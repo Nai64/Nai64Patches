@@ -8,7 +8,7 @@ val noAdsPatch = bytecodePatch(
     name = "No Ads",
     description = "Blocks all non-rewarded ads: interstitial, banner, app open, MREC banners. " +
             "Prevents ad display without affecting rewarded ad rewards.",
-    default = true,
+    default = false,
 ) {
     execute {
         ShowInterstitialFingerprint.method.addInstruction(0, "return-void")
