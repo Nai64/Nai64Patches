@@ -60,6 +60,7 @@ gradle-app.setting
 
 ### Project specific
 *.md
+!README.md
 *.apk
 *.xapk
 *.mpp
