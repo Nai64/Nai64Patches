@@ -1,0 +1,14 @@
+{
+  "NOTE": "Do NOT manually edit this file. This file is automatically updated when semantic release (release.yml) runs. Manually editing this file can break your releases and break third party tools that use this file.",
+  "version": "1.0.0",
+  "patches": [
+    {
+      "name": "Ads Free Rewards",
+      "description": "Auto-claim rewarded ad rewards without watching ads. Works with the AppLovin MAX SDK (Unity).",
+      "default": true,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": []
+    }
+  ]
+}
