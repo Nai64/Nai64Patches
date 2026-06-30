@@ -73,5 +73,6 @@ Trigger+Up_smali/
 .env
 SESSION_SUMMARY.md
 docs/superpowers/
+scripts/
 com/
 build/
