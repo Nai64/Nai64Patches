@@ -1,4 +1,4 @@
-# Nai64Patches
+# Nai's Patches
 
 Universal Morphe patches for Android games using AppLovin MAX SDK.
 
