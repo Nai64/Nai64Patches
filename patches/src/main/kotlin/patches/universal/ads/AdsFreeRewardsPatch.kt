@@ -57,20 +57,9 @@ val adsFreeRewardsPatch = bytecodePatch(
             return@execute
         }
 
-        // ── Strategy 2: Native MAX (non-Unity) ──
-        val nativeReady = MaxRewardedAdIsReadyFingerprint.methodOrNull
-        val nativeShow = MaxRewardedAdShowAdFingerprint.methodOrNull
-        if (nativeReady != null && nativeShow != null) {
-            nativeReady.addInstructions(0, """
-                const/4 v0, 0x1
-                return v0
-            """.trimIndent())
-            nativeShow.addInstructions(0, """
-                return-void
-            """.trimIndent())
-            return@execute
-        }
-
+        // ── Native MAX: silently skip (no forwardUnityEvent equivalent) ──
+        // showAd() NOP causes crashes because the game expects callbacks.
+        // For now, these games rely on NoAds for ad blocking.
         // ── No supported SDK found — silently skip ──
     }
 }
