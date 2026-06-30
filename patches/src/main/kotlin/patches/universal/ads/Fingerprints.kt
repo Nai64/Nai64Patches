@@ -72,3 +72,44 @@ internal object PerformLocalInstallerCheckFingerprint : Fingerprint(
     returnType = "Z",
     parameters = emptyList(),
 )
+
+// ── Native MAX (non-Unity) fingerprints ──
+
+internal object MaxRewardedAdIsReadyFingerprint : Fingerprint(
+    definingClass = "Lcom/applovin/mediation/ads/MaxRewardedAd;",
+    name = "isReady",
+    returnType = "Z",
+    parameters = emptyList(),
+)
+
+internal object MaxRewardedAdShowAdFingerprint : Fingerprint(
+    definingClass = "Lcom/applovin/mediation/ads/MaxRewardedAd;",
+    name = "showAd",
+    accessFlags = listOf(AccessFlags.PUBLIC),
+    returnType = "V",
+    parameters = emptyList(),
+)
+
+internal object MaxInterstitialAdShowAdFingerprint : Fingerprint(
+    definingClass = "Lcom/applovin/mediation/ads/MaxInterstitialAd;",
+    name = "showAd",
+    accessFlags = listOf(AccessFlags.PUBLIC),
+    returnType = "V",
+    parameters = emptyList(),
+)
+
+internal object MaxAppOpenAdShowAdFingerprint : Fingerprint(
+    definingClass = "Lcom/applovin/mediation/ads/MaxAppOpenAd;",
+    name = "showAd",
+    accessFlags = listOf(AccessFlags.PUBLIC),
+    returnType = "V",
+    parameters = emptyList(),
+)
+
+internal object MaxAdViewStartAutoRefreshFingerprint : Fingerprint(
+    definingClass = "Lcom/applovin/mediation/ads/MaxAdView;",
+    name = "startAutoRefresh",
+    accessFlags = listOf(AccessFlags.PUBLIC),
+    returnType = "V",
+    parameters = emptyList(),
+)
