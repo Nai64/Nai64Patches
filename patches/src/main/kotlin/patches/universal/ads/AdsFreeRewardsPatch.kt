@@ -7,7 +7,7 @@ import app.morphe.patcher.patch.bytecodePatch
 val adsFreeRewardsPatch = bytecodePatch(
     name = "Ads Free Rewards",
     description = "Auto-claim rewarded ad rewards without watching ads. Works with AppLovin MAX (Unity).",
-    default = true,
+    default = false,
 ) {
     execute {
         // Force isRewardedAdReady to always return true

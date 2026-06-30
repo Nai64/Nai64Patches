@@ -11,7 +11,7 @@ val installSourceSpoofPatch = bytecodePatch(
     name = "Spoof Play Store Install Source",
     description = "Makes the app think it was installed from Google Play Store. " +
             "Prevents Pairip license check from failing.",
-    default = true,
+    default = false,
 ) {
     execute {
         val method = PerformLocalInstallerCheckFingerprint.methodOrNull ?: return@execute
