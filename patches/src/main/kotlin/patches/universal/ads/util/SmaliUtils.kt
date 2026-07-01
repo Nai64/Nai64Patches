@@ -62,7 +62,7 @@ fun fireRewardedAdCallbacks(): String = """
  * so the game proceeds without actually showing an ad.
  */
 fun fireHiddenCallbacks(className: String): String = """
-    const-class v0, $className;
+    const-class v0, $className
     invoke-virtual {v0}, Ljava/lang/Class;->getDeclaredFields()[Ljava/lang/reflect/Field;
     move-result-object v0
     array-length v1, v0
