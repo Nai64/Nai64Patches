@@ -1,3 +1,9 @@
+## [1.5.6](https://github.com/Nai64/Nai64Patches/compare/1.5.5...1.5.6) (2026-07-01)
+
+### Bug Fixes
+
+* update patch descriptions and documentation ([604233f](https://github.com/Nai64/Nai64Patches/commit/604233f97074fb24274f5a9bb372a07a46446c08))
+
 ## [1.5.5](https://github.com/Nai64/Nai64Patches/compare/1.5.4...1.5.5) (2026-07-01)
 
 ### Bug Fixes
