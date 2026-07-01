@@ -1,3 +1,9 @@
+## [1.5.7](https://github.com/Nai64/Nai64Patches/compare/1.5.6...1.5.7) (2026-07-01)
+
+### Bug Fixes
+
+* **AdsFreeRewards:** fix register corruption, add OnRewardedAdDisplayedEvent ([2fbdd05](https://github.com/Nai64/Nai64Patches/commit/2fbdd056013578849074c77dd3e2f795a0fe7430))
+
 ## [1.5.6](https://github.com/Nai64/Nai64Patches/compare/1.5.5...1.5.6) (2026-07-01)
 
 ### Bug Fixes
