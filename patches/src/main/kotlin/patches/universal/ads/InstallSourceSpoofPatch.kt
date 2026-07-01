@@ -5,6 +5,7 @@ import app.morphe.patcher.patch.bytecodePatch
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction11n
 import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction11x
+import java.util.logging.Logger
 
 @Suppress("unused")
 val installSourceSpoofPatch = bytecodePatch(
@@ -14,7 +15,11 @@ val installSourceSpoofPatch = bytecodePatch(
     default = false,
 ) {
     execute {
-        val method = PerformLocalInstallerCheckFingerprint.methodOrNull ?: return@execute
+        val method = PerformLocalInstallerCheckFingerprint.methodOrNull
+        if (method == null) {
+            return@execute Logger.getLogger(this::class.java.name)
+                .warning("Could not find performLocalInstallerCheck. No changes applied.")
+        }
         method.addInstructions(0, listOf(
             BuilderInstruction11n(Opcode.CONST_4, 0, 1),
             BuilderInstruction11x(Opcode.RETURN, 0),

@@ -3,6 +3,7 @@ package patches.universal.ads
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.patch.bytecodePatch
 import patches.universal.ads.util.fireRewardedAdCallbacks
+import java.util.logging.Logger
 
 @Suppress("unused")
 val adsFreeRewardsPatch = bytecodePatch(
@@ -11,6 +12,17 @@ val adsFreeRewardsPatch = bytecodePatch(
     default = false,
 ) {
     execute {
+        // ── Bail out early if no supported SDK is present ──
+        val hasMaxUnity = ShowRewardedAdFingerprint.methodOrNull != null &&
+            IsRewardedAdReadyFingerprint.methodOrNull != null
+        val hasNativeMax = MaxRewardedAdIsReadyFingerprint.methodOrNull != null &&
+            MaxRewardedAdShowAdFingerprint.methodOrNull != null
+
+        if (!hasMaxUnity && !hasNativeMax) {
+            return@execute Logger.getLogger(this::class.java.name)
+                .warning("Could not find supported ad SDK (MAX Unity or native MAX). No changes applied.")
+        }
+
         // ── Strategy 1: MAX Unity wrapper ──
         val unityShow = ShowRewardedAdFingerprint.methodOrNull
         val unityReady = IsRewardedAdReadyFingerprint.methodOrNull
