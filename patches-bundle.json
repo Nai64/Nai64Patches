@@ -1,7 +1,6 @@
 {
-  "created_at": "2026-07-01T12:41:50",
-  "description": "## [1.5.1](https://github.com/Nai64/Nai64Patches/compare/1.5.0...1.5.1) (2026-07-01)\n\n### Bug Fixes\n\n* correct smali reflection helper logic ([9dd538c](https://github.com/Nai64/Nai64Patches/commit/9dd538cd689dae3228793c4f915230597dbddf61))",
-  "download_url": "https://github.com/Nai64/Nai64Patches/releases/download/1.5.1/patches-1.5.1.mpp",
-  "signature_download_url": "",
-  "version": "1.5.1"
+  "created_at": "2026-06-30T21:45:13",
+  "description": "Universal Morphe patches for Android games using AppLovin MAX SDK.",
+  "download_url": "https://github.com/Nai64/Nai64Patches/releases/download/1.5.0/patches-1.5.0.mpp",
+  "version": "1.5.0"
 }
