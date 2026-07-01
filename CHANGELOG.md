@@ -1,3 +1,9 @@
+## [1.5.5](https://github.com/Nai64/Nai64Patches/compare/1.5.4...1.5.5) (2026-07-01)
+
+### Bug Fixes
+
+* remove double semicolon in fireHiddenCallbacks smali template ([2f03299](https://github.com/Nai64/Nai64Patches/commit/2f03299f6e6b22d3dcc91d5cc82801e2222cc2d1))
+
 ## [1.5.4](https://github.com/Nai64/Nai64Patches/compare/1.5.3...1.5.4) (2026-07-01)
 
 ### Bug Fixes

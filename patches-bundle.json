@@ -1,7 +1,7 @@
 {
-  "created_at": "2026-07-01T15:58:22",
-  "description": "## [1.5.4](https://github.com/Nai64/Nai64Patches/compare/1.5.3...1.5.4) (2026-07-01)\n\n### Bug Fixes\n\n* add fingerprint checks with early return and warning logs for universal patches ([1b605a7](https://github.com/Nai64/Nai64Patches/commit/1b605a7afe501f4b26b42556bed1e1bf9f6c3f3c))",
-  "download_url": "https://github.com/Nai64/Nai64Patches/releases/download/1.5.4/patches-1.5.4.mpp",
+  "created_at": "2026-07-01T16:03:04",
+  "description": "## [1.5.5](https://github.com/Nai64/Nai64Patches/compare/1.5.4...1.5.5) (2026-07-01)\n\n### Bug Fixes\n\n* remove double semicolon in fireHiddenCallbacks smali template ([2f03299](https://github.com/Nai64/Nai64Patches/commit/2f03299f6e6b22d3dcc91d5cc82801e2222cc2d1))",
+  "download_url": "https://github.com/Nai64/Nai64Patches/releases/download/1.5.5/patches-1.5.5.mpp",
   "signature_download_url": "",
-  "version": "1.5.4"
+  "version": "1.5.5"
 }
