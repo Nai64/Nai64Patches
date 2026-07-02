@@ -1,10 +1,10 @@
 {
   "NOTE": "Do NOT manually edit this file. This file is automatically updated when semantic release (release.yml) runs. Manually editing this file can break your releases and break third party tools that use this file.",
-  "version": "1.5.9",
+  "version": "1.5.5",
   "patches": [
     {
       "name": "Ads Free Rewards",
-      "description": "Auto-claim rewarded ad rewards without watching ads. Supports MAX Unity, native MAX. WARNING: Enabling No Ads alongside this patch will prevent rewards from being claimed.",
+      "description": "Auto-claim rewarded ad rewards without watching ads. Supports MAX Unity, native MAX, Unity Ads. WARNING: Enabling No Ads alongside this patch will prevent rewards from being claimed.",
       "default": false,
       "dependencies": [],
       "compatiblePackages": null,

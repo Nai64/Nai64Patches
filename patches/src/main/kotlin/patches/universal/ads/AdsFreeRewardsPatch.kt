@@ -8,7 +8,7 @@ import java.util.logging.Logger
 @Suppress("unused")
 val adsFreeRewardsPatch = bytecodePatch(
     name = "Ads Free Rewards",
-    description = "Auto-claim rewarded ad rewards without watching ads. Supports MAX Unity, native MAX. " +
+    description = "Auto-claim rewarded ad rewards without watching ads. Supports MAX Unity, native MAX, Unity Ads. " +
             "WARNING: Enabling No Ads alongside this patch will prevent rewards from being claimed.",
     default = false,
 ) {
@@ -18,10 +18,12 @@ val adsFreeRewardsPatch = bytecodePatch(
             IsRewardedAdReadyFingerprint.methodOrNull != null
         val hasNativeMax = MaxRewardedAdIsReadyFingerprint.methodOrNull != null &&
             MaxRewardedAdShowAdFingerprint.methodOrNull != null
+        val hasUnityAds = UnityRewardedAdLoadFingerprint.methodOrNull != null &&
+            UnityRewardedAdShowFingerprint.methodOrNull != null
 
-        if (!hasMaxUnity && !hasNativeMax) {
+        if (!hasMaxUnity && !hasNativeMax && !hasUnityAds) {
             return@execute Logger.getLogger(this::class.java.name)
-                .warning("Could not find supported ad SDK (MAX Unity or native MAX). No changes applied.")
+                .warning("Could not find supported ad SDK (MAX Unity, native MAX, or Unity Ads). No changes applied.")
         }
 
         // ── Strategy 1: MAX Unity wrapper ──
@@ -99,6 +101,26 @@ val adsFreeRewardsPatch = bytecodePatch(
             // onUserRewarded → onRewardedVideoCompleted → onAdHidden).
             // This avoids crashes from simply NOP'ing showAd().
             nativeShow.addInstructions(0, fireRewardedAdCallbacks())
+            return@execute
+        }
+
+        // ── Strategy 3: Unity Ads RewardedAd ──
+        val adsLoad = UnityRewardedAdLoadFingerprint.methodOrNull
+        val adsShow = UnityRewardedAdShowFingerprint.methodOrNull
+        if (adsLoad != null && adsShow != null) {
+            adsLoad.addInstructions(0, """
+                const/4 v0, 0x0
+                invoke-interface {p1, p0, v0}, Lcom/unity3d/ads/LoadListener;->onAdLoaded(Ljava/lang/Object;Lcom/unity3d/ads/UnityAdsError;)V
+                return-void
+            """.trimIndent())
+
+            adsShow.addInstructions(0, """
+                invoke-interface {p3, p0}, Lcom/unity3d/ads/RewardedShowListener;->onRewarded(Lcom/unity3d/ads/RewardedAd;)V
+                invoke-interface {p3, p0}, Lcom/unity3d/ads/ShowListener;->onStarted(Ljava/lang/Object;)V
+                sget-object v0, Lcom/unity3d/ads/ShowFinishState;->COMPLETED:Lcom/unity3d/ads/ShowFinishState;
+                invoke-interface {p3, p0, v0}, Lcom/unity3d/ads/ShowListener;->onCompleted(Ljava/lang/Object;Lcom/unity3d/ads/ShowFinishState;)V
+                return-void
+            """.trimIndent())
             return@execute
         }
 

@@ -113,3 +113,28 @@ internal object MaxAdViewStartAutoRefreshFingerprint : Fingerprint(
     returnType = "V",
     parameters = emptyList(),
 )
+
+// ── Unity Ads RewardedAd fingerprints ──
+
+internal object UnityRewardedAdLoadFingerprint : Fingerprint(
+    definingClass = "Lcom/unity3d/ads/RewardedAd;",
+    name = "load",
+    accessFlags = listOf(AccessFlags.PUBLIC, AccessFlags.STATIC, AccessFlags.FINAL),
+    returnType = "V",
+    parameters = listOf(
+        "Lcom/unity3d/ads/LoadConfiguration;",
+        "Lcom/unity3d/ads/LoadListener;",
+    ),
+)
+
+internal object UnityRewardedAdShowFingerprint : Fingerprint(
+    definingClass = "Lcom/unity3d/ads/RewardedAd;",
+    name = "show",
+    accessFlags = listOf(AccessFlags.PUBLIC, AccessFlags.FINAL),
+    returnType = "V",
+    parameters = listOf(
+        "Landroid/app/Activity;",
+        "Lcom/unity3d/ads/ShowConfiguration;",
+        "Lcom/unity3d/ads/RewardedShowListener;",
+    ),
+)
