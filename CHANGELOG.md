@@ -1,3 +1,10 @@
+## [1.6.0](https://github.com/Nai64/Nai64Patches/compare/1.5.9...1.6.0) (2026-07-02)
+
+### New Features
+
+* **AdsFreeRewards:** add Unity Ads RewardedAd support ([c026d48](https://github.com/Nai64/Nai64Patches/commit/c026d48fb87ee1c9c5e15dd057fa50cf5a983bda))
+* **AdsFreeRewards:** add Unity Ads RewardedAd support [skip ci] ([dcf32a6](https://github.com/Nai64/Nai64Patches/commit/dcf32a628c2a5499719bfce1d2385e80e7381b3b))
+
 ## [1.5.9](https://github.com/Nai64/Nai64Patches/compare/1.5.8...1.5.9) (2026-07-02)
 
 ### Bug Fixes
