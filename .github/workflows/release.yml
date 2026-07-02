@@ -53,6 +53,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: ./gradlew :patches:buildAndroid generatePatchesList
 
+      - name: Clean old build artifacts (avoids version bleed into assets)
+        run: rm -f patches/build/libs/patches-*.mpp
+
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
