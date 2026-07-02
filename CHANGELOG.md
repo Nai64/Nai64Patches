@@ -1,3 +1,9 @@
+## [1.5.8](https://github.com/Nai64/Nai64Patches/compare/1.5.7...1.5.8) (2026-07-02)
+
+### Bug Fixes
+
+* **release:** clean build artifacts before release to avoid duplicating previous MPP versions ([0de1115](https://github.com/Nai64/Nai64Patches/commit/0de111595a8b9533525b7db50c86dadee3aba5d3))
+
 ## [1.5.7](https://github.com/Nai64/Nai64Patches/compare/1.5.6...1.5.7) (2026-07-01)
 
 ### Bug Fixes
