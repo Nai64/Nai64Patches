@@ -46,5 +46,23 @@ val noAdsPatch = bytecodePatch(
             it.addInstructions(0, fireHiddenCallbacks("Lcom/applovin/mediation/ads/MaxAppOpenAd;"))
         }
         MaxAdViewStartAutoRefreshFingerprint.methodOrNull?.let { it.addInstruction(0, "return-void") }
+
+        // ── Disable rewarded ads (conflict with Ads Free Rewards) ──
+        IsRewardedAdReadyFingerprint.methodOrNull?.let {
+            it.addInstructions(0, """
+                const/4 v0, 0x0
+                return v0
+            """.trimIndent())
+        }
+        ShowRewardedAdFingerprint.methodOrNull?.let { it.addInstruction(0, "return-void") }
+        MaxRewardedAdIsReadyFingerprint.methodOrNull?.let {
+            it.addInstructions(0, """
+                const/4 v0, 0x0
+                return v0
+            """.trimIndent())
+        }
+        MaxRewardedAdShowAdFingerprint.methodOrNull?.let {
+            it.addInstructions(0, fireHiddenCallbacks("Lcom/applovin/mediation/ads/MaxRewardedAd;"))
+        }
     }
 }
