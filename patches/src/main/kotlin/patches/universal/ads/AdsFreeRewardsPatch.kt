@@ -9,7 +9,7 @@ import java.util.logging.Logger
 val adsFreeRewardsPatch = bytecodePatch(
     name = "Ads Free Rewards",
     description = "Auto-claim rewarded ad rewards without watching ads. Supports MAX Unity, native MAX. " +
-            "Enabling No Ads will prevent rewards from being claimed.",
+            "WARNING: Enabling No Ads alongside this patch will prevent rewards from being claimed.",
     default = false,
 ) {
     execute {

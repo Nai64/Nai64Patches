@@ -10,8 +10,8 @@ import java.util.logging.Logger
 val noAdsPatch = bytecodePatch(
     name = "No Ads",
     description = "Blocks all non-rewarded ads: interstitial, banner, app open, MREC. " +
-            "Supports MAX Unity and native MAX. Enabling alongside Ads Free Rewards " +
-            "will prevent rewards from being claimed.",
+            "Supports MAX Unity and native MAX. WARNING: Enabling Ads Free Rewards " +
+            "alongside this patch will cause it to NOT work (No Ads takes priority).",
     default = false,
 ) {
     execute {
