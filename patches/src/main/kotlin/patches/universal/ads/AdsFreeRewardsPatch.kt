@@ -18,8 +18,7 @@ val adsFreeRewardsPatch = bytecodePatch(
             IsRewardedAdReadyFingerprint.methodOrNull != null
         val hasNativeMax = MaxRewardedAdIsReadyFingerprint.methodOrNull != null &&
             MaxRewardedAdShowAdFingerprint.methodOrNull != null
-        val hasUnityAds = UnityRewardedAdLoadFingerprint.methodOrNull != null &&
-            UnityRewardedAdShowFingerprint.methodOrNull != null
+        val hasUnityAds = UnityRewardedAdShowFingerprint.methodOrNull != null
 
         if (!hasMaxUnity && !hasNativeMax && !hasUnityAds) {
             return@execute Logger.getLogger(this::class.java.name)
@@ -105,15 +104,10 @@ val adsFreeRewardsPatch = bytecodePatch(
         }
 
         // ── Strategy 3: Unity Ads RewardedAd ──
-        val adsLoad = UnityRewardedAdLoadFingerprint.methodOrNull
         val adsShow = UnityRewardedAdShowFingerprint.methodOrNull
-        if (adsLoad != null && adsShow != null) {
-            adsLoad.addInstructions(0, """
-                const/4 v0, 0x0
-                invoke-interface {p1, p0, v0}, Lcom/unity3d/ads/LoadListener;->onAdLoaded(Ljava/lang/Object;Lcom/unity3d/ads/UnityAdsError;)V
-                return-void
-            """.trimIndent())
-
+        if (adsShow != null) {
+            // Only patch show() — do NOT patch load() so the real ad loads
+            // silently in the background (prevents Unity Ads error 628).
             adsShow.addInstructions(0, """
                 invoke-interface {p3, p0}, Lcom/unity3d/ads/RewardedShowListener;->onRewarded(Lcom/unity3d/ads/RewardedAd;)V
                 invoke-interface {p3, p0}, Lcom/unity3d/ads/ShowListener;->onStarted(Ljava/lang/Object;)V
