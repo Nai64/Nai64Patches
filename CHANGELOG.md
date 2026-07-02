@@ -1,3 +1,10 @@
+## [1.5.9](https://github.com/Nai64/Nai64Patches/compare/1.5.8...1.5.9) (2026-07-02)
+
+### Bug Fixes
+
+* NoAds now blocks rewarded ads, overriding AdsFreeRewards when both enabled ([dc96979](https://github.com/Nai64/Nai64Patches/commit/dc9697918f670fd11639cbdb00ffda0389be066b))
+* **NoAds:** also disable rewarded ads when No Ads is enabled [skip ci] ([cd822b2](https://github.com/Nai64/Nai64Patches/commit/cd822b287dc483742819984fac55068d6f7eca9c))
+
 ## [1.5.8](https://github.com/Nai64/Nai64Patches/compare/1.5.7...1.5.8) (2026-07-02)
 
 ### Bug Fixes

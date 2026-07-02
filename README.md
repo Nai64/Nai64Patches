@@ -13,6 +13,6 @@ Universal Morphe patches for Android games using AppLovin MAX SDK.
 
 | Patch | Description |
 |-------|-------------|
-| **Ads Free Rewards** | Auto-claim rewarded ad rewards without watching ads. Supports MAX Unity, native MAX. Enabling No Ads will prevent rewards from being claimed. |
-| **No Ads** | Blocks all non-rewarded ads: interstitial, banner, app open, MREC. Supports MAX Unity and native MAX. Enabling alongside Ads Free Rewards will prevent rewards from being claimed. |
+| **Ads Free Rewards** | Auto-claim rewarded ad rewards without watching ads. Supports MAX Unity, native MAX. WARNING: Enabling No Ads alongside this patch will prevent rewards from being claimed. |
+| **No Ads** | Blocks all non-rewarded ads: interstitial, banner, app open, MREC. Supports MAX Unity and native MAX. WARNING: Enabling Ads Free Rewards alongside this patch will cause it to NOT work (No Ads takes priority). |
 | **Spoof Play Store Install Source** | Makes the app think it was installed from Google Play Store. Prevents Pairip license check from failing. Recommended if the app is installed from Play Store. |

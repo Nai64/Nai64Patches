@@ -1,7 +1,7 @@
 {
-  "created_at": "2026-07-02T18:51:40",
-  "description": "## [1.5.8](https://github.com/Nai64/Nai64Patches/compare/1.5.7...1.5.8) (2026-07-02)\n\n### Bug Fixes\n\n* **release:** clean build artifacts before release to avoid duplicating previous MPP versions ([0de1115](https://github.com/Nai64/Nai64Patches/commit/0de111595a8b9533525b7db50c86dadee3aba5d3))",
-  "download_url": "https://github.com/Nai64/Nai64Patches/releases/download/1.5.8/patches-1.5.8.mpp",
+  "created_at": "2026-07-02T19:09:45",
+  "description": "## [1.5.9](https://github.com/Nai64/Nai64Patches/compare/1.5.8...1.5.9) (2026-07-02)\n\n### Bug Fixes\n\n* NoAds now blocks rewarded ads, overriding AdsFreeRewards when both enabled ([dc96979](https://github.com/Nai64/Nai64Patches/commit/dc9697918f670fd11639cbdb00ffda0389be066b))\n* **NoAds:** also disable rewarded ads when No Ads is enabled [skip ci] ([cd822b2](https://github.com/Nai64/Nai64Patches/commit/cd822b287dc483742819984fac55068d6f7eca9c))",
+  "download_url": "https://github.com/Nai64/Nai64Patches/releases/download/1.5.9/patches-1.5.9.mpp",
   "signature_download_url": "",
-  "version": "1.5.8"
+  "version": "1.5.9"
 }
