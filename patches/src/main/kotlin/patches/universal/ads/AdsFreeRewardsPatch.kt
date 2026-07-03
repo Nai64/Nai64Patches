@@ -122,8 +122,8 @@ val adsFreeRewardsPatch = bytecodePatch(
 
         // Strategy 3b: ironSource Unity bridge backed by LevelPlay.
         // Pickcrafter uses this bridge instead of MAX. Force the Unity-facing
-        // ready check, then intercept the shared fullscreen show path and use
-        // LevelPlay's own reward callback method so the bridge listener fires.
+        // ready check, then intercept the shared fullscreen show path and fire
+        // the bridge listener lifecycle directly.
         val bridgeReady = IronSourceUnityRewardedAdIsReadyFingerprint.methodOrNull
         val bridgeShow = IronSourceLevelPlayFullScreenShowAdFingerprint.methodOrNull
         if (bridgeReady != null && bridgeShow != null) {
@@ -133,12 +133,19 @@ val adsFreeRewardsPatch = bytecodePatch(
             """.trimIndent())
 
             bridgeShow.addInstructions(0, """
-                new-instance v0, Lcom/unity3d/mediation/rewarded/LevelPlayReward;
-                const-string v1, "reward"
-                const/4 p1, 0x1
-                invoke-direct {v0, v1, p1}, Lcom/unity3d/mediation/rewarded/LevelPlayReward;-><init>(Ljava/lang/String;I)V
-                invoke-virtual {p0, v0}, Lcom/ironsource/Ya;->a(Lcom/unity3d/mediation/rewarded/LevelPlayReward;)V
-                invoke-virtual {p0}, Lcom/ironsource/Ya;->onAdClosed()V
+                iget-object v0, p0, Lcom/ironsource/Ya;->k:Lcom/ironsource/Za;
+                if-eqz v0, :morphe_ads_free_rewards_done
+                iget-object p1, p0, Lcom/ironsource/Ya;->m:Lcom/ironsource/q6;
+                invoke-interface {p1}, Lcom/ironsource/q6;->b()Lcom/unity3d/mediation/LevelPlayAdInfo;
+                move-result-object p1
+                invoke-interface {v0, p1}, Lcom/ironsource/Za;->onAdDisplayed(Lcom/unity3d/mediation/LevelPlayAdInfo;)V
+                new-instance v1, Lcom/unity3d/mediation/rewarded/LevelPlayReward;
+                const-string p2, "reward"
+                const/4 p0, 0x1
+                invoke-direct {v1, p2, p0}, Lcom/unity3d/mediation/rewarded/LevelPlayReward;-><init>(Ljava/lang/String;I)V
+                invoke-interface {v0, v1, p1}, Lcom/ironsource/Za;->onAdRewarded(Lcom/unity3d/mediation/rewarded/LevelPlayReward;Lcom/unity3d/mediation/LevelPlayAdInfo;)V
+                invoke-interface {v0, p1}, Lcom/ironsource/Za;->onAdClosed(Lcom/unity3d/mediation/LevelPlayAdInfo;)V
+                :morphe_ads_free_rewards_done
                 return-void
             """.trimIndent())
             logger.info("Applied Ads Free Rewards ironSource Unity bridge strategy")
