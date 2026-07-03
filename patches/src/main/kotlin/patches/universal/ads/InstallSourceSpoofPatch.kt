@@ -50,14 +50,14 @@ val installSourceSpoofPatch = bytecodePatch(
             pairipApplied = true
         }
 
-        // Strategy 4: Pairip VMRunner.invoke() — native VM entry point.
-        // Skips the native Pairip VM that performs license/installer checks.
-        PairipVMRunnerInvokeFingerprint.methodOrNull?.let {
+        // Strategy 4: Pairip StartupLauncher.launch() — early native VM entry point.
+        // Skip only the startup VM program; VMRunner.invoke() is a shared dispatcher
+        // used by protected app/library code and must keep returning real values.
+        PairipStartupLauncherLaunchFingerprint.methodOrNull?.let {
             it.addInstructions(0, """
-                const/4 v0, 0x0
-                return-object v0
+                return-void
             """.trimIndent())
-            logger.info("Applied Pairip VM skip spoof")
+            logger.info("Applied Pairip StartupLauncher.launch bypass")
             pairipApplied = true
         }
 
