@@ -29,7 +29,25 @@ val installSourceSpoofPatch = bytecodePatch(
             return@execute
         }
 
-        // Strategy 2: Private boolean method referencing "com.android.vending"
+        // Strategy 2: Pairip VMRunner.invoke() — native VM entry point.
+        // Skips the native Pairip VM that performs license/installer checks.
+        // Checked early (before generic string matches) to avoid false positives
+        // from billing methods that also reference "com.android.vending".
+        val vmRunner = PairipVMRunnerInvokeFingerprint.methodOrNull
+        if (vmRunner != null) {
+            vmRunner.addInstructions(0, """
+                const/4 v0, 0x0
+                return-object v0
+            """.trimIndent())
+            logger.info("Applied Pairip VM skip spoof")
+            return@execute
+        }
+
+        // ── Generic string-based strategies ──
+        // These search for methods containing "com.android.vending" by return type.
+        // Lower priority: can false-match billing/purchase methods.
+
+        // Strategy 3: Private boolean method referencing "com.android.vending"
         val boolCheck = GenericBooleanInstallerCheckFingerprint.methodOrNull
         if (boolCheck != null) {
             boolCheck.addInstructions(0, listOf(
@@ -40,7 +58,7 @@ val installSourceSpoofPatch = bytecodePatch(
             return@execute
         }
 
-        // Strategy 3: Private String method referencing "com.android.vending"
+        // Strategy 4: Private String method referencing "com.android.vending"
         val strCheck = GenericStringInstallerCheckFingerprint.methodOrNull
         if (strCheck != null) {
             strCheck.addInstructions(0, """
@@ -51,7 +69,7 @@ val installSourceSpoofPatch = bytecodePatch(
             return@execute
         }
 
-        // Strategy 4: Any boolean method (any access) with "com.android.vending"
+        // Strategy 5: Any boolean method (any access) with "com.android.vending"
         val fallbackBool = FallbackBooleanInstallerCheckFingerprint.methodOrNull
         if (fallbackBool != null) {
             fallbackBool.addInstructions(0, listOf(
@@ -62,7 +80,7 @@ val installSourceSpoofPatch = bytecodePatch(
             return@execute
         }
 
-        // Strategy 5: Any String method (any access) with "com.android.vending"
+        // Strategy 6: Any String method (any access) with "com.android.vending"
         val fallbackStr = FallbackStringInstallerCheckFingerprint.methodOrNull
         if (fallbackStr != null) {
             fallbackStr.addInstructions(0, """
@@ -70,18 +88,6 @@ val installSourceSpoofPatch = bytecodePatch(
                 return-object v0
             """.trimIndent())
             logger.info("Applied fallback String Play Store spoof")
-            return@execute
-        }
-
-        // Strategy 6: Pairip VMRunner.invoke() — native VM entry point.
-        // Skips the native Pairip VM that performs license/installer checks.
-        val vmRunner = PairipVMRunnerInvokeFingerprint.methodOrNull
-        if (vmRunner != null) {
-            vmRunner.addInstructions(0, """
-                const/4 v0, 0x0
-                return-object v0
-            """.trimIndent())
-            logger.info("Applied Pairip VM skip spoof")
             return@execute
         }
 
