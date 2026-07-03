@@ -205,7 +205,6 @@ internal object UnityRewardedAdShowFingerprint : Fingerprint(
 internal object LevelPlayRewardedAdIsReadyFingerprint : Fingerprint(
     definingClass = "Lcom/unity3d/mediation/rewarded/LevelPlayRewardedAd;",
     name = "isAdReady",
-    accessFlags = listOf(AccessFlags.PUBLIC),
     returnType = "Z",
     parameters = emptyList(),
 )
@@ -213,7 +212,23 @@ internal object LevelPlayRewardedAdIsReadyFingerprint : Fingerprint(
 internal object LevelPlayRewardedAdShowAdFingerprint : Fingerprint(
     definingClass = "Lcom/unity3d/mediation/rewarded/LevelPlayRewardedAd;",
     name = "showAd",
-    accessFlags = listOf(AccessFlags.PUBLIC),
+    returnType = "V",
+    parameters = listOf(
+        "Landroid/app/Activity;",
+        "Ljava/lang/String;",
+    ),
+)
+
+internal object IronSourceUnityRewardedAdIsReadyFingerprint : Fingerprint(
+    definingClass = "Lcom/ironsource/unity/androidbridge/RewardedAd;",
+    name = "isAdReady",
+    returnType = "Z",
+    parameters = emptyList(),
+)
+
+internal object IronSourceLevelPlayFullScreenShowAdFingerprint : Fingerprint(
+    definingClass = "Lcom/ironsource/Ya;",
+    name = "a",
     returnType = "V",
     parameters = listOf(
         "Landroid/app/Activity;",

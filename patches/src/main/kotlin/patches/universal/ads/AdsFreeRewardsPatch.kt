@@ -13,6 +13,7 @@ val adsFreeRewardsPatch = bytecodePatch(
     default = false,
 ) {
     execute {
+        val logger = Logger.getLogger(this::class.java.name)
         // ── Bail out early if no supported SDK is present ──
         val hasMaxUnity = ShowRewardedAdFingerprint.methodOrNull != null &&
             IsRewardedAdReadyFingerprint.methodOrNull != null
@@ -20,10 +21,11 @@ val adsFreeRewardsPatch = bytecodePatch(
             MaxRewardedAdShowAdFingerprint.methodOrNull != null
         val hasUnityAds = UnityRewardedAdShowFingerprint.methodOrNull != null
         val hasLevelPlay = LevelPlayRewardedAdIsReadyFingerprint.methodOrNull != null
+        val hasIronSourceUnityBridge = IronSourceUnityRewardedAdIsReadyFingerprint.methodOrNull != null &&
+            IronSourceLevelPlayFullScreenShowAdFingerprint.methodOrNull != null
 
-        if (!hasMaxUnity && !hasNativeMax && !hasUnityAds && !hasLevelPlay) {
-            return@execute Logger.getLogger(this::class.java.name)
-                .warning("Could not find supported ad SDK (MAX Unity, native MAX, Unity Ads, or LevelPlay). No changes applied.")
+        if (!hasMaxUnity && !hasNativeMax && !hasUnityAds && !hasLevelPlay && !hasIronSourceUnityBridge) {
+            return@execute logger.warning("Could not find supported ad SDK (MAX Unity, native MAX, Unity Ads, LevelPlay, or ironSource Unity bridge). No changes applied.")
         }
 
         // ── Strategy 1: MAX Unity wrapper ──
@@ -114,10 +116,36 @@ val adsFreeRewardsPatch = bytecodePatch(
                 const/4 v0, 0x1
                 return v0
             """.trimIndent())
+            logger.info("Applied Ads Free Rewards LevelPlay ready strategy")
             // Continue to Strategy 4 to also patch RewardedAd.show()
         }
 
-        // ── Strategy 4: Unity Ads RewardedAd ──
+        // Strategy 3b: ironSource Unity bridge backed by LevelPlay.
+        // Pickcrafter uses this bridge instead of MAX. Force the Unity-facing
+        // ready check, then intercept the shared fullscreen show path and use
+        // LevelPlay's own reward callback method so the bridge listener fires.
+        val bridgeReady = IronSourceUnityRewardedAdIsReadyFingerprint.methodOrNull
+        val bridgeShow = IronSourceLevelPlayFullScreenShowAdFingerprint.methodOrNull
+        if (bridgeReady != null && bridgeShow != null) {
+            bridgeReady.addInstructions(0, """
+                const/4 v0, 0x1
+                return v0
+            """.trimIndent())
+
+            bridgeShow.addInstructions(0, """
+                new-instance v0, Lcom/unity3d/mediation/rewarded/LevelPlayReward;
+                const-string v1, "reward"
+                const/4 p1, 0x1
+                invoke-direct {v0, v1, p1}, Lcom/unity3d/mediation/rewarded/LevelPlayReward;-><init>(Ljava/lang/String;I)V
+                invoke-virtual {p0, v0}, Lcom/ironsource/Ya;->a(Lcom/unity3d/mediation/rewarded/LevelPlayReward;)V
+                invoke-virtual {p0}, Lcom/ironsource/Ya;->onAdClosed()V
+                return-void
+            """.trimIndent())
+            logger.info("Applied Ads Free Rewards ironSource Unity bridge strategy")
+            return@execute
+        }
+
+        // Strategy 4: Unity Ads RewardedAd.
         val adsShow = UnityRewardedAdShowFingerprint.methodOrNull
         if (adsShow != null) {
             // Only patch show() — do NOT patch load() so the real ad loads
