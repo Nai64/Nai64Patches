@@ -103,6 +103,14 @@ internal object FallbackStringInstallerCheckFingerprint : Fingerprint(
     strings = listOf("com.android.vending"),
 )
 
+internal object PairipVMRunnerInvokeFingerprint : Fingerprint(
+    definingClass = "Lcom/pairip/VMRunner;",
+    name = "invoke",
+    accessFlags = listOf(AccessFlags.PUBLIC, AccessFlags.STATIC),
+    returnType = "Ljava/lang/Object;",
+    parameters = listOf("Ljava/lang/String;", "[Ljava/lang/Object;"),
+)
+
 // ── Native MAX (non-Unity) fingerprints ──
 
 internal object MaxRewardedAdIsReadyFingerprint : Fingerprint(

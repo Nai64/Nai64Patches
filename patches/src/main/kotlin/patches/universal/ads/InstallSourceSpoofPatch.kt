@@ -73,6 +73,18 @@ val installSourceSpoofPatch = bytecodePatch(
             return@execute
         }
 
+        // Strategy 6: Pairip VMRunner.invoke() — native VM entry point.
+        // Skips the native Pairip VM that performs license/installer checks.
+        val vmRunner = PairipVMRunnerInvokeFingerprint.methodOrNull
+        if (vmRunner != null) {
+            vmRunner.addInstructions(0, """
+                const/4 v0, 0x0
+                return-object v0
+            """.trimIndent())
+            logger.info("Applied Pairip VM skip spoof")
+            return@execute
+        }
+
         logger.warning("Could not find any install source check method. No changes applied.")
     }
 }
