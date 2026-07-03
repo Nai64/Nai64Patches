@@ -1,3 +1,9 @@
+## [1.8.0](https://github.com/Nai64/Nai64Patches/compare/1.7.0...1.8.0) (2026-07-03)
+
+### New Features
+
+* **SpoofPlayStore:** add Pairip VM skip strategy for native-VM based apps ([d7f8525](https://github.com/Nai64/Nai64Patches/commit/d7f852537ee90bd9ea37a480cd1a0a2b1e775953))
+
 ## [1.7.0](https://github.com/Nai64/Nai64Patches/compare/1.6.0...1.7.0) (2026-07-03)
 
 ### Bug Fixes
