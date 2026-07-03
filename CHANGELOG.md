@@ -1,3 +1,9 @@
+## [1.8.1](https://github.com/Nai64/Nai64Patches/compare/1.8.0...1.8.1) (2026-07-03)
+
+### Bug Fixes
+
+* **SpoofPlayStore:** prioritize Pairip VM skip over generic string matches to avoid false positives ([651333c](https://github.com/Nai64/Nai64Patches/commit/651333c7e5d89b08edbc067b246b76a11e70855b))
+
 ## [1.8.0](https://github.com/Nai64/Nai64Patches/compare/1.7.0...1.8.0) (2026-07-03)
 
 ### New Features
