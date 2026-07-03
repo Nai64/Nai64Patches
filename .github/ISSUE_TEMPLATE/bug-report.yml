@@ -1,0 +1,60 @@
+name: Bug Report / Patch Issue
+description: Something broke after patching; crash, bootloop, feature not working
+labels: ["bug"]
+body:
+  - type: input
+    id: device
+    attributes:
+      label: Device model
+      placeholder: e.g. Xiaomi Redmi Note 13, Vivo X200 Pro, OnePlus 15
+    validations:
+      required: true
+
+  - type: input
+    id: android
+    attributes:
+      label: Android version
+      placeholder: e.g. 13, 14, 15
+    validations:
+      required: true
+
+  - type: input
+    id: rom
+    attributes:
+      label: ROM / custom OS (if any)
+      placeholder: e.g. stock, MIUI, HyperOS, LineageOS, PixelOS
+
+  - type: input
+    id: app
+    attributes:
+      label: Patched app/game
+      placeholder: e.g. Half-Life 3, Spotify 8.9.98
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: patches
+    attributes:
+      label: Patches applied
+      options:
+        - label: No Ads
+        - label: Ads Free Rewards
+        - label: Spoof Play Store Install Source
+
+  - type: textarea
+    id: issue
+    attributes:
+      label: What happens?
+      description: Description of the bug, crash log (if possible)
+      placeholder: App crashes on launch.
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before submitting
+      options:
+        - label: The unpatched app/game works fine on this device
+          required: true
+        - label: I tested the latest version of Nai64Patches
