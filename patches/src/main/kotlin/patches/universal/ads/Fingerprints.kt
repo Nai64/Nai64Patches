@@ -73,6 +73,36 @@ internal object PerformLocalInstallerCheckFingerprint : Fingerprint(
     parameters = emptyList(),
 )
 
+// ── Generic Play Store installer check fingerprints ──
+// Match methods containing "com.android.vending" string in their body,
+// a strong indicator of install source checking logic.
+
+internal object GenericBooleanInstallerCheckFingerprint : Fingerprint(
+    accessFlags = listOf(AccessFlags.PRIVATE),
+    returnType = "Z",
+    parameters = emptyList(),
+    strings = listOf("com.android.vending"),
+)
+
+internal object GenericStringInstallerCheckFingerprint : Fingerprint(
+    accessFlags = listOf(AccessFlags.PRIVATE),
+    returnType = "Ljava/lang/String;",
+    parameters = emptyList(),
+    strings = listOf("com.android.vending"),
+)
+
+internal object FallbackBooleanInstallerCheckFingerprint : Fingerprint(
+    returnType = "Z",
+    parameters = emptyList(),
+    strings = listOf("com.android.vending"),
+)
+
+internal object FallbackStringInstallerCheckFingerprint : Fingerprint(
+    returnType = "Ljava/lang/String;",
+    parameters = emptyList(),
+    strings = listOf("com.android.vending"),
+)
+
 // ── Native MAX (non-Unity) fingerprints ──
 
 internal object MaxRewardedAdIsReadyFingerprint : Fingerprint(
