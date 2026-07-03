@@ -8,7 +8,7 @@ import java.util.logging.Logger
 @Suppress("unused")
 val adsFreeRewardsPatch = bytecodePatch(
     name = "Ads Free Rewards",
-    description = "Auto-claim rewarded ad rewards without watching ads. Supports MAX Unity, native MAX, Unity Ads. " +
+    description = "Auto-claim rewarded ad rewards without watching ads. Supports MAX Unity, native MAX, Unity Ads, LevelPlay. " +
             "WARNING: Enabling No Ads alongside this patch will prevent rewards from being claimed.",
     default = false,
 ) {
@@ -19,10 +19,11 @@ val adsFreeRewardsPatch = bytecodePatch(
         val hasNativeMax = MaxRewardedAdIsReadyFingerprint.methodOrNull != null &&
             MaxRewardedAdShowAdFingerprint.methodOrNull != null
         val hasUnityAds = UnityRewardedAdShowFingerprint.methodOrNull != null
+        val hasLevelPlay = LevelPlayRewardedAdIsReadyFingerprint.methodOrNull != null
 
-        if (!hasMaxUnity && !hasNativeMax && !hasUnityAds) {
+        if (!hasMaxUnity && !hasNativeMax && !hasUnityAds && !hasLevelPlay) {
             return@execute Logger.getLogger(this::class.java.name)
-                .warning("Could not find supported ad SDK (MAX Unity, native MAX, or Unity Ads). No changes applied.")
+                .warning("Could not find supported ad SDK (MAX Unity, native MAX, Unity Ads, or LevelPlay). No changes applied.")
         }
 
         // ── Strategy 1: MAX Unity wrapper ──
@@ -103,7 +104,20 @@ val adsFreeRewardsPatch = bytecodePatch(
             return@execute
         }
 
-        // ── Strategy 3: Unity Ads RewardedAd ──
+        // ── Strategy 3: LevelPlay RewardedAd (ironSource mediation) ──
+        // Forces isAdReady() to return true. showAd() is NOT patched here;
+        // the call flows through to the ironSource Unity adapter which
+        // invokes com.unity3d.ads.RewardedAd.show(), which Strategy 4 patches.
+        val levelPlayReady = LevelPlayRewardedAdIsReadyFingerprint.methodOrNull
+        if (levelPlayReady != null) {
+            levelPlayReady.addInstructions(0, """
+                const/4 v0, 0x1
+                return v0
+            """.trimIndent())
+            // Continue to Strategy 4 to also patch RewardedAd.show()
+        }
+
+        // ── Strategy 4: Unity Ads RewardedAd ──
         val adsShow = UnityRewardedAdShowFingerprint.methodOrNull
         if (adsShow != null) {
             // Only patch show() — do NOT patch load() so the real ad loads
@@ -115,7 +129,6 @@ val adsFreeRewardsPatch = bytecodePatch(
                 invoke-interface {p3, p0, v0}, Lcom/unity3d/ads/ShowListener;->onCompleted(Ljava/lang/Object;Lcom/unity3d/ads/ShowFinishState;)V
                 return-void
             """.trimIndent())
-            return@execute
         }
 
         // ── No supported SDK found — silently skip ──

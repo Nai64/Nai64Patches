@@ -138,3 +138,24 @@ internal object UnityRewardedAdShowFingerprint : Fingerprint(
         "Lcom/unity3d/ads/RewardedShowListener;",
     ),
 )
+
+// ── LevelPlay RewardedAd fingerprints ──
+
+internal object LevelPlayRewardedAdIsReadyFingerprint : Fingerprint(
+    definingClass = "Lcom/unity3d/mediation/rewarded/LevelPlayRewardedAd;",
+    name = "isAdReady",
+    accessFlags = listOf(AccessFlags.PUBLIC),
+    returnType = "Z",
+    parameters = emptyList(),
+)
+
+internal object LevelPlayRewardedAdShowAdFingerprint : Fingerprint(
+    definingClass = "Lcom/unity3d/mediation/rewarded/LevelPlayRewardedAd;",
+    name = "showAd",
+    accessFlags = listOf(AccessFlags.PUBLIC),
+    returnType = "V",
+    parameters = listOf(
+        "Landroid/app/Activity;",
+        "Ljava/lang/String;",
+    ),
+)
