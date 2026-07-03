@@ -111,6 +111,22 @@ internal object PairipVMRunnerInvokeFingerprint : Fingerprint(
     parameters = listOf("Ljava/lang/String;", "[Ljava/lang/Object;"),
 )
 
+internal object PairipSignatureCheckVerifyIntegrityFingerprint : Fingerprint(
+    definingClass = "Lcom/pairip/SignatureCheck;",
+    name = "verifyIntegrity",
+    accessFlags = listOf(AccessFlags.PUBLIC, AccessFlags.STATIC),
+    returnType = "V",
+    parameters = listOf("Landroid/content/Context;"),
+)
+
+internal object PairipSignatureCheckVerifySignatureMatchesFingerprint : Fingerprint(
+    definingClass = "Lcom/pairip/SignatureCheck;",
+    name = "verifySignatureMatches",
+    accessFlags = listOf(AccessFlags.PUBLIC, AccessFlags.STATIC),
+    returnType = "Z",
+    parameters = listOf("Ljava/lang/String;"),
+)
+
 // ── Native MAX (non-Unity) fingerprints ──
 
 internal object MaxRewardedAdIsReadyFingerprint : Fingerprint(
