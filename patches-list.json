@@ -1,10 +1,10 @@
 {
   "NOTE": "Do NOT manually edit this file. This file is automatically updated when semantic release (release.yml) runs. Manually editing this file can break your releases and break third party tools that use this file.",
-  "version": "1.6.0",
+  "version": "1.7.0",
   "patches": [
     {
       "name": "Ads Free Rewards",
-      "description": "Auto-claim rewarded ad rewards without watching ads. Supports MAX Unity, native MAX, Unity Ads. WARNING: Enabling No Ads alongside this patch will prevent rewards from being claimed.",
+      "description": "Auto-claim rewarded ad rewards without watching ads. Supports MAX Unity, native MAX, Unity Ads, LevelPlay. WARNING: Enabling No Ads alongside this patch will prevent rewards from being claimed.",
       "default": false,
       "dependencies": [],
       "compatiblePackages": null,
@@ -20,7 +20,7 @@
     },
     {
       "name": "Spoof Play Store Install Source",
-      "description": "Makes the app think it was installed from Google Play Store. Prevents Pairip license check from failing. Recommended if the app is installed from Play Store.",
+      "description": "Makes the app think it was installed from Google Play Store. Supports Pairip and generic installer check methods. Recommended if the app has a Play Store license check.",
       "default": false,
       "dependencies": [],
       "compatiblePackages": null,

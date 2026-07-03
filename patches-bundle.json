@@ -1,7 +1,7 @@
 {
-  "created_at": "2026-07-02T19:52:42",
-  "description": "## [1.6.0](https://github.com/Nai64/Nai64Patches/compare/1.5.9...1.6.0) (2026-07-02)\n\n### New Features\n\n* **AdsFreeRewards:** add Unity Ads RewardedAd support ([c026d48](https://github.com/Nai64/Nai64Patches/commit/c026d48fb87ee1c9c5e15dd057fa50cf5a983bda))\n* **AdsFreeRewards:** add Unity Ads RewardedAd support [skip ci] ([dcf32a6](https://github.com/Nai64/Nai64Patches/commit/dcf32a628c2a5499719bfce1d2385e80e7381b3b))",
-  "download_url": "https://github.com/Nai64/Nai64Patches/releases/download/1.6.0/patches-1.6.0.mpp",
+  "created_at": "2026-07-03T10:14:59",
+  "description": "## [1.7.0](https://github.com/Nai64/Nai64Patches/compare/1.6.0...1.7.0) (2026-07-03)\n\n### Bug Fixes\n\n* **AdsFreeRewards:** dont patch Unity Ads load(), only show() to avoid error 628 [skip ci] ([83dc4e0](https://github.com/Nai64/Nai64Patches/commit/83dc4e093cf0d14cd2eef8737b15bfa9cf03cb24))\n\n### New Features\n\n* **AdsFreeRewards:** add LevelPlay strategy with Unity Ads fallthrough ([4b02a66](https://github.com/Nai64/Nai64Patches/commit/4b02a666d13e9d99d8469589cb2631dcaee5553e))\n* **SpoofPlayStore:** add fallback strategies for non-Pairip apps ([fd2a63d](https://github.com/Nai64/Nai64Patches/commit/fd2a63db5c5914bfc7bf969502fe3b2783462277))",
+  "download_url": "https://github.com/Nai64/Nai64Patches/releases/download/1.7.0/patches-1.7.0.mpp",
   "signature_download_url": "",
-  "version": "1.6.0"
+  "version": "1.7.0"
 }

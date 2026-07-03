@@ -1,3 +1,14 @@
+## [1.7.0](https://github.com/Nai64/Nai64Patches/compare/1.6.0...1.7.0) (2026-07-03)
+
+### Bug Fixes
+
+* **AdsFreeRewards:** dont patch Unity Ads load(), only show() to avoid error 628 [skip ci] ([83dc4e0](https://github.com/Nai64/Nai64Patches/commit/83dc4e093cf0d14cd2eef8737b15bfa9cf03cb24))
+
+### New Features
+
+* **AdsFreeRewards:** add LevelPlay strategy with Unity Ads fallthrough ([4b02a66](https://github.com/Nai64/Nai64Patches/commit/4b02a666d13e9d99d8469589cb2631dcaee5553e))
+* **SpoofPlayStore:** add fallback strategies for non-Pairip apps ([fd2a63d](https://github.com/Nai64/Nai64Patches/commit/fd2a63db5c5914bfc7bf969502fe3b2783462277))
+
 ## [1.6.0](https://github.com/Nai64/Nai64Patches/compare/1.5.9...1.6.0) (2026-07-02)
 
 ### New Features
