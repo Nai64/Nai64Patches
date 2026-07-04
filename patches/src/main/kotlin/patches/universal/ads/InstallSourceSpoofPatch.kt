@@ -60,11 +60,20 @@ val installSourceSpoofPatch = bytecodePatch(
             logger.info("Applied Pairip LicenseClient paywall suppress")
         }
 
+        // Strategy 6: Pairip LicenseActivity.showPaywallAndCloseApp — last link before PendingIntent.send()
+        // Catches paywall even if LicenseActivity is started from native code (libpairipcore.so).
+        PairipLicenseActivityShowPaywallFingerprint.methodOrNull?.let {
+            it.addInstructions(0, """
+                return-void
+            """.trimIndent())
+            logger.info("Applied Pairip LicenseActivity paywall suppress")
+        }
+
         // ── Generic string-based strategies ──
         // These search for methods containing "com.android.vending" by return type.
-        // Only reached if no Pairip-specific methods were found.
+        // These run even when Pairip is found — catches non-Pairip methods.
 
-        // Strategy 5: Private boolean method referencing "com.android.vending"
+        // Strategy 7: Private boolean method referencing "com.android.vending"
         val boolCheck = GenericBooleanInstallerCheckFingerprint.methodOrNull
         if (boolCheck != null) {
             boolCheck.addInstructions(0, listOf(
@@ -75,7 +84,7 @@ val installSourceSpoofPatch = bytecodePatch(
             return@execute
         }
 
-        // Strategy 6: Private String method referencing "com.android.vending"
+        // Strategy 8: Private String method referencing "com.android.vending"
         val strCheck = GenericStringInstallerCheckFingerprint.methodOrNull
         if (strCheck != null) {
             strCheck.addInstructions(0, """
@@ -86,7 +95,7 @@ val installSourceSpoofPatch = bytecodePatch(
             return@execute
         }
 
-        // Strategy 7: Private boolean method with "com.android.vending" (duplicate safety net)
+        // Strategy 9: Private boolean method with "com.android.vending" (duplicate safety net)
         val fallbackBool = FallbackBooleanInstallerCheckFingerprint.methodOrNull
         if (fallbackBool != null) {
             fallbackBool.addInstructions(0, listOf(
@@ -97,7 +106,7 @@ val installSourceSpoofPatch = bytecodePatch(
             return@execute
         }
 
-        // Strategy 8: Private String method with "com.android.vending" (duplicate safety net)
+        // Strategy 10: Private String method with "com.android.vending" (duplicate safety net)
         val fallbackStr = FallbackStringInstallerCheckFingerprint.methodOrNull
         if (fallbackStr != null) {
             fallbackStr.addInstructions(0, """
