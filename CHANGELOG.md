@@ -1,3 +1,9 @@
+## [1.10.0](https://github.com/Nai64/Nai64Patches/compare/1.9.3...1.10.0) (2026-07-04)
+
+### New Features
+
+* **SpoofPlayStore:** suppress Pairip LicenseClient error dialog redirect to Play Store ([39301ae](https://github.com/Nai64/Nai64Patches/commit/39301ae10e33895a22b9b488a050ec3fe5c5a5fe))
+
 ## [1.9.3](https://github.com/Nai64/Nai64Patches/compare/1.9.2...1.9.3) (2026-07-04)
 
 ### Bug Fixes
