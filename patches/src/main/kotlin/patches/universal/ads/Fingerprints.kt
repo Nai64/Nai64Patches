@@ -129,6 +129,14 @@ internal object PairipSignatureCheckVerifySignatureMatchesFingerprint : Fingerpr
     parameters = listOf("Ljava/lang/String;"),
 )
 
+internal object PairipLicenseClientStartErrorDialogFingerprint : Fingerprint(
+    definingClass = "Lcom/pairip/licensecheck/LicenseClient;",
+    name = "startErrorDialogActivity",
+    accessFlags = listOf(AccessFlags.PRIVATE),
+    returnType = "V",
+    parameters = emptyList(),
+)
+
 // ── Native MAX (non-Unity) fingerprints ──
 
 internal object MaxRewardedAdIsReadyFingerprint : Fingerprint(

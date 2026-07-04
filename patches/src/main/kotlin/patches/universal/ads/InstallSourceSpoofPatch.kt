@@ -44,6 +44,14 @@ val installSourceSpoofPatch = bytecodePatch(
             logger.info("Applied Pairip SignatureCheck.verifySignatureMatches bypass")
         }
 
+        // Strategy 4: Pairip LicenseClient error dialog — suppresses the "Get from Play Store" redirect
+        PairipLicenseClientStartErrorDialogFingerprint.methodOrNull?.let {
+            it.addInstructions(0, """
+                return-void
+            """.trimIndent())
+            logger.info("Applied Pairip LicenseClient error dialog suppress")
+        }
+
         // ── Generic string-based strategies ──
         // These search for methods containing "com.android.vending" by return type.
         // Only reached if no Pairip-specific methods were found.
