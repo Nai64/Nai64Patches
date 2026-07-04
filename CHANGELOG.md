@@ -1,3 +1,10 @@
+## [1.10.2](https://github.com/Nai64/Nai64Patches/compare/1.10.1...1.10.2) (2026-07-04)
+
+### Bug Fixes
+
+* **SpoofPlayStore:** add LicenseActivity.showPaywallAndCloseApp suppress ([069db73](https://github.com/Nai64/Nai64Patches/commit/069db73842bb44e2f307931adf6680c9a6cf64c5))
+* **SpoofPlayStore:** add LicenseActivity.showPaywallAndCloseApp suppress ([c264373](https://github.com/Nai64/Nai64Patches/commit/c2643732249a644ad225d662477efc80debdcfd2))
+
 ## [1.10.1](https://github.com/Nai64/Nai64Patches/compare/1.10.0...1.10.1) (2026-07-04)
 
 ### Bug Fixes
