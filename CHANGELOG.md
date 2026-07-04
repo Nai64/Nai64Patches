@@ -1,3 +1,9 @@
+## [1.9.2](https://github.com/Nai64/Nai64Patches/compare/1.9.1...1.9.2) (2026-07-04)
+
+### Bug Fixes
+
+* **SpoofPlayStore:** remove StartupLauncher.launch bypass that breaks Pairip VM init ([61874ba](https://github.com/Nai64/Nai64Patches/commit/61874ba3747b4f137dbd0f200ab4c474b5a25506))
+
 ## [1.9.1](https://github.com/Nai64/Nai64Patches/compare/1.9.0...1.9.1) (2026-07-04)
 
 ### Bug Fixes
