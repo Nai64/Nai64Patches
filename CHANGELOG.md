@@ -1,3 +1,9 @@
+## [1.10.1](https://github.com/Nai64/Nai64Patches/compare/1.10.0...1.10.1) (2026-07-04)
+
+### Bug Fixes
+
+* **SpoofPlayStore:** also suppress Pairip LicenseClient paywall to block Play Store redirect ([956539e](https://github.com/Nai64/Nai64Patches/commit/956539e6143d39f142cae1c90311da56ab9ac839))
+
 ## [1.10.0](https://github.com/Nai64/Nai64Patches/compare/1.9.3...1.10.0) (2026-07-04)
 
 ### New Features
