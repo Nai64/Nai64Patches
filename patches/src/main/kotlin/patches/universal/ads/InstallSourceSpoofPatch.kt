@@ -17,8 +17,6 @@ val installSourceSpoofPatch = bytecodePatch(
     execute {
         val logger = Logger.getLogger(this::class.java.name)
 
-        var pairipApplied = false
-
         // Strategy 1: Pairip performLocalInstallerCheck
         PerformLocalInstallerCheckFingerprint.methodOrNull?.let {
             it.addInstructions(0, listOf(
@@ -26,7 +24,6 @@ val installSourceSpoofPatch = bytecodePatch(
                 BuilderInstruction11x(Opcode.RETURN, 0),
             ))
             logger.info("Applied Pairip performLocalInstallerCheck spoof")
-            pairipApplied = true
         }
 
         // Strategy 2: Pairip SignatureCheck.verifyIntegrity() — runs in Application.attachBaseContext
@@ -36,7 +33,6 @@ val installSourceSpoofPatch = bytecodePatch(
                 return-void
             """.trimIndent())
             logger.info("Applied Pairip SignatureCheck.verifyIntegrity bypass")
-            pairipApplied = true
         }
 
         // Strategy 3: Pairip SignatureCheck.verifySignatureMatches() — belt-and-suspenders
@@ -46,11 +42,7 @@ val installSourceSpoofPatch = bytecodePatch(
                 BuilderInstruction11x(Opcode.RETURN, 0),
             ))
             logger.info("Applied Pairip SignatureCheck.verifySignatureMatches bypass")
-            pairipApplied = true
         }
-
-        // If any Pairip strategy was applied, generic fallbacks are unnecessary
-        if (pairipApplied) return@execute
 
         // ── Generic string-based strategies ──
         // These search for methods containing "com.android.vending" by return type.
