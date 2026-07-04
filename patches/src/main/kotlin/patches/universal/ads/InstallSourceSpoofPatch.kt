@@ -50,17 +50,6 @@ val installSourceSpoofPatch = bytecodePatch(
             pairipApplied = true
         }
 
-        // Strategy 4: Pairip StartupLauncher.launch() — early native VM entry point.
-        // Skip only the startup VM program; VMRunner.invoke() is a shared dispatcher
-        // used by protected app/library code and must keep returning real values.
-        PairipStartupLauncherLaunchFingerprint.methodOrNull?.let {
-            it.addInstructions(0, """
-                return-void
-            """.trimIndent())
-            logger.info("Applied Pairip StartupLauncher.launch bypass")
-            pairipApplied = true
-        }
-
         // If any Pairip strategy was applied, generic fallbacks are unnecessary
         if (pairipApplied) return@execute
 

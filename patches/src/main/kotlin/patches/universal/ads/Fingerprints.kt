@@ -113,13 +113,6 @@ internal object PairipVMRunnerInvokeFingerprint : Fingerprint(
     parameters = listOf("Ljava/lang/String;", "[Ljava/lang/Object;"),
 )
 
-internal object PairipStartupLauncherLaunchFingerprint : Fingerprint(
-    definingClass = "Lcom/pairip/StartupLauncher;",
-    name = "launch",
-    returnType = "V",
-    parameters = emptyList(),
-)
-
 internal object PairipSignatureCheckVerifyIntegrityFingerprint : Fingerprint(
     definingClass = "Lcom/pairip/SignatureCheck;",
     name = "verifyIntegrity",
