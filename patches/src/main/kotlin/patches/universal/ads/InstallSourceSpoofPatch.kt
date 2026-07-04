@@ -90,7 +90,7 @@ val installSourceSpoofPatch = bytecodePatch(
             return@execute
         }
 
-        // Strategy 7: Any boolean method (any access) with "com.android.vending"
+        // Strategy 7: Private boolean method with "com.android.vending" (duplicate safety net)
         val fallbackBool = FallbackBooleanInstallerCheckFingerprint.methodOrNull
         if (fallbackBool != null) {
             fallbackBool.addInstructions(0, listOf(
@@ -101,7 +101,7 @@ val installSourceSpoofPatch = bytecodePatch(
             return@execute
         }
 
-        // Strategy 8: Any String method (any access) with "com.android.vending"
+        // Strategy 8: Private String method with "com.android.vending" (duplicate safety net)
         val fallbackStr = FallbackStringInstallerCheckFingerprint.methodOrNull
         if (fallbackStr != null) {
             fallbackStr.addInstructions(0, """

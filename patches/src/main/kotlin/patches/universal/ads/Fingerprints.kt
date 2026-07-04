@@ -92,12 +92,14 @@ internal object GenericStringInstallerCheckFingerprint : Fingerprint(
 )
 
 internal object FallbackBooleanInstallerCheckFingerprint : Fingerprint(
+    accessFlags = listOf(AccessFlags.PRIVATE),
     returnType = "Z",
     parameters = emptyList(),
     strings = listOf("com.android.vending"),
 )
 
 internal object FallbackStringInstallerCheckFingerprint : Fingerprint(
+    accessFlags = listOf(AccessFlags.PRIVATE),
     returnType = "Ljava/lang/String;",
     parameters = emptyList(),
     strings = listOf("com.android.vending"),
