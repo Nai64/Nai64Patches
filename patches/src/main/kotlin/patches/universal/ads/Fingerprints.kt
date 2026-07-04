@@ -137,6 +137,14 @@ internal object PairipLicenseClientStartErrorDialogFingerprint : Fingerprint(
     parameters = emptyList(),
 )
 
+internal object PairipLicenseClientStartPaywallFingerprint : Fingerprint(
+    definingClass = "Lcom/pairip/licensecheck/LicenseClient;",
+    name = "startPaywallActivity",
+    accessFlags = listOf(AccessFlags.PRIVATE),
+    returnType = "V",
+    parameters = listOf("Landroid/app/PendingIntent;"),
+)
+
 // ── Native MAX (non-Unity) fingerprints ──
 
 internal object MaxRewardedAdIsReadyFingerprint : Fingerprint(

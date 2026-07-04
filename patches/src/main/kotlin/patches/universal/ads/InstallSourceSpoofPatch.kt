@@ -52,6 +52,14 @@ val installSourceSpoofPatch = bytecodePatch(
             logger.info("Applied Pairip LicenseClient error dialog suppress")
         }
 
+        // Strategy 5: Pairip LicenseClient paywall — suppresses the LVL paywall PendingIntent (opens Play Store)
+        PairipLicenseClientStartPaywallFingerprint.methodOrNull?.let {
+            it.addInstructions(0, """
+                return-void
+            """.trimIndent())
+            logger.info("Applied Pairip LicenseClient paywall suppress")
+        }
+
         // ── Generic string-based strategies ──
         // These search for methods containing "com.android.vending" by return type.
         // Only reached if no Pairip-specific methods were found.
