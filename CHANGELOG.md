@@ -1,3 +1,9 @@
+## [1.9.1](https://github.com/Nai64/Nai64Patches/compare/1.9.0...1.9.1) (2026-07-04)
+
+### Bug Fixes
+
+* **SpoofPlayStore:** tighten fallback installer check fingerprints to require PRIVATE access ([5ef4d55](https://github.com/Nai64/Nai64Patches/commit/5ef4d554aac5c382cd74d2cbcd5d86acb05828d2))
+
 ## [1.9.0](https://github.com/Nai64/Nai64Patches/compare/1.8.1...1.9.0) (2026-07-03)
 
 ### Bug Fixes
