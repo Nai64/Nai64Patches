@@ -1,7 +1,7 @@
 {
-  "created_at": "2026-07-04T12:05:34",
-  "description": "## [1.9.2](https://github.com/Nai64/Nai64Patches/compare/1.9.1...1.9.2) (2026-07-04)\n\n### Bug Fixes\n\n* **SpoofPlayStore:** remove StartupLauncher.launch bypass that breaks Pairip VM init ([61874ba](https://github.com/Nai64/Nai64Patches/commit/61874ba3747b4f137dbd0f200ab4c474b5a25506))",
-  "download_url": "https://github.com/Nai64/Nai64Patches/releases/download/1.9.2/patches-1.9.2.mpp",
+  "created_at": "2026-07-04T12:13:25",
+  "description": "## [1.9.3](https://github.com/Nai64/Nai64Patches/compare/1.9.2...1.9.3) (2026-07-04)\n\n### Bug Fixes\n\n* **SpoofPlayStore:** apply generic fallback strategies even when Pairip is found ([9ed4ca5](https://github.com/Nai64/Nai64Patches/commit/9ed4ca5d57d71b471d5e84637862b02cf4d4ca27))",
+  "download_url": "https://github.com/Nai64/Nai64Patches/releases/download/1.9.3/patches-1.9.3.mpp",
   "signature_download_url": "",
-  "version": "1.9.2"
+  "version": "1.9.3"
 }

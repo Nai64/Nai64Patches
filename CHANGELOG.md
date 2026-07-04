@@ -1,3 +1,9 @@
+## [1.9.3](https://github.com/Nai64/Nai64Patches/compare/1.9.2...1.9.3) (2026-07-04)
+
+### Bug Fixes
+
+* **SpoofPlayStore:** apply generic fallback strategies even when Pairip is found ([9ed4ca5](https://github.com/Nai64/Nai64Patches/commit/9ed4ca5d57d71b471d5e84637862b02cf4d4ca27))
+
 ## [1.9.2](https://github.com/Nai64/Nai64Patches/compare/1.9.1...1.9.2) (2026-07-04)
 
 ### Bug Fixes
