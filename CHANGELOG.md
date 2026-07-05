@@ -1,3 +1,13 @@
+## [1.12.0](https://github.com/Nai64/Nai64Patches/compare/1.11.0...1.12.0) (2026-07-05)
+
+### Bug Fixes
+
+* **InstallSourceSpoof:** neuter Pairip Application entry point to prevent VM start ([639567d](https://github.com/Nai64/Nai64Patches/commit/639567de916c94635f44ba7821f95f9cc65ef6dd))
+
+### New Features
+
+* **InstallSourceSpoof:** add ResourcePatch to redirect Pairip Application in manifest ([baa171e](https://github.com/Nai64/Nai64Patches/commit/baa171ef6904bb6b41ef0a6de13f72bbf9988777))
+
 ## [1.11.0](https://github.com/Nai64/Nai64Patches/compare/1.10.4...1.11.0) (2026-07-05)
 
 ### Bug Fixes

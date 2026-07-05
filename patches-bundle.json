@@ -1,7 +1,7 @@
 {
-  "created_at": "2026-07-05T13:33:45",
-  "description": "## [1.11.0](https://github.com/Nai64/Nai64Patches/compare/1.10.4...1.11.0) (2026-07-05)\n\n### Bug Fixes\n\n* **AdsFreeRewards:** clean up log messages ([70ba03b](https://github.com/Nai64/Nai64Patches/commit/70ba03b7dd4a7707b249c34d7f2b70026b1fa7ab))\n* **AdsFreeRewards:** clean up log messages ([938373e](https://github.com/Nai64/Nai64Patches/commit/938373edef33d5ab7588d9904aa864bab67570a5))\n\n### New Features\n\n* **AdsFreeRewards:** add detailed per-strategy SDK patching logs ([c90c57e](https://github.com/Nai64/Nai64Patches/commit/c90c57eb134ec11c8928938259c9f4a190e7016f))",
-  "download_url": "https://github.com/Nai64/Nai64Patches/releases/download/1.11.0/patches-1.11.0.mpp",
+  "created_at": "2026-07-05T20:11:15",
+  "description": "## [1.12.0](https://github.com/Nai64/Nai64Patches/compare/1.11.0...1.12.0) (2026-07-05)\n\n### Bug Fixes\n\n* **InstallSourceSpoof:** neuter Pairip Application entry point to prevent VM start ([639567d](https://github.com/Nai64/Nai64Patches/commit/639567de916c94635f44ba7821f95f9cc65ef6dd))\n\n### New Features\n\n* **InstallSourceSpoof:** add ResourcePatch to redirect Pairip Application in manifest ([baa171e](https://github.com/Nai64/Nai64Patches/commit/baa171ef6904bb6b41ef0a6de13f72bbf9988777))",
+  "download_url": "https://github.com/Nai64/Nai64Patches/releases/download/1.12.0/patches-1.12.0.mpp",
   "signature_download_url": "",
-  "version": "1.11.0"
+  "version": "1.12.0"
 }
