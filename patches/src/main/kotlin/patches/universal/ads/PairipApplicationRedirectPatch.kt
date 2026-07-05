@@ -59,16 +59,22 @@ val pairipApplicationRedirectPatch = resourcePatch(
 }
 
 private fun ResourcePatchContext.discoverPairipAppClass(logger: Logger): String? {
+    val apkDir = try {
+        get("AndroidManifest.xml", false)?.parentFile
+    } catch (_: Exception) {
+        null
+    } ?: run {
+        logger.warning("Cannot determine APK directory for DEX discovery")
+        return null
+    }
+
     for (i in 0..99) {
         val name = if (i == 0) "classes.dex" else "classes${i + 1}.dex"
-        val file = try {
-            get(name, false)
-        } catch (_: Exception) {
-            null
-        } ?: break
+        val dexFile = java.io.File(apkDir, name)
+        if (!dexFile.exists()) break
 
         try {
-            val dex = DexFileFactory.loadDexFile(file, Opcodes.getDefault())
+            val dex = DexFileFactory.loadDexFile(dexFile, Opcodes.getDefault())
             for (classDef in dex.classes) {
                 if (classDef.type != "Lcom/pairip/application/Application;") continue
                 val superclass = classDef.superclass ?: continue
