@@ -27,33 +27,34 @@ val pairipApplicationRedirectPatch = resourcePatch(
     execute {
         val logger = Logger.getLogger(this::class.java.name)
 
-        val doc = document("AndroidManifest.xml")
-        val appElement = doc.getElementsByTagName("application").item(0)
-        if (appElement !is Element) {
-            logger.warning("No <application> element found in AndroidManifest.xml")
-            return@execute
-        }
-
-        val ns = "http://schemas.android.com/apk/res/android"
-        val currentName = appElement.getAttributeNS(ns, "name").let { nsName ->
-            if (!nsName.isNullOrEmpty()) nsName else appElement.getAttribute("android:name")
-        }
-
-        if (currentName != "com.pairip.application.Application") {
-            logger.info("Application class is '$currentName', not Pairip — skipping redirect")
-            return@execute
-        }
-
         val targetClass = realAppClass?.takeIf { it.isNotEmpty() } ?: discoverPairipAppClass(logger)
 
-        if (targetClass == null) {
-            logger.warning("Could not auto-discover real app class. Set the 'Real Application Class' option. " +
-                    "To find it: check smali for .super directive in com/pairip/application/Application.smali")
-            return@execute
-        }
+        document("AndroidManifest.xml").use { doc ->
+            val appElement = doc.getElementsByTagName("application").item(0)
+            if (appElement !is Element) {
+                logger.warning("No <application> element found in AndroidManifest.xml")
+                return@execute
+            }
 
-        appElement.setAttributeNS(ns, "android:name", targetClass)
-        logger.info("Redirected Pairip Application entry point -> $targetClass")
+            val ns = "http://schemas.android.com/apk/res/android"
+            val currentName = appElement.getAttributeNS(ns, "name").let { nsName ->
+                if (!nsName.isNullOrEmpty()) nsName else appElement.getAttribute("android:name")
+            }
+
+            if (currentName != "com.pairip.application.Application") {
+                logger.info("Application class is '$currentName', not Pairip — skipping redirect")
+                return@execute
+            }
+
+            if (targetClass == null) {
+                logger.warning("Could not auto-discover real app class. Set the 'Real Application Class' option. " +
+                        "To find it: check smali for .super directive in com/pairip/application/Application.smali")
+                return@execute
+            }
+
+            appElement.setAttributeNS(ns, "android:name", targetClass)
+            logger.info("Redirected Pairip Application entry point -> $targetClass")
+        }
     }
 }
 
