@@ -167,13 +167,7 @@ internal object MaxRewardedAdShowAdFingerprint : Fingerprint(
     name = "showAd",
     accessFlags = listOf(AccessFlags.PUBLIC),
     returnType = "V",
-    parameters = listOf(
-        "Ljava/lang/String;",
-        "Ljava/lang/String;",
-        "Landroid/view/ViewGroup;",
-        "Landroidx/lifecycle/Lifecycle;",
-        "Landroid/app/Activity;",
-    ),
+    parameters = emptyList(),
 )
 
 internal object MaxInterstitialAdShowAdFingerprint : Fingerprint(

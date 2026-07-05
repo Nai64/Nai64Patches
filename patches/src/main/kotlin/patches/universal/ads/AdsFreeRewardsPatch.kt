@@ -103,7 +103,11 @@ val adsFreeRewardsPatch = bytecodePatch(
             // onUserRewarded → onRewardedVideoCompleted → onAdHidden).
             // This avoids crashes from simply NOP'ing showAd().
             nativeShow.addInstructions(0, fireRewardedAdCallbacks())
-            return@execute
+            logger.info("Applied Ads Free Rewards native MAX strategy")
+            // Do NOT return — let subsequent strategies run for games where the
+            // MAX showAd patch may not intercept the actual ad path (e.g. IL2CPP
+            // games with ProGuard-broken showAd()V, or games routing through
+            // LevelPlay / ironSource / Unity Ads instead).
         }
 
         // ── Strategy 3: LevelPlay RewardedAd (ironSource mediation) ──
