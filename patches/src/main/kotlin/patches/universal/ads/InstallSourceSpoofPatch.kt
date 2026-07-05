@@ -2,6 +2,7 @@ package patches.universal.ads
 
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.patch.bytecodePatch
+import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction11n
 import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction11x
@@ -67,6 +68,34 @@ val installSourceSpoofPatch = bytecodePatch(
                 return-void
             """.trimIndent())
             logger.info("Applied Pairip LicenseActivity paywall suppress")
+        }
+
+        // ── Pairip Application entry point bypass ──
+        // Prevents Pairip from loading libpairipcore.so and starting the VM.
+        // Works by neutering the Application class methods that Pairip overrides.
+        // If Pairip's Application extends the real app's Application, super calls
+        // handle real app initialization normally.
+        //
+        // For apps where Pairip wraps android.app.Application directly (not extending
+        // the real app), this may skip the real app's custom Application init.
+        // In that case, use the manifest-level bypass instead (ResourcePatch).
+
+        // Strategy 7a: Pairip Application.attachBaseContext — main Pairip entry point
+        PairipApplicationAttachBaseContextFingerprint.methodOrNull?.let {
+            it.addInstructions(0, """
+                invoke-super {p0, p1}, Lcom/pairip/application/Application;->attachBaseContext(Landroid/content/Context;)V
+                return-void
+            """.trimIndent())
+            logger.info("Applied Pairip Application.attachBaseContext bypass")
+        }
+
+        // Strategy 7b: Pairip Application.onCreate — backup in case attachBaseContext isn't overridden
+        PairipApplicationOnCreateFingerprint.methodOrNull?.let {
+            it.addInstructions(0, """
+                invoke-super {p0}, Lcom/pairip/application/Application;->onCreate()V
+                return-void
+            """.trimIndent())
+            logger.info("Applied Pairip Application.onCreate bypass")
         }
 
         // ── Generic string-based strategies ──

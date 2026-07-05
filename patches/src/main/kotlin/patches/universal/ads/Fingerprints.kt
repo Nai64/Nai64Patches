@@ -153,6 +153,24 @@ internal object PairipLicenseActivityShowPaywallFingerprint : Fingerprint(
     parameters = emptyList(),
 )
 
+// ── Pairip Application class bypass ──
+// Prevents Pairip from loading libpairipcore.so and starting the VM
+// by neutering the Application entry point methods.
+
+internal object PairipApplicationAttachBaseContextFingerprint : Fingerprint(
+    definingClass = "Lcom/pairip/application/Application;",
+    name = "attachBaseContext",
+    returnType = "V",
+    parameters = listOf("Landroid/content/Context;"),
+)
+
+internal object PairipApplicationOnCreateFingerprint : Fingerprint(
+    definingClass = "Lcom/pairip/application/Application;",
+    name = "onCreate",
+    returnType = "V",
+    parameters = emptyList(),
+)
+
 // ── Native MAX (non-Unity) fingerprints ──
 
 internal object MaxRewardedAdIsReadyFingerprint : Fingerprint(
