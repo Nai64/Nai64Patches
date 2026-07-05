@@ -1,3 +1,9 @@
+## [1.13.0](https://github.com/Nai64/Nai64Patches/compare/1.12.2...1.13.0) (2026-07-05)
+
+### New Features
+
+* **NoAds:** add per-ad-type toggles (interstitial, banner, app open, MREC, rewarded) ([95264f7](https://github.com/Nai64/Nai64Patches/commit/95264f7bcedcb27833709df5984cd90487c759a6))
+
 ## [1.12.2](https://github.com/Nai64/Nai64Patches/compare/1.12.1...1.12.2) (2026-07-05)
 
 ### Bug Fixes
