@@ -1,3 +1,9 @@
+## [1.12.2](https://github.com/Nai64/Nai64Patches/compare/1.12.1...1.12.2) (2026-07-05)
+
+### Bug Fixes
+
+* **PairipRedirect:** discover DEX from manifest parent dir instead of get() ([934d6c6](https://github.com/Nai64/Nai64Patches/commit/934d6c60ba56f015dd51e373b81698b227e1a413))
+
 ## [1.12.1](https://github.com/Nai64/Nai64Patches/compare/1.12.0...1.12.1) (2026-07-05)
 
 ### Bug Fixes

@@ -1,7 +1,7 @@
 {
-  "created_at": "2026-07-05T20:21:05",
-  "description": "## [1.12.1](https://github.com/Nai64/Nai64Patches/compare/1.12.0...1.12.1) (2026-07-05)\n\n### Bug Fixes\n\n* **PairipRedirect:** close Document with use block to prevent concurrent read crash ([d6e188b](https://github.com/Nai64/Nai64Patches/commit/d6e188bfd91750b7f746ba1595ab7a08c13be1ca))",
-  "download_url": "https://github.com/Nai64/Nai64Patches/releases/download/1.12.1/patches-1.12.1.mpp",
+  "created_at": "2026-07-05T20:28:54",
+  "description": "## [1.12.2](https://github.com/Nai64/Nai64Patches/compare/1.12.1...1.12.2) (2026-07-05)\n\n### Bug Fixes\n\n* **PairipRedirect:** discover DEX from manifest parent dir instead of get() ([934d6c6](https://github.com/Nai64/Nai64Patches/commit/934d6c60ba56f015dd51e373b81698b227e1a413))",
+  "download_url": "https://github.com/Nai64/Nai64Patches/releases/download/1.12.2/patches-1.12.2.mpp",
   "signature_download_url": "",
-  "version": "1.12.1"
+  "version": "1.12.2"
 }
