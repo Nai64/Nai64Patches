@@ -1,3 +1,9 @@
+## [1.12.1](https://github.com/Nai64/Nai64Patches/compare/1.12.0...1.12.1) (2026-07-05)
+
+### Bug Fixes
+
+* **PairipRedirect:** close Document with use block to prevent concurrent read crash ([d6e188b](https://github.com/Nai64/Nai64Patches/commit/d6e188bfd91750b7f746ba1595ab7a08c13be1ca))
+
 ## [1.12.0](https://github.com/Nai64/Nai64Patches/compare/1.11.0...1.12.0) (2026-07-05)
 
 ### Bug Fixes
