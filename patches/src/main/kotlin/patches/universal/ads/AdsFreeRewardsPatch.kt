@@ -26,14 +26,14 @@ val adsFreeRewardsPatch = bytecodePatch(
             IronSourceLevelPlayFullScreenShowAdFingerprint.methodOrNull != null
 
         if (!hasMaxUnity && !hasNativeMax && !hasUnityAds && !hasLevelPlay && !hasIronSourceUnityBridge) {
-            return@execute logger.info("none")
+            return@execute
         }
 
         // ── Strategy 1: MAX Unity wrapper ──
         val unityShow = ShowRewardedAdFingerprint.methodOrNull
         val unityReady = IsRewardedAdReadyFingerprint.methodOrNull
         if (unityShow != null && unityReady != null) {
-            logger.info("MAX Unity isRewardedAdReady, showRewardedAd")
+            logger.info("MAX Unity Ad wrapper patch succeeded")
             // Force isRewardedAdReady to always return true
             unityReady.addInstructions(0, """
                 const/4 v0, 0x1
@@ -95,7 +95,7 @@ val adsFreeRewardsPatch = bytecodePatch(
         val nativeReady = MaxRewardedAdIsReadyFingerprint.methodOrNull
         val nativeShow = MaxRewardedAdShowAdFingerprint.methodOrNull
         if (nativeReady != null && nativeShow != null) {
-            logger.info("native MAX isReady, showAd")
+            logger.info("native MAX patch succeeded")
             nativeReady.addInstructions(0, """
                 const/4 v0, 0x1
                 return v0
@@ -118,7 +118,7 @@ val adsFreeRewardsPatch = bytecodePatch(
         // invokes com.unity3d.ads.RewardedAd.show(), which Strategy 4 patches.
         val levelPlayReady = LevelPlayRewardedAdIsReadyFingerprint.methodOrNull
         if (levelPlayReady != null) {
-            logger.info("LevelPlay isAdReady")
+            logger.info("LevelPlay patch succeeded")
             levelPlayReady.addInstructions(0, """
                 const/4 v0, 0x1
                 return v0
@@ -133,7 +133,7 @@ val adsFreeRewardsPatch = bytecodePatch(
         val bridgeReady = IronSourceUnityRewardedAdIsReadyFingerprint.methodOrNull
         val bridgeShow = IronSourceLevelPlayFullScreenShowAdFingerprint.methodOrNull
         if (bridgeReady != null && bridgeShow != null) {
-            logger.info("ironSource bridge isAdReady, a")
+            logger.info("IronSource patch succeeded")
             bridgeReady.addInstructions(0, """
                 const/4 v0, 0x1
                 return v0
@@ -160,7 +160,7 @@ val adsFreeRewardsPatch = bytecodePatch(
         // Strategy 4: Unity Ads RewardedAd.
         val adsShow = UnityRewardedAdShowFingerprint.methodOrNull
         if (adsShow != null) {
-            logger.info("Unity Ads show")
+            logger.info("Unity Ads patch succeeded")
             // Only patch show() — do NOT patch load() so the real ad loads
             // silently in the background (prevents Unity Ads error 628).
             adsShow.addInstructions(0, """
