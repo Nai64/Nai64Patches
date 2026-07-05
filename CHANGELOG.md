@@ -1,3 +1,9 @@
+## [1.10.3](https://github.com/Nai64/Nai64Patches/compare/1.10.2...1.10.3) (2026-07-05)
+
+### Bug Fixes
+
+* **AdsFreeRewards:** target final showAd overload instead of deprecated no-params ([23675d9](https://github.com/Nai64/Nai64Patches/commit/23675d95f98d5128441c0de3bf4f1576c2dfece9))
+
 ## [1.10.2](https://github.com/Nai64/Nai64Patches/compare/1.10.1...1.10.2) (2026-07-04)
 
 ### Bug Fixes
