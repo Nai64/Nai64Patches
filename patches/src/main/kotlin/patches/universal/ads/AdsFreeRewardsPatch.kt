@@ -25,17 +25,15 @@ val adsFreeRewardsPatch = bytecodePatch(
         val hasIronSourceUnityBridge = IronSourceUnityRewardedAdIsReadyFingerprint.methodOrNull != null &&
             IronSourceLevelPlayFullScreenShowAdFingerprint.methodOrNull != null
 
-        logger.info("SDK detection: MAX Unity=$hasMaxUnity, native MAX=$hasNativeMax, Unity Ads=$hasUnityAds, LevelPlay=$hasLevelPlay, ironSource bridge=$hasIronSourceUnityBridge")
-
         if (!hasMaxUnity && !hasNativeMax && !hasUnityAds && !hasLevelPlay && !hasIronSourceUnityBridge) {
-            return@execute logger.warning("No supported ad SDK found, no changes applied")
+            return@execute logger.info("none")
         }
 
         // ── Strategy 1: MAX Unity wrapper ──
         val unityShow = ShowRewardedAdFingerprint.methodOrNull
         val unityReady = IsRewardedAdReadyFingerprint.methodOrNull
         if (unityShow != null && unityReady != null) {
-            logger.info("Patching MAX Unity wrapper: isRewardedAdReady(${unityReady.definingClass}::${unityReady.name}) and showRewardedAd(${unityShow.definingClass}::${unityShow.name})")
+            logger.info("MAX Unity isRewardedAdReady, showRewardedAd")
             // Force isRewardedAdReady to always return true
             unityReady.addInstructions(0, """
                 const/4 v0, 0x1
@@ -97,13 +95,12 @@ val adsFreeRewardsPatch = bytecodePatch(
         val nativeReady = MaxRewardedAdIsReadyFingerprint.methodOrNull
         val nativeShow = MaxRewardedAdShowAdFingerprint.methodOrNull
         if (nativeReady != null && nativeShow != null) {
-            logger.info("Patching native MAX: isReady(${nativeReady.definingClass}::${nativeReady.name}) → always true")
+            logger.info("native MAX isReady, showAd")
             nativeReady.addInstructions(0, """
                 const/4 v0, 0x1
                 return v0
             """.trimIndent())
 
-            logger.info("Patching native MAX: showAd(${nativeShow.definingClass}::${nativeShow.name}) → fire reward callbacks")
             // Use reflection to find the MaxRewardedAdListener field and fire
             // callbacks directly (onAdDisplayed → onRewardedVideoStarted →
             // onUserRewarded → onRewardedVideoCompleted → onAdHidden).
@@ -121,7 +118,7 @@ val adsFreeRewardsPatch = bytecodePatch(
         // invokes com.unity3d.ads.RewardedAd.show(), which Strategy 4 patches.
         val levelPlayReady = LevelPlayRewardedAdIsReadyFingerprint.methodOrNull
         if (levelPlayReady != null) {
-            logger.info("Patching LevelPlay: isAdReady(${levelPlayReady.definingClass}::${levelPlayReady.name}) → always true")
+            logger.info("LevelPlay isAdReady")
             levelPlayReady.addInstructions(0, """
                 const/4 v0, 0x1
                 return v0
@@ -136,13 +133,11 @@ val adsFreeRewardsPatch = bytecodePatch(
         val bridgeReady = IronSourceUnityRewardedAdIsReadyFingerprint.methodOrNull
         val bridgeShow = IronSourceLevelPlayFullScreenShowAdFingerprint.methodOrNull
         if (bridgeReady != null && bridgeShow != null) {
-            logger.info("Patching ironSource bridge: isAdReady(${bridgeReady.definingClass}::${bridgeReady.name}) → always true")
+            logger.info("ironSource bridge isAdReady, a")
             bridgeReady.addInstructions(0, """
                 const/4 v0, 0x1
                 return v0
             """.trimIndent())
-
-            logger.info("Patching ironSource bridge: fullscreen show(${bridgeShow.definingClass}::${bridgeShow.name}) → fire reward callbacks")
             bridgeShow.addInstructions(0, """
                 iget-object v0, p0, Lcom/ironsource/Ya;->k:Lcom/ironsource/Za;
                 if-eqz v0, :morphe_ads_free_rewards_done
@@ -165,7 +160,7 @@ val adsFreeRewardsPatch = bytecodePatch(
         // Strategy 4: Unity Ads RewardedAd.
         val adsShow = UnityRewardedAdShowFingerprint.methodOrNull
         if (adsShow != null) {
-            logger.info("Patching Unity Ads: show(${adsShow.definingClass}::${adsShow.name}) → fire reward callbacks")
+            logger.info("Unity Ads show")
             // Only patch show() — do NOT patch load() so the real ad loads
             // silently in the background (prevents Unity Ads error 628).
             adsShow.addInstructions(0, """
@@ -177,14 +172,5 @@ val adsFreeRewardsPatch = bytecodePatch(
             """.trimIndent())
         }
 
-        // ── Summary ──
-        val applied = buildList {
-            if (hasMaxUnity) add("MAX Unity")
-            if (hasNativeMax) add("native MAX")
-            if (hasLevelPlay) add("LevelPlay")
-            if (hasIronSourceUnityBridge) add("ironSource bridge")
-            if (hasUnityAds) add("Unity Ads")
-        }
-        logger.info("Ads Free Rewards applied to: ${applied.joinToString(", ")}")
     }
 }
