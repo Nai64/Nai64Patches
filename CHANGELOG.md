@@ -1,3 +1,14 @@
+## [1.11.0](https://github.com/Nai64/Nai64Patches/compare/1.10.4...1.11.0) (2026-07-05)
+
+### Bug Fixes
+
+* **AdsFreeRewards:** clean up log messages ([70ba03b](https://github.com/Nai64/Nai64Patches/commit/70ba03b7dd4a7707b249c34d7f2b70026b1fa7ab))
+* **AdsFreeRewards:** clean up log messages ([938373e](https://github.com/Nai64/Nai64Patches/commit/938373edef33d5ab7588d9904aa864bab67570a5))
+
+### New Features
+
+* **AdsFreeRewards:** add detailed per-strategy SDK patching logs ([c90c57e](https://github.com/Nai64/Nai64Patches/commit/c90c57eb134ec11c8928938259c9f4a190e7016f))
+
 ## [1.10.4](https://github.com/Nai64/Nai64Patches/compare/1.10.3...1.10.4) (2026-07-05)
 
 ### Bug Fixes
