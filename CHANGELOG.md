@@ -1,3 +1,9 @@
+## [1.10.4](https://github.com/Nai64/Nai64Patches/compare/1.10.3...1.10.4) (2026-07-05)
+
+### Bug Fixes
+
+* **AdsFreeRewards:** let native MAX strategy fall through so LevelPlay/ironSource/Unity Ads patches also run ([b059e7e](https://github.com/Nai64/Nai64Patches/commit/b059e7e6a338e54cd6ace097b59f36fc68d45a32))
+
 ## [1.10.3](https://github.com/Nai64/Nai64Patches/compare/1.10.2...1.10.3) (2026-07-05)
 
 ### Bug Fixes
