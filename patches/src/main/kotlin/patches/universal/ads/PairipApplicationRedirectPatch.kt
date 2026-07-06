@@ -11,80 +11,57 @@ import org.w3c.dom.Element
 @Suppress("unused")
 val pairipApplicationRedirectPatch = resourcePatch(
     name = "Pairip Application Redirect",
-    description = "Changes AndroidManifest.xml to redirect Pairip's Application entry point " +
-            "to the real app's Application class, preventing Pairip from ever starting. " +
-            "Auto-discovers the real app class from Pairip's DEX if not specified manually.",
+    description = "Redirects Pairip's Application entry point to the real app class. Auto-discovers from DEX.",
     default = false,
 ) {
     val realAppClass by option(
         title = "Real Application Class",
         default = "",
         key = "realAppClass",
-        description = "The real app's Application class name (e.g., com.example.app.App). " +
-                "Leave empty to auto-discover from Pairip's DEX.",
+        description = "The real app's Application class. Leave empty to auto-discover.",
     )
 
     execute {
         val logger = Logger.getLogger(this::class.java.name)
-
-        val targetClass = realAppClass?.takeIf { it.isNotEmpty() } ?: discoverPairipAppClass(logger)
+        val real = realAppClass?.takeIf { it.isNotEmpty() } ?: discoverPairipAppClass(logger) ?: run {
+            logger.warning("Could not discover real app class. Set 'Real Application Class' option manually.")
+            return@execute
+        }
 
         document("AndroidManifest.xml").use { doc ->
-            val appElement = doc.getElementsByTagName("application").item(0)
-            if (appElement !is Element) {
-                logger.warning("No <application> element found in AndroidManifest.xml")
+            val app = doc.getElementsByTagName("application").item(0) as? Element ?: run {
+                logger.warning("No <application> element found")
                 return@execute
             }
-
             val ns = "http://schemas.android.com/apk/res/android"
-            val currentName = appElement.getAttributeNS(ns, "name").let { nsName ->
-                if (!nsName.isNullOrEmpty()) nsName else appElement.getAttribute("android:name")
-            }
-
-            if (currentName != "com.pairip.application.Application") {
-                logger.info("Application class is '$currentName', not Pairip — skipping redirect")
+            val cur = app.getAttributeNS(ns, "name").let { if (!it.isNullOrEmpty()) it else app.getAttribute("android:name") }
+            if (cur != "com.pairip.application.Application") {
+                logger.info("Application class is '$cur' — not Pairip, skipping")
                 return@execute
             }
-
-            if (targetClass == null) {
-                logger.warning("Could not auto-discover real app class. Set the 'Real Application Class' option. " +
-                        "To find it: check smali for .super directive in com/pairip/application/Application.smali")
-                return@execute
-            }
-
-            appElement.setAttributeNS(ns, "android:name", targetClass)
-            logger.info("Redirected Pairip Application entry point -> $targetClass")
+            app.setAttributeNS(ns, "android:name", real)
+            logger.info("Redirected Pairip -> $real")
         }
     }
 }
 
 private fun ResourcePatchContext.discoverPairipAppClass(logger: Logger): String? {
-    val apkDir = try {
-        get("AndroidManifest.xml", false)?.parentFile
-    } catch (_: Exception) {
-        null
-    } ?: run {
-        logger.warning("Cannot determine APK directory for DEX discovery")
-        return null
-    }
-
+    val dir = try { get("AndroidManifest.xml", false)?.parentFile } catch (_: Exception) { null }
+        ?: return null.also { logger.warning("Cannot determine APK directory") }
     for (i in 0..99) {
-        val name = if (i == 0) "classes.dex" else "classes${i + 1}.dex"
-        val dexFile = java.io.File(apkDir, name)
-        if (!dexFile.exists()) break
-
+        val f = java.io.File(dir, if (i == 0) "classes.dex" else "classes${i + 1}.dex")
+        if (!f.exists()) break
         try {
-            val dex = DexFileFactory.loadDexFile(dexFile, Opcodes.getDefault())
-            for (classDef in dex.classes) {
-                if (classDef.type != "Lcom/pairip/application/Application;") continue
-                val superclass = classDef.superclass ?: continue
-                if (superclass == "Ljava/lang/Object;" || superclass == "Landroid/app/Application;") continue
-                val realClass = superclass.substringAfter("L").substringBefore(";").replace('/', '.')
-                logger.info("Auto-discovered real app class from $name: $realClass")
-                return realClass
+            for (cls in DexFileFactory.loadDexFile(f, Opcodes.getDefault()).classes) {
+                if (cls.type != "Lcom/pairip/application/Application;") continue
+                val sup = cls.superclass ?: continue
+                if (sup == "Ljava/lang/Object;" || sup == "Landroid/app/Application;") continue
+                return sup.substringAfter("L").substringBefore(";").replace('/', '.').also {
+                    logger.info("Discovered real app class from ${f.name}: $it")
+                }
             }
         } catch (e: Exception) {
-            logger.warning("Failed to parse $name: ${e.message}")
+            logger.warning("Failed to parse ${f.name}: ${e.message}")
         }
     }
     return null
