@@ -12,8 +12,7 @@ val noAdsPatch = bytecodePatch(
     name = "No Ads",
     description = "Blocks ads: interstitial, banner, app open, MREC. " +
             "Each ad type can be toggled individually. " +
-            "WARNING: Enabling Ads Free Rewards " +
-            "alongside this patch will cause it to NOT work (No Ads takes priority).",
+            "Disable 'Block Rewarded' to use alongside Ads Free Rewards patch.",
     default = false,
 ) {
     val blockInterstitials by booleanOption(
