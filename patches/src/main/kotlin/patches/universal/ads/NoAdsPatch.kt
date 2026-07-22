@@ -10,9 +10,6 @@ import java.util.logging.Logger
 @Suppress("unused")
 val noAdsPatch = bytecodePatch(
     name = "No Ads",
-    description = "Blocks ads: interstitial, banner, app open, MREC. " +
-            "Each ad type can be toggled individually. " +
-            "Disable 'Block Rewarded' to use alongside Ads Free Rewards patch.",
     default = false,
 ) {
     val blockInterstitials by booleanOption(

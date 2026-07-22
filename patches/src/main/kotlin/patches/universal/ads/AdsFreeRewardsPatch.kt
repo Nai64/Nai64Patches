@@ -8,8 +8,6 @@ import java.util.logging.Logger
 @Suppress("unused")
 val adsFreeRewardsPatch = bytecodePatch(
     name = "Ads Free Rewards",
-    description = "Auto-claim rewarded ad rewards without watching ads. " +
-            "WARNING: Enabling No Ads alongside this patch will prevent rewards from being claimed.",
     default = false,
 ) {
     execute {

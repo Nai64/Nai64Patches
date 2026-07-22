@@ -11,7 +11,6 @@ import org.w3c.dom.Element
 @Suppress("unused")
 val pairipApplicationRedirectPatch = resourcePatch(
     name = "Pairip Application Redirect",
-    description = "Redirects Pairip's Application entry point to the real app class. Auto-discovers from DEX.",
     default = false,
 ) {
     val realAppClass by option(
