@@ -1,3 +1,9 @@
+## [1.13.1](https://github.com/Nai64/Nai64Patches/compare/1.13.0...1.13.1) (2026-07-22)
+
+### Bug Fixes
+
+* remove patch descriptions ([275a761](https://github.com/Nai64/Nai64Patches/commit/275a7612cdd352eece2fe02a3a9401c570f738f0))
+
 ## [1.13.0](https://github.com/Nai64/Nai64Patches/compare/1.12.2...1.13.0) (2026-07-05)
 
 ### New Features
