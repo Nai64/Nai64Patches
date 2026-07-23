@@ -13,7 +13,7 @@ Universal Morphe patches for Android games using AppLovin MAX SDK.
 
 | Patch | Description |
 |-------|-------------|
-| **Ads Free Rewards** | None |
-| **No Ads** | None |
-| **Pairip Application Redirect** | None |
-| **Spoof Play Store Install Source** | None |
+| **Ads Free Rewards** | Auto-claim rewarded ad rewards without watching ads. |
+| **No Ads** | Blocks ads with per-type toggles (interstitial, banner, app open, MREC, rewarded). All enabled by default. |
+| **Pairip Application Redirect** | Redirects Pairip's Application entry point to the real app class. Auto-discovers from DEX. |
+| **Spoof Play Store Install Source** | Makes the app think it was installed from Google Play Store. |
