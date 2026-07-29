@@ -272,3 +272,11 @@ internal object IronSourceLevelPlayFullScreenShowAdFingerprint : Fingerprint(
         "Ljava/lang/String;",
     ),
 )
+
+// ── Play In-app Updates ──
+
+internal object AppUpdateManagerImplStartUpdateFlowFingerprint : Fingerprint(
+    definingClass = "Lcom/google/android/play/core/appupdate/AppUpdateManagerImpl;",
+    name = "startUpdateFlowForResult",
+    returnType = "Lcom/google/android/play/core/tasks/Task;",
+)
