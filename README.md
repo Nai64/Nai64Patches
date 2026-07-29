@@ -2,12 +2,10 @@
 
 Universal Morphe patches for Android games.
 
-Compatible SDKs:
+Compatible ad SDKs:
 - **AppLovin MAX**
 - **Unity Ads**
 - **ironSource / LevelPlay**
-- **Pairip**
-- **Google Play Store**
 
 ## Add to Morphe
 
