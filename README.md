@@ -1,6 +1,11 @@
 # Nai's Patches
 
-Universal Morphe patches for Android games. Compatible with AppLovin MAX, Unity Ads, ironSource, and LevelPlay.
+Universal Morphe patches for Android games.
+
+Compatible SDKs:
+- AppLovin MAX
+- Unity Ads
+- ironSource / LevelPlay
 
 ## Add to Morphe
 
