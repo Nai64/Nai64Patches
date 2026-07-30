@@ -1,3 +1,16 @@
+## [1.15.0](https://github.com/Nai64/Nai64Patches/compare/1.14.0...1.15.0) (2026-07-30)
+
+### Bug Fixes
+
+* custom patch order in Morphe ([c8a3054](https://github.com/Nai64/Nai64Patches/commit/c8a3054329ad85593247a40b5341ab09d2474a14))
+
+### New Features
+
+* add Disable Telemetry universal patch ([e09bcac](https://github.com/Nai64/Nai64Patches/commit/e09bcacf74a1dc8def693b5892c2797dd9a7ea1c))
+* add onAdHidden safety net to Ads Free Rewards ([5bdc9df](https://github.com/Nai64/Nai64Patches/commit/5bdc9df995c9b4ef2a71a215289925aee661b33a))
+* add Unlock RevenueCat Entitlements universal patch ([1d32ddb](https://github.com/Nai64/Nai64Patches/commit/1d32ddbd5ee271d04b5d47d69378b14360430d57))
+* register Disable Telemetry patch in order + README ([8480439](https://github.com/Nai64/Nai64Patches/commit/84804395aba1fdbe5294073cf68f03a8b850f3c9))
+
 ## [1.14.0](https://github.com/Nai64/Nai64Patches/compare/1.13.1...1.14.0) (2026-07-30)
 
 ### Bug Fixes
