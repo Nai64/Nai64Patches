@@ -280,3 +280,23 @@ internal object AppUpdateManagerImplStartUpdateFlowFingerprint : Fingerprint(
     name = "startUpdateFlowForResult",
     returnType = "Lcom/google/android/play/core/tasks/Task;",
 )
+
+// ── RootBeer root detection ──
+
+internal object RootBeerIsRootedFingerprint : Fingerprint(
+    definingClass = "Lcom/scottyab/rootbeer/RootBeer;",
+    name = "isRooted",
+    returnType = "Z",
+)
+
+internal object RootBeerDetectSuBinaryFingerprint : Fingerprint(
+    definingClass = "Lcom/scottyab/rootbeer/RootBeer;",
+    name = "detectSuBinary",
+    returnType = "Z",
+)
+
+internal object RootBeerDetectTestKeysFingerprint : Fingerprint(
+    definingClass = "Lcom/scottyab/rootbeer/RootBeer;",
+    name = "detectTestKeys",
+    returnType = "Z",
+)

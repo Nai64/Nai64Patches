@@ -1,5 +1,6 @@
 package patches.universal.ads
 
+import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.patch.bytecodePatch
 import java.util.logging.Logger
 
