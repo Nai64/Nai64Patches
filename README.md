@@ -2,11 +2,6 @@
 
 Universal Morphe patches for Android games.
 
-Compatible ad SDKs:
-- **AppLovin MAX**
-- **Unity Ads**
-- **ironSource / LevelPlay**
-
 ## Add to Morphe
 
 | Method | URL |
@@ -18,7 +13,7 @@ Compatible ad SDKs:
 
 | Patch | Description |
 |-------|-------------|
-| **Ads Free Rewards** | Gets you the reward from rewarded ads without watching them. |
+| **Ads Free Rewards** | Gets you the reward from rewarded ads without watching them. Compatible with AppLovin MAX, Unity Ads, and ironSource / LevelPlay. |
 | **No Ads** | Removes ads from the app. You can choose which ad types to block. |
 | **Spoof Play Store Install Source** | Tricks the app into thinking it came from the Google Play Store. |
 | **Disable Root Checks** | Prevents apps from detecting if your device is rooted. |
