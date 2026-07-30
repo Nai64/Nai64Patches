@@ -309,3 +309,43 @@ internal object EntitlementInfoIsActiveFingerprint : Fingerprint(
     returnType = "Z",
     parameters = emptyList(),
 )
+
+// ── Pairip LicenseClient.checkLicense root kill ──
+
+internal object PairipLicenseClientCheckLicenseFingerprint : Fingerprint(
+    definingClass = "Lcom/pairip/licensecheck/LicenseClient;",
+    name = "checkLicense",
+    returnType = "V",
+    parameters = listOf("Landroid/content/Context;"),
+)
+
+// ── Pairip LicenseContentProvider lifecycle neuter ──
+
+internal object PairipLicenseContentProviderOnCreateFingerprint : Fingerprint(
+    definingClass = "Lcom/pairip/licensecheck/LicenseContentProvider;",
+    name = "onCreate",
+    returnType = "Z",
+    parameters = emptyList(),
+)
+
+internal object PairipLicenseContentProviderQueryFingerprint : Fingerprint(
+    definingClass = "Lcom/pairip/licensecheck/LicenseContentProvider;",
+    name = "query",
+    returnType = "Landroid/database/Cursor;",
+    parameters = listOf(
+        "Landroid/net/Uri;",
+        "[Ljava/lang/String;",
+        "Ljava/lang/String;",
+        "[Ljava/lang/String;",
+        "Ljava/lang/String;",
+    ),
+)
+
+// ── Pairip InitContextProvider ──
+
+internal object PairipInitContextProviderGetContextFingerprint : Fingerprint(
+    definingClass = "Lcom/pairip/InitContextProvider;",
+    name = "getContext",
+    returnType = "Landroid/content/Context;",
+    parameters = emptyList(),
+)
