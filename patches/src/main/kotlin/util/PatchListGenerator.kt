@@ -35,7 +35,14 @@ fun main() {
 private fun generatePatchList(version: String, patches: Set<Patch<*>>) {
     val listJson = File("../patches-list.json")
 
-    val patchesMap = patches.sortedBy { it.name }.map { patch ->
+    val patchOrder = listOf(
+        "Ads Free Rewards",
+        "No Ads",
+        "Spoof Play Store Install Source",
+    )
+    val orderMap = patchOrder.withIndex().associate { (i, name) -> name to i }
+
+    val patchesMap = patches.sortedWith(compareBy({ orderMap[it.name] ?: Int.MAX_VALUE }, { it.name ?: "" })).map { patch ->
         JsonPatch(
             name = patch.name!!,
             description = patch.description,
