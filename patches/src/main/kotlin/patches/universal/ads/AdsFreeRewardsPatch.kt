@@ -22,8 +22,9 @@ val adsFreeRewardsPatch = bytecodePatch(
         val hasLevelPlay = LevelPlayRewardedAdIsReadyFingerprint.methodOrNull != null
         val hasIronSourceUnityBridge = IronSourceUnityRewardedAdIsReadyFingerprint.methodOrNull != null &&
             IronSourceLevelPlayFullScreenShowAdFingerprint.methodOrNull != null
+        val hasOnAdHidden = MaxUnityAdManagerOnAdHiddenFingerprint.methodOrNull != null
 
-        if (!hasMaxUnity && !hasNativeMax && !hasUnityAds && !hasLevelPlay && !hasIronSourceUnityBridge) {
+        if (!hasMaxUnity && !hasNativeMax && !hasUnityAds && !hasLevelPlay && !hasIronSourceUnityBridge && !hasOnAdHidden) {
             return@execute
         }
 
@@ -86,7 +87,40 @@ val adsFreeRewardsPatch = bytecodePatch(
                 invoke-static {v1}, Lcom/applovin/mediation/unity/MaxUnityAdManager;->forwardUnityEvent(Lorg/json/JSONObject;)V
                 return-void
             """.trimIndent())
-            return@execute
+        }
+
+        // ── Strategy 1b: MAX Unity onAdHidden safety net ──
+        // Fires the reward event when a rewarded ad is dismissed, regardless
+        // of whether the ad network's reward verification succeeded. This
+        // catches cases where the adapter-level reward callback is never
+        // fired (e.g. server-side verification failure), ensuring Unity C#
+        // always receives OnRewardedAdReceivedRewardEvent.
+        val onAdHidden = MaxUnityAdManagerOnAdHiddenFingerprint.methodOrNull
+        if (onAdHidden != null) {
+            logger.info("MAX Unity onAdHidden safety net active")
+            onAdHidden.addInstructions(0, """
+                invoke-interface {p1}, Lcom/applovin/mediation/MaxAd;->getFormat()Lcom/applovin/mediation/MaxAdFormat;
+                move-result-object v0
+                sget-object v1, Lcom/applovin/mediation/MaxAdFormat;->REWARDED:Lcom/applovin/mediation/MaxAdFormat;
+                if-ne v0, v1, :morphe_ah_skip
+                new-instance v0, Lorg/json/JSONObject;
+                invoke-direct {v0}, Lorg/json/JSONObject;-><init>()V
+                const-string v1, "name"
+                const-string v2, "OnRewardedAdReceivedRewardEvent"
+                invoke-static {v0, v1, v2}, Lcom/applovin/impl/sdk/utils/JsonUtils;->putString(Lorg/json/JSONObject;Ljava/lang/String;Ljava/lang/String;)V
+                const-string v1, "adUnitId"
+                invoke-interface {p1}, Lcom/applovin/mediation/MaxAd;->getAdUnitId()Ljava/lang/String;
+                move-result-object v2
+                invoke-static {v0, v1, v2}, Lcom/applovin/impl/sdk/utils/JsonUtils;->putString(Lorg/json/JSONObject;Ljava/lang/String;Ljava/lang/String;)V
+                const-string v1, "rewardLabel"
+                const-string v2, "reward"
+                invoke-static {v0, v1, v2}, Lcom/applovin/impl/sdk/utils/JsonUtils;->putString(Lorg/json/JSONObject;Ljava/lang/String;Ljava/lang/String;)V
+                const-string v1, "rewardAmount"
+                const-string v2, "1"
+                invoke-static {v0, v1, v2}, Lcom/applovin/impl/sdk/utils/JsonUtils;->putString(Lorg/json/JSONObject;Ljava/lang/String;Ljava/lang/String;)V
+                invoke-static {v0}, Lcom/applovin/mediation/unity/MaxUnityAdManager;->forwardUnityEvent(Lorg/json/JSONObject;)V
+                :morphe_ah_skip
+            """.trimIndent())
         }
 
         // ── Strategy 2: Native MAX (non-Unity) ──

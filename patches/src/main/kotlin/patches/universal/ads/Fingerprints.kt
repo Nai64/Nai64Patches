@@ -38,6 +38,13 @@ internal object ShowAppOpenAdFingerprint : Fingerprint(
     parameters = listOf("Ljava/lang/String;", "Ljava/lang/String;", "Ljava/lang/String;"),
 )
 
+internal object MaxUnityAdManagerOnAdHiddenFingerprint : Fingerprint(
+    name = "onAdHidden",
+    accessFlags = listOf(AccessFlags.PUBLIC),
+    returnType = "V",
+    parameters = listOf("Lcom/applovin/mediation/MaxAd;"),
+)
+
 internal object ShowBannerFingerprint : Fingerprint(
     name = "showBanner",
     accessFlags = listOf(AccessFlags.PUBLIC),
