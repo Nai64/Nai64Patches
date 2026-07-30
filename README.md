@@ -24,4 +24,5 @@ Compatible ad SDKs:
 | **Disable Root Checks** | Disables RootBeer root detection. Forces isRooted(), detectSuBinary(), and detectTestKeys() to return false. |
 | **Disable Update Checks** | Disables Google Play In-app Updates. Prevents the app from showing update dialogs. |
 | **Unlock RevenueCat Entitlements** | Unlocks all entitlements by forcing RevenueCat's EntitlementInfo.isActive() to always return true. |
+| **Disable Telemetry** | Blocks 12 analytics SDKs (Firebase, AppsFlyer, Adjust, Amplitude, Mixpanel, CleverTap, Segment, Facebook Analytics, Branch.io, Unity Analytics, Flurry) via init gating + event nulling. |
 | **Pairip Application Redirect** | Redirects Pairip's Application entry point to the real app class. Auto-discovers from DEX. |
