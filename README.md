@@ -13,11 +13,11 @@ Universal Morphe patches for Android apps and games.
 
 | Patch | Description |
 |-------|-------------|
-| **Ads Free Rewards** | Get rewarded ad rewards without watching ads. Supports MAX, ironSource, Unity Ads. |
-| **No Ads** | Block interstitial, banner, MREC, app open, and rewarded ads. Uses MAX Unity bridge + native MAX. |
-| **Spoof Play Store Install Source** | Makes the app think it was installed from the Google Play Store. |
-| **Unlock RevenueCat Entitlements** | Unlocks all RevenueCat entitlements by forcing `EntitlementInfo.isActive()` to always return true. |
-| **Disable Telemetry** | Blocks Firebase, AppsFlyer, Adjust, Amplitude, Mixpanel, CleverTap, Segment, Facebook, Branch, Unity Analytics, Flurry. |
-| **Disable Root Checks** | Disables RootBeer root detection checks (`isRooted`, `detectSuBinary`, `detectTestKeys`). |
-| **Disable Update Checks** | Disables Google Play In-app Updates check. |
-| **Pairip Bypass (Experimental)** | Bytecode + manifest-level Pairip protection bypass. 11 strategies + Application redirect. |
+| **Ads Free Rewards** | None |
+| **No Ads** | None |
+| **Spoof Play Store Install Source** | None |
+| **Pairip Bypass (Experimental)** | None |
+| **Unlock RevenueCat Entitlements** | None |
+| **Disable Root Checks** | None |
+| **Disable Update Checks** | None |
+| **Disable Telemetry** | None |
