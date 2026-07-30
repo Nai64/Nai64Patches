@@ -73,7 +73,31 @@
       "options": []
     },
     {
+      "name": "Pairip Bypass",
+      "description": null,
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": []
+    },
+    {
       "name": "Unlock RevenueCat Entitlements",
+      "description": null,
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": []
+    },
+    {
+      "name": "Disable Root Checks",
+      "description": null,
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": []
+    },
+    {
+      "name": "Disable Update Checks",
       "description": null,
       "default": false,
       "dependencies": [],
@@ -187,22 +211,6 @@
           "values": null
         }
       ]
-    },
-    {
-      "name": "Disable Root Checks",
-      "description": null,
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Disable Update Checks",
-      "description": null,
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
     },
     {
       "name": "Pairip Application Redirect",
