@@ -176,6 +176,57 @@ val pairipBypassPatch = bytecodePatch(
             logger.info("Applied Pairip InitContextProvider.getContext bypass")
         }
 
+        // ── Strategy 12: LicenseResponseHelper.validateResponse ──
+        PairipLicenseResponseHelperValidateResponseFingerprint.methodOrNull?.let {
+            it.addInstructions(0, """
+                return-void
+            """.trimIndent())
+            logger.info("Applied Pairip LicenseResponseHelper.validateResponse bypass")
+        }
+
+        // ── Strategy 13: LicenseResponseHelper.getRepeatedCheckMetadata ──
+        PairipLicenseResponseHelperGetRepeatedCheckMetadataFingerprint.methodOrNull?.let {
+            it.addInstructions(0, """
+                const/4 v0, 0x0
+                return-object v0
+            """.trimIndent())
+            logger.info("Applied Pairip LicenseResponseHelper.getRepeatedCheckMetadata bypass")
+        }
+
+        // ── Strategy 14: LicenseResponseHelper.verifySignature ──
+        PairipLicenseResponseHelperVerifySignatureFingerprint.methodOrNull?.let {
+            it.addInstructions(0, listOf(
+                BuilderInstruction11n(Opcode.CONST_4, 0, 1),
+                BuilderInstruction11x(Opcode.RETURN, 0),
+            ))
+            logger.info("Applied Pairip LicenseResponseHelper.verifySignature bypass")
+        }
+
+        // ── Strategy 15: ResponseValidator.validateResponse ──
+        PairipResponseValidatorValidateResponseFingerprint.methodOrNull?.let {
+            it.addInstructions(0, """
+                return-void
+            """.trimIndent())
+            logger.info("Applied Pairip ResponseValidator.validateResponse bypass")
+        }
+
+        // ── Strategy 16: ResponseValidator.verifySignature ──
+        PairipResponseValidatorVerifySignatureFingerprint.methodOrNull?.let {
+            it.addInstructions(0, listOf(
+                BuilderInstruction11n(Opcode.CONST_4, 0, 1),
+                BuilderInstruction11x(Opcode.RETURN, 0),
+            ))
+            logger.info("Applied Pairip ResponseValidator.verifySignature bypass")
+        }
+
+        // ── Strategy 17: licensecheck3 ResponseValidator.validateResponse ──
+        PairipResponseValidatorV3ValidateResponseFingerprint.methodOrNull?.let {
+            it.addInstructions(0, """
+                return-void
+            """.trimIndent())
+            logger.info("Applied Pairip licensecheck3 ResponseValidator.validateResponse bypass")
+        }
+
         val applied = listOfNotNull(
             PerformLocalInstallerCheckFingerprint.methodOrNull?.let { "performLocalInstallerCheck" },
             PairipSignatureCheckVerifyIntegrityFingerprint.methodOrNull?.let { "verifyIntegrity" },
@@ -189,6 +240,12 @@ val pairipBypassPatch = bytecodePatch(
             PairipLicenseContentProviderOnCreateFingerprint.methodOrNull?.let { "onCreate (ContentProvider)" },
             PairipLicenseContentProviderQueryFingerprint.methodOrNull?.let { "query" },
             PairipInitContextProviderGetContextFingerprint.methodOrNull?.let { "getContext" },
+            PairipLicenseResponseHelperValidateResponseFingerprint.methodOrNull?.let { "validateResponse" },
+            PairipLicenseResponseHelperGetRepeatedCheckMetadataFingerprint.methodOrNull?.let { "getRepeatedCheckMetadata" },
+            PairipLicenseResponseHelperVerifySignatureFingerprint.methodOrNull?.let { "verifySignature (ResponseHelper)" },
+            PairipResponseValidatorValidateResponseFingerprint.methodOrNull?.let { "validateResponse (ResponseValidator)" },
+            PairipResponseValidatorVerifySignatureFingerprint.methodOrNull?.let { "verifySignature (ResponseValidator)" },
+            PairipResponseValidatorV3ValidateResponseFingerprint.methodOrNull?.let { "validateResponse (V3)" },
         )
         logger.info("Pairip Bypass (Experimental) patch succeeded — ${applied.size} strategy/strategies applied: ${applied.joinToString(", ")}")
     }

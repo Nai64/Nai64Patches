@@ -349,3 +349,51 @@ internal object PairipInitContextProviderGetContextFingerprint : Fingerprint(
     returnType = "Landroid/content/Context;",
     parameters = emptyList(),
 )
+
+// ── Pairip LicenseResponseHelper (response validation sink) ──
+
+internal object PairipLicenseResponseHelperValidateResponseFingerprint : Fingerprint(
+    definingClass = "Lcom/pairip/licensecheck/LicenseResponseHelper;",
+    name = "validateResponse",
+    returnType = "V",
+    parameters = listOf("Landroid/os/Bundle;", "Ljava/lang/String;"),
+)
+
+internal object PairipLicenseResponseHelperGetRepeatedCheckMetadataFingerprint : Fingerprint(
+    definingClass = "Lcom/pairip/licensecheck/LicenseResponseHelper;",
+    name = "getRepeatedCheckMetadata",
+    returnType = "Landroid/os/Bundle;",
+    parameters = listOf("Landroid/os/Bundle;"),
+)
+
+internal object PairipLicenseResponseHelperVerifySignatureFingerprint : Fingerprint(
+    definingClass = "Lcom/pairip/licensecheck/LicenseResponseHelper;",
+    name = "verifySignature",
+    returnType = "Z",
+    parameters = listOf("Ljava/lang/String;", "Ljava/lang/String;", "Ljava/lang/String;", "Ljava/security/PublicKey;"),
+)
+
+// ── Pairip ResponseValidator (older response validation path) ──
+
+internal object PairipResponseValidatorValidateResponseFingerprint : Fingerprint(
+    definingClass = "Lcom/pairip/licensecheck/ResponseValidator;",
+    name = "validateResponse",
+    returnType = "V",
+    parameters = listOf("Landroid/os/Bundle;", "Ljava/lang/String;"),
+)
+
+internal object PairipResponseValidatorVerifySignatureFingerprint : Fingerprint(
+    definingClass = "Lcom/pairip/licensecheck/ResponseValidator;",
+    name = "verifySignature",
+    returnType = "Z",
+    parameters = listOf("Ljava/lang/String;", "Ljava/lang/String;", "Ljava/lang/String;", "Ljava/security/PublicKey;"),
+)
+
+// ── Pairip licensecheck3 ResponseValidator (V3 response validation path) ──
+
+internal object PairipResponseValidatorV3ValidateResponseFingerprint : Fingerprint(
+    definingClass = "Lcom/pairip/licensecheck3/ResponseValidator;",
+    name = "validateResponse",
+    returnType = "V",
+    parameters = listOf("Landroid/os/Bundle;", "Ljava/lang/String;"),
+)
