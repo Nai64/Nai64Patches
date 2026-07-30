@@ -1,3 +1,15 @@
+## [1.17.0](https://github.com/Nai64/Nai64Patches/compare/1.16.0...1.17.0) (2026-07-30)
+
+### Bug Fixes
+
+* correct FLAG_LAYOUT_NO_LIMITS value, remove unused import ([05987a7](https://github.com/Nai64/Nai64Patches/commit/05987a76c72c42e9aacf36508bccd52a033b610f))
+
+### New Features
+
+* add Custom App Resolution (Experimental) patch ([4163b89](https://github.com/Nai64/Nai64Patches/commit/4163b89dd11b43edce7517cd8f6712699d47beb6))
+* add LicenseResponseHelper and ResponseValidator fingerprints to Pairip bypass ([0e6d341](https://github.com/Nai64/Nai64Patches/commit/0e6d3411ad7129dc63acef6aae5cfbdd7024364e))
+* add loadRewardedAd patching to fire OnRewardedAdLoadedEvent ([f8c0afe](https://github.com/Nai64/Nai64Patches/commit/f8c0afef376ba7895bbfab6baa16b9ead008715d))
+
 ## [1.16.0](https://github.com/Nai64/Nai64Patches/compare/1.15.0...1.16.0) (2026-07-30)
 
 ### Bug Fixes

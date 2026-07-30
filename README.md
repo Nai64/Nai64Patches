@@ -18,6 +18,7 @@ Universal Morphe patches for Android apps and games.
 | **Spoof Play Store Install Source** | None |
 | **Pairip Bypass (Experimental)** | None |
 | **Unlock RevenueCat Entitlements** | None |
+| **Custom App Resolution (Experimental)** | None |
 | **Disable Root Checks** | None |
 | **Disable Update Checks** | None |
 | **Disable Telemetry** | None |
