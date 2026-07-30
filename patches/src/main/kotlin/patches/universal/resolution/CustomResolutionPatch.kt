@@ -5,7 +5,6 @@ import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.patch.booleanOption
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.patch.intOption
-import app.morphe.patcher.patch.ResourcePatchContext
 import app.morphe.patcher.patch.resourcePatch
 import java.util.logging.Logger
 import org.w3c.dom.Element
@@ -108,7 +107,7 @@ val customResolutionPatch = bytecodePatch(
 
         val match = unityPlayerActivityOnCreateFingerprint.methodOrNull
         if (match == null) {
-            logger.warning("UnityPlayerActivity.onCreate not found. Manifest changes applied only.")
+            logger.warning("No Unity activity found. Manifest changes applied only.")
             return@execute
         }
 
@@ -121,7 +120,7 @@ val customResolutionPatch = bytecodePatch(
             const v0, ${w}
             const v1, ${h}
             invoke-virtual {v2, v0, v1}, Landroid/view/Window;->setLayout(II)V
-            const/high16 v0, 0x2000000
+            const/16 v0, 0x200
             invoke-virtual {v2, v0}, Landroid/view/Window;->addFlags(I)V
         """.trimIndent())
 
