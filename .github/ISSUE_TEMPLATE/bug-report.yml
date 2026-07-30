@@ -37,10 +37,14 @@ body:
     attributes:
       label: Patches applied
       options:
-        - label: No Ads
         - label: Ads Free Rewards
+        - label: No Ads
         - label: Spoof Play Store Install Source
-        - label: Pairip Application Redirect
+        - label: Pairip Bypass (Experimental)
+        - label: Unlock RevenueCat Entitlements
+        - label: Disable Root Checks
+        - label: Disable Update Checks
+        - label: Disable Telemetry
 
   - type: textarea
     id: issue
