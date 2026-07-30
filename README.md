@@ -1,8 +1,8 @@
 # Nai's Patches
 
-Universal Morphe patches for Android games.
+Universal Morphe patches for Android apps and games.
 
-## Add to Morphe
+## Install Source
 
 | Method | URL |
 |--------|-----|
