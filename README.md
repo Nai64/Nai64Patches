@@ -18,11 +18,11 @@ Compatible ad SDKs:
 
 | Patch | Description |
 |-------|-------------|
-| **Ads Free Rewards** | Auto-claim rewarded ad rewards without watching ads. |
-| **No Ads** | Blocks ads with per-type toggles (interstitial, banner, app open, MREC, rewarded). All enabled by default. |
-| **Spoof Play Store Install Source** | Makes the app think it was installed from Google Play Store. |
-| **Disable Root Checks** | Disables RootBeer root detection. Forces isRooted(), detectSuBinary(), and detectTestKeys() to return false. |
-| **Disable Update Checks** | Disables Google Play In-app Updates. Prevents the app from showing update dialogs. |
-| **Unlock RevenueCat Entitlements** | Unlocks all entitlements by forcing RevenueCat's EntitlementInfo.isActive() to always return true. |
-| **Disable Telemetry** | Blocks 12 analytics SDKs (Firebase, AppsFlyer, Adjust, Amplitude, Mixpanel, CleverTap, Segment, Facebook Analytics, Branch.io, Unity Analytics, Flurry) via init gating + event nulling. |
-| **Pairip Application Redirect** | Redirects Pairip's Application entry point to the real app class. Auto-discovers from DEX. |
+| **Ads Free Rewards** | Gets you the reward from rewarded ads without watching them. |
+| **No Ads** | Removes ads from the app. You can choose which ad types to block. |
+| **Spoof Play Store Install Source** | Tricks the app into thinking it came from the Google Play Store. |
+| **Disable Root Checks** | Prevents apps from detecting if your device is rooted. |
+| **Disable Update Checks** | Stops the app from nagging you to update. |
+| **Unlock RevenueCat Entitlements** | Unlocks premium features in apps that use RevenueCat for subscriptions. |
+| **Disable Telemetry** | Stops the app from sending your data to analytics services. |
+| **Pairip Application Redirect** | Fixes Pairip-protected apps so other patches can apply to them. |
