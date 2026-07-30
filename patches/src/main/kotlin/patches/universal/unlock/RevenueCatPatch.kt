@@ -19,6 +19,7 @@ val unlockEntitlementsRevenueCatPatch = bytecodePatch(
                 return v0
             """.trimIndent())
             logger.info("Patched EntitlementInfo.isActive() to always return true")
+            logger.info("Unlock RevenueCat Entitlements patch succeeded")
         } ?: run {
             logger.warning("Could not find RevenueCat EntitlementInfo.isActive() method. Skipping.")
         }

@@ -35,5 +35,12 @@ val disableRootCheckPatch = bytecodePatch(
             """.trimIndent())
             logger.info("Disabled RootBeer detectTestKeys check")
         }
+
+        val applied = listOfNotNull(
+            RootBeerIsRootedFingerprint.methodOrNull?.let { "isRooted" },
+            RootBeerDetectSuBinaryFingerprint.methodOrNull?.let { "detectSuBinary" },
+            RootBeerDetectTestKeysFingerprint.methodOrNull?.let { "detectTestKeys" },
+        )
+        logger.info("Disable Root Checks patch succeeded — ${applied.size} strategy/strategies applied: ${applied.joinToString(", ")}")
     }
 }

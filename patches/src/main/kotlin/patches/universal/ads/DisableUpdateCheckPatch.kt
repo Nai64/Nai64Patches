@@ -19,6 +19,7 @@ val disableUpdateCheckPatch = bytecodePatch(
                 return-object v0
             """.trimIndent())
             logger.info("Disabled Play In-app Updates")
+            logger.info("Disable Update Checks patch succeeded")
         }
     }
 }

@@ -142,5 +142,20 @@ val disableTelemetryPatch = bytecodePatch(
         if (blockFlurry == true) {
             FlurryLogEventFingerprint.methodOrNull?.let { it.addInstruction(0, "return-void") }
         }
+
+        val blocked = buildList {
+            if (blockFirebase == true && FirebaseInitializeFingerprint.methodOrNull != null) add("Firebase")
+            if (blockAppsFlyer == true && AppsFlyerStartFingerprint.methodOrNull != null) add("AppsFlyer")
+            if (blockAdjust == true && AdjustOnCreateFingerprint.methodOrNull != null) add("Adjust")
+            if (blockBranch == true && BranchInitFingerprint.methodOrNull != null) add("Branch")
+            if (blockAmplitude == true && AmplitudeLogEventFingerprint.methodOrNull != null) add("Amplitude")
+            if (blockMixpanel == true && MixpanelTrackFingerprint.methodOrNull != null) add("Mixpanel")
+            if (blockCleverTap == true && CleverTapPushEventFingerprint.methodOrNull != null) add("CleverTap")
+            if (blockSegment == true && SegmentTrackFingerprint.methodOrNull != null) add("Segment")
+            if (blockFacebook == true && FacebookLogEventFingerprint.methodOrNull != null) add("Facebook")
+            if (blockUnity == true && UnityAnalyticsTransactionFingerprint.methodOrNull != null) add("Unity")
+            if (blockFlurry == true && FlurryLogEventFingerprint.methodOrNull != null) add("Flurry")
+        }
+        logger.info("Disable Telemetry patch succeeded — ${blocked.size} SDK/SDKs blocked: ${blocked.joinToString(", ")}")
     }
 }

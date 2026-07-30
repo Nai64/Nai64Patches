@@ -35,7 +35,7 @@ private val applicationRedirectPatch = resourcePatch(
                 return@execute
             }
             app.setAttributeNS(ns, "android:name", real)
-            logger.info("Redirected Pairip -> $real")
+            logger.info("Redirected Pairip -> $real — Pairip Application Redirect (internal) patch succeeded")
         }
     }
 }
@@ -175,5 +175,21 @@ val pairipBypassPatch = bytecodePatch(
             """.trimIndent())
             logger.info("Applied Pairip InitContextProvider.getContext bypass")
         }
+
+        val applied = listOfNotNull(
+            PerformLocalInstallerCheckFingerprint.methodOrNull?.let { "performLocalInstallerCheck" },
+            PairipSignatureCheckVerifyIntegrityFingerprint.methodOrNull?.let { "verifyIntegrity" },
+            PairipSignatureCheckVerifySignatureMatchesFingerprint.methodOrNull?.let { "verifySignatureMatches" },
+            PairipLicenseClientStartErrorDialogFingerprint.methodOrNull?.let { "errorDialog" },
+            PairipLicenseClientStartPaywallFingerprint.methodOrNull?.let { "paywall" },
+            PairipLicenseActivityShowPaywallFingerprint.methodOrNull?.let { "showPaywallAndCloseApp" },
+            PairipApplicationAttachBaseContextFingerprint.methodOrNull?.let { "attachBaseContext" },
+            PairipApplicationOnCreateFingerprint.methodOrNull?.let { "onCreate" },
+            PairipLicenseClientCheckLicenseFingerprint.methodOrNull?.let { "checkLicense" },
+            PairipLicenseContentProviderOnCreateFingerprint.methodOrNull?.let { "onCreate (ContentProvider)" },
+            PairipLicenseContentProviderQueryFingerprint.methodOrNull?.let { "query" },
+            PairipInitContextProviderGetContextFingerprint.methodOrNull?.let { "getContext" },
+        )
+        logger.info("Pairip Bypass (Experimental) patch succeeded — ${applied.size} strategy/strategies applied: ${applied.joinToString(", ")}")
     }
 }
