@@ -41,6 +41,7 @@ private fun generatePatchList(version: String, patches: Set<Patch<*>>) {
         "Spoof Play Store Install Source",
         "Pairip Bypass (Experimental)",
         "Unlock RevenueCat Entitlements",
+        "Custom App Resolution (Experimental)",
         "Disable Root Checks",
         "Disable Update Checks",
         "Disable Telemetry",

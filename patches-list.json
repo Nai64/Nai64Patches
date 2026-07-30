@@ -91,6 +91,44 @@
       "options": []
     },
     {
+      "name": "Custom App Resolution (Experimental)",
+      "description": null,
+      "default": false,
+      "dependencies": [
+        "ResourcePatch"
+      ],
+      "compatiblePackages": null,
+      "options": [
+        {
+          "key": "enableCustomResolution",
+          "title": "Enable Custom Resolution",
+          "description": "",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "width",
+          "title": "Resolution width (px)",
+          "description": "",
+          "required": false,
+          "type": "kotlin.Int",
+          "default": 1920,
+          "values": null
+        },
+        {
+          "key": "height",
+          "title": "Resolution height (px)",
+          "description": "",
+          "required": false,
+          "type": "kotlin.Int",
+          "default": 1080,
+          "values": null
+        }
+      ]
+    },
+    {
       "name": "Disable Root Checks",
       "description": null,
       "default": false,
