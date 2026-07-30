@@ -300,3 +300,12 @@ internal object RootBeerDetectTestKeysFingerprint : Fingerprint(
     name = "detectTestKeys",
     returnType = "Z",
 )
+
+// ── RevenueCat ──
+
+internal object EntitlementInfoIsActiveFingerprint : Fingerprint(
+    definingClass = "Lcom/revenuecat/purchases/EntitlementInfo;",
+    name = "isActive",
+    returnType = "Z",
+    parameters = emptyList(),
+)

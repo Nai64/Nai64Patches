@@ -23,4 +23,5 @@ Compatible ad SDKs:
 | **Spoof Play Store Install Source** | Makes the app think it was installed from Google Play Store. |
 | **Disable Root Checks** | Disables RootBeer root detection. Forces isRooted(), detectSuBinary(), and detectTestKeys() to return false. |
 | **Disable Update Checks** | Disables Google Play In-app Updates. Prevents the app from showing update dialogs. |
+| **Unlock RevenueCat Entitlements** | Unlocks all entitlements by forcing RevenueCat's EntitlementInfo.isActive() to always return true. |
 | **Pairip Application Redirect** | Redirects Pairip's Application entry point to the real app class. Auto-discovers from DEX. |

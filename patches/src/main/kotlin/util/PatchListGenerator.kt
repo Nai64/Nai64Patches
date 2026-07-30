@@ -39,6 +39,7 @@ private fun generatePatchList(version: String, patches: Set<Patch<*>>) {
         "Ads Free Rewards",
         "No Ads",
         "Spoof Play Store Install Source",
+        "Unlock RevenueCat Entitlements",
     )
     val orderMap = patchOrder.withIndex().associate { (i, name) -> name to i }
 
