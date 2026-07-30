@@ -2,17 +2,73 @@ package patches.universal.ads
 
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.patch.bytecodePatch
-import com.android.tools.smali.dexlib2.AccessFlags
+import app.morphe.patcher.patch.ResourcePatchContext
+import app.morphe.patcher.patch.resourcePatch
+import com.android.tools.smali.dexlib2.DexFileFactory
+import com.android.tools.smali.dexlib2.Opcodes
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction11n
 import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction11x
 import java.util.logging.Logger
+import org.w3c.dom.Element
+
+private val applicationRedirectPatch = resourcePatch(
+    name = "Pairip Application Redirect (internal)",
+    default = false,
+) {
+    execute {
+        val logger = Logger.getLogger(this::class.java.name)
+        val real = discoverPairipAppClass(logger) ?: run {
+            logger.warning("Could not discover real app class. Skipping manifest redirect.")
+            return@execute
+        }
+
+        document("AndroidManifest.xml").use { doc ->
+            val app = doc.getElementsByTagName("application").item(0) as? Element ?: run {
+                logger.warning("No <application> element found")
+                return@execute
+            }
+            val ns = "http://schemas.android.com/apk/res/android"
+            val cur = app.getAttributeNS(ns, "name").let { if (!it.isNullOrEmpty()) it else app.getAttribute("android:name") }
+            if (cur != "com.pairip.application.Application") {
+                logger.info("Application class is '$cur' — not Pairip, skipping")
+                return@execute
+            }
+            app.setAttributeNS(ns, "android:name", real)
+            logger.info("Redirected Pairip -> $real")
+        }
+    }
+}
+
+private fun ResourcePatchContext.discoverPairipAppClass(logger: Logger): String? {
+    val dir = try { get("AndroidManifest.xml", false)?.parentFile } catch (_: Exception) { null }
+        ?: return null.also { logger.warning("Cannot determine APK directory") }
+    for (i in 0..99) {
+        val f = java.io.File(dir, if (i == 0) "classes.dex" else "classes${i + 1}.dex")
+        if (!f.exists()) break
+        try {
+            for (cls in DexFileFactory.loadDexFile(f, Opcodes.getDefault()).classes) {
+                if (cls.type != "Lcom/pairip/application/Application;") continue
+                val sup = cls.superclass ?: continue
+                if (sup == "Ljava/lang/Object;" || sup == "Landroid/app/Application;") continue
+                return sup.substringAfter("L").substringBefore(";").replace('/', '.').also {
+                    logger.info("Discovered real app class from ${f.name}: $it")
+                }
+            }
+        } catch (e: Exception) {
+            logger.warning("Failed to parse ${f.name}: ${e.message}")
+        }
+    }
+    return null
+}
 
 @Suppress("unused")
 val pairipBypassPatch = bytecodePatch(
-    name = "Pairip Bypass",
+    name = "Pairip Bypass (Experimental)",
     default = false,
 ) {
+    dependsOn(applicationRedirectPatch)
+
     execute {
         val logger = Logger.getLogger(this::class.java.name)
 

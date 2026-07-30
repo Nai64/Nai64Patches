@@ -73,10 +73,12 @@
       "options": []
     },
     {
-      "name": "Pairip Bypass",
+      "name": "Pairip Bypass (Experimental)",
       "description": null,
       "default": false,
-      "dependencies": [],
+      "dependencies": [
+        "ResourcePatch"
+      ],
       "compatiblePackages": null,
       "options": []
     },
@@ -208,24 +210,6 @@
           "required": false,
           "type": "kotlin.Boolean",
           "default": true,
-          "values": null
-        }
-      ]
-    },
-    {
-      "name": "Pairip Application Redirect",
-      "description": null,
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": [
-        {
-          "key": "realAppClass",
-          "title": "Real Application Class",
-          "description": "The real app's Application class. Leave empty to auto-discover.",
-          "required": false,
-          "type": "kotlin.String",
-          "default": "",
           "values": null
         }
       ]
