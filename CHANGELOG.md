@@ -1,3 +1,15 @@
+## [1.16.0](https://github.com/Nai64/Nai64Patches/compare/1.15.0...1.16.0) (2026-07-30)
+
+### Bug Fixes
+
+* preserve VMRunner.setContext in Pairip attachBaseContext bypass ([4f21453](https://github.com/Nai64/Nai64Patches/commit/4f214535905d9cfd92f46d94849f240b4ac7c1a3))
+
+### New Features
+
+* add dedicated Pairip Bypass patch with 11 strategies ([1eb30e7](https://github.com/Nai64/Nai64Patches/commit/1eb30e7db8e8090791888161cde2f7cdb023d7cf))
+* add Pairip LicenseClient, ContentProvider, InitContextProvider fingerprints ([e70ae6c](https://github.com/Nai64/Nai64Patches/commit/e70ae6c3081e59f321e3a86b21a549bc26b6d51e))
+* add PATCH succeeded summary messages to all patches ([e0f2546](https://github.com/Nai64/Nai64Patches/commit/e0f2546f26283ddb1c525f80855f36922e501cb9))
+
 ## [1.15.0](https://github.com/Nai64/Nai64Patches/compare/1.14.0...1.15.0) (2026-07-30)
 
 ### Bug Fixes

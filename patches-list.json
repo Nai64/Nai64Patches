@@ -1,6 +1,6 @@
 {
   "NOTE": "Do NOT manually edit this file. This file is automatically updated when semantic release (release.yml) runs. Manually editing this file can break your releases and break third party tools that use this file.",
-  "version": "1.15.0",
+  "version": "1.16.0",
   "patches": [
     {
       "name": "Ads Free Rewards",
@@ -20,7 +20,7 @@
         {
           "key": "blockInterstitials",
           "title": "Block Interstitials",
-          "description": "Blocks interstitial and app open ads.",
+          "description": "",
           "required": false,
           "type": "kotlin.Boolean",
           "default": true,
@@ -29,7 +29,7 @@
         {
           "key": "blockBanners",
           "title": "Block Banners",
-          "description": "Blocks banner and MREC ads.",
+          "description": "",
           "required": false,
           "type": "kotlin.Boolean",
           "default": true,
@@ -38,7 +38,7 @@
         {
           "key": "blockAppOpen",
           "title": "Block App Open",
-          "description": "Blocks app open ads.",
+          "description": "",
           "required": false,
           "type": "kotlin.Boolean",
           "default": true,
@@ -47,7 +47,7 @@
         {
           "key": "blockMRec",
           "title": "Block MREC",
-          "description": "Blocks MREC ads.",
+          "description": "",
           "required": false,
           "type": "kotlin.Boolean",
           "default": true,
@@ -56,7 +56,7 @@
         {
           "key": "blockRewarded",
           "title": "Block Rewarded",
-          "description": "Blocks rewarded ads. Disable this if using Ads Free Rewards patch.",
+          "description": "",
           "required": false,
           "type": "kotlin.Boolean",
           "default": true,
@@ -116,7 +116,7 @@
         {
           "key": "blockFirebase",
           "title": "Block Firebase Analytics",
-          "description": "Blocks Firebase Analytics and Crashlytics.",
+          "description": "",
           "required": false,
           "type": "kotlin.Boolean",
           "default": true,
@@ -125,7 +125,7 @@
         {
           "key": "blockAppsFlyer",
           "title": "Block AppsFlyer",
-          "description": "Blocks AppsFlyer SDK.",
+          "description": "",
           "required": false,
           "type": "kotlin.Boolean",
           "default": true,
@@ -134,7 +134,7 @@
         {
           "key": "blockAdjust",
           "title": "Block Adjust",
-          "description": "Blocks Adjust SDK.",
+          "description": "",
           "required": false,
           "type": "kotlin.Boolean",
           "default": true,
@@ -143,7 +143,7 @@
         {
           "key": "blockAmplitude",
           "title": "Block Amplitude",
-          "description": "Blocks Amplitude.",
+          "description": "",
           "required": false,
           "type": "kotlin.Boolean",
           "default": true,
@@ -152,7 +152,7 @@
         {
           "key": "blockMixpanel",
           "title": "Block Mixpanel",
-          "description": "Blocks Mixpanel.",
+          "description": "",
           "required": false,
           "type": "kotlin.Boolean",
           "default": true,
@@ -161,7 +161,7 @@
         {
           "key": "blockCleverTap",
           "title": "Block CleverTap",
-          "description": "Blocks CleverTap.",
+          "description": "",
           "required": false,
           "type": "kotlin.Boolean",
           "default": true,
@@ -170,7 +170,7 @@
         {
           "key": "blockSegment",
           "title": "Block Segment",
-          "description": "Blocks Segment.",
+          "description": "",
           "required": false,
           "type": "kotlin.Boolean",
           "default": true,
@@ -179,7 +179,7 @@
         {
           "key": "blockFacebook",
           "title": "Block Facebook Analytics",
-          "description": "Blocks Facebook Analytics.",
+          "description": "",
           "required": false,
           "type": "kotlin.Boolean",
           "default": true,
@@ -188,7 +188,7 @@
         {
           "key": "blockBranch",
           "title": "Block Branch.io",
-          "description": "Blocks Branch.io.",
+          "description": "",
           "required": false,
           "type": "kotlin.Boolean",
           "default": true,
@@ -197,7 +197,7 @@
         {
           "key": "blockUnity",
           "title": "Block Unity Analytics",
-          "description": "Blocks Unity Analytics.",
+          "description": "",
           "required": false,
           "type": "kotlin.Boolean",
           "default": true,
@@ -206,7 +206,7 @@
         {
           "key": "blockFlurry",
           "title": "Block Flurry",
-          "description": "Blocks Flurry.",
+          "description": "",
           "required": false,
           "type": "kotlin.Boolean",
           "default": true,
