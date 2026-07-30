@@ -1,3 +1,13 @@
+## [1.14.0](https://github.com/Nai64/Nai64Patches/compare/1.13.1...1.14.0) (2026-07-30)
+
+### Bug Fixes
+
+* add missing import in DisableUpdateCheckPatch ([e54c186](https://github.com/Nai64/Nai64Patches/commit/e54c1864cbc88e63fdefe3ea68b6fadf714eb69a))
+
+### New Features
+
+* add Disable Update Checks patch ([0d3ffe6](https://github.com/Nai64/Nai64Patches/commit/0d3ffe661874f4350026d41474fb0d4263e02376))
+
 ## [1.13.1](https://github.com/Nai64/Nai64Patches/compare/1.13.0...1.13.1) (2026-07-22)
 
 ### Bug Fixes
