@@ -81,6 +81,7 @@ val installSourceSpoofPatch = bytecodePatch(
         // Strategy 7a: Pairip Application.attachBaseContext — main Pairip entry point
         PairipApplicationAttachBaseContextFingerprint.methodOrNull?.let {
             it.addInstructions(0, """
+                invoke-static {p1}, Lcom/pairip/VMRunner;->setContext(Landroid/content/Context;)V
                 invoke-super {p0, p1}, Lcom/pairip/application/Application;->attachBaseContext(Landroid/content/Context;)V
                 return-void
             """.trimIndent())
