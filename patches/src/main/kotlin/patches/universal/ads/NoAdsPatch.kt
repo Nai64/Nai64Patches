@@ -16,31 +16,31 @@ val noAdsPatch = bytecodePatch(
         title = "Block Interstitials",
         default = true,
         key = "blockInterstitials",
-        description = "Blocks interstitial and app open ads.",
+        description = "",
     )
     val blockBanners by booleanOption(
         title = "Block Banners",
         default = true,
         key = "blockBanners",
-        description = "Blocks banner and MREC ads.",
+        description = "",
     )
     val blockAppOpen by booleanOption(
         title = "Block App Open",
         default = true,
         key = "blockAppOpen",
-        description = "Blocks app open ads.",
+        description = "",
     )
     val blockMRec by booleanOption(
         title = "Block MREC",
         default = true,
         key = "blockMRec",
-        description = "Blocks MREC ads.",
+        description = "",
     )
     val blockRewarded by booleanOption(
         title = "Block Rewarded",
         default = true,
         key = "blockRewarded",
-        description = "Blocks rewarded ads. Disable this if using Ads Free Rewards patch.",
+        description = "",
     )
 
     execute {
