@@ -2,7 +2,6 @@ package patches.universal.ads
 
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.patch.bytecodePatch
-import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction11n
 import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction11x
@@ -15,87 +14,6 @@ val installSourceSpoofPatch = bytecodePatch(
 ) {
     execute {
         val logger = Logger.getLogger(this::class.java.name)
-
-        // Strategy 1: Pairip performLocalInstallerCheck
-        PerformLocalInstallerCheckFingerprint.methodOrNull?.let {
-            it.addInstructions(0, listOf(
-                BuilderInstruction11n(Opcode.CONST_4, 0, 1),
-                BuilderInstruction11x(Opcode.RETURN, 0),
-            ))
-            logger.info("Applied Pairip performLocalInstallerCheck spoof")
-        }
-
-        // Strategy 2: Pairip SignatureCheck.verifyIntegrity() — runs in Application.attachBaseContext
-        // before any app code, checks APK signature. Must be patched first to avoid crash.
-        PairipSignatureCheckVerifyIntegrityFingerprint.methodOrNull?.let {
-            it.addInstructions(0, """
-                return-void
-            """.trimIndent())
-            logger.info("Applied Pairip SignatureCheck.verifyIntegrity bypass")
-        }
-
-        // Strategy 3: Pairip SignatureCheck.verifySignatureMatches() — belt-and-suspenders
-        PairipSignatureCheckVerifySignatureMatchesFingerprint.methodOrNull?.let {
-            it.addInstructions(0, listOf(
-                BuilderInstruction11n(Opcode.CONST_4, 0, 1),
-                BuilderInstruction11x(Opcode.RETURN, 0),
-            ))
-            logger.info("Applied Pairip SignatureCheck.verifySignatureMatches bypass")
-        }
-
-        // Strategy 4: Pairip LicenseClient error dialog — suppresses the "Get from Play Store" redirect
-        PairipLicenseClientStartErrorDialogFingerprint.methodOrNull?.let {
-            it.addInstructions(0, """
-                return-void
-            """.trimIndent())
-            logger.info("Applied Pairip LicenseClient error dialog suppress")
-        }
-
-        // Strategy 5: Pairip LicenseClient paywall — suppresses the LVL paywall PendingIntent (opens Play Store)
-        PairipLicenseClientStartPaywallFingerprint.methodOrNull?.let {
-            it.addInstructions(0, """
-                return-void
-            """.trimIndent())
-            logger.info("Applied Pairip LicenseClient paywall suppress")
-        }
-
-        // Strategy 6: Pairip LicenseActivity.showPaywallAndCloseApp — last link before PendingIntent.send()
-        // Catches paywall even if LicenseActivity is started from native code (libpairipcore.so).
-        PairipLicenseActivityShowPaywallFingerprint.methodOrNull?.let {
-            it.addInstructions(0, """
-                return-void
-            """.trimIndent())
-            logger.info("Applied Pairip LicenseActivity paywall suppress")
-        }
-
-        // ── Pairip Application entry point bypass ──
-        // Prevents Pairip from loading libpairipcore.so and starting the VM.
-        // Works by neutering the Application class methods that Pairip overrides.
-        // If Pairip's Application extends the real app's Application, super calls
-        // handle real app initialization normally.
-        //
-        // For apps where Pairip wraps android.app.Application directly (not extending
-        // the real app), this may skip the real app's custom Application init.
-        // In that case, use the manifest-level bypass instead (ResourcePatch).
-
-        // Strategy 7a: Pairip Application.attachBaseContext — main Pairip entry point
-        PairipApplicationAttachBaseContextFingerprint.methodOrNull?.let {
-            it.addInstructions(0, """
-                invoke-static {p1}, Lcom/pairip/VMRunner;->setContext(Landroid/content/Context;)V
-                invoke-super {p0, p1}, Lcom/pairip/application/Application;->attachBaseContext(Landroid/content/Context;)V
-                return-void
-            """.trimIndent())
-            logger.info("Applied Pairip Application.attachBaseContext bypass")
-        }
-
-        // Strategy 7b: Pairip Application.onCreate — backup in case attachBaseContext isn't overridden
-        PairipApplicationOnCreateFingerprint.methodOrNull?.let {
-            it.addInstructions(0, """
-                invoke-super {p0}, Lcom/pairip/application/Application;->onCreate()V
-                return-void
-            """.trimIndent())
-            logger.info("Applied Pairip Application.onCreate bypass")
-        }
 
         // ── Generic string-based strategies ──
         // These search for methods containing "com.android.vending" by return type.
