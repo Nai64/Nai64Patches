@@ -12,11 +12,20 @@ Universal Morphe patches for Android apps and games.
 ## Patches
 
 **Ads Free Rewards**
+
 **No Ads**
+
 **Spoof Play Store Install Source**
+
 **Pairip Bypass (Experimental)**
+
 **Unlock RevenueCat Entitlements**
+
 **Custom App Resolution (Experimental)**
+
 **Disable Root Checks**
+
 **Disable Update Checks**
+
 **Disable Telemetry**
+
