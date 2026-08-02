@@ -237,6 +237,33 @@ internal object UnityRewardedAdShowFingerprint : Fingerprint(
     ),
 )
 
+// ── Unity Ads SDK v4 fingerprints ──
+// New Unity Ads 4.x API: UnityAds.show(Activity, placementId, listener) fires
+// IUnityAdsShowListener.onUnityAdsShowComplete(placementId, completionState).
+
+internal object UnityAdsV4Show3ArgFingerprint : Fingerprint(
+    definingClass = "Lcom/unity3d/ads/UnityAds;",
+    name = "show",
+    returnType = "V",
+    parameters = listOf(
+        "Landroid/app/Activity;",
+        "Ljava/lang/String;",
+        "Lcom/unity3d/ads/IUnityAdsShowListener;",
+    ),
+)
+
+internal object UnityAdsV4Show4ArgFingerprint : Fingerprint(
+    definingClass = "Lcom/unity3d/ads/UnityAds;",
+    name = "show",
+    returnType = "V",
+    parameters = listOf(
+        "Landroid/app/Activity;",
+        "Ljava/lang/String;",
+        "Lcom/unity3d/ads/UnityAdsShowOptions;",
+        "Lcom/unity3d/ads/IUnityAdsShowListener;",
+    ),
+)
+
 // ── LevelPlay RewardedAd fingerprints ──
 
 internal object LevelPlayRewardedAdIsReadyFingerprint : Fingerprint(

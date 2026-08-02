@@ -19,11 +19,13 @@ val adsFreeRewardsPatch = bytecodePatch(
         val hasNativeMax = MaxRewardedAdIsReadyFingerprint.methodOrNull != null &&
             MaxRewardedAdShowAdFingerprint.methodOrNull != null
         val hasUnityAds = UnityRewardedAdShowFingerprint.methodOrNull != null
+        val hasUnityAdsV4 = UnityAdsV4Show3ArgFingerprint.methodOrNull != null ||
+            UnityAdsV4Show4ArgFingerprint.methodOrNull != null
         val hasLevelPlay = LevelPlayRewardedAdIsReadyFingerprint.methodOrNull != null
         val hasIronSourceUnityBridge = IronSourceUnityRewardedAdIsReadyFingerprint.methodOrNull != null &&
             IronSourceLevelPlayFullScreenShowAdFingerprint.methodOrNull != null
 
-        if (!hasMaxUnity && !hasNativeMax && !hasUnityAds && !hasLevelPlay && !hasIronSourceUnityBridge) {
+        if (!hasMaxUnity && !hasNativeMax && !hasUnityAds && !hasUnityAdsV4 && !hasLevelPlay && !hasIronSourceUnityBridge) {
             return@execute
         }
 
@@ -192,6 +194,34 @@ val adsFreeRewardsPatch = bytecodePatch(
                 invoke-interface {p3, p0}, Lcom/unity3d/ads/ShowListener;->onStarted(Ljava/lang/Object;)V
                 sget-object v0, Lcom/unity3d/ads/ShowFinishState;->COMPLETED:Lcom/unity3d/ads/ShowFinishState;
                 invoke-interface {p3, p0, v0}, Lcom/unity3d/ads/ShowListener;->onCompleted(Ljava/lang/Object;Lcom/unity3d/ads/ShowFinishState;)V
+                return-void
+            """.trimIndent())
+        }
+
+        // Strategy 5: Unity Ads SDK v4 (UnityAds.show + IUnityAdsShowListener).
+        // IL2CPP games using the new Unity Ads 4.x native engine (e.g. Coin Flip
+        // Master) call UnityAds.show(Activity, placementId, listener) instead of
+        // the legacy RewardedAd API. Fire onUnityAdsShowStart + onUnityAdsShowComplete
+        // (COMPLETED) so the C# side grants the reward without showing a real ad.
+        // Register layout (static methods): p0=Activity, p1=placementId,
+        // p2=options (4-arg only), listener is the last parameter.
+        val v4Show3 = UnityAdsV4Show3ArgFingerprint.methodOrNull
+        if (v4Show3 != null) {
+            logger.info("Unity Ads v4 patch succeeded (3-arg show)")
+            v4Show3.addInstructions(0, """
+                invoke-interface {p2, p1}, Lcom/unity3d/ads/IUnityAdsShowListener;->onUnityAdsShowStart(Ljava/lang/String;)V
+                sget-object v0, Lcom/unity3d/ads/UnityAds${'$'}UnityAdsShowCompletionState;->COMPLETED:Lcom/unity3d/ads/UnityAds${'$'}UnityAdsShowCompletionState;
+                invoke-interface {p2, p1, v0}, Lcom/unity3d/ads/IUnityAdsShowListener;->onUnityAdsShowComplete(Ljava/lang/String;Lcom/unity3d/ads/UnityAds${'$'}UnityAdsShowCompletionState;)V
+                return-void
+            """.trimIndent())
+        }
+        val v4Show4 = UnityAdsV4Show4ArgFingerprint.methodOrNull
+        if (v4Show4 != null) {
+            logger.info("Unity Ads v4 patch succeeded (4-arg show)")
+            v4Show4.addInstructions(0, """
+                invoke-interface {p3, p1}, Lcom/unity3d/ads/IUnityAdsShowListener;->onUnityAdsShowStart(Ljava/lang/String;)V
+                sget-object v0, Lcom/unity3d/ads/UnityAds${'$'}UnityAdsShowCompletionState;->COMPLETED:Lcom/unity3d/ads/UnityAds${'$'}UnityAdsShowCompletionState;
+                invoke-interface {p3, p1, v0}, Lcom/unity3d/ads/IUnityAdsShowListener;->onUnityAdsShowComplete(Ljava/lang/String;Lcom/unity3d/ads/UnityAds${'$'}UnityAdsShowCompletionState;)V
                 return-void
             """.trimIndent())
         }
