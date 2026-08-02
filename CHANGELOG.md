@@ -1,3 +1,9 @@
+## [1.18.0](https://github.com/Nai64/Nai64Patches/compare/1.17.0...1.18.0) (2026-08-02)
+
+### New Features
+
+* add Unity Ads v4 support to Ads Free Rewards patch ([1be49ed](https://github.com/Nai64/Nai64Patches/commit/1be49edc8b227a966abafa183f70d1e50e5192f1))
+
 ## [1.17.0](https://github.com/Nai64/Nai64Patches/compare/1.16.0...1.17.0) (2026-07-30)
 
 ### Bug Fixes
