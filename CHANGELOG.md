@@ -1,3 +1,9 @@
+## [1.18.1](https://github.com/Nai64/Nai64Patches/compare/1.18.0...1.18.1) (2026-08-18)
+
+### Bug Fixes
+
+* make MAX Unity ad injections register-safe for any method layout ([4286b76](https://github.com/Nai64/Nai64Patches/commit/4286b769241a56102298f63959a95f3d561fea08))
+
 ## [1.18.0](https://github.com/Nai64/Nai64Patches/compare/1.17.0...1.18.0) (2026-08-02)
 
 ### New Features
