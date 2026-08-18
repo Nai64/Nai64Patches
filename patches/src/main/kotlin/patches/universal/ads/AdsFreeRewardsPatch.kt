@@ -2,6 +2,7 @@ package patches.universal.ads
 
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.patch.bytecodePatch
+import patches.universal.ads.util.cloneMutableAndPreserveParameters
 import patches.universal.ads.util.fireRewardedAdCallbacks
 import java.util.logging.Logger
 
@@ -43,49 +44,53 @@ val adsFreeRewardsPatch = bytecodePatch(
             // Replace showRewardedAd with JSONObject + forwardUnityEvent.
             // Uses JsonUtils.putString (avoids JSONException), then calls
             // forwardUnityEvent to push through the MAX SDK callback pipeline.
-            // Register layout: registers=5, ins=3 → p0=v2(this), p1=v3(adUnitId), p2=v4(context).
-            // Save p1 to v0 first so v2/v3 can be used as string temps without corrupting adUnitId.
-            unityShow.addInstructions(0, """
+            // The method is cloned with extra registers that hold copies of the
+            // parameters (see BytecodeUtils.cloneMutableAndPreserveParameters),
+            // so the injection only uses v0 + p0/p1/p2 and works with ANY
+            // register layout (e.g. .registers 3 like Crowd Champs' showAd path).
+            val showClass = ShowRewardedAdFingerprint.classDefOrNull
+            val clonedShow = unityShow.cloneMutableAndPreserveParameters(showClass!!)
+            clonedShow.addInstructions(0, """
                 move-object v0, p1
-                new-instance v1, Lorg/json/JSONObject;
-                invoke-direct {v1}, Lorg/json/JSONObject;-><init>()V
-                const-string v2, "name"
-                const-string v3, "OnRewardedAdDisplayedEvent"
-                invoke-static {v1, v2, v3}, Lcom/applovin/impl/sdk/utils/JsonUtils;->putString(Lorg/json/JSONObject;Ljava/lang/String;Ljava/lang/String;)V
-                const-string v2, "adUnitId"
-                invoke-static {v1, v2, v0}, Lcom/applovin/impl/sdk/utils/JsonUtils;->putString(Lorg/json/JSONObject;Ljava/lang/String;Ljava/lang/String;)V
-                const-string v2, "adFormat"
-                const-string v3, "rewarded"
-                invoke-static {v1, v2, v3}, Lcom/applovin/impl/sdk/utils/JsonUtils;->putString(Lorg/json/JSONObject;Ljava/lang/String;Ljava/lang/String;)V
-                invoke-static {v1}, Lcom/applovin/mediation/unity/MaxUnityAdManager;->forwardUnityEvent(Lorg/json/JSONObject;)V
-                new-instance v1, Lorg/json/JSONObject;
-                invoke-direct {v1}, Lorg/json/JSONObject;-><init>()V
-                const-string v2, "name"
-                const-string v3, "OnRewardedAdReceivedRewardEvent"
-                invoke-static {v1, v2, v3}, Lcom/applovin/impl/sdk/utils/JsonUtils;->putString(Lorg/json/JSONObject;Ljava/lang/String;Ljava/lang/String;)V
-                const-string v2, "adUnitId"
-                invoke-static {v1, v2, v0}, Lcom/applovin/impl/sdk/utils/JsonUtils;->putString(Lorg/json/JSONObject;Ljava/lang/String;Ljava/lang/String;)V
-                const-string v2, "adFormat"
-                const-string v3, "rewarded"
-                invoke-static {v1, v2, v3}, Lcom/applovin/impl/sdk/utils/JsonUtils;->putString(Lorg/json/JSONObject;Ljava/lang/String;Ljava/lang/String;)V
-                const-string v2, "rewardLabel"
-                const-string v3, "reward"
-                invoke-static {v1, v2, v3}, Lcom/applovin/impl/sdk/utils/JsonUtils;->putString(Lorg/json/JSONObject;Ljava/lang/String;Ljava/lang/String;)V
-                const-string v2, "rewardAmount"
-                const-string v3, "1"
-                invoke-static {v1, v2, v3}, Lcom/applovin/impl/sdk/utils/JsonUtils;->putString(Lorg/json/JSONObject;Ljava/lang/String;Ljava/lang/String;)V
-                invoke-static {v1}, Lcom/applovin/mediation/unity/MaxUnityAdManager;->forwardUnityEvent(Lorg/json/JSONObject;)V
-                new-instance v1, Lorg/json/JSONObject;
-                invoke-direct {v1}, Lorg/json/JSONObject;-><init>()V
-                const-string v2, "name"
-                const-string v3, "OnRewardedAdHiddenEvent"
-                invoke-static {v1, v2, v3}, Lcom/applovin/impl/sdk/utils/JsonUtils;->putString(Lorg/json/JSONObject;Ljava/lang/String;Ljava/lang/String;)V
-                const-string v2, "adUnitId"
-                invoke-static {v1, v2, v0}, Lcom/applovin/impl/sdk/utils/JsonUtils;->putString(Lorg/json/JSONObject;Ljava/lang/String;Ljava/lang/String;)V
-                const-string v2, "adFormat"
-                const-string v3, "rewarded"
-                invoke-static {v1, v2, v3}, Lcom/applovin/impl/sdk/utils/JsonUtils;->putString(Lorg/json/JSONObject;Ljava/lang/String;Ljava/lang/String;)V
-                invoke-static {v1}, Lcom/applovin/mediation/unity/MaxUnityAdManager;->forwardUnityEvent(Lorg/json/JSONObject;)V
+                new-instance p0, Lorg/json/JSONObject;
+                invoke-direct {p0}, Lorg/json/JSONObject;-><init>()V
+                const-string p1, "name"
+                const-string p2, "OnRewardedAdDisplayedEvent"
+                invoke-static {p0, p1, p2}, Lcom/applovin/impl/sdk/utils/JsonUtils;->putString(Lorg/json/JSONObject;Ljava/lang/String;Ljava/lang/String;)V
+                const-string p1, "adUnitId"
+                invoke-static {p0, p1, v0}, Lcom/applovin/impl/sdk/utils/JsonUtils;->putString(Lorg/json/JSONObject;Ljava/lang/String;Ljava/lang/String;)V
+                const-string p1, "adFormat"
+                const-string p2, "rewarded"
+                invoke-static {p0, p1, p2}, Lcom/applovin/impl/sdk/utils/JsonUtils;->putString(Lorg/json/JSONObject;Ljava/lang/String;Ljava/lang/String;)V
+                invoke-static {p0}, Lcom/applovin/mediation/unity/MaxUnityAdManager;->forwardUnityEvent(Lorg/json/JSONObject;)V
+                new-instance p0, Lorg/json/JSONObject;
+                invoke-direct {p0}, Lorg/json/JSONObject;-><init>()V
+                const-string p1, "name"
+                const-string p2, "OnRewardedAdReceivedRewardEvent"
+                invoke-static {p0, p1, p2}, Lcom/applovin/impl/sdk/utils/JsonUtils;->putString(Lorg/json/JSONObject;Ljava/lang/String;Ljava/lang/String;)V
+                const-string p1, "adUnitId"
+                invoke-static {p0, p1, v0}, Lcom/applovin/impl/sdk/utils/JsonUtils;->putString(Lorg/json/JSONObject;Ljava/lang/String;Ljava/lang/String;)V
+                const-string p1, "adFormat"
+                const-string p2, "rewarded"
+                invoke-static {p0, p1, p2}, Lcom/applovin/impl/sdk/utils/JsonUtils;->putString(Lorg/json/JSONObject;Ljava/lang/String;Ljava/lang/String;)V
+                const-string p1, "rewardLabel"
+                const-string p2, "reward"
+                invoke-static {p0, p1, p2}, Lcom/applovin/impl/sdk/utils/JsonUtils;->putString(Lorg/json/JSONObject;Ljava/lang/String;Ljava/lang/String;)V
+                const-string p1, "rewardAmount"
+                const-string p2, "1"
+                invoke-static {p0, p1, p2}, Lcom/applovin/impl/sdk/utils/JsonUtils;->putString(Lorg/json/JSONObject;Ljava/lang/String;Ljava/lang/String;)V
+                invoke-static {p0}, Lcom/applovin/mediation/unity/MaxUnityAdManager;->forwardUnityEvent(Lorg/json/JSONObject;)V
+                new-instance p0, Lorg/json/JSONObject;
+                invoke-direct {p0}, Lorg/json/JSONObject;-><init>()V
+                const-string p1, "name"
+                const-string p2, "OnRewardedAdHiddenEvent"
+                invoke-static {p0, p1, p2}, Lcom/applovin/impl/sdk/utils/JsonUtils;->putString(Lorg/json/JSONObject;Ljava/lang/String;Ljava/lang/String;)V
+                const-string p1, "adUnitId"
+                invoke-static {p0, p1, v0}, Lcom/applovin/impl/sdk/utils/JsonUtils;->putString(Lorg/json/JSONObject;Ljava/lang/String;Ljava/lang/String;)V
+                const-string p1, "adFormat"
+                const-string p2, "rewarded"
+                invoke-static {p0, p1, p2}, Lcom/applovin/impl/sdk/utils/JsonUtils;->putString(Lorg/json/JSONObject;Ljava/lang/String;Ljava/lang/String;)V
+                invoke-static {p0}, Lcom/applovin/mediation/unity/MaxUnityAdManager;->forwardUnityEvent(Lorg/json/JSONObject;)V
                 return-void
             """.trimIndent())
 
@@ -93,24 +98,28 @@ val adsFreeRewardsPatch = bytecodePatch(
             // When the game C# IL2CPP side calls MaxSdk.LoadRewardedAd() and subscribes to
             // OnRewardedAdLoadedEvent, this synthetic event transitions the reward state
             // machine from "loading" to "loaded", enabling the reward button to work.
-            // Register layout: loadRewardedAd uses registers=5, ins=2.
-            // p0=v3(this), p1=v4(adUnitId). Save p1 to v0; v1=JSONObject, v2/v3=temps.
+            // Same clone + preserve-parameters trick as showRewardedAd: the injection
+            // only uses v0/v1 + p0/p1, valid for ANY register layout (Crowd Champs
+            // compiles this method with .registers 2, which previously broke the
+            // v2/v3-based injection).
             val unityLoad = LoadRewardedAdFingerprint.methodOrNull
             if (unityLoad != null) {
                 logger.info("MAX Unity loadRewardedAd patching")
-                unityLoad.addInstructions(0, """
+                val loadClass = LoadRewardedAdFingerprint.classDefOrNull
+                val clonedLoad = unityLoad.cloneMutableAndPreserveParameters(loadClass!!)
+                clonedLoad.addInstructions(0, """
                     move-object v0, p1
-                    new-instance v1, Lorg/json/JSONObject;
-                    invoke-direct {v1}, Lorg/json/JSONObject;-><init>()V
-                    const-string v2, "name"
-                    const-string v3, "OnRewardedAdLoadedEvent"
-                    invoke-static {v1, v2, v3}, Lcom/applovin/impl/sdk/utils/JsonUtils;->putString(Lorg/json/JSONObject;Ljava/lang/String;Ljava/lang/String;)V
-                    const-string v2, "adUnitId"
-                    invoke-static {v1, v2, v0}, Lcom/applovin/impl/sdk/utils/JsonUtils;->putString(Lorg/json/JSONObject;Ljava/lang/String;Ljava/lang/String;)V
-                    const-string v2, "adFormat"
-                    const-string v3, "rewarded"
-                    invoke-static {v1, v2, v3}, Lcom/applovin/impl/sdk/utils/JsonUtils;->putString(Lorg/json/JSONObject;Ljava/lang/String;Ljava/lang/String;)V
-                    invoke-static {v1}, Lcom/applovin/mediation/unity/MaxUnityAdManager;->forwardUnityEvent(Lorg/json/JSONObject;)V
+                    new-instance p0, Lorg/json/JSONObject;
+                    invoke-direct {p0}, Lorg/json/JSONObject;-><init>()V
+                    const-string p1, "name"
+                    const-string v1, "OnRewardedAdLoadedEvent"
+                    invoke-static {p0, p1, v1}, Lcom/applovin/impl/sdk/utils/JsonUtils;->putString(Lorg/json/JSONObject;Ljava/lang/String;Ljava/lang/String;)V
+                    const-string p1, "adUnitId"
+                    invoke-static {p0, p1, v0}, Lcom/applovin/impl/sdk/utils/JsonUtils;->putString(Lorg/json/JSONObject;Ljava/lang/String;Ljava/lang/String;)V
+                    const-string p1, "adFormat"
+                    const-string v1, "rewarded"
+                    invoke-static {p0, p1, v1}, Lcom/applovin/impl/sdk/utils/JsonUtils;->putString(Lorg/json/JSONObject;Ljava/lang/String;Ljava/lang/String;)V
+                    invoke-static {p0}, Lcom/applovin/mediation/unity/MaxUnityAdManager;->forwardUnityEvent(Lorg/json/JSONObject;)V
                     return-void
                 """.trimIndent())
             }
@@ -131,7 +140,16 @@ val adsFreeRewardsPatch = bytecodePatch(
             // callbacks directly (onAdDisplayed → onRewardedVideoStarted →
             // onUserRewarded → onRewardedVideoCompleted → onAdHidden).
             // This avoids crashes from simply NOP'ing showAd().
-            nativeShow.addInstructions(0, fireRewardedAdCallbacks())
+            // The reflection loop needs 7 registers (v0-v6); skip methods with
+            // fewer to avoid out-of-range register failures on reassembly.
+            if ((nativeShow.implementation?.registerCount ?: 0) >= 7) {
+                nativeShow.addInstructions(0, fireRewardedAdCallbacks())
+            } else {
+                logger.warning(
+                    "Skipping native MAX showAd() patch: " +
+                        "register count ${nativeShow.implementation?.registerCount} < 7"
+                )
+            }
             // Do NOT return — let subsequent strategies run for games where the
             // MAX showAd patch may not intercept the actual ad path (e.g. IL2CPP
             // games with ProGuard-broken showAd()V, or games routing through
