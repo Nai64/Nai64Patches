@@ -55,7 +55,7 @@ private val manifestResolutionPatch = resourcePatch(
                 }
                 if (isLauncher) {
                     activity.setAttributeNS(ns, "android:resizeableActivity", "true")
-                    // The maxAspectRatio will be set from the bytecode patch options
+                    // The actual resolution is enforced by the bytecode patch via Window.setLayout(width, height) + FLAG_LAYOUT_NO_LIMITS
                     logger.info("Set resizeableActivity on launcher activity")
                 }
             }
