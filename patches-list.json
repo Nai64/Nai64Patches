@@ -97,6 +97,14 @@
       "options": []
     },
     {
+      "name": "Skip Rate-Us Prompt",
+      "description": "Skip the in-app review (rate us) prompt",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": []
+    },
+    {
       "name": "Spoof Play Store Install Source",
       "description": null,
       "default": false,
@@ -316,6 +324,15 @@
         {
           "key": "blockFlurry",
           "title": "Block Flurry",
+          "description": "",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": true,
+          "values": null
+        },
+        {
+          "key": "blockGameAnalytics",
+          "title": "Block GameAnalytics",
           "description": "",
           "required": false,
           "type": "kotlin.Boolean",

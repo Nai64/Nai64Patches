@@ -39,6 +39,7 @@ private fun generatePatchList(version: String, patches: Set<Patch<*>>) {
         "Ads Free Rewards",
         "No Ads",
         "Skip Consent Popup",
+        "Skip Rate-Us Prompt",
         "Spoof Play Store Install Source",
         "Spoof Play Integrity",
         "Bypass License Verification",
