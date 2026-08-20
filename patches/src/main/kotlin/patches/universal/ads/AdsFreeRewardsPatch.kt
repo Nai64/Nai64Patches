@@ -1,7 +1,9 @@
 package patches.universal.ads
 
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
+import app.morphe.patcher.patch.booleanOption
 import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.stringOption
 import patches.universal.ads.util.cloneMutableAndPreserveParameters
 import patches.universal.ads.util.fireRewardedAdCallbacks
 import java.util.logging.Logger
@@ -9,10 +11,34 @@ import java.util.logging.Logger
 @Suppress("unused")
 val adsFreeRewardsPatch = bytecodePatch(
     name = "Ads Free Rewards",
+    description = "Skip rewarded ads and claim rewards instantly",
     default = false,
 ) {
+    val rewardStrategy by stringOption(
+        key = "rewardStrategy",
+        default = "auto",
+        title = "Reward Strategy",
+        description = "Which ad networks to patch",
+        values = mapOf(
+            "Auto (all networks)" to "auto",
+            "AppLovin MAX" to "max",
+            "Unity Ads" to "unityAds",
+            "ironSource / LevelPlay" to "ironSource",
+        ),
+    )
+    val instantReward by booleanOption(
+        key = "instantReward",
+        default = true,
+        title = "Instant reward",
+        description = "Claim the reward immediately without showing an ad",
+    )
+
     execute {
         val logger = Logger.getLogger(this::class.java.name)
+        val strategy = rewardStrategy
+        val useMax = strategy == "auto" || strategy == "max"
+        val useUnityAds = strategy == "auto" || strategy == "unityAds"
+        val useIronSource = strategy == "auto" || strategy == "ironSource"
 
         // ── SDK detection ──
         val hasMaxUnity = ShowRewardedAdFingerprint.methodOrNull != null &&
@@ -33,7 +59,7 @@ val adsFreeRewardsPatch = bytecodePatch(
         // ── Strategy 1: MAX Unity wrapper ──
         val unityShow = ShowRewardedAdFingerprint.methodOrNull
         val unityReady = IsRewardedAdReadyFingerprint.methodOrNull
-        if (unityShow != null && unityReady != null) {
+        if (useMax && unityShow != null && unityReady != null) {
             logger.info("MAX Unity Ad wrapper patch succeeded")
             // Force isRewardedAdReady to always return true
             unityReady.addInstructions(0, """
@@ -48,51 +74,53 @@ val adsFreeRewardsPatch = bytecodePatch(
             // parameters (see BytecodeUtils.cloneMutableAndPreserveParameters),
             // so the injection only uses v0 + p0/p1/p2 and works with ANY
             // register layout (e.g. .registers 3 like Crowd Champs' showAd path).
-            val showClass = ShowRewardedAdFingerprint.classDefOrNull
-            val clonedShow = unityShow.cloneMutableAndPreserveParameters(showClass!!)
-            clonedShow.addInstructions(0, """
-                move-object v0, p1
-                new-instance p0, Lorg/json/JSONObject;
-                invoke-direct {p0}, Lorg/json/JSONObject;-><init>()V
-                const-string p1, "name"
-                const-string p2, "OnRewardedAdDisplayedEvent"
-                invoke-static {p0, p1, p2}, Lcom/applovin/impl/sdk/utils/JsonUtils;->putString(Lorg/json/JSONObject;Ljava/lang/String;Ljava/lang/String;)V
-                const-string p1, "adUnitId"
-                invoke-static {p0, p1, v0}, Lcom/applovin/impl/sdk/utils/JsonUtils;->putString(Lorg/json/JSONObject;Ljava/lang/String;Ljava/lang/String;)V
-                const-string p1, "adFormat"
-                const-string p2, "rewarded"
-                invoke-static {p0, p1, p2}, Lcom/applovin/impl/sdk/utils/JsonUtils;->putString(Lorg/json/JSONObject;Ljava/lang/String;Ljava/lang/String;)V
-                invoke-static {p0}, Lcom/applovin/mediation/unity/MaxUnityAdManager;->forwardUnityEvent(Lorg/json/JSONObject;)V
-                new-instance p0, Lorg/json/JSONObject;
-                invoke-direct {p0}, Lorg/json/JSONObject;-><init>()V
-                const-string p1, "name"
-                const-string p2, "OnRewardedAdReceivedRewardEvent"
-                invoke-static {p0, p1, p2}, Lcom/applovin/impl/sdk/utils/JsonUtils;->putString(Lorg/json/JSONObject;Ljava/lang/String;Ljava/lang/String;)V
-                const-string p1, "adUnitId"
-                invoke-static {p0, p1, v0}, Lcom/applovin/impl/sdk/utils/JsonUtils;->putString(Lorg/json/JSONObject;Ljava/lang/String;Ljava/lang/String;)V
-                const-string p1, "adFormat"
-                const-string p2, "rewarded"
-                invoke-static {p0, p1, p2}, Lcom/applovin/impl/sdk/utils/JsonUtils;->putString(Lorg/json/JSONObject;Ljava/lang/String;Ljava/lang/String;)V
-                const-string p1, "rewardLabel"
-                const-string p2, "reward"
-                invoke-static {p0, p1, p2}, Lcom/applovin/impl/sdk/utils/JsonUtils;->putString(Lorg/json/JSONObject;Ljava/lang/String;Ljava/lang/String;)V
-                const-string p1, "rewardAmount"
-                const-string p2, "1"
-                invoke-static {p0, p1, p2}, Lcom/applovin/impl/sdk/utils/JsonUtils;->putString(Lorg/json/JSONObject;Ljava/lang/String;Ljava/lang/String;)V
-                invoke-static {p0}, Lcom/applovin/mediation/unity/MaxUnityAdManager;->forwardUnityEvent(Lorg/json/JSONObject;)V
-                new-instance p0, Lorg/json/JSONObject;
-                invoke-direct {p0}, Lorg/json/JSONObject;-><init>()V
-                const-string p1, "name"
-                const-string p2, "OnRewardedAdHiddenEvent"
-                invoke-static {p0, p1, p2}, Lcom/applovin/impl/sdk/utils/JsonUtils;->putString(Lorg/json/JSONObject;Ljava/lang/String;Ljava/lang/String;)V
-                const-string p1, "adUnitId"
-                invoke-static {p0, p1, v0}, Lcom/applovin/impl/sdk/utils/JsonUtils;->putString(Lorg/json/JSONObject;Ljava/lang/String;Ljava/lang/String;)V
-                const-string p1, "adFormat"
-                const-string p2, "rewarded"
-                invoke-static {p0, p1, p2}, Lcom/applovin/impl/sdk/utils/JsonUtils;->putString(Lorg/json/JSONObject;Ljava/lang/String;Ljava/lang/String;)V
-                invoke-static {p0}, Lcom/applovin/mediation/unity/MaxUnityAdManager;->forwardUnityEvent(Lorg/json/JSONObject;)V
-                return-void
-            """.trimIndent())
+            if (instantReward == true) {
+                val showClass = ShowRewardedAdFingerprint.classDefOrNull
+                val clonedShow = unityShow.cloneMutableAndPreserveParameters(showClass!!)
+                clonedShow.addInstructions(0, """
+                    move-object v0, p1
+                    new-instance p0, Lorg/json/JSONObject;
+                    invoke-direct {p0}, Lorg/json/JSONObject;-><init>()V
+                    const-string p1, "name"
+                    const-string p2, "OnRewardedAdDisplayedEvent"
+                    invoke-static {p0, p1, p2}, Lcom/applovin/impl/sdk/utils/JsonUtils;->putString(Lorg/json/JSONObject;Ljava/lang/String;Ljava/lang/String;)V
+                    const-string p1, "adUnitId"
+                    invoke-static {p0, p1, v0}, Lcom/applovin/impl/sdk/utils/JsonUtils;->putString(Lorg/json/JSONObject;Ljava/lang/String;Ljava/lang/String;)V
+                    const-string p1, "adFormat"
+                    const-string p2, "rewarded"
+                    invoke-static {p0, p1, p2}, Lcom/applovin/impl/sdk/utils/JsonUtils;->putString(Lorg/json/JSONObject;Ljava/lang/String;Ljava/lang/String;)V
+                    invoke-static {p0}, Lcom/applovin/mediation/unity/MaxUnityAdManager;->forwardUnityEvent(Lorg/json/JSONObject;)V
+                    new-instance p0, Lorg/json/JSONObject;
+                    invoke-direct {p0}, Lorg/json/JSONObject;-><init>()V
+                    const-string p1, "name"
+                    const-string p2, "OnRewardedAdReceivedRewardEvent"
+                    invoke-static {p0, p1, p2}, Lcom/applovin/impl/sdk/utils/JsonUtils;->putString(Lorg/json/JSONObject;Ljava/lang/String;Ljava/lang/String;)V
+                    const-string p1, "adUnitId"
+                    invoke-static {p0, p1, v0}, Lcom/applovin/impl/sdk/utils/JsonUtils;->putString(Lorg/json/JSONObject;Ljava/lang/String;Ljava/lang/String;)V
+                    const-string p1, "adFormat"
+                    const-string p2, "rewarded"
+                    invoke-static {p0, p1, p2}, Lcom/applovin/impl/sdk/utils/JsonUtils;->putString(Lorg/json/JSONObject;Ljava/lang/String;Ljava/lang/String;)V
+                    const-string p1, "rewardLabel"
+                    const-string p2, "reward"
+                    invoke-static {p0, p1, p2}, Lcom/applovin/impl/sdk/utils/JsonUtils;->putString(Lorg/json/JSONObject;Ljava/lang/String;Ljava/lang/String;)V
+                    const-string p1, "rewardAmount"
+                    const-string p2, "1"
+                    invoke-static {p0, p1, p2}, Lcom/applovin/impl/sdk/utils/JsonUtils;->putString(Lorg/json/JSONObject;Ljava/lang/String;Ljava/lang/String;)V
+                    invoke-static {p0}, Lcom/applovin/mediation/unity/MaxUnityAdManager;->forwardUnityEvent(Lorg/json/JSONObject;)V
+                    new-instance p0, Lorg/json/JSONObject;
+                    invoke-direct {p0}, Lorg/json/JSONObject;-><init>()V
+                    const-string p1, "name"
+                    const-string p2, "OnRewardedAdHiddenEvent"
+                    invoke-static {p0, p1, p2}, Lcom/applovin/impl/sdk/utils/JsonUtils;->putString(Lorg/json/JSONObject;Ljava/lang/String;Ljava/lang/String;)V
+                    const-string p1, "adUnitId"
+                    invoke-static {p0, p1, v0}, Lcom/applovin/impl/sdk/utils/JsonUtils;->putString(Lorg/json/JSONObject;Ljava/lang/String;Ljava/lang/String;)V
+                    const-string p1, "adFormat"
+                    const-string p2, "rewarded"
+                    invoke-static {p0, p1, p2}, Lcom/applovin/impl/sdk/utils/JsonUtils;->putString(Lorg/json/JSONObject;Ljava/lang/String;Ljava/lang/String;)V
+                    invoke-static {p0}, Lcom/applovin/mediation/unity/MaxUnityAdManager;->forwardUnityEvent(Lorg/json/JSONObject;)V
+                    return-void
+                """.trimIndent())
+            }
 
             // Patch loadRewardedAd to fire OnRewardedAdLoadedEvent via forwardUnityEvent.
             // When the game C# IL2CPP side calls MaxSdk.LoadRewardedAd() and subscribes to
@@ -129,7 +157,7 @@ val adsFreeRewardsPatch = bytecodePatch(
         // ── Strategy 2: Native MAX (non-Unity) ──
         val nativeReady = MaxRewardedAdIsReadyFingerprint.methodOrNull
         val nativeShow = MaxRewardedAdShowAdFingerprint.methodOrNull
-        if (nativeReady != null && nativeShow != null) {
+        if (useMax && nativeReady != null && nativeShow != null) {
             logger.info("native MAX patch succeeded")
             nativeReady.addInstructions(0, """
                 const/4 v0, 0x1
@@ -142,9 +170,9 @@ val adsFreeRewardsPatch = bytecodePatch(
             // This avoids crashes from simply NOP'ing showAd().
             // The reflection loop needs 7 registers (v0-v6); skip methods with
             // fewer to avoid out-of-range register failures on reassembly.
-            if ((nativeShow.implementation?.registerCount ?: 0) >= 7) {
+            if (instantReward == true && (nativeShow.implementation?.registerCount ?: 0) >= 7) {
                 nativeShow.addInstructions(0, fireRewardedAdCallbacks())
-            } else {
+            } else if (instantReward == true) {
                 logger.warning(
                     "Skipping native MAX showAd() patch: " +
                         "register count ${nativeShow.implementation?.registerCount} < 7"
@@ -161,7 +189,7 @@ val adsFreeRewardsPatch = bytecodePatch(
         // the call flows through to the ironSource Unity adapter which
         // invokes com.unity3d.ads.RewardedAd.show(), which Strategy 4 patches.
         val levelPlayReady = LevelPlayRewardedAdIsReadyFingerprint.methodOrNull
-        if (levelPlayReady != null) {
+        if (useIronSource && levelPlayReady != null) {
             logger.info("LevelPlay patch succeeded")
             levelPlayReady.addInstructions(0, """
                 const/4 v0, 0x1
@@ -176,34 +204,36 @@ val adsFreeRewardsPatch = bytecodePatch(
         // the bridge listener lifecycle directly.
         val bridgeReady = IronSourceUnityRewardedAdIsReadyFingerprint.methodOrNull
         val bridgeShow = IronSourceLevelPlayFullScreenShowAdFingerprint.methodOrNull
-        if (bridgeReady != null && bridgeShow != null) {
+        if (useIronSource && bridgeReady != null && bridgeShow != null) {
             logger.info("IronSource patch succeeded")
             bridgeReady.addInstructions(0, """
                 const/4 v0, 0x1
                 return v0
             """.trimIndent())
-            bridgeShow.addInstructions(0, """
-                iget-object v0, p0, Lcom/ironsource/Ya;->k:Lcom/ironsource/Za;
-                if-eqz v0, :morphe_ads_free_rewards_done
-                iget-object p1, p0, Lcom/ironsource/Ya;->m:Lcom/ironsource/q6;
-                invoke-interface {p1}, Lcom/ironsource/q6;->b()Lcom/unity3d/mediation/LevelPlayAdInfo;
-                move-result-object p1
-                invoke-interface {v0, p1}, Lcom/ironsource/Za;->onAdDisplayed(Lcom/unity3d/mediation/LevelPlayAdInfo;)V
-                new-instance v1, Lcom/unity3d/mediation/rewarded/LevelPlayReward;
-                const-string p2, "reward"
-                const/4 p0, 0x1
-                invoke-direct {v1, p2, p0}, Lcom/unity3d/mediation/rewarded/LevelPlayReward;-><init>(Ljava/lang/String;I)V
-                invoke-interface {v0, v1, p1}, Lcom/ironsource/Za;->onAdRewarded(Lcom/unity3d/mediation/rewarded/LevelPlayReward;Lcom/unity3d/mediation/LevelPlayAdInfo;)V
-                invoke-interface {v0, p1}, Lcom/ironsource/Za;->onAdClosed(Lcom/unity3d/mediation/LevelPlayAdInfo;)V
-                :morphe_ads_free_rewards_done
-                return-void
-            """.trimIndent())
+            if (instantReward == true) {
+                bridgeShow.addInstructions(0, """
+                    iget-object v0, p0, Lcom/ironsource/Ya;->k:Lcom/ironsource/Za;
+                    if-eqz v0, :morphe_ads_free_rewards_done
+                    iget-object p1, p0, Lcom/ironsource/Ya;->m:Lcom/ironsource/q6;
+                    invoke-interface {p1}, Lcom/ironsource/q6;->b()Lcom/unity3d/mediation/LevelPlayAdInfo;
+                    move-result-object p1
+                    invoke-interface {v0, p1}, Lcom/ironsource/Za;->onAdDisplayed(Lcom/unity3d/mediation/LevelPlayAdInfo;)V
+                    new-instance v1, Lcom/unity3d/mediation/rewarded/LevelPlayReward;
+                    const-string p2, "reward"
+                    const/4 p0, 0x1
+                    invoke-direct {v1, p2, p0}, Lcom/unity3d/mediation/rewarded/LevelPlayReward;-><init>(Ljava/lang/String;I)V
+                    invoke-interface {v0, v1, p1}, Lcom/ironsource/Za;->onAdRewarded(Lcom/unity3d/mediation/rewarded/LevelPlayReward;Lcom/unity3d/mediation/LevelPlayAdInfo;)V
+                    invoke-interface {v0, p1}, Lcom/ironsource/Za;->onAdClosed(Lcom/unity3d/mediation/LevelPlayAdInfo;)V
+                    :morphe_ads_free_rewards_done
+                    return-void
+                """.trimIndent())
+            }
             return@execute
         }
 
-        // Strategy 4: Unity Ads RewardedAd.
+        // ── Strategy 4: Unity Ads RewardedAd. ──
         val adsShow = UnityRewardedAdShowFingerprint.methodOrNull
-        if (adsShow != null) {
+        if (useUnityAds && adsShow != null && instantReward == true) {
             logger.info("Unity Ads patch succeeded")
             // Only patch show() — do NOT patch load() so the real ad loads
             // silently in the background (prevents Unity Ads error 628).
@@ -216,32 +246,34 @@ val adsFreeRewardsPatch = bytecodePatch(
             """.trimIndent())
         }
 
-        // Strategy 5: Unity Ads SDK v4 (UnityAds.show + IUnityAdsShowListener).
+        // ── Strategy 5: Unity Ads SDK v4 (UnityAds.show + IUnityAdsShowListener). ──
         // IL2CPP games using the new Unity Ads 4.x native engine (e.g. Coin Flip
         // Master) call UnityAds.show(Activity, placementId, listener) instead of
         // the legacy RewardedAd API. Fire onUnityAdsShowStart + onUnityAdsShowComplete
         // (COMPLETED) so the C# side grants the reward without showing a real ad.
         // Register layout (static methods): p0=Activity, p1=placementId,
         // p2=options (4-arg only), listener is the last parameter.
-        val v4Show3 = UnityAdsV4Show3ArgFingerprint.methodOrNull
-        if (v4Show3 != null) {
-            logger.info("Unity Ads v4 patch succeeded (3-arg show)")
-            v4Show3.addInstructions(0, """
-                invoke-interface {p2, p1}, Lcom/unity3d/ads/IUnityAdsShowListener;->onUnityAdsShowStart(Ljava/lang/String;)V
-                sget-object v0, Lcom/unity3d/ads/UnityAds${'$'}UnityAdsShowCompletionState;->COMPLETED:Lcom/unity3d/ads/UnityAds${'$'}UnityAdsShowCompletionState;
-                invoke-interface {p2, p1, v0}, Lcom/unity3d/ads/IUnityAdsShowListener;->onUnityAdsShowComplete(Ljava/lang/String;Lcom/unity3d/ads/UnityAds${'$'}UnityAdsShowCompletionState;)V
-                return-void
-            """.trimIndent())
-        }
-        val v4Show4 = UnityAdsV4Show4ArgFingerprint.methodOrNull
-        if (v4Show4 != null) {
-            logger.info("Unity Ads v4 patch succeeded (4-arg show)")
-            v4Show4.addInstructions(0, """
-                invoke-interface {p3, p1}, Lcom/unity3d/ads/IUnityAdsShowListener;->onUnityAdsShowStart(Ljava/lang/String;)V
-                sget-object v0, Lcom/unity3d/ads/UnityAds${'$'}UnityAdsShowCompletionState;->COMPLETED:Lcom/unity3d/ads/UnityAds${'$'}UnityAdsShowCompletionState;
-                invoke-interface {p3, p1, v0}, Lcom/unity3d/ads/IUnityAdsShowListener;->onUnityAdsShowComplete(Ljava/lang/String;Lcom/unity3d/ads/UnityAds${'$'}UnityAdsShowCompletionState;)V
-                return-void
-            """.trimIndent())
+        if (useUnityAds && instantReward == true) {
+            val v4Show3 = UnityAdsV4Show3ArgFingerprint.methodOrNull
+            if (v4Show3 != null) {
+                logger.info("Unity Ads v4 patch succeeded (3-arg show)")
+                v4Show3.addInstructions(0, """
+                    invoke-interface {p2, p1}, Lcom/unity3d/ads/IUnityAdsShowListener;->onUnityAdsShowStart(Ljava/lang/String;)V
+                    sget-object v0, Lcom/unity3d/ads/UnityAds${'$'}UnityAdsShowCompletionState;->COMPLETED:Lcom/unity3d/ads/UnityAds${'$'}UnityAdsShowCompletionState;
+                    invoke-interface {p2, p1, v0}, Lcom/unity3d/ads/IUnityAdsShowListener;->onUnityAdsShowComplete(Ljava/lang/String;Lcom/unity3d/ads/UnityAds${'$'}UnityAdsShowCompletionState;)V
+                    return-void
+                """.trimIndent())
+            }
+            val v4Show4 = UnityAdsV4Show4ArgFingerprint.methodOrNull
+            if (v4Show4 != null) {
+                logger.info("Unity Ads v4 patch succeeded (4-arg show)")
+                v4Show4.addInstructions(0, """
+                    invoke-interface {p3, p1}, Lcom/unity3d/ads/IUnityAdsShowListener;->onUnityAdsShowStart(Ljava/lang/String;)V
+                    sget-object v0, Lcom/unity3d/ads/UnityAds${'$'}UnityAdsShowCompletionState;->COMPLETED:Lcom/unity3d/ads/UnityAds${'$'}UnityAdsShowCompletionState;
+                    invoke-interface {p3, p1, v0}, Lcom/unity3d/ads/IUnityAdsShowListener;->onUnityAdsShowComplete(Ljava/lang/String;Lcom/unity3d/ads/UnityAds${'$'}UnityAdsShowCompletionState;)V
+                    return-void
+                """.trimIndent())
+            }
         }
 
     }
