@@ -47,15 +47,20 @@ val noAdsPatch = bytecodePatch(
     execute {
         val logger = Logger.getLogger(this::class.java.name)
 
-        val hasMaxUnity = ShowInterstitialFingerprint.methodOrNull != null ||
+val hasMaxUnity = ShowInterstitialFingerprint.methodOrNull != null ||
             ShowAppOpenAdFingerprint.methodOrNull != null ||
             ShowBannerFingerprint.methodOrNull != null
         val hasNativeMax = MaxInterstitialAdShowAdFingerprint.methodOrNull != null ||
             MaxAppOpenAdShowAdFingerprint.methodOrNull != null ||
             MaxAdViewStartAutoRefreshFingerprint.methodOrNull != null
+        val hasAdMob = AdMobInterstitialShowFingerprint.methodOrNull != null ||
+            AdMobLegacyInterstitialShowFingerprint.methodOrNull != null ||
+            AdMobAppOpenShowFingerprint.methodOrNull != null ||
+            AdMobRewardedShowFingerprint.methodOrNull != null ||
+            AdMobLegacyRewardedVideoShowFingerprint.methodOrNull != null
 
-        if (!hasMaxUnity && !hasNativeMax) {
-            logger.warning("Could not find supported ad SDK (MAX Unity or native MAX). No changes applied.")
+        if (!hasMaxUnity && !hasNativeMax && !hasAdMob) {
+            logger.warning("Could not find supported ad SDK (MAX Unity, native MAX or AdMob). No changes applied.")
             return@execute
         }
 
@@ -88,6 +93,19 @@ val noAdsPatch = bytecodePatch(
         }
         if (blockBanners == true || blockMRec == true) {
             MaxAdViewStartAutoRefreshFingerprint.methodOrNull?.let { it.addInstruction(0, "return-void") }
+        }
+
+        // ── AdMob (Google Mobile Ads) ──
+        if (blockInterstitials == true) {
+            AdMobInterstitialShowFingerprint.methodOrNull?.let { it.addInstruction(0, "return-void") }
+            AdMobLegacyInterstitialShowFingerprint.methodOrNull?.let { it.addInstruction(0, "return-void") }
+        }
+        if (blockAppOpen == true) {
+            AdMobAppOpenShowFingerprint.methodOrNull?.let { it.addInstruction(0, "return-void") }
+        }
+        if (blockRewarded == true) {
+            AdMobRewardedShowFingerprint.methodOrNull?.let { it.addInstruction(0, "return-void") }
+            AdMobLegacyRewardedVideoShowFingerprint.methodOrNull?.let { it.addInstruction(0, "return-void") }
         }
 
         // ── Rewarded ads ──

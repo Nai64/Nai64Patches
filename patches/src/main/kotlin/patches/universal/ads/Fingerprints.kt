@@ -424,3 +424,40 @@ internal object PairipResponseValidatorV3ValidateResponseFingerprint : Fingerpri
     returnType = "V",
     parameters = listOf("Landroid/os/Bundle;", "Ljava/lang/String;"),
 )
+
+// AdMob (Google Mobile Ads)
+
+internal object AdMobInterstitialShowFingerprint : Fingerprint(
+    definingClass = "Lcom/google/android/gms/ads/interstitial/InterstitialAd;",
+    name = "show",
+    returnType = "V",
+    parameters = listOf("Landroid/app/Activity;"),
+)
+
+internal object AdMobLegacyInterstitialShowFingerprint : Fingerprint(
+    definingClass = "Lcom/google/android/gms/ads/InterstitialAd;",
+    name = "show",
+    returnType = "V",
+    parameters = emptyList(),
+)
+
+internal object AdMobAppOpenShowFingerprint : Fingerprint(
+    definingClass = "Lcom/google/android/gms/ads/AppOpenAd;",
+    name = "show",
+    returnType = "V",
+    parameters = listOf("Landroid/app/Activity;"),
+)
+
+internal object AdMobRewardedShowFingerprint : Fingerprint(
+    definingClass = "Lcom/google/android/gms/ads/rewarded/RewardedAd;",
+    name = "show",
+    returnType = "V",
+    parameters = listOf("Landroid/app/Activity;", "Lcom/google/android/gms/ads/OnUserEarnedRewardListener;"),
+)
+
+internal object AdMobLegacyRewardedVideoShowFingerprint : Fingerprint(
+    definingClass = "Lcom/google/android/gms/ads/reward/RewardedVideoAd;",
+    name = "show",
+    returnType = "V",
+    parameters = emptyList(),
+)
