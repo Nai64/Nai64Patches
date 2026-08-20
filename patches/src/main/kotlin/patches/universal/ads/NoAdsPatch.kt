@@ -17,31 +17,31 @@ val noAdsPatch = bytecodePatch(
         title = "Block Interstitials",
         default = true,
         key = "blockInterstitials",
-        description = "",
+        description = "Block full-screen ads shown between app content",
     )
     val blockBanners by booleanOption(
         title = "Block Banners",
         default = true,
         key = "blockBanners",
-        description = "",
+        description = "Block banner ads shown at the top or bottom of the screen",
     )
     val blockAppOpen by booleanOption(
         title = "Block App Open",
         default = true,
         key = "blockAppOpen",
-        description = "",
+        description = "Block ads shown when the app starts",
     )
     val blockMRec by booleanOption(
         title = "Block MREC",
         default = true,
         key = "blockMRec",
-        description = "",
+        description = "Block medium rectangle (MREC) banner ads",
     )
     val blockRewarded by booleanOption(
         title = "Block Rewarded",
         default = true,
         key = "blockRewarded",
-        description = "",
+        description = "Block rewarded ads; may disable features that require watching them",
     )
 
     execute {
