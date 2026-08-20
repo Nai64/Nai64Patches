@@ -113,6 +113,32 @@
       "options": []
     },
     {
+      "name": "Limit Ad Tracking",
+      "description": "Neutralize the Google advertising ID: empty ID and limit ad tracking enabled",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": []
+    },
+    {
+      "name": "Remove Permissions",
+      "description": "Remove permissions from the app manifest",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": [
+        {
+          "key": "removePermissions",
+          "title": "Permissions to remove",
+          "description": "Comma-separated permission names to remove from the manifest",
+          "required": false,
+          "type": "kotlin.String",
+          "default": "android.permission.SEND_SMS,android.permission.RECEIVE_SMS,android.permission.READ_SMS,android.permission.RECORD_AUDIO,android.permission.CAMERA",
+          "values": null
+        }
+      ]
+    },
+    {
       "name": "Spoof Play Integrity",
       "description": "Force Play Integrity checks to pass",
       "default": false,
