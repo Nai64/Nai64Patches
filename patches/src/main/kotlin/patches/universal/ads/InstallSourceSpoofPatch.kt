@@ -10,6 +10,7 @@ import java.util.logging.Logger
 @Suppress("unused")
 val installSourceSpoofPatch = bytecodePatch(
     name = "Spoof Play Store Install Source",
+    description = "Make the app believe it was installed from the Play Store",
     default = false,
 ) {
     execute {
