@@ -58,9 +58,17 @@ val hasMaxUnity = ShowInterstitialFingerprint.methodOrNull != null ||
             AdMobAppOpenShowFingerprint.methodOrNull != null ||
             AdMobRewardedShowFingerprint.methodOrNull != null ||
             AdMobLegacyRewardedVideoShowFingerprint.methodOrNull != null
+        val hasUnityAdsV3 = UnityAdsV3Show2ArgFingerprint.methodOrNull != null ||
+            UnityAdsV3ShowOptionsFingerprint.methodOrNull != null
+        val hasIronSource = IronSourceShowDemandOnlyInterstitialFingerprint.methodOrNull != null ||
+            IronSourceShowDemandOnlyRewardedVideoFingerprint.methodOrNull != null
+        val hasAppLovinLegacy = AppLovinInterstitialDialogShowFingerprint.methodOrNull != null ||
+            AppLovinIncentivizedShow4ListenerFingerprint.methodOrNull != null ||
+            AppLovinAdViewLoadNextAdFingerprint.methodOrNull != null
+        val hasVungle = VungleBaseFullscreenAdLoadFingerprint.methodOrNull != null
 
-        if (!hasMaxUnity && !hasNativeMax && !hasAdMob) {
-            logger.warning("Could not find supported ad SDK (MAX Unity, native MAX or AdMob). No changes applied.")
+        if (!hasMaxUnity && !hasNativeMax && !hasAdMob && !hasUnityAdsV3 && !hasIronSource && !hasAppLovinLegacy && !hasVungle) {
+            logger.warning("Could not find supported ad SDK (MAX Unity, native MAX, AdMob, Unity Ads, ironSource, AppLovin or Vungle). No changes applied.")
             return@execute
         }
 
@@ -126,6 +134,38 @@ val hasMaxUnity = ShowInterstitialFingerprint.methodOrNull != null ||
             MaxRewardedAdShowAdFingerprint.methodOrNull?.let {
                 it.addInstructions(0, fireHiddenCallbacks("Lcom/applovin/mediation/ads/MaxRewardedAd;"))
             }
+        }
+
+        // ── Unity Ads v3 (legacy) ──
+        if (blockInterstitials == true) {
+            UnityAdsV3Show2ArgFingerprint.methodOrNull?.let { it.addInstruction(0, "return-void") }
+            UnityAdsV3ShowOptionsFingerprint.methodOrNull?.let { it.addInstruction(0, "return-void") }
+        }
+
+        // ── ironSource (LevelPlay) public API ──
+        if (blockInterstitials == true) {
+            IronSourceShowDemandOnlyInterstitialFingerprint.methodOrNull?.let { it.addInstruction(0, "return-void") }
+        }
+        if (blockRewarded == true) {
+            IronSourceShowDemandOnlyRewardedVideoFingerprint.methodOrNull?.let { it.addInstruction(0, "return-void") }
+        }
+
+        // ── AppLovin legacy (direct SDK, non-MAX) ──
+        if (blockInterstitials == true) {
+            AppLovinInterstitialDialogShowFingerprint.methodOrNull?.let { it.addInstruction(0, "return-void") }
+            AppLovinInterstitialDialogShowAndRenderFingerprint.methodOrNull?.let { it.addInstruction(0, "return-void") }
+        }
+        if (blockBanners == true) {
+            AppLovinAdViewLoadNextAdFingerprint.methodOrNull?.let { it.addInstruction(0, "return-void") }
+        }
+        if (blockRewarded == true) {
+            AppLovinIncentivizedShow4ListenerFingerprint.methodOrNull?.let { it.addInstruction(0, "return-void") }
+            AppLovinIncentivizedShow5ListenerFingerprint.methodOrNull?.let { it.addInstruction(0, "return-void") }
+        }
+
+        // ── Vungle ──
+        if (blockInterstitials == true || blockRewarded == true) {
+            VungleBaseFullscreenAdLoadFingerprint.methodOrNull?.let { it.addInstruction(0, "return-void") }
         }
     }
 }

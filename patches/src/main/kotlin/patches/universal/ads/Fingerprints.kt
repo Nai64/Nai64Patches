@@ -264,6 +264,105 @@ internal object UnityAdsV4Show4ArgFingerprint : Fingerprint(
     ),
 )
 
+// ── Unity Ads v3 (legacy) ──
+// Older Unity Ads API: UnityAds.show(Activity, placementId) without listeners.
+
+internal object UnityAdsV3Show2ArgFingerprint : Fingerprint(
+    definingClass = "Lcom/unity3d/ads/UnityAds;",
+    name = "show",
+    returnType = "V",
+    parameters = listOf(
+        "Landroid/app/Activity;",
+        "Ljava/lang/String;",
+    ),
+)
+
+internal object UnityAdsV3ShowOptionsFingerprint : Fingerprint(
+    definingClass = "Lcom/unity3d/ads/UnityAds;",
+    name = "show",
+    returnType = "V",
+    parameters = listOf(
+        "Landroid/app/Activity;",
+        "Ljava/lang/String;",
+        "Lcom/unity3d/ads/UnityAdsShowOptions;",
+    ),
+)
+
+// ── ironSource (LevelPlay) public API ──
+
+internal object IronSourceShowDemandOnlyInterstitialFingerprint : Fingerprint(
+    definingClass = "Lcom/ironsource/mediationsdk/IronSource;",
+    name = "showISDemandOnlyInterstitial",
+    returnType = "V",
+    parameters = listOf("Ljava/lang/String;"),
+)
+
+internal object IronSourceShowDemandOnlyRewardedVideoFingerprint : Fingerprint(
+    definingClass = "Lcom/ironsource/mediationsdk/IronSource;",
+    name = "showISDemandOnlyRewardedVideo",
+    returnType = "V",
+    parameters = listOf("Ljava/lang/String;"),
+)
+
+// ── AppLovin legacy (direct SDK, non-MAX) ──
+
+internal object AppLovinInterstitialDialogShowFingerprint : Fingerprint(
+    definingClass = "Lcom/applovin/adview/AppLovinInterstitialAdDialog;",
+    name = "show",
+    returnType = "V",
+    parameters = emptyList(),
+)
+
+internal object AppLovinInterstitialDialogShowAndRenderFingerprint : Fingerprint(
+    definingClass = "Lcom/applovin/adview/AppLovinInterstitialAdDialog;",
+    name = "showAndRender",
+    returnType = "V",
+    parameters = listOf("Lcom/applovin/sdk/AppLovinAd;"),
+)
+
+internal object AppLovinIncentivizedShow4ListenerFingerprint : Fingerprint(
+    definingClass = "Lcom/applovin/adview/AppLovinIncentivizedInterstitial;",
+    name = "show",
+    returnType = "V",
+    parameters = listOf(
+        "Landroid/content/Context;",
+        "Lcom/applovin/sdk/AppLovinAdRewardListener;",
+        "Lcom/applovin/sdk/AppLovinAdVideoPlaybackListener;",
+        "Lcom/applovin/sdk/AppLovinAdDisplayListener;",
+    ),
+)
+
+internal object AppLovinIncentivizedShow5ListenerFingerprint : Fingerprint(
+    definingClass = "Lcom/applovin/adview/AppLovinIncentivizedInterstitial;",
+    name = "show",
+    returnType = "V",
+    parameters = listOf(
+        "Landroid/content/Context;",
+        "Lcom/applovin/sdk/AppLovinAdRewardListener;",
+        "Lcom/applovin/sdk/AppLovinAdVideoPlaybackListener;",
+        "Lcom/applovin/sdk/AppLovinAdDisplayListener;",
+        "Lcom/applovin/sdk/AppLovinAdClickListener;",
+    ),
+)
+
+internal object AppLovinAdViewLoadNextAdFingerprint : Fingerprint(
+    definingClass = "Lcom/applovin/adview/AppLovinAdView;",
+    name = "loadNextAd",
+    returnType = "V",
+    parameters = emptyList(),
+)
+
+// ── Vungle ──
+// Vungle 7.x: VungleInterstitialAd / VungleRewardedAd both load through
+// BaseFullscreenAd.load(placementId). Blocking the load makes shows no-op.
+
+internal object VungleBaseFullscreenAdLoadFingerprint : Fingerprint(
+    definingClass = "Lcom/vungle/ads/BaseFullscreenAd;",
+    name = "load",
+    returnType = "V",
+    parameters = listOf("Ljava/lang/String;"),
+)
+
 // ── LevelPlay RewardedAd fingerprints ──
 
 internal object LevelPlayRewardedAdIsReadyFingerprint : Fingerprint(
