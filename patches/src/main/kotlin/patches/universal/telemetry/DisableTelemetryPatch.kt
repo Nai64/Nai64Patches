@@ -171,7 +171,10 @@ val disableTelemetryPatch = bytecodePatch(
             if (blockFacebook == true && FacebookLogEventFingerprint.methodOrNull != null) add("Facebook")
             if (blockUnity == true && UnityAnalyticsTransactionFingerprint.methodOrNull != null) add("Unity")
             if (blockFlurry == true && FlurryLogEventFingerprint.methodOrNull != null) add("Flurry")
-            if (blockGameAnalytics == true && GameAnalyticsInitializeFingerprint.methodOrNull != null) add("GameAnalytics")
+            if (blockGameAnalytics == true && (
+                GameAnalyticsInitializeFingerprint.methodOrNull != null ||
+                GameAnalyticsInitializeNoArgFingerprint.methodOrNull != null
+            )) add("GameAnalytics")
         }
         blocked.forEach { logger.info("Blocked telemetry SDK: $it") }
         logger.info("Disable Telemetry patch succeeded (${blocked.size} SDK(s) blocked)")
