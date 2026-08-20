@@ -76,19 +76,19 @@ val customResolutionPatch = bytecodePatch(
         title = "Enable Custom Resolution",
         default = false,
         key = "enableCustomResolution",
-        description = "",
+        description = "Override the game's window size with the width and height below",
     )
     val width by intOption(
         title = "Resolution width (px)",
         default = 1920,
         key = "width",
-        description = "",
+        description = "Horizontal resolution in pixels",
     )
     val height by intOption(
         title = "Resolution height (px)",
         default = 1080,
         key = "height",
-        description = "",
+        description = "Vertical resolution in pixels",
     )
 
     execute {
