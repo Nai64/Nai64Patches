@@ -112,14 +112,6 @@ internal object FallbackStringInstallerCheckFingerprint : Fingerprint(
     strings = listOf("com.android.vending"),
 )
 
-internal object PairipVMRunnerInvokeFingerprint : Fingerprint(
-    definingClass = "Lcom/pairip/VMRunner;",
-    name = "invoke",
-    accessFlags = listOf(AccessFlags.PUBLIC, AccessFlags.STATIC),
-    returnType = "Ljava/lang/Object;",
-    parameters = listOf("Ljava/lang/String;", "[Ljava/lang/Object;"),
-)
-
 internal object PairipSignatureCheckVerifyIntegrityFingerprint : Fingerprint(
     definingClass = "Lcom/pairip/SignatureCheck;",
     name = "verifyIntegrity",
@@ -220,17 +212,6 @@ internal object MaxAdViewStartAutoRefreshFingerprint : Fingerprint(
 )
 
 // ── Unity Ads RewardedAd fingerprints ──
-
-internal object UnityRewardedAdLoadFingerprint : Fingerprint(
-    definingClass = "Lcom/unity3d/ads/RewardedAd;",
-    name = "load",
-    accessFlags = listOf(AccessFlags.PUBLIC, AccessFlags.STATIC, AccessFlags.FINAL),
-    returnType = "V",
-    parameters = listOf(
-        "Lcom/unity3d/ads/LoadConfiguration;",
-        "Lcom/unity3d/ads/LoadListener;",
-    ),
-)
 
 internal object UnityRewardedAdShowFingerprint : Fingerprint(
     definingClass = "Lcom/unity3d/ads/RewardedAd;",
@@ -501,16 +482,6 @@ internal object LevelPlayRewardedAdIsReadyFingerprint : Fingerprint(
     name = "isAdReady",
     returnType = "Z",
     parameters = emptyList(),
-)
-
-internal object LevelPlayRewardedAdShowAdFingerprint : Fingerprint(
-    definingClass = "Lcom/unity3d/mediation/rewarded/LevelPlayRewardedAd;",
-    name = "showAd",
-    returnType = "V",
-    parameters = listOf(
-        "Landroid/app/Activity;",
-        "Ljava/lang/String;",
-    ),
 )
 
 internal object IronSourceUnityRewardedAdIsReadyFingerprint : Fingerprint(
