@@ -46,6 +46,7 @@ private fun generatePatchList(version: String, patches: Set<Patch<*>>) {
         "Bypass Google Play Services Check",
         "Pairip Bypass (Experimental)",
         "Unlock RevenueCat Entitlements",
+        "Unlock All IAPs (Unity IAP)",
         "Custom App Resolution (Experimental)",
         "Allow Screenshots",
         "Skip Splash Screen (Experimental)",
