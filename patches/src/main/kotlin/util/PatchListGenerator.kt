@@ -39,6 +39,7 @@ private fun generatePatchList(version: String, patches: Set<Patch<*>>) {
         "Ads Free Rewards",
         "No Ads",
         "Spoof Play Store Install Source",
+        "Spoof Play Integrity",
         "Pairip Bypass (Experimental)",
         "Unlock RevenueCat Entitlements",
         "Custom App Resolution (Experimental)",
