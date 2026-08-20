@@ -1,6 +1,6 @@
 {
   "NOTE": "Do NOT manually edit this file. This file is automatically updated when semantic release (release.yml) runs. Manually editing this file can break your releases and break third party tools that use this file.",
-  "version": "1.19.0",
+  "version": "1.20.0",
   "patches": [
     {
       "name": "Ads Free Rewards",
@@ -9,6 +9,23 @@
       "dependencies": [],
       "compatiblePackages": null,
       "options": [
+        {
+          "key": "patchVersion",
+          "title": "Patch version",
+          "description": "Which implementation of the patch to use",
+          "required": false,
+          "type": "kotlin.String",
+          "default": "1.19.0",
+          "values": {
+            "1.1.0 (Original)": "1.1.0",
+            "1.15.0": "1.15.0",
+            "1.16.0": "1.16.0",
+            "1.17.0": "1.17.0",
+            "1.18.0": "1.18.0",
+            "1.18.1": "1.18.1",
+            "1.19.0 (Current)": "1.19.0"
+          }
+        },
         {
           "key": "rewardStrategy",
           "title": "Reward Strategy",

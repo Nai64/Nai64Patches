@@ -1,3 +1,9 @@
+## [1.20.0](https://github.com/Nai64/Nai64Patches/compare/1.19.0...1.20.0) (2026-08-20)
+
+### New Features
+
+* add patch version selector to Ads Free Rewards ([e62760b](https://github.com/Nai64/Nai64Patches/commit/e62760b8137ca1ba58765e4e45cf99aba866d270))
+
 ## [1.19.0](https://github.com/Nai64/Nai64Patches/compare/1.18.1...1.19.0) (2026-08-20)
 
 ### New Features
