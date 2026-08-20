@@ -34,7 +34,7 @@ val adsFreeRewardsPatch = bytecodePatch(
         key = "rewardStrategy",
         default = "auto",
         title = "Reward Strategy",
-        description = "Which ad networks to patch",
+        description = "Which ad-network integration to patch. 'Auto' covers every supported network",
         values = mapOf(
             "Auto (all networks)" to "auto",
             "AppLovin MAX" to "max",
@@ -46,7 +46,7 @@ val adsFreeRewardsPatch = bytecodePatch(
         key = "instantReward",
         default = true,
         title = "Instant reward",
-        description = "Claim the reward immediately without showing an ad",
+        description = "Claim the reward immediately without showing an ad (applies to the current patch version)",
     )
 
     execute {
