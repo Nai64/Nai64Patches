@@ -56,12 +56,15 @@ val hasMaxUnity = ShowInterstitialFingerprint.methodOrNull != null ||
         val hasAdMob = AdMobInterstitialShowFingerprint.methodOrNull != null ||
             AdMobLegacyInterstitialShowFingerprint.methodOrNull != null ||
             AdMobAppOpenShowFingerprint.methodOrNull != null ||
+            AdMobAppOpenLoadFingerprint.methodOrNull != null ||
             AdMobRewardedShowFingerprint.methodOrNull != null ||
             AdMobLegacyRewardedVideoShowFingerprint.methodOrNull != null
         val hasUnityAdsV3 = UnityAdsV3Show2ArgFingerprint.methodOrNull != null ||
             UnityAdsV3ShowOptionsFingerprint.methodOrNull != null
         val hasIronSource = IronSourceShowDemandOnlyInterstitialFingerprint.methodOrNull != null ||
-            IronSourceShowDemandOnlyRewardedVideoFingerprint.methodOrNull != null
+            IronSourceShowDemandOnlyRewardedVideoFingerprint.methodOrNull != null ||
+            IronSourceShowInterstitialFingerprint.methodOrNull != null ||
+            IronSourceShowRewardedVideoFingerprint.methodOrNull != null
         val hasAppLovinLegacy = AppLovinInterstitialDialogShowFingerprint.methodOrNull != null ||
             AppLovinIncentivizedShow4ListenerFingerprint.methodOrNull != null ||
             AppLovinAdViewLoadNextAdFingerprint.methodOrNull != null
@@ -114,6 +117,7 @@ val hasMaxUnity = ShowInterstitialFingerprint.methodOrNull != null ||
         }
         if (blockAppOpen == true) {
             AdMobAppOpenShowFingerprint.methodOrNull?.let { it.addInstruction(0, "return-void") }
+            AdMobAppOpenLoadFingerprint.methodOrNull?.let { it.addInstruction(0, "return-void") }
         }
         if (blockRewarded == true) {
             AdMobRewardedShowFingerprint.methodOrNull?.let { it.addInstruction(0, "return-void") }
@@ -149,9 +153,17 @@ val hasMaxUnity = ShowInterstitialFingerprint.methodOrNull != null ||
         // ── ironSource (LevelPlay) public API ──
         if (blockInterstitials == true) {
             IronSourceShowDemandOnlyInterstitialFingerprint.methodOrNull?.let { it.addInstruction(0, "return-void") }
+            IronSourceShowInterstitialFingerprint.methodOrNull?.let { it.addInstruction(0, "return-void") }
+            IronSourceShowInterstitialActivityFingerprint.methodOrNull?.let { it.addInstruction(0, "return-void") }
+            IronSourceShowInterstitialActivityPlacementFingerprint.methodOrNull?.let { it.addInstruction(0, "return-void") }
+            IronSourceShowInterstitialPlacementFingerprint.methodOrNull?.let { it.addInstruction(0, "return-void") }
         }
         if (blockRewarded == true) {
             IronSourceShowDemandOnlyRewardedVideoFingerprint.methodOrNull?.let { it.addInstruction(0, "return-void") }
+            IronSourceShowRewardedVideoFingerprint.methodOrNull?.let { it.addInstruction(0, "return-void") }
+            IronSourceShowRewardedVideoActivityFingerprint.methodOrNull?.let { it.addInstruction(0, "return-void") }
+            IronSourceShowRewardedVideoActivityPlacementFingerprint.methodOrNull?.let { it.addInstruction(0, "return-void") }
+            IronSourceShowRewardedVideoPlacementFingerprint.methodOrNull?.let { it.addInstruction(0, "return-void") }
         }
 
         // ── AppLovin legacy (direct SDK, non-MAX) ──

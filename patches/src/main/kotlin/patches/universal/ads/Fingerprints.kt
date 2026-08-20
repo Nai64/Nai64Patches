@@ -304,6 +304,62 @@ internal object IronSourceShowDemandOnlyRewardedVideoFingerprint : Fingerprint(
     parameters = listOf("Ljava/lang/String;"),
 )
 
+internal object IronSourceShowInterstitialFingerprint : Fingerprint(
+    definingClass = "Lcom/ironsource/mediationsdk/IronSource;",
+    name = "showInterstitial",
+    returnType = "V",
+    parameters = emptyList(),
+)
+
+internal object IronSourceShowInterstitialActivityFingerprint : Fingerprint(
+    definingClass = "Lcom/ironsource/mediationsdk/IronSource;",
+    name = "showInterstitial",
+    returnType = "V",
+    parameters = listOf("Landroid/app/Activity;"),
+)
+
+internal object IronSourceShowInterstitialActivityPlacementFingerprint : Fingerprint(
+    definingClass = "Lcom/ironsource/mediationsdk/IronSource;",
+    name = "showInterstitial",
+    returnType = "V",
+    parameters = listOf("Landroid/app/Activity;", "Ljava/lang/String;"),
+)
+
+internal object IronSourceShowInterstitialPlacementFingerprint : Fingerprint(
+    definingClass = "Lcom/ironsource/mediationsdk/IronSource;",
+    name = "showInterstitial",
+    returnType = "V",
+    parameters = listOf("Ljava/lang/String;"),
+)
+
+internal object IronSourceShowRewardedVideoFingerprint : Fingerprint(
+    definingClass = "Lcom/ironsource/mediationsdk/IronSource;",
+    name = "showRewardedVideo",
+    returnType = "V",
+    parameters = emptyList(),
+)
+
+internal object IronSourceShowRewardedVideoActivityFingerprint : Fingerprint(
+    definingClass = "Lcom/ironsource/mediationsdk/IronSource;",
+    name = "showRewardedVideo",
+    returnType = "V",
+    parameters = listOf("Landroid/app/Activity;"),
+)
+
+internal object IronSourceShowRewardedVideoActivityPlacementFingerprint : Fingerprint(
+    definingClass = "Lcom/ironsource/mediationsdk/IronSource;",
+    name = "showRewardedVideo",
+    returnType = "V",
+    parameters = listOf("Landroid/app/Activity;", "Ljava/lang/String;"),
+)
+
+internal object IronSourceShowRewardedVideoPlacementFingerprint : Fingerprint(
+    definingClass = "Lcom/ironsource/mediationsdk/IronSource;",
+    name = "showRewardedVideo",
+    returnType = "V",
+    parameters = listOf("Ljava/lang/String;"),
+)
+
 // ── AppLovin legacy (direct SDK, non-MAX) ──
 
 internal object AppLovinInterstitialDialogShowFingerprint : Fingerprint(
@@ -609,10 +665,23 @@ internal object AdMobLegacyInterstitialShowFingerprint : Fingerprint(
 )
 
 internal object AdMobAppOpenShowFingerprint : Fingerprint(
-    definingClass = "Lcom/google/android/gms/ads/AppOpenAd;",
+    definingClass = "Lcom/google/android/gms/ads/appopen/AppOpenAd;",
     name = "show",
     returnType = "V",
     parameters = listOf("Landroid/app/Activity;"),
+)
+
+internal object AdMobAppOpenLoadFingerprint : Fingerprint(
+    definingClass = "Lcom/google/android/gms/ads/appopen/AppOpenAd;",
+    name = "load",
+    accessFlags = listOf(AccessFlags.PUBLIC, AccessFlags.STATIC),
+    returnType = "V",
+    parameters = listOf(
+        "Landroid/content/Context;",
+        "Ljava/lang/String;",
+        "Lcom/google/android/gms/ads/AdRequest;",
+        "Lcom/google/android/gms/ads/appopen/AppOpenAd\$AppOpenAdLoadCallback;",
+    ),
 )
 
 internal object AdMobRewardedShowFingerprint : Fingerprint(
