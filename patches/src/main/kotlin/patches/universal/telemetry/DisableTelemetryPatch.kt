@@ -173,6 +173,6 @@ val disableTelemetryPatch = bytecodePatch(
             if (blockFlurry == true && FlurryLogEventFingerprint.methodOrNull != null) add("Flurry")
             if (blockGameAnalytics == true && GameAnalyticsInitializeFingerprint.methodOrNull != null) add("GameAnalytics")
         }
-        logger.info("Disable Telemetry patch succeeded — ${blocked.size} SDK/SDKs blocked: ${blocked.joinToString(", ")}")
+        logger.info("Disable Telemetry patch succeeded - ${blocked.size} SDK/SDKs blocked: ${blocked.joinToString(", ")}")
     }
 }

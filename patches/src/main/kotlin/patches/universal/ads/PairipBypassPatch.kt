@@ -31,11 +31,11 @@ private val applicationRedirectPatch = resourcePatch(
             val ns = "http://schemas.android.com/apk/res/android"
             val cur = app.getAttributeNS(ns, "name").let { if (!it.isNullOrEmpty()) it else app.getAttribute("android:name") }
             if (cur != "com.pairip.application.Application") {
-                logger.info("Application class is '$cur' — not Pairip, skipping")
+                logger.info("Application class is '$cur' - not Pairip, skipping")
                 return@execute
             }
             app.setAttributeNS(ns, "android:name", real)
-            logger.info("Redirected Pairip -> $real — Pairip Application Redirect (internal) patch succeeded")
+            logger.info("Redirected Pairip -> $real - Pairip Application Redirect (internal) patch succeeded")
         }
     }
 }
@@ -123,7 +123,7 @@ val pairipBypassPatch = bytecodePatch(
             logger.info("Applied Pairip LicenseActivity paywall suppress")
         }
 
-        // ── Strategy 7a: Application.attachBaseContext — main entry point ──
+        // ── Strategy 7a: Application.attachBaseContext - main entry point ──
         PairipApplicationAttachBaseContextFingerprint.methodOrNull?.let {
             it.addInstructions(0, """
                 invoke-static {p1}, Lcom/pairip/VMRunner;->setContext(Landroid/content/Context;)V
@@ -133,7 +133,7 @@ val pairipBypassPatch = bytecodePatch(
             logger.info("Applied Pairip Application.attachBaseContext bypass")
         }
 
-        // ── Strategy 7b: Application.onCreate — backup entry point ──
+        // ── Strategy 7b: Application.onCreate - backup entry point ──
         PairipApplicationOnCreateFingerprint.methodOrNull?.let {
             it.addInstructions(0, """
                 invoke-super {p0}, Lcom/pairip/application/Application;->onCreate()V
@@ -142,7 +142,7 @@ val pairipBypassPatch = bytecodePatch(
             logger.info("Applied Pairip Application.onCreate bypass")
         }
 
-        // ── Strategy 8: LicenseClient.checkLicense — root kill ──
+        // ── Strategy 8: LicenseClient.checkLicense - root kill ──
         PairipLicenseClientCheckLicenseFingerprint.methodOrNull?.let {
             it.addInstructions(0, """
                 return-void
@@ -248,6 +248,6 @@ val pairipBypassPatch = bytecodePatch(
             PairipResponseValidatorVerifySignatureFingerprint.methodOrNull?.let { "verifySignature (ResponseValidator)" },
             PairipResponseValidatorV3ValidateResponseFingerprint.methodOrNull?.let { "validateResponse (V3)" },
         )
-        logger.info("Pairip Bypass (Experimental) patch succeeded — ${applied.size} strategy/strategies applied: ${applied.joinToString(", ")}")
+        logger.info("Pairip Bypass (Experimental) patch succeeded - ${applied.size} strategy/strategies applied: ${applied.joinToString(", ")}")
     }
 }

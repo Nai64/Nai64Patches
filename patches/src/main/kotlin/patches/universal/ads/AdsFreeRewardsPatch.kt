@@ -178,7 +178,7 @@ val adsFreeRewardsPatch = bytecodePatch(
                         "register count ${nativeShow.implementation?.registerCount} < 7"
                 )
             }
-            // Do NOT return — let subsequent strategies run for games where the
+            // Do NOT return - let subsequent strategies run for games where the
             // MAX showAd patch may not intercept the actual ad path (e.g. IL2CPP
             // games with ProGuard-broken showAd()V, or games routing through
             // LevelPlay / ironSource / Unity Ads instead).
@@ -235,7 +235,7 @@ val adsFreeRewardsPatch = bytecodePatch(
         val adsShow = UnityRewardedAdShowFingerprint.methodOrNull
         if (useUnityAds && adsShow != null && instantReward == true) {
             logger.info("Unity Ads patch succeeded")
-            // Only patch show() — do NOT patch load() so the real ad loads
+            // Only patch show() - do NOT patch load() so the real ad loads
             // silently in the background (prevents Unity Ads error 628).
             adsShow.addInstructions(0, """
                 invoke-interface {p3, p0}, Lcom/unity3d/ads/RewardedShowListener;->onRewarded(Lcom/unity3d/ads/RewardedAd;)V

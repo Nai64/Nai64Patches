@@ -125,6 +125,6 @@ val customResolutionPatch = bytecodePatch(
             invoke-virtual {v2, v0}, Landroid/view/Window;->addFlags(I)V
         """.trimIndent())
 
-        logger.info("Custom App Resolution (Experimental) patch succeeded — ${w}x${h}")
+        logger.info("Custom App Resolution (Experimental) patch succeeded - ${w}x${h}")
     }
 }

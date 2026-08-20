@@ -17,7 +17,7 @@ val installSourceSpoofPatch = bytecodePatch(
 
         // ── Generic string-based strategies ──
         // These search for methods containing "com.android.vending" by return type.
-        // These run even when Pairip is found — catches non-Pairip methods.
+        // These run even when Pairip is found - catches non-Pairip methods.
 
         // Strategy 7: Private boolean method referencing "com.android.vending"
         val boolCheck = GenericBooleanInstallerCheckFingerprint.methodOrNull
