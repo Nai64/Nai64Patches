@@ -165,6 +165,24 @@
       "options": []
     },
     {
+      "name": "Force Landscape / Portrait",
+      "description": "Force the app to a fixed screen orientation",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": [
+        {
+          "key": "orientation",
+          "title": "Orientation",
+          "description": "landscape, portrait, sensorLandscape, sensorPortrait, userLandscape or userPortrait",
+          "required": false,
+          "type": "kotlin.String",
+          "default": "landscape",
+          "values": null
+        }
+      ]
+    },
+    {
       "name": "Spoof Play Integrity",
       "description": "Force Play Integrity checks to pass",
       "default": false,
@@ -400,6 +418,14 @@
           "values": null
         }
       ]
+    },
+    {
+      "name": "Block Push Ads",
+      "description": "Block push notification ads (Firebase Cloud Messaging). Also blocks legitimate notifications.",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": []
     }
   ]
 }
