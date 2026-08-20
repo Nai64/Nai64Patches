@@ -97,6 +97,14 @@
       "options": []
     },
     {
+      "name": "Spoof Play Integrity",
+      "description": "Force Play Integrity checks to pass",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": []
+    },
+    {
       "name": "Pairip Bypass (Experimental)",
       "description": "Bypass Pairip license protection",
       "default": false,
