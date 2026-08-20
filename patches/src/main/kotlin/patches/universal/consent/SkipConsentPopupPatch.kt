@@ -1,6 +1,7 @@
 package patches.universal.consent
 
 import app.morphe.patcher.Fingerprint
+import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.patch.bytecodePatch
 import java.util.logging.Logger
@@ -14,6 +15,13 @@ internal object UmpConsentFormShowFingerprint : Fingerprint(
     },
 )
 
+internal object AppLovinShowConsentFlowFingerprint : Fingerprint(
+    definingClass = "Lcom/applovin/sdk/AppLovinSdk;",
+    name = "showConsentFlow",
+    returnType = "V",
+    parameters = listOf("Landroid/app/Activity;", "Lcom/applovin/sdk/AppLovinSdk\$ConsentFlowListener;"),
+)
+
 @Suppress("unused")
 val skipConsentPopupPatch = bytecodePatch(
     name = "Skip Consent Popup",
@@ -23,14 +31,27 @@ val skipConsentPopupPatch = bytecodePatch(
     execute {
         val logger = Logger.getLogger(this::class.java.name)
 
+        var patched = false
+
+        // AppLovin MAX consent flow (CCPA/GDPR dialog shown by the ad SDK).
+        val appLovin = AppLovinShowConsentFlowFingerprint.methodOrNull
+        if (appLovin != null) {
+            appLovin.addInstruction(0, "return-void")
+            logger.info("AppLovin consent flow skipped")
+            patched = true
+        }
+
+        // Google UMP consent form (GDPR).
         val method = UmpConsentFormShowFingerprint.methodOrNull
         if (method == null || method.implementation == null) {
-            logger.warning("Google consent form not found. No changes applied.")
+            if (!patched) {
+                logger.warning("No consent popup found. No changes applied.")
+            }
             return@execute
         }
 
         if (method.implementation!!.registerCount < 3) {
-            logger.warning("Skipping consent popup: not enough registers")
+            logger.warning("Skipping Google consent popup: not enough registers")
             return@execute
         }
 
@@ -43,6 +64,6 @@ val skipConsentPopupPatch = bytecodePatch(
             return-void
             """.trimIndent(),
         )
-        logger.info("Consent popup skipped")
+        logger.info("Google consent popup skipped")
     }
 }
