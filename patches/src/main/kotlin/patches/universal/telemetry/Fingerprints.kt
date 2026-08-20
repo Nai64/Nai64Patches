@@ -115,3 +115,28 @@ internal object FlurryLogEventFingerprint : Fingerprint(
     parameters = listOf("Ljava/lang/String;", "Landroid/os/Bundle;"),
     accessFlags = listOf(AccessFlags.PUBLIC, AccessFlags.STATIC),
 )
+
+internal object GameAnalyticsInitializeFingerprint : Fingerprint(
+    name = "initializeWithGameKey",
+    returnType = "V",
+    custom = { method, classDef ->
+        classDef.type.contains("gameanalytics", ignoreCase = true)
+    },
+)
+
+internal object GameAnalyticsInitializeNoArgFingerprint : Fingerprint(
+    name = "initialize",
+    returnType = "V",
+    accessFlags = listOf(AccessFlags.PUBLIC, AccessFlags.STATIC),
+    custom = { method, classDef ->
+        classDef.type.contains("gameanalytics", ignoreCase = true)
+    },
+)
+
+internal object GameAnalyticsDesignEventFingerprint : Fingerprint(
+    name = "addDesignEvent",
+    returnType = "V",
+    custom = { method, classDef ->
+        classDef.type.contains("gameanalytics", ignoreCase = true)
+    },
+)

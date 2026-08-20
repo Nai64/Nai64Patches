@@ -77,6 +77,12 @@ val disableTelemetryPatch = bytecodePatch(
         key = "blockFlurry",
         description = "",
     )
+    val blockGameAnalytics by booleanOption(
+        title = "Block GameAnalytics",
+        default = true,
+        key = "blockGameAnalytics",
+        description = "",
+    )
 
     execute {
         val logger = Logger.getLogger(this::class.java.name)
@@ -94,6 +100,10 @@ val disableTelemetryPatch = bytecodePatch(
         if (FacebookLogEventFingerprint.methodOrNull != null) detected.add("Facebook Analytics")
         if (UnityAnalyticsTransactionFingerprint.methodOrNull != null) detected.add("Unity Analytics")
         if (FlurryLogEventFingerprint.methodOrNull != null) detected.add("Flurry")
+        if (
+            GameAnalyticsInitializeFingerprint.methodOrNull != null ||
+            GameAnalyticsInitializeNoArgFingerprint.methodOrNull != null
+        ) detected.add("GameAnalytics")
 
         if (detected.isEmpty()) {
             logger.warning("No supported telemetry SDKs found. No changes applied.")
@@ -143,6 +153,11 @@ val disableTelemetryPatch = bytecodePatch(
         if (blockFlurry == true) {
             FlurryLogEventFingerprint.methodOrNull?.let { it.addInstruction(0, "return-void") }
         }
+        if (blockGameAnalytics == true) {
+            GameAnalyticsInitializeFingerprint.methodOrNull?.let { it.addInstruction(0, "return-void") }
+            GameAnalyticsInitializeNoArgFingerprint.methodOrNull?.let { it.addInstruction(0, "return-void") }
+            GameAnalyticsDesignEventFingerprint.methodOrNull?.let { it.addInstruction(0, "return-void") }
+        }
 
         val blocked = buildList {
             if (blockFirebase == true && FirebaseInitializeFingerprint.methodOrNull != null) add("Firebase")
@@ -156,6 +171,7 @@ val disableTelemetryPatch = bytecodePatch(
             if (blockFacebook == true && FacebookLogEventFingerprint.methodOrNull != null) add("Facebook")
             if (blockUnity == true && UnityAnalyticsTransactionFingerprint.methodOrNull != null) add("Unity")
             if (blockFlurry == true && FlurryLogEventFingerprint.methodOrNull != null) add("Flurry")
+            if (blockGameAnalytics == true && GameAnalyticsInitializeFingerprint.methodOrNull != null) add("GameAnalytics")
         }
         logger.info("Disable Telemetry patch succeeded — ${blocked.size} SDK/SDKs blocked: ${blocked.joinToString(", ")}")
     }
