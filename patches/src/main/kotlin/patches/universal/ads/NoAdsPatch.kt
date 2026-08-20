@@ -5,7 +5,12 @@ import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.patch.booleanOption
 import app.morphe.patcher.patch.bytecodePatch
 import patches.universal.ads.util.fireHiddenCallbacks
+import app.morphe.patcher.Fingerprint
+import app.morphe.patcher.patch.BytecodePatchContext
 import java.util.logging.Logger
+
+private fun BytecodePatchContext.returnVoid(fingerprint: Fingerprint) =
+    fingerprint.methodOrNull?.addInstruction(0, "return-void")
 
 @Suppress("unused")
 val noAdsPatch = bytecodePatch(
@@ -81,18 +86,18 @@ val noAdsPatch = bytecodePatch(
 
         // ── MAX Unity wrapper ──
         if (blockInterstitials == true) {
-            ShowInterstitialFingerprint.methodOrNull?.let { it.addInstruction(0, "return-void") }
+            returnVoid(ShowInterstitialFingerprint)
         }
         if (blockAppOpen == true) {
-            ShowAppOpenAdFingerprint.methodOrNull?.let { it.addInstruction(0, "return-void") }
+            returnVoid(ShowAppOpenAdFingerprint)
         }
         if (blockBanners == true) {
-            ShowBannerFingerprint.methodOrNull?.let { it.addInstruction(0, "return-void") }
-            StartBannerAutoRefreshFingerprint.methodOrNull?.let { it.addInstruction(0, "return-void") }
+            returnVoid(ShowBannerFingerprint)
+            returnVoid(StartBannerAutoRefreshFingerprint)
         }
         if (blockMRec == true) {
-            ShowMRecFingerprint.methodOrNull?.let { it.addInstruction(0, "return-void") }
-            StartMRecAutoRefreshFingerprint.methodOrNull?.let { it.addInstruction(0, "return-void") }
+            returnVoid(ShowMRecFingerprint)
+            returnVoid(StartMRecAutoRefreshFingerprint)
         }
 
         // ── Native MAX (non-Unity) ──
@@ -107,21 +112,21 @@ val noAdsPatch = bytecodePatch(
             }
         }
         if (blockBanners == true || blockMRec == true) {
-            MaxAdViewStartAutoRefreshFingerprint.methodOrNull?.let { it.addInstruction(0, "return-void") }
+            returnVoid(MaxAdViewStartAutoRefreshFingerprint)
         }
 
         // ── AdMob (Google Mobile Ads) ──
         if (blockInterstitials == true) {
-            AdMobInterstitialShowFingerprint.methodOrNull?.let { it.addInstruction(0, "return-void") }
-            AdMobLegacyInterstitialShowFingerprint.methodOrNull?.let { it.addInstruction(0, "return-void") }
+            returnVoid(AdMobInterstitialShowFingerprint)
+            returnVoid(AdMobLegacyInterstitialShowFingerprint)
         }
         if (blockAppOpen == true) {
-            AdMobAppOpenShowFingerprint.methodOrNull?.let { it.addInstruction(0, "return-void") }
-            AdMobAppOpenLoadFingerprint.methodOrNull?.let { it.addInstruction(0, "return-void") }
+            returnVoid(AdMobAppOpenShowFingerprint)
+            returnVoid(AdMobAppOpenLoadFingerprint)
         }
         if (blockRewarded == true) {
-            AdMobRewardedShowFingerprint.methodOrNull?.let { it.addInstruction(0, "return-void") }
-            AdMobLegacyRewardedVideoShowFingerprint.methodOrNull?.let { it.addInstruction(0, "return-void") }
+            returnVoid(AdMobRewardedShowFingerprint)
+            returnVoid(AdMobLegacyRewardedVideoShowFingerprint)
         }
 
         // ── Rewarded ads ──
@@ -132,7 +137,7 @@ val noAdsPatch = bytecodePatch(
                     return v0
                 """.trimIndent())
             }
-            ShowRewardedAdFingerprint.methodOrNull?.let { it.addInstruction(0, "return-void") }
+            returnVoid(ShowRewardedAdFingerprint)
             MaxRewardedAdIsReadyFingerprint.methodOrNull?.let {
                 it.addInstructions(0, """
                     const/4 v0, 0x0
@@ -146,42 +151,42 @@ val noAdsPatch = bytecodePatch(
 
         // ── Unity Ads v3 (legacy) ──
         if (blockInterstitials == true) {
-            UnityAdsV3Show2ArgFingerprint.methodOrNull?.let { it.addInstruction(0, "return-void") }
-            UnityAdsV3ShowOptionsFingerprint.methodOrNull?.let { it.addInstruction(0, "return-void") }
+            returnVoid(UnityAdsV3Show2ArgFingerprint)
+            returnVoid(UnityAdsV3ShowOptionsFingerprint)
         }
 
         // ── ironSource (LevelPlay) public API ──
         if (blockInterstitials == true) {
-            IronSourceShowDemandOnlyInterstitialFingerprint.methodOrNull?.let { it.addInstruction(0, "return-void") }
-            IronSourceShowInterstitialFingerprint.methodOrNull?.let { it.addInstruction(0, "return-void") }
-            IronSourceShowInterstitialActivityFingerprint.methodOrNull?.let { it.addInstruction(0, "return-void") }
-            IronSourceShowInterstitialActivityPlacementFingerprint.methodOrNull?.let { it.addInstruction(0, "return-void") }
-            IronSourceShowInterstitialPlacementFingerprint.methodOrNull?.let { it.addInstruction(0, "return-void") }
+            returnVoid(IronSourceShowDemandOnlyInterstitialFingerprint)
+            returnVoid(IronSourceShowInterstitialFingerprint)
+            returnVoid(IronSourceShowInterstitialActivityFingerprint)
+            returnVoid(IronSourceShowInterstitialActivityPlacementFingerprint)
+            returnVoid(IronSourceShowInterstitialPlacementFingerprint)
         }
         if (blockRewarded == true) {
-            IronSourceShowDemandOnlyRewardedVideoFingerprint.methodOrNull?.let { it.addInstruction(0, "return-void") }
-            IronSourceShowRewardedVideoFingerprint.methodOrNull?.let { it.addInstruction(0, "return-void") }
-            IronSourceShowRewardedVideoActivityFingerprint.methodOrNull?.let { it.addInstruction(0, "return-void") }
-            IronSourceShowRewardedVideoActivityPlacementFingerprint.methodOrNull?.let { it.addInstruction(0, "return-void") }
-            IronSourceShowRewardedVideoPlacementFingerprint.methodOrNull?.let { it.addInstruction(0, "return-void") }
+            returnVoid(IronSourceShowDemandOnlyRewardedVideoFingerprint)
+            returnVoid(IronSourceShowRewardedVideoFingerprint)
+            returnVoid(IronSourceShowRewardedVideoActivityFingerprint)
+            returnVoid(IronSourceShowRewardedVideoActivityPlacementFingerprint)
+            returnVoid(IronSourceShowRewardedVideoPlacementFingerprint)
         }
 
         // ── AppLovin legacy (direct SDK, non-MAX) ──
         if (blockInterstitials == true) {
-            AppLovinInterstitialDialogShowFingerprint.methodOrNull?.let { it.addInstruction(0, "return-void") }
-            AppLovinInterstitialDialogShowAndRenderFingerprint.methodOrNull?.let { it.addInstruction(0, "return-void") }
+            returnVoid(AppLovinInterstitialDialogShowFingerprint)
+            returnVoid(AppLovinInterstitialDialogShowAndRenderFingerprint)
         }
         if (blockBanners == true) {
-            AppLovinAdViewLoadNextAdFingerprint.methodOrNull?.let { it.addInstruction(0, "return-void") }
+            returnVoid(AppLovinAdViewLoadNextAdFingerprint)
         }
         if (blockRewarded == true) {
-            AppLovinIncentivizedShow4ListenerFingerprint.methodOrNull?.let { it.addInstruction(0, "return-void") }
-            AppLovinIncentivizedShow5ListenerFingerprint.methodOrNull?.let { it.addInstruction(0, "return-void") }
+            returnVoid(AppLovinIncentivizedShow4ListenerFingerprint)
+            returnVoid(AppLovinIncentivizedShow5ListenerFingerprint)
         }
 
         // ── Vungle ──
         if (blockInterstitials == true || blockRewarded == true) {
-            VungleBaseFullscreenAdLoadFingerprint.methodOrNull?.let { it.addInstruction(0, "return-void") }
+            returnVoid(VungleBaseFullscreenAdLoadFingerprint)
         }
 
         // ── Meta Audience Network (facebook/ads) ──
@@ -210,13 +215,13 @@ val noAdsPatch = bytecodePatch(
 
         // ── Pangle (bytedance) ──
         if (blockInterstitials == true) {
-            PangleInterstitialShowFingerprint.methodOrNull?.let { it.addInstruction(0, "return-void") }
+            returnVoid(PangleInterstitialShowFingerprint)
         }
         if (blockAppOpen == true) {
-            PangleAppOpenShowFingerprint.methodOrNull?.let { it.addInstruction(0, "return-void") }
+            returnVoid(PangleAppOpenShowFingerprint)
         }
         if (blockRewarded == true) {
-            PangleRewardedShowFingerprint.methodOrNull?.let { it.addInstruction(0, "return-void") }
+            returnVoid(PangleRewardedShowFingerprint)
         }
     }
 }
