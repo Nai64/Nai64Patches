@@ -55,12 +55,13 @@ val skipConsentPopupPatch = bytecodePatch(
             return@execute
         }
 
-        // Fire onConsentFormDismissed on the listener (p2) and return,
-        // skipping the consent dialog entirely.
+        // Fire onConsentFormDismissed on the listener (p2) with a null
+        // FormError and return, skipping the consent dialog entirely.
         method.addInstructions(
             0,
             """
-            invoke-interface {p2}, Lcom/google/android/ump/ConsentFormOnShowListener;->onConsentFormDismissed()V
+            const/4 v0, 0x0
+            invoke-interface {p2, v0}, Lcom/google/android/ump/ConsentFormOnShowListener;->onConsentFormDismissed(Lcom/google/android/ump/FormError;)V
             return-void
             """.trimIndent(),
         )
