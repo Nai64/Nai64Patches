@@ -24,6 +24,13 @@ internal object IsRewardedAdReadyFingerprint : Fingerprint(
     parameters = listOf("Ljava/lang/String;"),
 )
 
+internal object MaxUnityAdManagerOnAdHiddenFingerprint : Fingerprint(
+    name = "onAdHidden",
+    accessFlags = listOf(AccessFlags.PUBLIC),
+    returnType = "V",
+    parameters = listOf("Lcom/applovin/mediation/MaxAd;"),
+)
+
 internal object ShowInterstitialFingerprint : Fingerprint(
     name = "showInterstitial",
     accessFlags = listOf(AccessFlags.PUBLIC),
