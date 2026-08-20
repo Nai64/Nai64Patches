@@ -15,73 +15,73 @@ val disableTelemetryPatch = bytecodePatch(
         title = "Block Firebase Analytics",
         default = true,
         key = "blockFirebase",
-        description = "",
+        description = "Google's analytics and crash reporting suite",
     )
     val blockAppsFlyer by booleanOption(
         title = "Block AppsFlyer",
         default = true,
         key = "blockAppsFlyer",
-        description = "",
+        description = "Mobile attribution and marketing analytics",
     )
     val blockAdjust by booleanOption(
         title = "Block Adjust",
         default = true,
         key = "blockAdjust",
-        description = "",
+        description = "Mobile attribution analytics",
     )
     val blockAmplitude by booleanOption(
         title = "Block Amplitude",
         default = true,
         key = "blockAmplitude",
-        description = "",
+        description = "Product analytics platform",
     )
     val blockMixpanel by booleanOption(
         title = "Block Mixpanel",
         default = true,
         key = "blockMixpanel",
-        description = "",
+        description = "Product analytics platform",
     )
     val blockCleverTap by booleanOption(
         title = "Block CleverTap",
         default = true,
         key = "blockCleverTap",
-        description = "",
+        description = "User engagement and analytics",
     )
     val blockSegment by booleanOption(
         title = "Block Segment",
         default = true,
         key = "blockSegment",
-        description = "",
+        description = "Customer data pipeline and analytics",
     )
     val blockFacebook by booleanOption(
         title = "Block Facebook Analytics",
         default = true,
         key = "blockFacebook",
-        description = "",
+        description = "Meta's analytics and event logging",
     )
     val blockBranch by booleanOption(
         title = "Block Branch.io",
         default = true,
         key = "blockBranch",
-        description = "",
+        description = "Deep linking and attribution",
     )
     val blockUnity by booleanOption(
         title = "Block Unity Analytics",
         default = true,
         key = "blockUnity",
-        description = "",
+        description = "Unity engine analytics",
     )
     val blockFlurry by booleanOption(
         title = "Block Flurry",
         default = true,
         key = "blockFlurry",
-        description = "",
+        description = "Yahoo's analytics platform",
     )
     val blockGameAnalytics by booleanOption(
         title = "Block GameAnalytics",
         default = true,
         key = "blockGameAnalytics",
-        description = "",
+        description = "Game-focused analytics",
     )
 
     execute {
