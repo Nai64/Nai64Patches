@@ -8,6 +8,7 @@ import java.util.logging.Logger
 @Suppress("unused")
 val unlockEntitlementsRevenueCatPatch = bytecodePatch(
     name = "Unlock RevenueCat Entitlements",
+    description = "Unlock all RevenueCat entitlements",
     default = false,
 ) {
     execute {

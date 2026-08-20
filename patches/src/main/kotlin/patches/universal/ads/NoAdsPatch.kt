@@ -10,6 +10,7 @@ import java.util.logging.Logger
 @Suppress("unused")
 val noAdsPatch = bytecodePatch(
     name = "No Ads",
+    description = "Remove ads",
     default = false,
 ) {
     val blockInterstitials by booleanOption(

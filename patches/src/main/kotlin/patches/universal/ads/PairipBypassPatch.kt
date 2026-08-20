@@ -65,6 +65,7 @@ private fun ResourcePatchContext.discoverPairipAppClass(logger: Logger): String?
 @Suppress("unused")
 val pairipBypassPatch = bytecodePatch(
     name = "Pairip Bypass (Experimental)",
+    description = "Bypass Pairip license protection",
     default = false,
 ) {
     dependsOn(applicationRedirectPatch)

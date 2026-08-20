@@ -8,6 +8,7 @@ import java.util.logging.Logger
 @Suppress("unused")
 val disableTelemetryPatch = bytecodePatch(
     name = "Disable Telemetry",
+    description = "Block analytics and tracking",
     default = false,
 ) {
     val blockFirebase by booleanOption(

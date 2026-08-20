@@ -7,6 +7,7 @@ import java.util.logging.Logger
 @Suppress("unused")
 val disableRootCheckPatch = bytecodePatch(
     name = "Disable Root Checks",
+    description = "Disable root detection",
     default = false,
 ) {
     execute {

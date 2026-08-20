@@ -67,6 +67,7 @@ private val manifestResolutionPatch = resourcePatch(
 @Suppress("unused")
 val customResolutionPatch = bytecodePatch(
     name = "Custom App Resolution (Experimental)",
+    description = "Set a custom resolution for the game",
     default = false,
 ) {
     dependsOn(manifestResolutionPatch)

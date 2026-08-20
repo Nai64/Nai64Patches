@@ -7,6 +7,7 @@ import java.util.logging.Logger
 @Suppress("unused")
 val disableUpdateCheckPatch = bytecodePatch(
     name = "Disable Update Checks",
+    description = "Disable in-app update prompts",
     default = false,
 ) {
     execute {
