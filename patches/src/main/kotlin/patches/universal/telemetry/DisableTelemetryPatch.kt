@@ -110,7 +110,7 @@ val disableTelemetryPatch = bytecodePatch(
             return@execute
         }
 
-        logger.info("Detected telemetry SDKs: ${detected.joinToString(", ")}")
+        detected.forEach { logger.info("Detected telemetry SDK: $it") }
 
         if (blockFirebase == true) {
             FirebaseInitializeFingerprint.methodOrNull?.let { it.addInstruction(0, "return-void") }
@@ -173,6 +173,7 @@ val disableTelemetryPatch = bytecodePatch(
             if (blockFlurry == true && FlurryLogEventFingerprint.methodOrNull != null) add("Flurry")
             if (blockGameAnalytics == true && GameAnalyticsInitializeFingerprint.methodOrNull != null) add("GameAnalytics")
         }
-        logger.info("Disable Telemetry patch succeeded - ${blocked.size} SDK/SDKs blocked: ${blocked.joinToString(", ")}")
+        blocked.forEach { logger.info("Blocked telemetry SDK: $it") }
+        logger.info("Disable Telemetry patch succeeded (${blocked.size} SDK(s) blocked)")
     }
 }

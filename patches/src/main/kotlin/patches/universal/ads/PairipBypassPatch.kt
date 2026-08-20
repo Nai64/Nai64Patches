@@ -248,6 +248,6 @@ val pairipBypassPatch = bytecodePatch(
             PairipResponseValidatorVerifySignatureFingerprint.methodOrNull?.let { "verifySignature (ResponseValidator)" },
             PairipResponseValidatorV3ValidateResponseFingerprint.methodOrNull?.let { "validateResponse (V3)" },
         )
-        logger.info("Pairip Bypass (Experimental) patch succeeded - ${applied.size} strategy/strategies applied: ${applied.joinToString(", ")}")
+        logger.info("Pairip Bypass (Experimental) patch succeeded (${applied.size} strategy(s) applied)")
     }
 }
