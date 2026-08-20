@@ -127,7 +127,7 @@ val pairipBypassPatch = bytecodePatch(
         PairipApplicationAttachBaseContextFingerprint.methodOrNull?.let {
             it.addInstructions(0, """
                 invoke-static {p1}, Lcom/pairip/VMRunner;->setContext(Landroid/content/Context;)V
-                invoke-super {p0, p1}, Lcom/pairip/application/Application;->attachBaseContext(Landroid/content/Context;)V
+                invoke-super {p0, p1}, Landroid/app/Application;->attachBaseContext(Landroid/content/Context;)V
                 return-void
             """.trimIndent())
             logger.info("Applied Pairip Application.attachBaseContext bypass")
@@ -136,7 +136,7 @@ val pairipBypassPatch = bytecodePatch(
         // ── Strategy 7b: Application.onCreate - backup entry point ──
         PairipApplicationOnCreateFingerprint.methodOrNull?.let {
             it.addInstructions(0, """
-                invoke-super {p0}, Lcom/pairip/application/Application;->onCreate()V
+                invoke-super {p0}, Landroid/app/Application;->onCreate()V
                 return-void
             """.trimIndent())
             logger.info("Applied Pairip Application.onCreate bypass")
