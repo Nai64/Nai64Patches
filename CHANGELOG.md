@@ -1,3 +1,20 @@
+## [1.21.0](https://github.com/Nai64/Nai64Patches/compare/1.20.0...1.21.0) (2026-08-20)
+
+### Bug Fixes
+
+* **AllowScreenshots:** correct setFlags method descriptors ([5406e1f](https://github.com/Nai64/Nai64Patches/commit/5406e1f19f2d52bc77b4e89c5c4ff6a325013109))
+* **DisableRootCheck:** warn when no root-check methods are found ([0921ada](https://github.com/Nai64/Nai64Patches/commit/0921adacedb3381f8df2959fbfcf7b4e65eaf827))
+* **DisableTelemetry:** count GameAnalytics when only NoArg variant present ([4b57a04](https://github.com/Nai64/Nai64Patches/commit/4b57a04dc40c09c953132079024c0a4ae90d7b7e))
+* **PairipBypass:** invoke superclass Application in attachBaseContext/onCreate ([954c171](https://github.com/Nai64/Nai64Patches/commit/954c17171fc465fdd64ad0203bbb74e53c379c08))
+* **PairipBypass:** warn when no license methods are found ([a942618](https://github.com/Nai64/Nai64Patches/commit/a942618e9d4f1ef0e87ea8e780307281c38cf3cb))
+* **PatchListGenerator:** avoid crash when no .mpp artifact found ([19546ea](https://github.com/Nai64/Nai64Patches/commit/19546eaa72ee18b01309f13f0ad8d07b7aa4b4ca))
+* **SkipConsentPopup:** pass FormError argument to onConsentFormDismissed ([aa809a8](https://github.com/Nai64/Nai64Patches/commit/aa809a80a80834afb5f25257b92fc5c94c27c4d6))
+* **UnlockAllIaps:** overwrite receipt and transaction id parameter registers ([c62b14d](https://github.com/Nai64/Nai64Patches/commit/c62b14d65e8c6fa1ba052eb624260a41073a3d30))
+
+### New Features
+
+* **ForceOrientation:** add orientation dropdown ([d319ed2](https://github.com/Nai64/Nai64Patches/commit/d319ed2c1edf9328dc99cf81cd9cfb57b3a71fc4))
+
 ## [1.20.0](https://github.com/Nai64/Nai64Patches/compare/1.19.0...1.20.0) (2026-08-20)
 
 ### New Features
