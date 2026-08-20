@@ -89,6 +89,14 @@
       ]
     },
     {
+      "name": "Skip Consent Popup",
+      "description": "Skip the Google consent (GDPR) popup",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": []
+    },
+    {
       "name": "Spoof Play Store Install Source",
       "description": null,
       "default": false,
@@ -107,6 +115,14 @@
     {
       "name": "Bypass License Verification",
       "description": "Always pass Google Play license checks",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": []
+    },
+    {
+      "name": "Bypass Google Play Services Check",
+      "description": "Always report Google Play Services as available",
       "default": false,
       "dependencies": [],
       "compatiblePackages": null,
@@ -171,6 +187,14 @@
     {
       "name": "Allow Screenshots",
       "description": "Remove the screenshot-blocking window flag",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": []
+    },
+    {
+      "name": "Skip Splash Screen (Experimental)",
+      "description": "Skip or shorten splash screen delays",
       "default": false,
       "dependencies": [],
       "compatiblePackages": null,
