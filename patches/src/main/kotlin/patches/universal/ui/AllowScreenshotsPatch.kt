@@ -17,9 +17,9 @@ private const val FLAG_SECURE = 0x2000
 
 private val FLAG_TARGET_METHODS = setOf(
     "Landroid/app/Activity;->addFlags(I)V",
-    "Landroid/app/Activity;->setFlags(ILandroid/os/Bundle;)V",
+    "Landroid/app/Activity;->setFlags(II)V",
     "Landroid/view/Window;->addFlags(I)V",
-    "Landroid/view/Window;->setFlags(ILandroid/os/Bundle;)V",
+    "Landroid/view/Window;->setFlags(II)V",
 )
 
 private fun lastRegisterOf(invoke: Instruction): Int? = when (invoke) {
