@@ -105,6 +105,14 @@
       "options": []
     },
     {
+      "name": "Bypass License Verification",
+      "description": "Always pass Google Play license checks",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": []
+    },
+    {
       "name": "Pairip Bypass (Experimental)",
       "description": "Bypass Pairip license protection",
       "default": false,
@@ -159,6 +167,14 @@
           "values": null
         }
       ]
+    },
+    {
+      "name": "Allow Screenshots",
+      "description": "Remove the screenshot-blocking window flag",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": []
     },
     {
       "name": "Disable Root Checks",
