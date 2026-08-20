@@ -42,6 +42,10 @@ val disableRootCheckPatch = bytecodePatch(
             RootBeerDetectSuBinaryFingerprint.methodOrNull?.let { "detectSuBinary" },
             RootBeerDetectTestKeysFingerprint.methodOrNull?.let { "detectTestKeys" },
         )
-        logger.info("Disable Root Checks patch succeeded (${applied.size} strategy(s) applied)")
+        if (applied.isEmpty()) {
+            logger.warning("No root-check methods found. No changes applied.")
+        } else {
+            logger.info("Disable Root Checks patch succeeded (${applied.size} strategy(s) applied)")
+        }
     }
 }
