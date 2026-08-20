@@ -47,7 +47,7 @@ val noAdsPatch = bytecodePatch(
     execute {
         val logger = Logger.getLogger(this::class.java.name)
 
-val hasMaxUnity = ShowInterstitialFingerprint.methodOrNull != null ||
+        val hasMaxUnity = ShowInterstitialFingerprint.methodOrNull != null ||
             ShowAppOpenAdFingerprint.methodOrNull != null ||
             ShowBannerFingerprint.methodOrNull != null
         val hasNativeMax = MaxInterstitialAdShowAdFingerprint.methodOrNull != null ||
