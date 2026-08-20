@@ -66,9 +66,13 @@ val hasMaxUnity = ShowInterstitialFingerprint.methodOrNull != null ||
             AppLovinIncentivizedShow4ListenerFingerprint.methodOrNull != null ||
             AppLovinAdViewLoadNextAdFingerprint.methodOrNull != null
         val hasVungle = VungleBaseFullscreenAdLoadFingerprint.methodOrNull != null
+        val hasFacebook = FacebookInterstitialAdShowFingerprint.methodOrNull != null ||
+            FacebookRewardedVideoAdShowFingerprint.methodOrNull != null
+        val hasPangle = PangleInterstitialShowFingerprint.methodOrNull != null ||
+            PangleRewardedShowFingerprint.methodOrNull != null
 
-        if (!hasMaxUnity && !hasNativeMax && !hasAdMob && !hasUnityAdsV3 && !hasIronSource && !hasAppLovinLegacy && !hasVungle) {
-            logger.warning("Could not find supported ad SDK (MAX Unity, native MAX, AdMob, Unity Ads, ironSource, AppLovin or Vungle). No changes applied.")
+        if (!hasMaxUnity && !hasNativeMax && !hasAdMob && !hasUnityAdsV3 && !hasIronSource && !hasAppLovinLegacy && !hasVungle && !hasFacebook && !hasPangle) {
+            logger.warning("Could not find supported ad SDK (MAX Unity, native MAX, AdMob, Unity Ads, ironSource, AppLovin, Vungle, Meta or Pangle). No changes applied.")
             return@execute
         }
 
@@ -166,6 +170,41 @@ val hasMaxUnity = ShowInterstitialFingerprint.methodOrNull != null ||
         // ── Vungle ──
         if (blockInterstitials == true || blockRewarded == true) {
             VungleBaseFullscreenAdLoadFingerprint.methodOrNull?.let { it.addInstruction(0, "return-void") }
+        }
+
+        // ── Meta Audience Network (facebook/ads) ──
+        if (blockInterstitials == true) {
+            FacebookInterstitialAdShowFingerprint.methodOrNull?.let {
+                it.addInstructions(0, "const/4 v0, 0x0\nreturn v0")
+            }
+            FacebookInterstitialAdShowConfigFingerprint.methodOrNull?.let {
+                it.addInstructions(0, "const/4 v0, 0x0\nreturn v0")
+            }
+        }
+        if (blockRewarded == true) {
+            FacebookRewardedVideoAdShowFingerprint.methodOrNull?.let {
+                it.addInstructions(0, "const/4 v0, 0x0\nreturn v0")
+            }
+            FacebookRewardedVideoAdShowConfigFingerprint.methodOrNull?.let {
+                it.addInstructions(0, "const/4 v0, 0x0\nreturn v0")
+            }
+            FacebookRewardedInterstitialShowFingerprint.methodOrNull?.let {
+                it.addInstructions(0, "const/4 v0, 0x0\nreturn v0")
+            }
+            FacebookRewardedInterstitialShowConfigFingerprint.methodOrNull?.let {
+                it.addInstructions(0, "const/4 v0, 0x0\nreturn v0")
+            }
+        }
+
+        // ── Pangle (bytedance) ──
+        if (blockInterstitials == true) {
+            PangleInterstitialShowFingerprint.methodOrNull?.let { it.addInstruction(0, "return-void") }
+        }
+        if (blockAppOpen == true) {
+            PangleAppOpenShowFingerprint.methodOrNull?.let { it.addInstruction(0, "return-void") }
+        }
+        if (blockRewarded == true) {
+            PangleRewardedShowFingerprint.methodOrNull?.let { it.addInstruction(0, "return-void") }
         }
     }
 }

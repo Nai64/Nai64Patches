@@ -363,6 +363,74 @@ internal object VungleBaseFullscreenAdLoadFingerprint : Fingerprint(
     parameters = listOf("Ljava/lang/String;"),
 )
 
+// ── Meta Audience Network (facebook/ads) ──
+// show() returns Z in the modern AN SDK.
+
+internal object FacebookInterstitialAdShowFingerprint : Fingerprint(
+    definingClass = "Lcom/facebook/ads/InterstitialAd;",
+    name = "show",
+    returnType = "Z",
+    parameters = emptyList(),
+)
+
+internal object FacebookInterstitialAdShowConfigFingerprint : Fingerprint(
+    definingClass = "Lcom/facebook/ads/InterstitialAd;",
+    name = "show",
+    returnType = "Z",
+    parameters = listOf("Lcom/facebook/ads/InterstitialAd\$InterstitialShowAdConfig;"),
+)
+
+internal object FacebookRewardedVideoAdShowFingerprint : Fingerprint(
+    definingClass = "Lcom/facebook/ads/RewardedVideoAd;",
+    name = "show",
+    returnType = "Z",
+    parameters = emptyList(),
+)
+
+internal object FacebookRewardedVideoAdShowConfigFingerprint : Fingerprint(
+    definingClass = "Lcom/facebook/ads/RewardedVideoAd;",
+    name = "show",
+    returnType = "Z",
+    parameters = listOf("Lcom/facebook/ads/RewardedVideoAd\$RewardedVideoShowAdConfig;"),
+)
+
+internal object FacebookRewardedInterstitialShowFingerprint : Fingerprint(
+    definingClass = "Lcom/facebook/ads/RewardedInterstitialAd;",
+    name = "show",
+    returnType = "Z",
+    parameters = emptyList(),
+)
+
+internal object FacebookRewardedInterstitialShowConfigFingerprint : Fingerprint(
+    definingClass = "Lcom/facebook/ads/RewardedInterstitialAd;",
+    name = "show",
+    returnType = "Z",
+    parameters = listOf("Lcom/facebook/ads/RewardedInterstitialAd\$RewardedInterstitialShowAdConfig;"),
+)
+
+// ── Pangle (bytedance) ──
+
+internal object PangleInterstitialShowFingerprint : Fingerprint(
+    definingClass = "Lcom/bytedance/sdk/openadsdk/api/interstitial/PAGInterstitialAd;",
+    name = "show",
+    returnType = "V",
+    parameters = listOf("Landroid/app/Activity;"),
+)
+
+internal object PangleRewardedShowFingerprint : Fingerprint(
+    definingClass = "Lcom/bytedance/sdk/openadsdk/api/reward/PAGRewardedAd;",
+    name = "show",
+    returnType = "V",
+    parameters = listOf("Landroid/app/Activity;"),
+)
+
+internal object PangleAppOpenShowFingerprint : Fingerprint(
+    definingClass = "Lcom/bytedance/sdk/openadsdk/api/open/PAGAppOpenAd;",
+    name = "show",
+    returnType = "V",
+    parameters = listOf("Landroid/app/Activity;"),
+)
+
 // ── LevelPlay RewardedAd fingerprints ──
 
 internal object LevelPlayRewardedAdIsReadyFingerprint : Fingerprint(
