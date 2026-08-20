@@ -139,6 +139,32 @@
       ]
     },
     {
+      "name": "Remove Hardware Requirements",
+      "description": "Remove uses-feature entries so the app installs on more devices",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": [
+        {
+          "key": "removeFeatures",
+          "title": "Features to remove",
+          "description": "Comma-separated feature names to remove; leave empty to remove all uses-feature entries",
+          "required": false,
+          "type": "kotlin.String",
+          "default": "",
+          "values": null
+        }
+      ]
+    },
+    {
+      "name": "Unlock Rotation",
+      "description": "Remove screenOrientation locks so the app rotates freely",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": []
+    },
+    {
       "name": "Spoof Play Integrity",
       "description": "Force Play Integrity checks to pass",
       "default": false,
