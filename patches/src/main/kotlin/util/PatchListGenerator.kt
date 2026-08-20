@@ -15,7 +15,8 @@ fun main() {
             !fileName.contains("javadoc") &&
                     !fileName.contains("sources") &&
                     fileName.endsWith(".mpp")
-        }!!.maxBy { it.lastModified() }
+        }?.maxByOrNull { it.lastModified() }
+            ?: error("No .mpp artifact found in build/libs/")
     )
     val loadedPatches = loadPatchesFromJar(patchFiles)
     val patchClassLoader = URLClassLoader(patchFiles.map { it.toURI().toURL() }.toTypedArray())
