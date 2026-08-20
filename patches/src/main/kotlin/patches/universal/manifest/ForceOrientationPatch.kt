@@ -14,7 +14,15 @@ val forceOrientationPatch = resourcePatch(
         title = "Orientation",
         default = "landscape",
         key = "orientation",
-        description = "landscape, portrait, sensorLandscape, sensorPortrait, userLandscape or userPortrait",
+        description = "Force a fixed screen orientation on all activities",
+        values = linkedMapOf(
+            "Landscape" to "landscape",
+            "Portrait" to "portrait",
+            "Sensor Landscape" to "sensorLandscape",
+            "Sensor Portrait" to "sensorPortrait",
+            "User Landscape" to "userLandscape",
+            "User Portrait" to "userPortrait",
+        ),
     )
 
     execute {
