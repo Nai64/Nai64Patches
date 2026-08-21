@@ -419,6 +419,75 @@
       "options": []
     },
     {
+      "name": "Disable App Links Verification",
+      "description": "Removes android:autoVerify from intent filters so Android stops prompting to verify the app's web domains and never converts links into app opens",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": []
+    },
+    {
+      "name": "Support All Screens",
+      "description": "Removes compatible-screens restrictions and marks every screen size supported so the app installs on devices it would otherwise reject",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": []
+    },
+    {
+      "name": "Remove Ad Services Entries",
+      "description": "Strips Privacy Sandbox (AdServices) permissions, the ad ID permission and their config metadata from the manifest",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": []
+    },
+    {
+      "name": "Disable Permission Auto-Revoke",
+      "description": "Sets android:autoRevokePermissions to discouraged so Android stops resetting unused permissions of apps you rarely open",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": []
+    },
+    {
+      "name": "Ensure Internet Permission",
+      "description": "Adds the INTERNET permission if it is missing. Useful after aggressive permission stripping or for offline builds that still need web endpoints",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": []
+    },
+    {
+      "name": "Status Bar Icons",
+      "description": "Forces the status bar and navigation bar icon color in every theme. Pick white icons for dark backgrounds or dark icons for light backgrounds",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": [
+        {
+          "key": "statusBarIcons",
+          "title": "Icon color",
+          "description": "Color of the system bar icons while the app is open.",
+          "required": false,
+          "type": "kotlin.String",
+          "default": "white",
+          "values": {
+            "White icons (dark backgrounds)": "white",
+            "Dark icons (light backgrounds)": "dark"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Fake Online State",
+      "description": "Makes connectivity checks report an active connection: WifiManager.isWifiEnabled, NetworkInfo.isConnected/isAvailable/isConnectedOrConnecting all return true",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": []
+    },
+    {
       "name": "Spoof Play Integrity",
       "description": "Force Play Integrity checks to pass",
       "default": false,
