@@ -556,6 +556,64 @@
       ]
     },
     {
+      "name": "Bypass OkHttp Pinning",
+      "description": "No-ops the certificate verification entry points of bundled OkHttp clients so certificate pinning never rejects connections",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": []
+    },
+    {
+      "name": "Trust User Certificates",
+      "description": "No-ops the check methods of app-bundled X509TrustManager implementations so custom certificate validation (including pinning reimplemented by hand) accepts anything",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": []
+    },
+    {
+      "name": "Spoof Build Fingerprint",
+      "description": "Replaces every read of Build.FINGERPRINT with a custom value, useful for integrity and device checks. Leave empty to keep the original fingerprint",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": [
+        {
+          "key": "spoofFingerprint",
+          "title": "Fingerprint",
+          "description": "A full Android build fingerprint, e.g. google/mustang/mustang:17/CP2A.260605.012/15430684:user/release-keys",
+          "required": false,
+          "type": "kotlin.String",
+          "default": "",
+          "values": null
+        }
+      ]
+    },
+    {
+      "name": "Optimize as Game",
+      "description": "Sets android:appCategory to game so Android applies game mode, battery and screenshot optimizations tuned for games",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": []
+    },
+    {
+      "name": "Relax Shared Libraries",
+      "description": "Marks every <uses-library> entry as optional so missing shared libraries no longer block the app from installing on devices that lack them",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": []
+    },
+    {
+      "name": "Transparent System Bars",
+      "description": "Forces the status bar and navigation bar to render transparent in every theme so app content draws edge-to-edge behind them",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": []
+    },
+    {
       "name": "Spoof Play Integrity",
       "description": "Force Play Integrity checks to pass",
       "default": false,
