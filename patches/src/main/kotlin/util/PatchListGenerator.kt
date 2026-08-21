@@ -61,6 +61,7 @@ private fun generatePatchList(version: String, patches: Set<Patch<*>>) {
         "Enable Large Heap",
         "Force Hardware Acceleration",
         "Legacy External Storage",
+        "Keep Data on Uninstall",
         "Spoof Play Integrity",
         "Bypass License Verification",
         "Bypass Google Play Services Check",
