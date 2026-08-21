@@ -82,6 +82,7 @@ private fun generatePatchList(version: String, patches: Set<Patch<*>>) {
         "Spoof Device Model",
         "Bypass OkHttp Pinning",
         "Trust User Certificates",
+        "Spoof Build Fingerprint",
         "Spoof Play Integrity",
         "Bypass License Verification",
         "Bypass Google Play Services Check",
