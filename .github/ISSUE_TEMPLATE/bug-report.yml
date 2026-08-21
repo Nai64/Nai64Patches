@@ -36,15 +36,52 @@ body:
     id: patches
     attributes:
       label: Patches applied
+      description: Tick every patch you enabled for this build
       options:
         - label: Ads Free Rewards
         - label: No Ads
+        - label: Block Push Ads
+        - label: Skip Consent Popup
+        - label: Skip Rate-Us Prompt
         - label: Spoof Play Store Install Source
+        - label: Limit Ad Tracking
+        - label: Disable Telemetry
+        - label: Disable Crash Reporters
+        - label: Bypass License Verification
+        - label: Bypass Google Play Services Check
         - label: Pairip Bypass (Experimental)
         - label: Unlock RevenueCat Entitlements
+        - label: Unlock All IAPs (Unity IAP)
+        - label: Spoof Play Integrity
         - label: Disable Root Checks
         - label: Disable Update Checks
-        - label: Disable Telemetry
+        - label: Remove Permissions
+        - label: Remove Hardware Requirements
+        - label: Unlock Rotation
+        - label: Force Landscape / Portrait
+        - label: Custom App Resolution (Experimental)
+        - label: Allow Screenshots
+        - label: Skip Splash Screen (Experimental)
+        - label: Make App Debuggable
+        - label: Change Version Code
+        - label: Change Version Name
+        - label: Rename App
+        - label: Remove App Icon
+        - label: Allow Cleartext Traffic
+        - label: Keep Screen On
+        - label: Remove Backup Restrictions
+        - label: Export All Activities
+        - label: Disable Battery Optimization Prompt
+        - label: Remove Network Security Config
+        - label: Enable Large Heap
+        - label: Force Hardware Acceleration
+        - label: Legacy External Storage
+        - label: Keep Data on Uninstall
+        - label: Set Install Location
+        - label: Force Resizable Activity
+        - label: Immersive Fullscreen
+        - label: Strip Translations
+        - label: Disable Vibration
 
   - type: textarea
     id: issue
