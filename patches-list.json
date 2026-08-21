@@ -207,6 +207,124 @@
       ]
     },
     {
+      "name": "Make App Debuggable",
+      "description": "Sets android:debuggable so debuggers and profiling tools can attach",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": []
+    },
+    {
+      "name": "Change Version Code",
+      "description": "Overrides the android:versionCode declared in the manifest",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": [
+        {
+          "key": "versionCode",
+          "title": "Version code",
+          "description": "New version code. Use -1 (default) to keep the original.",
+          "required": false,
+          "type": "kotlin.Int",
+          "default": -1,
+          "values": null
+        }
+      ]
+    },
+    {
+      "name": "Change Version Name",
+      "description": "Overrides the android:versionName declared in the manifest",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": [
+        {
+          "key": "versionName",
+          "title": "Version name",
+          "description": "New version name (e.g. 2.5.1). Leave empty to keep the original.",
+          "required": false,
+          "type": "kotlin.String",
+          "default": "",
+          "values": null
+        }
+      ]
+    },
+    {
+      "name": "Rename App",
+      "description": "Overrides the launcher label of the app",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": [
+        {
+          "key": "appLabel",
+          "title": "App name",
+          "description": "New launcher name. Leave empty to keep the original.",
+          "required": false,
+          "type": "kotlin.String",
+          "default": "",
+          "values": null
+        }
+      ]
+    },
+    {
+      "name": "Remove App Icon",
+      "description": "Replaces the launcher icon with a transparent drawable",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": []
+    },
+    {
+      "name": "Allow Cleartext Traffic",
+      "description": "Sets android:usesCleartextTraffic and drops any network security config so plain HTTP requests are allowed (useful for debugging through local proxies)",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": []
+    },
+    {
+      "name": "Keep Screen On",
+      "description": "Adds android:keepScreenOn to every theme so the display stays on while any activity of the app is visible",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": []
+    },
+    {
+      "name": "Remove Backup Restrictions",
+      "description": "Sets android:allowBackup and removes data extraction / full backup rules that exclude app data from device transfers and cloud backups",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": []
+    },
+    {
+      "name": "Export All Activities",
+      "description": "Marks every activity as android:exported so other apps and ADB can launch them",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": []
+    },
+    {
+      "name": "Disable Battery Optimization Prompt",
+      "description": "Removes the permission and intent filters apps use to ask for battery optimization exemptions, so the 'Ignore battery optimizations?' dialog never appears",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": []
+    },
+    {
+      "name": "Remove Network Security Config",
+      "description": "Removes the app's network security config so certificate pinning and cleartext restrictions fall back to platform defaults (useful for HTTPS inspection)",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": []
+    },
+    {
       "name": "Spoof Play Integrity",
       "description": "Force Play Integrity checks to pass",
       "default": false,
