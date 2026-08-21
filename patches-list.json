@@ -1,6 +1,6 @@
 {
   "NOTE": "Do NOT manually edit this file. This file is automatically updated when semantic release (release.yml) runs. Manually editing this file can break your releases and break third party tools that use this file.",
-  "version": "1.20.0",
+  "version": "1.21.0",
   "patches": [
     {
       "name": "Ads Free Rewards",
@@ -29,7 +29,7 @@
         {
           "key": "rewardStrategy",
           "title": "Reward Strategy",
-          "description": "Which ad networks to patch",
+          "description": "Which ad-network integration to patch. 'Auto' covers every supported network",
           "required": false,
           "type": "kotlin.String",
           "default": "auto",
@@ -43,7 +43,7 @@
         {
           "key": "instantReward",
           "title": "Instant reward",
-          "description": "Claim the reward immediately without showing an ad",
+          "description": "Claim the reward immediately without showing an ad (applies to the current patch version)",
           "required": false,
           "type": "kotlin.Boolean",
           "default": true,
@@ -61,7 +61,7 @@
         {
           "key": "blockInterstitials",
           "title": "Block Interstitials",
-          "description": "",
+          "description": "Block full-screen ads shown between app content",
           "required": false,
           "type": "kotlin.Boolean",
           "default": true,
@@ -70,7 +70,7 @@
         {
           "key": "blockBanners",
           "title": "Block Banners",
-          "description": "",
+          "description": "Block banner ads shown at the top or bottom of the screen",
           "required": false,
           "type": "kotlin.Boolean",
           "default": true,
@@ -79,7 +79,7 @@
         {
           "key": "blockAppOpen",
           "title": "Block App Open",
-          "description": "",
+          "description": "Block ads shown when the app starts",
           "required": false,
           "type": "kotlin.Boolean",
           "default": true,
@@ -88,7 +88,7 @@
         {
           "key": "blockMRec",
           "title": "Block MREC",
-          "description": "",
+          "description": "Block medium rectangle (MREC) banner ads",
           "required": false,
           "type": "kotlin.Boolean",
           "default": true,
@@ -97,7 +97,7 @@
         {
           "key": "blockRewarded",
           "title": "Block Rewarded",
-          "description": "",
+          "description": "Block rewarded ads; may disable features that require watching them",
           "required": false,
           "type": "kotlin.Boolean",
           "default": true,
@@ -123,7 +123,7 @@
     },
     {
       "name": "Spoof Play Store Install Source",
-      "description": null,
+      "description": "Make the app believe it was installed from the Play Store",
       "default": false,
       "dependencies": [],
       "compatiblePackages": null,
@@ -191,11 +191,18 @@
         {
           "key": "orientation",
           "title": "Orientation",
-          "description": "landscape, portrait, sensorLandscape, sensorPortrait, userLandscape or userPortrait",
+          "description": "Force a fixed screen orientation on all activities",
           "required": false,
           "type": "kotlin.String",
           "default": "landscape",
-          "values": null
+          "values": {
+            "Landscape": "landscape",
+            "Portrait": "portrait",
+            "Sensor Landscape": "sensorLandscape",
+            "Sensor Portrait": "sensorPortrait",
+            "User Landscape": "userLandscape",
+            "User Portrait": "userPortrait"
+          }
         }
       ]
     },
@@ -261,7 +268,7 @@
         {
           "key": "enableCustomResolution",
           "title": "Enable Custom Resolution",
-          "description": "",
+          "description": "Override the game's window size with the width and height below",
           "required": false,
           "type": "kotlin.Boolean",
           "default": false,
@@ -270,7 +277,7 @@
         {
           "key": "width",
           "title": "Resolution width (px)",
-          "description": "",
+          "description": "Horizontal resolution in pixels",
           "required": false,
           "type": "kotlin.Int",
           "default": 1920,
@@ -279,7 +286,7 @@
         {
           "key": "height",
           "title": "Resolution height (px)",
-          "description": "",
+          "description": "Vertical resolution in pixels",
           "required": false,
           "type": "kotlin.Int",
           "default": 1080,
@@ -329,7 +336,7 @@
         {
           "key": "blockFirebase",
           "title": "Block Firebase Analytics",
-          "description": "",
+          "description": "Google's analytics and crash reporting suite",
           "required": false,
           "type": "kotlin.Boolean",
           "default": true,
@@ -338,7 +345,7 @@
         {
           "key": "blockAppsFlyer",
           "title": "Block AppsFlyer",
-          "description": "",
+          "description": "Mobile attribution and marketing analytics",
           "required": false,
           "type": "kotlin.Boolean",
           "default": true,
@@ -347,7 +354,7 @@
         {
           "key": "blockAdjust",
           "title": "Block Adjust",
-          "description": "",
+          "description": "Mobile attribution analytics",
           "required": false,
           "type": "kotlin.Boolean",
           "default": true,
@@ -356,7 +363,7 @@
         {
           "key": "blockAmplitude",
           "title": "Block Amplitude",
-          "description": "",
+          "description": "Product analytics platform",
           "required": false,
           "type": "kotlin.Boolean",
           "default": true,
@@ -365,7 +372,7 @@
         {
           "key": "blockMixpanel",
           "title": "Block Mixpanel",
-          "description": "",
+          "description": "Product analytics platform",
           "required": false,
           "type": "kotlin.Boolean",
           "default": true,
@@ -374,7 +381,7 @@
         {
           "key": "blockCleverTap",
           "title": "Block CleverTap",
-          "description": "",
+          "description": "User engagement and analytics",
           "required": false,
           "type": "kotlin.Boolean",
           "default": true,
@@ -383,7 +390,7 @@
         {
           "key": "blockSegment",
           "title": "Block Segment",
-          "description": "",
+          "description": "Customer data pipeline and analytics",
           "required": false,
           "type": "kotlin.Boolean",
           "default": true,
@@ -392,7 +399,7 @@
         {
           "key": "blockFacebook",
           "title": "Block Facebook Analytics",
-          "description": "",
+          "description": "Meta's analytics and event logging",
           "required": false,
           "type": "kotlin.Boolean",
           "default": true,
@@ -401,7 +408,7 @@
         {
           "key": "blockBranch",
           "title": "Block Branch.io",
-          "description": "",
+          "description": "Deep linking and attribution",
           "required": false,
           "type": "kotlin.Boolean",
           "default": true,
@@ -410,7 +417,7 @@
         {
           "key": "blockUnity",
           "title": "Block Unity Analytics",
-          "description": "",
+          "description": "Unity engine analytics",
           "required": false,
           "type": "kotlin.Boolean",
           "default": true,
@@ -419,7 +426,7 @@
         {
           "key": "blockFlurry",
           "title": "Block Flurry",
-          "description": "",
+          "description": "Yahoo's analytics platform",
           "required": false,
           "type": "kotlin.Boolean",
           "default": true,
@@ -428,7 +435,7 @@
         {
           "key": "blockGameAnalytics",
           "title": "Block GameAnalytics",
-          "description": "",
+          "description": "Game-focused analytics",
           "required": false,
           "type": "kotlin.Boolean",
           "default": true,
