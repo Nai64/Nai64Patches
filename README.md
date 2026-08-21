@@ -1,6 +1,6 @@
 <a name="top"></a>
 <p align="center">
-  <img src="https://placehold.co/1200x320/0d1117/58a6ff?text=Nai's+Patches&font=montserrat" alt="Nai's Patches banner">
+  <img src="https://github.com/Nai64.png" alt="Nai64" width="180" height="180">
 </p>
 
 <div align="center">
