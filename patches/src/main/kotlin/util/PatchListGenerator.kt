@@ -85,6 +85,7 @@ private fun generatePatchList(version: String, patches: Set<Patch<*>>) {
         "Spoof Build Fingerprint",
         "Optimize as Game",
         "Relax Shared Libraries",
+        "Transparent System Bars",
         "Spoof Play Integrity",
         "Bypass License Verification",
         "Bypass Google Play Services Check",
