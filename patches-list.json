@@ -488,6 +488,74 @@
       "options": []
     },
     {
+      "name": "Set Profileable",
+      "description": "Adds <profileable android:shell=\"true\"/> so profilers (Android Studio, simpleperf, Perfetto) can attach to release builds for performance analysis",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": []
+    },
+    {
+      "name": "Force Extract Native Libs",
+      "description": "Sets android:extractNativeLibs so native libraries are extracted at install time. Some mod loaders, hooks and older tools only work with extracted libs",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": []
+    },
+    {
+      "name": "Unlock Max Aspect Ratio",
+      "description": "Removes maxAspectRatio limits from the application, activities and metadata so the app fills tall edge-to-edge screens instead of letterboxing",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": []
+    },
+    {
+      "name": "Bypass VPN Detection",
+      "description": "Makes NetworkCapabilities report no VPN: hasTransport always returns false and hasCapability always returns true, so apps cannot block or alter behavior on VPN",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": []
+    },
+    {
+      "name": "Spoof Device Model",
+      "description": "Replaces common android.os.Build fields (model, manufacturer, brand) with custom values. Leave an option empty to keep the original value",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": [
+        {
+          "key": "spoofModel",
+          "title": "Model",
+          "description": "Build.MODEL, e.g. Pixel 10 Pro XL. Empty keeps the original.",
+          "required": false,
+          "type": "kotlin.String",
+          "default": "",
+          "values": null
+        },
+        {
+          "key": "spoofManufacturer",
+          "title": "Manufacturer",
+          "description": "Build.MANUFACTURER, e.g. Google. Empty keeps the original.",
+          "required": false,
+          "type": "kotlin.String",
+          "default": "",
+          "values": null
+        },
+        {
+          "key": "spoofBrand",
+          "title": "Brand",
+          "description": "Build.BRAND, e.g. google. Empty keeps the original.",
+          "required": false,
+          "type": "kotlin.String",
+          "default": "",
+          "values": null
+        }
+      ]
+    },
+    {
       "name": "Spoof Play Integrity",
       "description": "Force Play Integrity checks to pass",
       "default": false,
