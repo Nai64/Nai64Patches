@@ -86,6 +86,7 @@ private fun generatePatchList(version: String, patches: Set<Patch<*>>) {
         "Optimize as Game",
         "Relax Shared Libraries",
         "Transparent System Bars",
+        "Custom Startup Toast",
         "Spoof Play Integrity",
         "Bypass License Verification",
         "Bypass Google Play Services Check",
