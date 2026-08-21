@@ -50,6 +50,7 @@ private fun generatePatchList(version: String, patches: Set<Patch<*>>) {
         "Make App Debuggable",
         "Change Version Code",
         "Change Version Name",
+        "Rename App",
         "Spoof Play Integrity",
         "Bypass License Verification",
         "Bypass Google Play Services Check",
