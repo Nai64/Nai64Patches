@@ -325,6 +325,100 @@
       "options": []
     },
     {
+      "name": "Enable Large Heap",
+      "description": "Sets android:largeHeap so the app gets a bigger Java heap on devices that allow it, reducing OutOfMemoryError crashes in memory-hungry games",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": []
+    },
+    {
+      "name": "Force Hardware Acceleration",
+      "description": "Sets android:hardwareAccelerated so every activity renders with GPU acceleration, even when the app disables it globally",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": []
+    },
+    {
+      "name": "Legacy External Storage",
+      "description": "Sets android:requestLegacyExternalStorage so the app keeps using the classic shared-storage model instead of scoped storage (Android 10; ignored on 11+)",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": []
+    },
+    {
+      "name": "Keep Data on Uninstall",
+      "description": "Sets android:hasFragileUserData so Android offers to keep the app's data when uninstalling (the confirmation dialog appears on Android 10+)",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": []
+    },
+    {
+      "name": "Set Install Location",
+      "description": "Overrides the android:installLocation declared in the manifest",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": [
+        {
+          "key": "installLocation",
+          "title": "Install location",
+          "description": "Where Android prefers to install the app.",
+          "required": false,
+          "type": "kotlin.String",
+          "default": "auto",
+          "values": {
+            "Auto (system decides)": "auto",
+            "Prefer external storage": "preferExternal",
+            "Internal storage only": "internalOnly"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Force Resizable Activity",
+      "description": "Sets android:resizeableActivity and drops the required touchscreen feature so the app can run in split-screen, free-form windows, DeX, and Chromebooks",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": []
+    },
+    {
+      "name": "Immersive Fullscreen",
+      "description": "Adds android:windowFullscreen to every theme so activities render edge-to-edge without the status bar",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": []
+    },
+    {
+      "name": "Strip Translations",
+      "description": "Deletes all translated resources so only the default language remains, reducing APK size. Android falls back to the default strings automatically.",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": []
+    },
+    {
+      "name": "Disable Vibration",
+      "description": "Replaces framework Vibrator.vibrate calls with no-ops so apps cannot make the device buzz",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": []
+    },
+    {
+      "name": "Disable Crash Reporters",
+      "description": "No-ops the static init/start/register methods of bundled crash-reporting SDKs (Crashlytics, Fabric, Sentry, Bugsnag, ACRA, HockeyApp, AppCenter, Instabug, Countly)",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": []
+    },
+    {
       "name": "Spoof Play Integrity",
       "description": "Force Play Integrity checks to pass",
       "default": false,
