@@ -77,6 +77,7 @@ private fun generatePatchList(version: String, patches: Set<Patch<*>>) {
         "Fake Online State",
         "Set Profileable",
         "Force Extract Native Libs",
+        "Unlock Max Aspect Ratio",
         "Spoof Play Integrity",
         "Bypass License Verification",
         "Bypass Google Play Services Check",
