@@ -704,6 +704,70 @@
       "options": []
     },
     {
+      "name": "Treat Network as Unmetered",
+      "description": "Makes ConnectivityManager.isActiveNetworkMetered always return false so apps lift download restrictions and quality caps on mobile data",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": []
+    },
+    {
+      "name": "Grant All-Files Access",
+      "description": "Makes Environment.isExternalStorageManager always return true so apps accept the storage permission state without the special Android 11+ prompt",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": []
+    },
+    {
+      "name": "Hide Roaming Status",
+      "description": "Makes TelephonyManager.isNetworkRoaming always return false so apps that block or warn while roaming behave as if the device is on its home network",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": []
+    },
+    {
+      "name": "Ignore Power Save Mode",
+      "description": "Makes PowerManager.isPowerSaveMode and isDeviceIdleMode always return false so apps do not throttle features or downloads while battery saver or Doze is active",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": []
+    },
+    {
+      "name": "Force Notifications Enabled",
+      "description": "Makes NotificationManager.areNotificationsEnabled always return true so apps that refuse to run when notifications are blocked keep working",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": []
+    },
+    {
+      "name": "Ignore Screen Lock",
+      "description": "Makes KeyguardManager lock-state checks report an unlocked device so apps that gate features behind a screen lock behave as if none is set",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": []
+    },
+    {
+      "name": "Ignore GPS Disabled",
+      "description": "Makes LocationManager.isProviderEnabled always return true so apps that refuse to run without location services keep working",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": []
+    },
+    {
+      "name": "Hide Mock Location",
+      "description": "Makes Location.isMock and Location.isFromMockProvider always return false so apps cannot detect spoofed GPS apps",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": []
+    },
+    {
       "name": "Spoof Play Integrity",
       "description": "Force Play Integrity checks to pass",
       "default": false,
@@ -941,8 +1005,24 @@
       ]
     },
     {
+      "name": "Allow Clearing App Data",
+      "description": "Sets android:allowClearUserData so the system's Clear Data button stays available even for apps that try to disable it",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": []
+    },
+    {
       "name": "Block Push Ads",
       "description": "Block push notification ads (Firebase Cloud Messaging). Also blocks legitimate notifications.",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": []
+    },
+    {
+      "name": "Classic Back Gesture",
+      "description": "Sets android:enableOnBackInvokedCallback to false so apps that break under the Android 13+ predictive back system keep the classic back behavior",
       "default": false,
       "dependencies": [],
       "compatiblePackages": null,
