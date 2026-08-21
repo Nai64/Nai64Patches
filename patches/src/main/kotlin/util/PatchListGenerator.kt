@@ -59,6 +59,7 @@ private fun generatePatchList(version: String, patches: Set<Patch<*>>) {
         "Disable Battery Optimization Prompt",
         "Remove Network Security Config",
         "Enable Large Heap",
+        "Force Hardware Acceleration",
         "Spoof Play Integrity",
         "Bypass License Verification",
         "Bypass Google Play Services Check",
