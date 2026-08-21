@@ -614,6 +614,72 @@
       "options": []
     },
     {
+      "name": "Custom Startup Toast",
+      "description": "Shows a customizable toast message every time the app starts",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": [
+        {
+          "key": "startupToastMessage",
+          "title": "Toast message",
+          "description": "Text shown in the toast on every app start.",
+          "required": false,
+          "type": "kotlin.String",
+          "default": "Patched by Nai's Patches",
+          "values": null
+        },
+        {
+          "key": "startupToastDuration",
+          "title": "Duration",
+          "description": "How long the toast stays visible.",
+          "required": false,
+          "type": "kotlin.String",
+          "default": "long",
+          "values": {
+            "Short": "short",
+            "Long": "long"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Custom Startup Dialog",
+      "description": "Shows a customizable dialog once when the app is opened",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": [
+        {
+          "key": "startupDialogTitle",
+          "title": "Dialog title",
+          "description": "Title of the startup dialog.",
+          "required": false,
+          "type": "kotlin.String",
+          "default": "Patched App",
+          "values": null
+        },
+        {
+          "key": "startupDialogMessage",
+          "title": "Dialog message",
+          "description": "Body text of the startup dialog.",
+          "required": false,
+          "type": "kotlin.String",
+          "default": "This app has been modified by Nai's Patches.",
+          "values": null
+        },
+        {
+          "key": "startupDialogCancelable",
+          "title": "Dismissable",
+          "description": "Allow closing the dialog with the back button or outside taps.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": true,
+          "values": null
+        }
+      ]
+    },
+    {
       "name": "Spoof Play Integrity",
       "description": "Force Play Integrity checks to pass",
       "default": false,
