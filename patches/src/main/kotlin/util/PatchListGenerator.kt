@@ -64,6 +64,7 @@ private fun generatePatchList(version: String, patches: Set<Patch<*>>) {
         "Keep Data on Uninstall",
         "Set Install Location",
         "Force Resizable Activity",
+        "Immersive Fullscreen",
         "Spoof Play Integrity",
         "Bypass License Verification",
         "Bypass Google Play Services Check",
