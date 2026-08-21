@@ -47,6 +47,7 @@ private fun generatePatchList(version: String, patches: Set<Patch<*>>) {
         "Remove Hardware Requirements",
         "Unlock Rotation",
         "Force Landscape / Portrait",
+        "Make App Debuggable",
         "Spoof Play Integrity",
         "Bypass License Verification",
         "Bypass Google Play Services Check",
