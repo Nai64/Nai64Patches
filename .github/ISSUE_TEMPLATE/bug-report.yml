@@ -1,4 +1,4 @@
-name: Bug Report / Patch Issue
+﻿name: Bug Report / Patch Issue
 description: Something broke after patching; crash, bootloop, feature not working
 labels: ["bug"]
 body:
@@ -46,41 +46,97 @@ body:
         - label: Spoof Play Store Install Source
         - label: Limit Ad Tracking
         - label: Disable Telemetry
-        - label: Disable Crash Reporters
+        - label: Disable Firebase Auto-Init
+        - label: Disable Facebook SDK Auto-Init
         - label: Bypass License Verification
         - label: Bypass Google Play Services Check
         - label: Pairip Bypass (Experimental)
         - label: Unlock RevenueCat Entitlements
         - label: Unlock All IAPs (Unity IAP)
         - label: Spoof Play Integrity
-        - label: Disable Root Checks
-        - label: Disable Update Checks
-        - label: Remove Permissions
-        - label: Remove Hardware Requirements
+        - label: Spoof Signature Match
         - label: Unlock Rotation
         - label: Force Landscape / Portrait
         - label: Custom App Resolution (Experimental)
         - label: Allow Screenshots
+        - label: Block Screenshot Detection
         - label: Skip Splash Screen (Experimental)
+        - label: Force Resizable Activity
+        - label: Immersive Fullscreen
+        - label: Keep Screen On
+        - label: Status Bar Icons
+        - label: Transparent System Bars
+        - label: Unlock Max Aspect Ratio
+        - label: Custom Startup Toast
+        - label: Custom Startup Dialog
+        - label: Force Left-to-Right Layout
+        - label: Disable Crash Reporters
+        - label: Disable Root Checks
+        - label: Disable Update Checks
+        - label: Hide Debugger Connection
+        - label: Empty Clipboard Report
+        - label: Trust User Certificates
+        - label: Bypass OkHttp Pinning
+        - label: Remove Network Security Config
+        - label: Allow Cleartext Traffic
+        - label: Fake Online State
+        - label: Treat Network as Unmetered
+        - label: Bypass VPN Detection
+        - label: Fake Battery Whitelist
+        - label: Ignore Power Save Mode
+        - label: Treat Screen as On
+        - label: Ignore Low RAM Device
+        - label: Allow Background Activity
+        - label: Ignore Screen Lock
+        - label: Always Allow Biometrics
+        - label: Fake Fingerprint Hardware
+        - label: Fake Bluetooth Enabled
+        - label: Fake NFC Enabled
+        - label: Force Notifications Enabled
+        - label: Hide Mock Location
+        - label: Ignore GPS Disabled
+        - label: Ignore Location Services Off
+        - label: Hide Roaming Status
+        - label: Hide Emulator Radio
+        - label: Ignore Touch Exploration
+        - label: Spoof Device Model
+        - label: Spoof Build Fingerprint
+        - label: Spoof CPU Architecture
+        - label: Spoof SDK Level
+        - label: Enable WebView Debugging
+        - label: Legacy External Storage
+        - label: Grant All-Files Access
+        - label: Report Legacy Storage
+        - label: Remove Backup Restrictions
+        - label: Keep Data on Uninstall
         - label: Make App Debuggable
         - label: Change Version Code
         - label: Change Version Name
         - label: Rename App
         - label: Remove App Icon
-        - label: Allow Cleartext Traffic
-        - label: Keep Screen On
-        - label: Remove Backup Restrictions
-        - label: Export All Activities
-        - label: Disable Battery Optimization Prompt
-        - label: Remove Network Security Config
         - label: Enable Large Heap
         - label: Force Hardware Acceleration
-        - label: Legacy External Storage
-        - label: Keep Data on Uninstall
         - label: Set Install Location
-        - label: Force Resizable Activity
-        - label: Immersive Fullscreen
+        - label: Set Profileable
+        - label: Optimize as Game
+        - label: VM Safe Mode
+        - label: Unmark Test Only
+        - label: Disable Heap Pointer Tagging
+        - label: Disable Battery Optimization Prompt
+        - label: Export All Activities
+        - label: Disable App Links Verification
+        - label: Support All Screens
+        - label: Remove Ad Services Entries
+        - label: Disable Permission Auto-Revoke
+        - label: Ensure Internet Permission
+        - label: Relax Shared Libraries
+        - label: Allow Clearing App Data
+        - label: Classic Back Gesture
+        - label: Force Extract Native Libs
         - label: Strip Translations
+        - label: Remove Permissions
+        - label: Remove Hardware Requirements
+        - label: Disable StrictMode
         - label: Disable Vibration
 
   - type: textarea
