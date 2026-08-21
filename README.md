@@ -6,13 +6,13 @@
 <div align="center">
 
 ![Morphe](https://img.shields.io/badge/Morphe-Patcher-9b59b6?style=for-the-badge)
-![Patches](https://img.shields.io/badge/22%20Patches-2ecc71?style=for-the-badge)
+![Patches](https://img.shields.io/badge/44%20Patches-2ecc71?style=for-the-badge)
 ![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)
 ![Platform](https://img.shields.io/badge/Android-Games-ff7f50?style=for-the-badge)
 
 # Nai's Patches
 
-A curated collection of Morphe patches that tune, unlock and declutter Android games. Skip ads, bypass license checks, hide root, force orientations and more, all from a single patcher.
+A curated collection of Morphe patches that tune, unlock and declutter Android games and apps. Skip ads, bypass license checks, hide root, force orientations, tweak manifest behavior, strip translations and more, all from a single patcher.
 
 </div>
 
@@ -67,6 +67,7 @@ Patches are grouped by what they affect. The table below lists every available p
 | :--- | :--- |
 | Ads Free Rewards | Skip rewarded ads and claim rewards instantly |
 | No Ads | Remove interstitial, banner, app open, MREC and rewarded ads |
+| Block Push Ads | Silence notification ads |
 | Skip Consent Popup | Skip the Google consent, GDPR, popup |
 | Skip Rate Us Prompt | Dismiss the annoying rate this app prompt |
 | Spoof Play Store Install Source | Make the app believe it was installed from the Play Store |
@@ -87,13 +88,15 @@ Patches are grouped by what they affect. The table below lists every available p
 
 | Patch | What it does |
 | :--- | :--- |
-| Remove Permissions | Remove permissions from the app manifest |
-| Remove Hardware Requirements | Remove uses feature entries so the app installs on more devices |
 | Unlock Rotation | Allow the app to rotate freely |
 | Force Landscape / Portrait | Force a fixed screen orientation |
 | Custom App Resolution (Experimental) | Set a custom resolution for the game |
 | Allow Screenshots | Remove the screenshot blocking window flag |
 | Skip Splash Screen (Experimental) | Skip or shorten splash screen delays |
+| Force Resizable Activity | Enable split-screen, free-form windows, DeX and Chromebooks |
+| Immersive Fullscreen | Hide the status bar by forcing fullscreen themes |
+| Keep Screen On | Keep the display on while any activity of the app is visible |
+| Disable Vibration | Stop apps from making the device buzz |
 
 ### Privacy and Integrity
 
@@ -102,6 +105,30 @@ Patches are grouped by what they affect. The table below lists every available p
 | Spoof Play Integrity | Spoof Play Integrity verdicts |
 | Disable Root Checks | Disable root detection |
 | Disable Update Checks | Stop forced update prompts |
+| Disable Crash Reporters | Neutralize Crashlytics, Sentry, Bugsnag, ACRA and similar SDKs |
+
+### Manifest and App Tweaks
+
+| Patch | What it does |
+| :--- | :--- |
+| Make App Debuggable | Let debuggers and profiling tools attach |
+| Change Version Code | Override the version code reported to the system |
+| Change Version Name | Override the version name shown in settings |
+| Rename App | Change the launcher name of the app |
+| Remove App Icon | Replace the launcher icon with a transparent drawable |
+| Allow Cleartext Traffic | Permit plain HTTP requests for local proxy debugging |
+| Remove Backup Restrictions | Let Android back up and transfer all app data |
+| Export All Activities | Make every activity launchable by other apps and ADB |
+| Disable Battery Optimization Prompt | Remove the "Ignore battery optimizations?" dialog |
+| Remove Network Security Config | Drop certificate pinning configs for HTTPS inspection |
+| Enable Large Heap | Give the app a bigger Java heap where supported |
+| Force Hardware Acceleration | GPU render every activity, even if the app opts out |
+| Legacy External Storage | Use classic shared storage instead of scoped storage (Android 10) |
+| Keep Data on Uninstall | Offer to keep app data when uninstalling (Android 10+) |
+| Set Install Location | Prefer internal storage, external storage or let the system decide |
+| Strip Translations | Delete translated resources to shrink the APK |
+| Remove Permissions | Remove permissions from the app manifest |
+| Remove Hardware Requirements | Remove uses feature entries so the app installs on more devices |
 
 > [!TIP]
 > Combine **No Ads** with **Disable Telemetry** for the quietest possible session, and add **Ads Free Rewards** only when a game gates progress behind rewarded ads.
@@ -191,6 +218,18 @@ Twelve independent toggles let you block each analytics SDK on its own. All defa
 | Block Unity Analytics | Unity engine analytics |
 | Block Flurry | Yahoo analytics |
 | Block GameAnalytics | Game focused analytics |
+
+</details>
+
+<details>
+<summary><b>Version and identity patches</b></summary>
+
+| Patch | Option | Default | Notes |
+| :--- | :--- | :--- | :--- |
+| Change Version Code | Version code | -1, keeps original | Any positive number |
+| Change Version Name | Version name | Empty, keeps original | e.g. 2.5.1 |
+| Rename App | App name | Empty, keeps original | New launcher label |
+| Set Install Location | Install location | Auto | Auto, Prefer external storage or Internal storage only |
 
 </details>
 
