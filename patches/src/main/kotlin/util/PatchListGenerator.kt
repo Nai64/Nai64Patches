@@ -74,6 +74,7 @@ private fun generatePatchList(version: String, patches: Set<Patch<*>>) {
         "Disable Permission Auto-Revoke",
         "Ensure Internet Permission",
         "Status Bar Icons",
+        "Fake Online State",
         "Spoof Play Integrity",
         "Bypass License Verification",
         "Bypass Google Play Services Check",
