@@ -54,6 +54,7 @@ private fun generatePatchList(version: String, patches: Set<Patch<*>>) {
         "Remove App Icon",
         "Allow Cleartext Traffic",
         "Keep Screen On",
+        "Remove Backup Restrictions",
         "Spoof Play Integrity",
         "Bypass License Verification",
         "Bypass Google Play Services Check",
