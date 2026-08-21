@@ -57,6 +57,7 @@ private fun generatePatchList(version: String, patches: Set<Patch<*>>) {
         "Remove Backup Restrictions",
         "Export All Activities",
         "Disable Battery Optimization Prompt",
+        "Remove Network Security Config",
         "Spoof Play Integrity",
         "Bypass License Verification",
         "Bypass Google Play Services Check",
