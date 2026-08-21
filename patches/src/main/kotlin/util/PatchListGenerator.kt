@@ -73,6 +73,7 @@ private fun generatePatchList(version: String, patches: Set<Patch<*>>) {
         "Remove Ad Services Entries",
         "Disable Permission Auto-Revoke",
         "Ensure Internet Permission",
+        "Status Bar Icons",
         "Spoof Play Integrity",
         "Bypass License Verification",
         "Bypass Google Play Services Check",
