@@ -1037,6 +1037,14 @@
       "options": []
     },
     {
+      "name": "Block Screenshot Detection",
+      "description": "Adds FLAG_SECURE to every activity window so the system blocks screenshots, screen recording and recents previews of the app",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": []
+    },
+    {
       "name": "Classic Back Gesture",
       "description": "Sets android:enableOnBackInvokedCallback to false so apps that break under the Android 13+ predictive back system keep the classic back behavior",
       "default": false,
@@ -1045,8 +1053,40 @@
       "options": []
     },
     {
+      "name": "Disable Facebook SDK Auto-Init",
+      "description": "Adds Facebook SDK manifest switches that stop auto-initialization, automatic app event logging and advertiser ID collection at startup",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": []
+    },
+    {
       "name": "Disable Firebase Auto-Init",
       "description": "Adds Firebase manifest switches that stop Analytics, Messaging, Crashlytics and Performance from initializing themselves at startup",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": []
+    },
+    {
+      "name": "Disable Heap Pointer Tagging",
+      "description": "Sets android:allowNativeHeapPointerTagging to false so older native games that break under Android 12+ tagged pointers keep running",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": []
+    },
+    {
+      "name": "Disable StrictMode",
+      "description": "No-ops StrictMode policy installs made by the app so debug builds that enable strict disk or network checks stop crashing on release-like usage",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": []
+    },
+    {
+      "name": "Empty Clipboard Report",
+      "description": "Makes ClipboardManager.hasPrimaryClip always return false so apps stop harvesting or acting on clipboard content copied from other apps",
       "default": false,
       "dependencies": [],
       "compatiblePackages": null,
@@ -1069,6 +1109,38 @@
       "options": []
     },
     {
+      "name": "Fake NFC Enabled",
+      "description": "Makes NfcAdapter.isEnabled always return true so apps that require NFC stop blocking features on devices without it",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": []
+    },
+    {
+      "name": "Force Left-to-Right Layout",
+      "description": "Sets android:supportsRtl to false so the app always renders left-to-right, fixing layouts that break under right-to-left system languages",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": []
+    },
+    {
+      "name": "Hide Debugger Connection",
+      "description": "Makes Debug.isDebuggerConnected and waitingForDebugger always return false so apps that refuse to run under a debugger keep working",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": []
+    },
+    {
+      "name": "Hide Emulator Radio",
+      "description": "Makes TelephonyManager.getPhoneType always report GSM so emulator detection based on a missing radio reports a normal device",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": []
+    },
+    {
       "name": "Ignore Location Services Off",
       "description": "Makes LocationManager.isLocationEnabled always return true so apps that refuse to run when location services are disabled keep working",
       "default": false,
@@ -1083,6 +1155,64 @@
       "dependencies": [],
       "compatiblePackages": null,
       "options": []
+    },
+    {
+      "name": "Ignore Touch Exploration",
+      "description": "Makes AccessibilityManager.isTouchExplorationEnabled always return false so games that disable or alter gameplay under TalkBack behave normally",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": []
+    },
+    {
+      "name": "Report Legacy Storage",
+      "description": "Makes Environment.isExternalStorageLegacy always return true so apps behave as if they got classic shared-storage access",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": []
+    },
+    {
+      "name": "Spoof CPU Architecture",
+      "description": "Replaces reads of Build.CPU_ABI and Build.CPU_ABI2 with a custom value. Leave empty to keep the original",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": [
+        {
+          "key": "spoofCpuAbi",
+          "title": "CPU ABI",
+          "description": "Reported CPU architecture. Only affects the legacy CPU_ABI fields.",
+          "required": false,
+          "type": "kotlin.String",
+          "default": "",
+          "values": {
+            "Keep original": "",
+            "arm64-v8a": "arm64-v8a",
+            "armeabi-v7a": "armeabi-v7a",
+            "x86_64": "x86_64",
+            "x86": "x86"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Spoof SDK Level",
+      "description": "Replaces every read of Build.VERSION.SDK_INT with a custom value. WARNING: setting a level lower than the device's real API level makes apps call missing APIs and crash; only use when you know the app checks it",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": [
+        {
+          "key": "spoofSdkLevel",
+          "title": "SDK level",
+          "description": "Reported API level (e.g. 29). Use -1 to keep the original.",
+          "required": false,
+          "type": "kotlin.Int",
+          "default": -1,
+          "values": null
+        }
+      ]
     },
     {
       "name": "Treat Screen as On",
