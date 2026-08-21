@@ -69,6 +69,7 @@ private fun generatePatchList(version: String, patches: Set<Patch<*>>) {
         "Disable Vibration",
         "Disable Crash Reporters",
         "Disable App Links Verification",
+        "Support All Screens",
         "Spoof Play Integrity",
         "Bypass License Verification",
         "Bypass Google Play Services Check",
