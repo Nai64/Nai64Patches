@@ -60,6 +60,7 @@ private fun generatePatchList(version: String, patches: Set<Patch<*>>) {
         "Remove Network Security Config",
         "Enable Large Heap",
         "Force Hardware Acceleration",
+        "Legacy External Storage",
         "Spoof Play Integrity",
         "Bypass License Verification",
         "Bypass Google Play Services Check",
