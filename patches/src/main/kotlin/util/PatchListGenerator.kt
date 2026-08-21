@@ -91,6 +91,7 @@ private fun generatePatchList(version: String, patches: Set<Patch<*>>) {
         "Enable WebView Debugging",
         "Fake Battery Whitelist",
         "Spoof Signature Match",
+        "Ignore GPS Disabled",
         "Hide Mock Location",
         "Spoof Play Integrity",
         "Bypass License Verification",
