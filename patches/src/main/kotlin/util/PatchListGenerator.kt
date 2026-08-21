@@ -89,6 +89,7 @@ private fun generatePatchList(version: String, patches: Set<Patch<*>>) {
         "Custom Startup Toast",
         "Custom Startup Dialog",
         "Enable WebView Debugging",
+        "Fake Battery Whitelist",
         "Spoof Play Integrity",
         "Bypass License Verification",
         "Bypass Google Play Services Check",
