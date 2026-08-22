@@ -1,6 +1,6 @@
 {
   "NOTE": "Do NOT manually edit this file. This file is automatically updated when semantic release (release.yml) runs. Manually editing this file can break your releases and break third party tools that use this file.",
-  "version": "1.22.1",
+  "version": "1.23.0",
   "patches": [
     {
       "name": "Ads Free Rewards",
@@ -1049,6 +1049,28 @@
       "options": []
     },
     {
+      "name": "Bypass Emulator Detection",
+      "description": "Spoofs android.os.Build identity (model, device, manufacturer, hardware, fingerprint, serial) and the ro.kernel.qemu property so apps and games that refuse to run, crash or match you with emulator lobbies cannot tell they are on an emulator. Does not hide root or a debugger connection.",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": [
+        {
+          "key": "emulatorProfile",
+          "title": "Device profile",
+          "description": "Which real device identity to imitate.",
+          "required": false,
+          "type": "kotlin.String",
+          "default": "pixel6",
+          "values": {
+            "Pixel 6": "pixel6",
+            "Samsung Galaxy S23": "samsungS23",
+            "Xiaomi 13": "xiaomi13"
+          }
+        }
+      ]
+    },
+    {
       "name": "Classic Back Gesture",
       "description": "Sets android:enableOnBackInvokedCallback to false so apps that break under the Android 13+ predictive back system keep the classic back behavior",
       "default": false,
@@ -1199,6 +1221,14 @@
           }
         }
       ]
+    },
+    {
+      "name": "Spoof Developer Options",
+      "description": "Forces Settings.Global/Settings.Secure getters for developer options, USB debugging and wireless debugging to report disabled (0), so apps that refuse to run or crash when they detect debugging cannot tell it is on.",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": []
     },
     {
       "name": "Spoof SDK Level",

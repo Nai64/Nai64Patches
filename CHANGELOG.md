@@ -1,3 +1,10 @@
+## [1.23.0](https://github.com/Nai64/Nai64Patches/compare/1.22.1...1.23.0) (2026-08-22)
+
+### New Features
+
+* add Bypass Emulator Detection patch (closes [#20](https://github.com/Nai64/Nai64Patches/issues/20)) ([bb4c88a](https://github.com/Nai64/Nai64Patches/commit/bb4c88a692574b19bf80b06c699a8bdfc7ffa4a4))
+* add Spoof Developer Options patch ([d67058b](https://github.com/Nai64/Nai64Patches/commit/d67058b9300cae7e65c718304c25f8f1c3a91cd8)), closes [#23](https://github.com/Nai64/Nai64Patches/issues/23)
+
 ## [1.22.1](https://github.com/Nai64/Nai64Patches/compare/1.22.0...1.22.1) (2026-08-22)
 
 ### Bug Fixes
