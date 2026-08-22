@@ -16,7 +16,7 @@ val installSourceSpoofPatch = bytecodePatch(
     execute {
         val logger = Logger.getLogger(this::class.java.name)
 
-        // ── Generic string-based strategies ──
+        // -- Generic string-based strategies --
         // These search for methods containing "com.android.vending" by return type.
         // These run even when Pairip is found - catches non-Pairip methods.
 

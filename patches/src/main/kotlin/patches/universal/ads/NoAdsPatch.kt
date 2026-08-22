@@ -84,7 +84,7 @@ val noAdsPatch = bytecodePatch(
             return@execute
         }
 
-        // ── MAX Unity wrapper ──
+        // -- MAX Unity wrapper --
         if (blockInterstitials == true) {
             returnVoid(ShowInterstitialFingerprint)
         }
@@ -100,7 +100,7 @@ val noAdsPatch = bytecodePatch(
             returnVoid(StartMRecAutoRefreshFingerprint)
         }
 
-        // ── Native MAX (non-Unity) ──
+        // -- Native MAX (non-Unity) --
         if (blockInterstitials == true) {
             MaxInterstitialAdShowAdFingerprint.methodOrNull?.let {
                 it.addInstructions(0, fireHiddenCallbacks("Lcom/applovin/mediation/ads/MaxInterstitialAd;"))
@@ -115,7 +115,7 @@ val noAdsPatch = bytecodePatch(
             returnVoid(MaxAdViewStartAutoRefreshFingerprint)
         }
 
-        // ── AdMob (Google Mobile Ads) ──
+        // -- AdMob (Google Mobile Ads) --
         if (blockInterstitials == true) {
             returnVoid(AdMobInterstitialShowFingerprint)
             returnVoid(AdMobLegacyInterstitialShowFingerprint)
@@ -129,7 +129,7 @@ val noAdsPatch = bytecodePatch(
             returnVoid(AdMobLegacyRewardedVideoShowFingerprint)
         }
 
-        // ── Rewarded ads ──
+        // -- Rewarded ads --
         if (blockRewarded == true) {
             IsRewardedAdReadyFingerprint.methodOrNull?.let {
                 it.addInstructions(0, """
@@ -149,13 +149,13 @@ val noAdsPatch = bytecodePatch(
             }
         }
 
-        // ── Unity Ads v3 (legacy) ──
+        // -- Unity Ads v3 (legacy) --
         if (blockInterstitials == true) {
             returnVoid(UnityAdsV3Show2ArgFingerprint)
             returnVoid(UnityAdsV3ShowOptionsFingerprint)
         }
 
-        // ── ironSource (LevelPlay) public API ──
+        // -- ironSource (LevelPlay) public API --
         if (blockInterstitials == true) {
             returnVoid(IronSourceShowDemandOnlyInterstitialFingerprint)
             returnVoid(IronSourceShowInterstitialFingerprint)
@@ -171,7 +171,7 @@ val noAdsPatch = bytecodePatch(
             returnVoid(IronSourceShowRewardedVideoPlacementFingerprint)
         }
 
-        // ── AppLovin legacy (direct SDK, non-MAX) ──
+        // -- AppLovin legacy (direct SDK, non-MAX) --
         if (blockInterstitials == true) {
             returnVoid(AppLovinInterstitialDialogShowFingerprint)
             returnVoid(AppLovinInterstitialDialogShowAndRenderFingerprint)
@@ -184,12 +184,12 @@ val noAdsPatch = bytecodePatch(
             returnVoid(AppLovinIncentivizedShow5ListenerFingerprint)
         }
 
-        // ── Vungle ──
+        // -- Vungle --
         if (blockInterstitials == true || blockRewarded == true) {
             returnVoid(VungleBaseFullscreenAdLoadFingerprint)
         }
 
-        // ── Meta Audience Network (facebook/ads) ──
+        // -- Meta Audience Network (facebook/ads) --
         if (blockInterstitials == true) {
             FacebookInterstitialAdShowFingerprint.methodOrNull?.let {
                 it.addInstructions(0, "const/4 v0, 0x0\nreturn v0")
@@ -213,7 +213,7 @@ val noAdsPatch = bytecodePatch(
             }
         }
 
-        // ── Pangle (bytedance) ──
+        // -- Pangle (bytedance) --
         if (blockInterstitials == true) {
             returnVoid(PangleInterstitialShowFingerprint)
         }

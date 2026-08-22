@@ -39,8 +39,8 @@ private val DEV_OPTIONS_KEYS = setOf(
  * Settings provider and folds the call (and its `move-result`) into a constant,
  * key-aware (unlike [foldBooleanReturns], which is key-agnostic).
  *
- * This patches the app's *invocations* of the framework getters — the patcher
- * cannot modify framework classes — which covers the standard detection path
+ * This patches the app's *invocations* of the framework getters - the patcher
+ * cannot modify framework classes - which covers the standard detection path
  * apps use.
  *
  * @return number of patched call sites.

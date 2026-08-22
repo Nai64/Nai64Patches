@@ -3,8 +3,8 @@ package patches.universal.ads.util
 /**
  * Generates Smali bytecode that uses reflection to find the
  * MaxRewardedAdListener field on `this`, then fires the full callback
- * chain: onAdDisplayed → onRewardedVideoStarted → onUserRewarded →
- * onRewardedVideoCompleted → onAdHidden.
+ * chain: onAdDisplayed -> onRewardedVideoStarted -> onUserRewarded ->
+ * onRewardedVideoCompleted -> onAdHidden.
  *
  * Designed to replace showAd() in MaxRewardedAd without crashing
  * the game (game gets the reward callbacks it expects).

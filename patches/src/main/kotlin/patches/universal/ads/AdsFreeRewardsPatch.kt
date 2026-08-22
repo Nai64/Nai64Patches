@@ -69,7 +69,7 @@ private fun BytecodePatchContext.applyAdsFreeRewardsV1190(logger: Logger, reward
     val useUnityAds = strategy == "auto" || strategy == "unityAds"
     val useIronSource = strategy == "auto" || strategy == "ironSource"
 
-    // ── SDK detection ──
+    // -- SDK detection --
     val hasMaxUnity = ShowRewardedAdFingerprint.methodOrNull != null &&
         IsRewardedAdReadyFingerprint.methodOrNull != null
     val hasNativeMax = MaxRewardedAdIsReadyFingerprint.methodOrNull != null &&
@@ -85,7 +85,7 @@ private fun BytecodePatchContext.applyAdsFreeRewardsV1190(logger: Logger, reward
         return
     }
 
-    // ── Strategy 1: MAX Unity wrapper ──
+    // -- Strategy 1: MAX Unity wrapper --
     val unityShow = ShowRewardedAdFingerprint.methodOrNull
     val unityReady = IsRewardedAdReadyFingerprint.methodOrNull
     if (useMax && unityShow != null && unityReady != null) {
@@ -183,7 +183,7 @@ private fun BytecodePatchContext.applyAdsFreeRewardsV1190(logger: Logger, reward
         return
     }
 
-    // ── Strategy 2: Native MAX (non-Unity) ──
+    // -- Strategy 2: Native MAX (non-Unity) --
     val nativeReady = MaxRewardedAdIsReadyFingerprint.methodOrNull
     val nativeShow = MaxRewardedAdShowAdFingerprint.methodOrNull
     if (useMax && nativeReady != null && nativeShow != null) {
@@ -194,8 +194,8 @@ private fun BytecodePatchContext.applyAdsFreeRewardsV1190(logger: Logger, reward
         """.trimIndent())
 
         // Use reflection to find the MaxRewardedAdListener field and fire
-        // callbacks directly (onAdDisplayed → onRewardedVideoStarted →
-        // onUserRewarded → onRewardedVideoCompleted → onAdHidden).
+        // callbacks directly (onAdDisplayed -> onRewardedVideoStarted ->
+        // onUserRewarded -> onRewardedVideoCompleted -> onAdHidden).
         // This avoids crashes from simply NOP'ing showAd().
         // The reflection loop needs 7 registers (v0-v6); skip methods with
         // fewer to avoid out-of-range register failures on reassembly.
@@ -213,7 +213,7 @@ private fun BytecodePatchContext.applyAdsFreeRewardsV1190(logger: Logger, reward
         // LevelPlay / ironSource / Unity Ads instead).
     }
 
-    // ── Strategy 3: LevelPlay RewardedAd (ironSource mediation) ──
+    // -- Strategy 3: LevelPlay RewardedAd (ironSource mediation) --
     // Forces isAdReady() to return true. showAd() is NOT patched here;
     // the call flows through to the ironSource Unity adapter which
     // invokes com.unity3d.ads.RewardedAd.show(), which Strategy 4 patches.
@@ -260,7 +260,7 @@ private fun BytecodePatchContext.applyAdsFreeRewardsV1190(logger: Logger, reward
         return
     }
 
-    // ── Strategy 4: Unity Ads RewardedAd. ──
+    // -- Strategy 4: Unity Ads RewardedAd. --
     val adsShow = UnityRewardedAdShowFingerprint.methodOrNull
     if (useUnityAds && adsShow != null && instantReward == true) {
         logger.info("Unity Ads patch succeeded")
@@ -275,7 +275,7 @@ private fun BytecodePatchContext.applyAdsFreeRewardsV1190(logger: Logger, reward
         """.trimIndent())
     }
 
-    // ── Strategy 5: Unity Ads SDK v4 (UnityAds.show + IUnityAdsShowListener). ──
+    // -- Strategy 5: Unity Ads SDK v4 (UnityAds.show + IUnityAdsShowListener). --
     // IL2CPP games using the new Unity Ads 4.x native engine (e.g. Coin Flip
     // Master) call UnityAds.show(Activity, placementId, listener) instead of
     // the legacy RewardedAd API. Fire onUnityAdsShowStart + onUnityAdsShowComplete

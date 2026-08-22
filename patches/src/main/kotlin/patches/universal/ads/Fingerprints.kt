@@ -80,7 +80,7 @@ internal object PerformLocalInstallerCheckFingerprint : Fingerprint(
     parameters = emptyList(),
 )
 
-// ── Generic Play Store installer check fingerprints ──
+// -- Generic Play Store installer check fingerprints --
 // Match methods containing "com.android.vending" string in their body,
 // a strong indicator of install source checking logic.
 
@@ -152,7 +152,7 @@ internal object PairipLicenseActivityShowPaywallFingerprint : Fingerprint(
     parameters = emptyList(),
 )
 
-// ── Pairip Application class bypass ──
+// -- Pairip Application class bypass --
 // Prevents Pairip from loading libpairipcore.so and starting the VM
 // by neutering the Application entry point methods.
 
@@ -170,7 +170,7 @@ internal object PairipApplicationOnCreateFingerprint : Fingerprint(
     parameters = emptyList(),
 )
 
-// ── Native MAX (non-Unity) fingerprints ──
+// -- Native MAX (non-Unity) fingerprints --
 
 internal object MaxRewardedAdIsReadyFingerprint : Fingerprint(
     definingClass = "Lcom/applovin/mediation/ads/MaxRewardedAd;",
@@ -211,7 +211,7 @@ internal object MaxAdViewStartAutoRefreshFingerprint : Fingerprint(
     parameters = emptyList(),
 )
 
-// ── Unity Ads RewardedAd fingerprints ──
+// -- Unity Ads RewardedAd fingerprints --
 
 internal object UnityRewardedAdShowFingerprint : Fingerprint(
     definingClass = "Lcom/unity3d/ads/RewardedAd;",
@@ -225,7 +225,7 @@ internal object UnityRewardedAdShowFingerprint : Fingerprint(
     ),
 )
 
-// ── Unity Ads SDK v4 fingerprints ──
+// -- Unity Ads SDK v4 fingerprints --
 // New Unity Ads 4.x API: UnityAds.show(Activity, placementId, listener) fires
 // IUnityAdsShowListener.onUnityAdsShowComplete(placementId, completionState).
 
@@ -252,7 +252,7 @@ internal object UnityAdsV4Show4ArgFingerprint : Fingerprint(
     ),
 )
 
-// ── Unity Ads v3 (legacy) ──
+// -- Unity Ads v3 (legacy) --
 // Older Unity Ads API: UnityAds.show(Activity, placementId) without listeners.
 
 internal object UnityAdsV3Show2ArgFingerprint : Fingerprint(
@@ -276,7 +276,7 @@ internal object UnityAdsV3ShowOptionsFingerprint : Fingerprint(
     ),
 )
 
-// ── ironSource (LevelPlay) public API ──
+// -- ironSource (LevelPlay) public API --
 
 internal object IronSourceShowDemandOnlyInterstitialFingerprint : Fingerprint(
     definingClass = "Lcom/ironsource/mediationsdk/IronSource;",
@@ -348,7 +348,7 @@ internal object IronSourceShowRewardedVideoPlacementFingerprint : Fingerprint(
     parameters = listOf("Ljava/lang/String;"),
 )
 
-// ── AppLovin legacy (direct SDK, non-MAX) ──
+// -- AppLovin legacy (direct SDK, non-MAX) --
 
 internal object AppLovinInterstitialDialogShowFingerprint : Fingerprint(
     definingClass = "Lcom/applovin/adview/AppLovinInterstitialAdDialog;",
@@ -396,7 +396,7 @@ internal object AppLovinAdViewLoadNextAdFingerprint : Fingerprint(
     parameters = emptyList(),
 )
 
-// ── Vungle ──
+// -- Vungle --
 // Vungle 7.x: VungleInterstitialAd / VungleRewardedAd both load through
 // BaseFullscreenAd.load(placementId). Blocking the load makes shows no-op.
 
@@ -407,7 +407,7 @@ internal object VungleBaseFullscreenAdLoadFingerprint : Fingerprint(
     parameters = listOf("Ljava/lang/String;"),
 )
 
-// ── Meta Audience Network (facebook/ads) ──
+// -- Meta Audience Network (facebook/ads) --
 // show() returns Z in the modern AN SDK.
 
 internal object FacebookInterstitialAdShowFingerprint : Fingerprint(
@@ -452,7 +452,7 @@ internal object FacebookRewardedInterstitialShowConfigFingerprint : Fingerprint(
     parameters = listOf("Lcom/facebook/ads/RewardedInterstitialAd\$RewardedInterstitialShowAdConfig;"),
 )
 
-// ── Pangle (bytedance) ──
+// -- Pangle (bytedance) --
 
 internal object PangleInterstitialShowFingerprint : Fingerprint(
     definingClass = "Lcom/bytedance/sdk/openadsdk/api/interstitial/PAGInterstitialAd;",
@@ -475,7 +475,7 @@ internal object PangleAppOpenShowFingerprint : Fingerprint(
     parameters = listOf("Landroid/app/Activity;"),
 )
 
-// ── LevelPlay RewardedAd fingerprints ──
+// -- LevelPlay RewardedAd fingerprints --
 
 internal object LevelPlayRewardedAdIsReadyFingerprint : Fingerprint(
     definingClass = "Lcom/unity3d/mediation/rewarded/LevelPlayRewardedAd;",
@@ -501,7 +501,7 @@ internal object IronSourceLevelPlayFullScreenShowAdFingerprint : Fingerprint(
     ),
 )
 
-// ── Play In-app Updates ──
+// -- Play In-app Updates --
 
 internal object AppUpdateManagerImplStartUpdateFlowFingerprint : Fingerprint(
     definingClass = "Lcom/google/android/play/core/appupdate/AppUpdateManagerImpl;",
@@ -509,7 +509,7 @@ internal object AppUpdateManagerImplStartUpdateFlowFingerprint : Fingerprint(
     returnType = "Lcom/google/android/play/core/tasks/Task;",
 )
 
-// ── RootBeer root detection ──
+// -- RootBeer root detection --
 
 internal object RootBeerIsRootedFingerprint : Fingerprint(
     definingClass = "Lcom/scottyab/rootbeer/RootBeer;",
@@ -529,7 +529,7 @@ internal object RootBeerDetectTestKeysFingerprint : Fingerprint(
     returnType = "Z",
 )
 
-// ── RevenueCat ──
+// -- RevenueCat --
 
 internal object EntitlementInfoIsActiveFingerprint : Fingerprint(
     definingClass = "Lcom/revenuecat/purchases/EntitlementInfo;",
@@ -538,7 +538,7 @@ internal object EntitlementInfoIsActiveFingerprint : Fingerprint(
     parameters = emptyList(),
 )
 
-// ── Pairip LicenseClient.checkLicense root kill ──
+// -- Pairip LicenseClient.checkLicense root kill --
 
 internal object PairipLicenseClientCheckLicenseFingerprint : Fingerprint(
     definingClass = "Lcom/pairip/licensecheck/LicenseClient;",
@@ -547,7 +547,7 @@ internal object PairipLicenseClientCheckLicenseFingerprint : Fingerprint(
     parameters = listOf("Landroid/content/Context;"),
 )
 
-// ── Pairip LicenseContentProvider lifecycle neuter ──
+// -- Pairip LicenseContentProvider lifecycle neuter --
 
 internal object PairipLicenseContentProviderOnCreateFingerprint : Fingerprint(
     definingClass = "Lcom/pairip/licensecheck/LicenseContentProvider;",
@@ -569,7 +569,7 @@ internal object PairipLicenseContentProviderQueryFingerprint : Fingerprint(
     ),
 )
 
-// ── Pairip InitContextProvider ──
+// -- Pairip InitContextProvider --
 
 internal object PairipInitContextProviderGetContextFingerprint : Fingerprint(
     definingClass = "Lcom/pairip/InitContextProvider;",
@@ -578,7 +578,7 @@ internal object PairipInitContextProviderGetContextFingerprint : Fingerprint(
     parameters = emptyList(),
 )
 
-// ── Pairip LicenseResponseHelper (response validation sink) ──
+// -- Pairip LicenseResponseHelper (response validation sink) --
 
 internal object PairipLicenseResponseHelperValidateResponseFingerprint : Fingerprint(
     definingClass = "Lcom/pairip/licensecheck/LicenseResponseHelper;",
@@ -601,7 +601,7 @@ internal object PairipLicenseResponseHelperVerifySignatureFingerprint : Fingerpr
     parameters = listOf("Ljava/lang/String;", "Ljava/lang/String;", "Ljava/lang/String;", "Ljava/security/PublicKey;"),
 )
 
-// ── Pairip ResponseValidator (older response validation path) ──
+// -- Pairip ResponseValidator (older response validation path) --
 
 internal object PairipResponseValidatorValidateResponseFingerprint : Fingerprint(
     definingClass = "Lcom/pairip/licensecheck/ResponseValidator;",
@@ -617,7 +617,7 @@ internal object PairipResponseValidatorVerifySignatureFingerprint : Fingerprint(
     parameters = listOf("Ljava/lang/String;", "Ljava/lang/String;", "Ljava/lang/String;", "Ljava/security/PublicKey;"),
 )
 
-// ── Pairip licensecheck3 ResponseValidator (V3 response validation path) ──
+// -- Pairip licensecheck3 ResponseValidator (V3 response validation path) --
 
 internal object PairipResponseValidatorV3ValidateResponseFingerprint : Fingerprint(
     definingClass = "Lcom/pairip/licensecheck3/ResponseValidator;",

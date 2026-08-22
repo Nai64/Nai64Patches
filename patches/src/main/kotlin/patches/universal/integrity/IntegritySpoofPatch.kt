@@ -14,7 +14,7 @@ val spoofPlayIntegrityPatch = bytecodePatch(
     execute {
         val logger = Logger.getLogger(this::class.java.name)
 
-        // ── Build a fake passing verdict token (JWT) ──
+        // -- Build a fake passing verdict token (JWT) --
         // Uses the app's real package identity so client-side checks that
         // compare requestPackageName/packageName still pass.
         val packageName = packageMetadata.packageName
@@ -47,7 +47,7 @@ val spoofPlayIntegrityPatch = bytecodePatch(
 
         val token = b64(header) + "." + b64(payload) + "." + b64("spoofed-by-morphe")
 
-        // ── Patch the token response methods ──
+        // -- Patch the token response methods --
         var patched = false
 
         val classic = IntegrityTokenResponseFingerprint.methodOrNull

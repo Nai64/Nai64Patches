@@ -62,7 +62,7 @@ internal fun BytecodePatchContext.applyAdsFreeRewardsV110(logger: Logger) {
 }
 
 internal fun BytecodePatchContext.applyAdsFreeRewardsV1150(logger: Logger) {
-    // â”€â”€ SDK detection â”€â”€
+    // -- SDK detection --
     val hasMaxUnity = ShowRewardedAdFingerprint.methodOrNull != null &&
         IsRewardedAdReadyFingerprint.methodOrNull != null
     val hasNativeMax = MaxRewardedAdIsReadyFingerprint.methodOrNull != null &&
@@ -77,7 +77,7 @@ internal fun BytecodePatchContext.applyAdsFreeRewardsV1150(logger: Logger) {
         return
     }
 
-    // â”€â”€ Strategy 1: MAX Unity wrapper â”€â”€
+    // -- Strategy 1: MAX Unity wrapper --
     val unityShow = ShowRewardedAdFingerprint.methodOrNull
     val unityReady = IsRewardedAdReadyFingerprint.methodOrNull
     if (unityShow != null && unityReady != null) {
@@ -91,7 +91,7 @@ internal fun BytecodePatchContext.applyAdsFreeRewardsV1150(logger: Logger) {
         // Replace showRewardedAd with JSONObject + forwardUnityEvent.
         // Uses JsonUtils.putString (avoids JSONException), then calls
         // forwardUnityEvent to push through the MAX SDK callback pipeline.
-        // Register layout: registers=5, ins=4 â†’ p0=v1(this), p1=v2(adUnitId), p2=v3, p3=v4.
+        // Register layout: registers=5, ins=4 -> p0=v1(this), p1=v2(adUnitId), p2=v3, p3=v4.
         // Save p1 to v0 first so v2 can be used for string temps without corrupting adUnitId.
         unityShow.addInstructions(0, """
             move-object v0, p1
@@ -138,7 +138,7 @@ internal fun BytecodePatchContext.applyAdsFreeRewardsV1150(logger: Logger) {
         """.trimIndent())
     }
 
-    // â”€â”€ Strategy 1b: MAX Unity onAdHidden safety net â”€â”€
+    // -- Strategy 1b: MAX Unity onAdHidden safety net --
     // Fires the reward event when a rewarded ad is dismissed, regardless
     // of whether the ad network's reward verification succeeded. This
     // catches cases where the adapter-level reward callback is never
@@ -172,7 +172,7 @@ internal fun BytecodePatchContext.applyAdsFreeRewardsV1150(logger: Logger) {
         """.trimIndent())
     }
 
-    // â”€â”€ Strategy 2: Native MAX (non-Unity) â”€â”€
+    // -- Strategy 2: Native MAX (non-Unity) --
     val nativeReady = MaxRewardedAdIsReadyFingerprint.methodOrNull
     val nativeShow = MaxRewardedAdShowAdFingerprint.methodOrNull
     if (nativeReady != null && nativeShow != null) {
@@ -183,8 +183,8 @@ internal fun BytecodePatchContext.applyAdsFreeRewardsV1150(logger: Logger) {
         """.trimIndent())
 
         // Use reflection to find the MaxRewardedAdListener field and fire
-        // callbacks directly (onAdDisplayed â†’ onRewardedVideoStarted â†’
-        // onUserRewarded â†’ onRewardedVideoCompleted â†’ onAdHidden).
+        // callbacks directly (onAdDisplayed -> onRewardedVideoStarted ->
+        // onUserRewarded -> onRewardedVideoCompleted -> onAdHidden).
         // This avoids crashes from simply NOP'ing showAd().
         nativeShow.addInstructions(0, fireRewardedAdCallbacks())
 
@@ -194,7 +194,7 @@ internal fun BytecodePatchContext.applyAdsFreeRewardsV1150(logger: Logger) {
         // LevelPlay / ironSource / Unity Ads instead).
     }
 
-    // â”€â”€ Strategy 3: LevelPlay RewardedAd (ironSource mediation) â”€â”€
+    // -- Strategy 3: LevelPlay RewardedAd (ironSource mediation) --
     // Forces isAdReady() to return true. showAd() is NOT patched here;
     // the call flows through to the ironSource Unity adapter which
     // invokes com.unity3d.ads.RewardedAd.show(), which Strategy 4 patches.
@@ -256,7 +256,7 @@ internal fun BytecodePatchContext.applyAdsFreeRewardsV1150(logger: Logger) {
 }
 
 internal fun BytecodePatchContext.applyAdsFreeRewardsV1160(logger: Logger) {
-    // â”€â”€ SDK detection â”€â”€
+    // -- SDK detection --
     val hasMaxUnity = ShowRewardedAdFingerprint.methodOrNull != null &&
         IsRewardedAdReadyFingerprint.methodOrNull != null
     val hasNativeMax = MaxRewardedAdIsReadyFingerprint.methodOrNull != null &&
@@ -270,7 +270,7 @@ internal fun BytecodePatchContext.applyAdsFreeRewardsV1160(logger: Logger) {
         return
     }
 
-    // â”€â”€ Strategy 1: MAX Unity wrapper â”€â”€
+    // -- Strategy 1: MAX Unity wrapper --
     val unityShow = ShowRewardedAdFingerprint.methodOrNull
     val unityReady = IsRewardedAdReadyFingerprint.methodOrNull
     if (unityShow != null && unityReady != null) {
@@ -284,7 +284,7 @@ internal fun BytecodePatchContext.applyAdsFreeRewardsV1160(logger: Logger) {
         // Replace showRewardedAd with JSONObject + forwardUnityEvent.
         // Uses JsonUtils.putString (avoids JSONException), then calls
         // forwardUnityEvent to push through the MAX SDK callback pipeline.
-        // Register layout: registers=5, ins=4 â†’ p0=v1(this), p1=v2(adUnitId), p2=v3, p3=v4.
+        // Register layout: registers=5, ins=4 -> p0=v1(this), p1=v2(adUnitId), p2=v3, p3=v4.
         // Save p1 to v0 first so v2 can be used for string temps without corrupting adUnitId.
         unityShow.addInstructions(0, """
             move-object v0, p1
@@ -332,7 +332,7 @@ internal fun BytecodePatchContext.applyAdsFreeRewardsV1160(logger: Logger) {
         return
     }
 
-    // â”€â”€ Strategy 2: Native MAX (non-Unity) â”€â”€
+    // -- Strategy 2: Native MAX (non-Unity) --
     val nativeReady = MaxRewardedAdIsReadyFingerprint.methodOrNull
     val nativeShow = MaxRewardedAdShowAdFingerprint.methodOrNull
     if (nativeReady != null && nativeShow != null) {
@@ -343,8 +343,8 @@ internal fun BytecodePatchContext.applyAdsFreeRewardsV1160(logger: Logger) {
         """.trimIndent())
 
         // Use reflection to find the MaxRewardedAdListener field and fire
-        // callbacks directly (onAdDisplayed â†’ onRewardedVideoStarted â†’
-        // onUserRewarded â†’ onRewardedVideoCompleted â†’ onAdHidden).
+        // callbacks directly (onAdDisplayed -> onRewardedVideoStarted ->
+        // onUserRewarded -> onRewardedVideoCompleted -> onAdHidden).
         // This avoids crashes from simply NOP'ing showAd().
         nativeShow.addInstructions(0, fireRewardedAdCallbacks())
 
@@ -354,7 +354,7 @@ internal fun BytecodePatchContext.applyAdsFreeRewardsV1160(logger: Logger) {
         // LevelPlay / ironSource / Unity Ads instead).
     }
 
-    // â”€â”€ Strategy 3: LevelPlay RewardedAd (ironSource mediation) â”€â”€
+    // -- Strategy 3: LevelPlay RewardedAd (ironSource mediation) --
     // Forces isAdReady() to return true. showAd() is NOT patched here;
     // the call flows through to the ironSource Unity adapter which
     // invokes com.unity3d.ads.RewardedAd.show(), which Strategy 4 patches.
@@ -416,7 +416,7 @@ internal fun BytecodePatchContext.applyAdsFreeRewardsV1160(logger: Logger) {
 }
 
 internal fun BytecodePatchContext.applyAdsFreeRewardsV1170(logger: Logger) {
-    // â”€â”€ SDK detection â”€â”€
+    // -- SDK detection --
     val hasMaxUnity = ShowRewardedAdFingerprint.methodOrNull != null &&
         IsRewardedAdReadyFingerprint.methodOrNull != null
     val hasNativeMax = MaxRewardedAdIsReadyFingerprint.methodOrNull != null &&
@@ -430,7 +430,7 @@ internal fun BytecodePatchContext.applyAdsFreeRewardsV1170(logger: Logger) {
         return
     }
 
-    // â”€â”€ Strategy 1: MAX Unity wrapper â”€â”€
+    // -- Strategy 1: MAX Unity wrapper --
     val unityShow = ShowRewardedAdFingerprint.methodOrNull
     val unityReady = IsRewardedAdReadyFingerprint.methodOrNull
     if (unityShow != null && unityReady != null) {
@@ -444,7 +444,7 @@ internal fun BytecodePatchContext.applyAdsFreeRewardsV1170(logger: Logger) {
         // Replace showRewardedAd with JSONObject + forwardUnityEvent.
         // Uses JsonUtils.putString (avoids JSONException), then calls
         // forwardUnityEvent to push through the MAX SDK callback pipeline.
-        // Register layout: registers=5, ins=3 â†’ p0=v2(this), p1=v3(adUnitId), p2=v4(context).
+        // Register layout: registers=5, ins=3 -> p0=v2(this), p1=v3(adUnitId), p2=v4(context).
         // Save p1 to v0 first so v2/v3 can be used as string temps without corrupting adUnitId.
         unityShow.addInstructions(0, """
             move-object v0, p1
@@ -518,7 +518,7 @@ internal fun BytecodePatchContext.applyAdsFreeRewardsV1170(logger: Logger) {
         return
     }
 
-    // â”€â”€ Strategy 2: Native MAX (non-Unity) â”€â”€
+    // -- Strategy 2: Native MAX (non-Unity) --
     val nativeReady = MaxRewardedAdIsReadyFingerprint.methodOrNull
     val nativeShow = MaxRewardedAdShowAdFingerprint.methodOrNull
     if (nativeReady != null && nativeShow != null) {
@@ -529,8 +529,8 @@ internal fun BytecodePatchContext.applyAdsFreeRewardsV1170(logger: Logger) {
         """.trimIndent())
 
         // Use reflection to find the MaxRewardedAdListener field and fire
-        // callbacks directly (onAdDisplayed â†’ onRewardedVideoStarted â†’
-        // onUserRewarded â†’ onRewardedVideoCompleted â†’ onAdHidden).
+        // callbacks directly (onAdDisplayed -> onRewardedVideoStarted ->
+        // onUserRewarded -> onRewardedVideoCompleted -> onAdHidden).
         // This avoids crashes from simply NOP'ing showAd().
         nativeShow.addInstructions(0, fireRewardedAdCallbacks())
 
@@ -540,7 +540,7 @@ internal fun BytecodePatchContext.applyAdsFreeRewardsV1170(logger: Logger) {
         // LevelPlay / ironSource / Unity Ads instead).
     }
 
-    // â”€â”€ Strategy 3: LevelPlay RewardedAd (ironSource mediation) â”€â”€
+    // -- Strategy 3: LevelPlay RewardedAd (ironSource mediation) --
     // Forces isAdReady() to return true. showAd() is NOT patched here;
     // the call flows through to the ironSource Unity adapter which
     // invokes com.unity3d.ads.RewardedAd.show(), which Strategy 4 patches.
@@ -602,7 +602,7 @@ internal fun BytecodePatchContext.applyAdsFreeRewardsV1170(logger: Logger) {
 }
 
 internal fun BytecodePatchContext.applyAdsFreeRewardsV1180(logger: Logger) {
-    // â”€â”€ SDK detection â”€â”€
+    // -- SDK detection --
     val hasMaxUnity = ShowRewardedAdFingerprint.methodOrNull != null &&
         IsRewardedAdReadyFingerprint.methodOrNull != null
     val hasNativeMax = MaxRewardedAdIsReadyFingerprint.methodOrNull != null &&
@@ -618,7 +618,7 @@ internal fun BytecodePatchContext.applyAdsFreeRewardsV1180(logger: Logger) {
         return
     }
 
-    // â”€â”€ Strategy 1: MAX Unity wrapper â”€â”€
+    // -- Strategy 1: MAX Unity wrapper --
     val unityShow = ShowRewardedAdFingerprint.methodOrNull
     val unityReady = IsRewardedAdReadyFingerprint.methodOrNull
     if (unityShow != null && unityReady != null) {
@@ -632,7 +632,7 @@ internal fun BytecodePatchContext.applyAdsFreeRewardsV1180(logger: Logger) {
         // Replace showRewardedAd with JSONObject + forwardUnityEvent.
         // Uses JsonUtils.putString (avoids JSONException), then calls
         // forwardUnityEvent to push through the MAX SDK callback pipeline.
-        // Register layout: registers=5, ins=3 â†’ p0=v2(this), p1=v3(adUnitId), p2=v4(context).
+        // Register layout: registers=5, ins=3 -> p0=v2(this), p1=v3(adUnitId), p2=v4(context).
         // Save p1 to v0 first so v2/v3 can be used as string temps without corrupting adUnitId.
         unityShow.addInstructions(0, """
             move-object v0, p1
@@ -706,7 +706,7 @@ internal fun BytecodePatchContext.applyAdsFreeRewardsV1180(logger: Logger) {
         return
     }
 
-    // â”€â”€ Strategy 2: Native MAX (non-Unity) â”€â”€
+    // -- Strategy 2: Native MAX (non-Unity) --
     val nativeReady = MaxRewardedAdIsReadyFingerprint.methodOrNull
     val nativeShow = MaxRewardedAdShowAdFingerprint.methodOrNull
     if (nativeReady != null && nativeShow != null) {
@@ -717,8 +717,8 @@ internal fun BytecodePatchContext.applyAdsFreeRewardsV1180(logger: Logger) {
         """.trimIndent())
 
         // Use reflection to find the MaxRewardedAdListener field and fire
-        // callbacks directly (onAdDisplayed â†’ onRewardedVideoStarted â†’
-        // onUserRewarded â†’ onRewardedVideoCompleted â†’ onAdHidden).
+        // callbacks directly (onAdDisplayed -> onRewardedVideoStarted ->
+        // onUserRewarded -> onRewardedVideoCompleted -> onAdHidden).
         // This avoids crashes from simply NOP'ing showAd().
         nativeShow.addInstructions(0, fireRewardedAdCallbacks())
 
@@ -728,7 +728,7 @@ internal fun BytecodePatchContext.applyAdsFreeRewardsV1180(logger: Logger) {
         // LevelPlay / ironSource / Unity Ads instead).
     }
 
-    // â”€â”€ Strategy 3: LevelPlay RewardedAd (ironSource mediation) â”€â”€
+    // -- Strategy 3: LevelPlay RewardedAd (ironSource mediation) --
     // Forces isAdReady() to return true. showAd() is NOT patched here;
     // the call flows through to the ironSource Unity adapter which
     // invokes com.unity3d.ads.RewardedAd.show(), which Strategy 4 patches.
@@ -818,7 +818,7 @@ internal fun BytecodePatchContext.applyAdsFreeRewardsV1180(logger: Logger) {
 }
 
 internal fun BytecodePatchContext.applyAdsFreeRewardsV1181(logger: Logger) {
-    // â”€â”€ SDK detection â”€â”€
+    // -- SDK detection --
     val hasMaxUnity = ShowRewardedAdFingerprint.methodOrNull != null &&
         IsRewardedAdReadyFingerprint.methodOrNull != null
     val hasNativeMax = MaxRewardedAdIsReadyFingerprint.methodOrNull != null &&
@@ -834,7 +834,7 @@ internal fun BytecodePatchContext.applyAdsFreeRewardsV1181(logger: Logger) {
         return
     }
 
-    // â”€â”€ Strategy 1: MAX Unity wrapper â”€â”€
+    // -- Strategy 1: MAX Unity wrapper --
     val unityShow = ShowRewardedAdFingerprint.methodOrNull
     val unityReady = IsRewardedAdReadyFingerprint.methodOrNull
     if (unityShow != null && unityReady != null) {
@@ -930,7 +930,7 @@ internal fun BytecodePatchContext.applyAdsFreeRewardsV1181(logger: Logger) {
         return
     }
 
-    // â”€â”€ Strategy 2: Native MAX (non-Unity) â”€â”€
+    // -- Strategy 2: Native MAX (non-Unity) --
     val nativeReady = MaxRewardedAdIsReadyFingerprint.methodOrNull
     val nativeShow = MaxRewardedAdShowAdFingerprint.methodOrNull
     if (nativeReady != null && nativeShow != null) {
@@ -941,8 +941,8 @@ internal fun BytecodePatchContext.applyAdsFreeRewardsV1181(logger: Logger) {
         """.trimIndent())
 
         // Use reflection to find the MaxRewardedAdListener field and fire
-        // callbacks directly (onAdDisplayed â†’ onRewardedVideoStarted â†’
-        // onUserRewarded â†’ onRewardedVideoCompleted â†’ onAdHidden).
+        // callbacks directly (onAdDisplayed -> onRewardedVideoStarted ->
+        // onUserRewarded -> onRewardedVideoCompleted -> onAdHidden).
         // This avoids crashes from simply NOP'ing showAd().
         // The reflection loop needs 7 registers (v0-v6); skip methods with
         // fewer to avoid out-of-range register failures on reassembly.
@@ -960,7 +960,7 @@ internal fun BytecodePatchContext.applyAdsFreeRewardsV1181(logger: Logger) {
         // LevelPlay / ironSource / Unity Ads instead).
     }
 
-    // â”€â”€ Strategy 3: LevelPlay RewardedAd (ironSource mediation) â”€â”€
+    // -- Strategy 3: LevelPlay RewardedAd (ironSource mediation) --
     // Forces isAdReady() to return true. showAd() is NOT patched here;
     // the call flows through to the ironSource Unity adapter which
     // invokes com.unity3d.ads.RewardedAd.show(), which Strategy 4 patches.
