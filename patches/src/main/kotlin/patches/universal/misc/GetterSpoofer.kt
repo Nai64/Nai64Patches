@@ -169,6 +169,51 @@ internal fun BytecodePatchContext.foldNoArgStringGetter(
 }
 
 /**
+ * Folds a no-argument `int` getter (e.g. `TelephonyManager.getDataState`) into a
+ * constant [value]. The invoke is replaced by a `const/4`/`const/16` into the
+ * result register and the following `move-result` by a `nop`.
+ *
+ * @return number of patched call sites.
+ */
+internal fun BytecodePatchContext.foldNoArgIntGetter(
+    definingClass: String,
+    methodNames: Set<String>,
+    value: Int,
+): Int {
+    var patched = 0
+    classDefForEach { classDef ->
+        val mutableClass = mutableClassDefBy(classDef)
+        for (method in mutableClass.methods) {
+            val implementation = method.implementation ?: continue
+            val instructions: List<Instruction> = implementation.instructions.toList()
+            for ((index, instruction) in instructions.withIndex()) {
+                val reference =
+                    (instruction as? ReferenceInstruction)?.reference as? MethodReference
+                        ?: continue
+                if (reference.definingClass != definingClass) continue
+                if (reference.name !in methodNames) continue
+                if (reference.parameterTypes.isNotEmpty()) continue
+                if (reference.returnType != "I") continue
+
+                val next = instructions.getOrNull(index + 1)
+                val resultRegister = (next as? OneRegisterInstruction)?.registerA
+                if (next != null && next.opcode == Opcode.MOVE_RESULT) {
+                    val const = if (value in -8..7) {
+                        "const/4 v$resultRegister, $value"
+                    } else {
+                        "const/16 v$resultRegister, $value"
+                    }
+                    method.replaceInstruction(index, const)
+                    method.replaceInstruction(index + 1, "nop")
+                    patched++
+                }
+            }
+        }
+    }
+    return patched
+}
+
+/**
  * Redirects `Locale.getDefault()` to `Locale.forLanguageTag([tag])` so the call
  * returns the chosen locale everywhere. The original invoke is rewritten as:
  *   const-string vR, "[tag]"
