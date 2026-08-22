@@ -11,7 +11,8 @@ import patches.universal.ads.util.p0Register
 import java.util.logging.Logger
 
 /**
- * Finds the Application.onCreate()V method, or null.
+ * Finds the first Application.onCreate()V method, or null. Used as a fallback
+ * when the manifest-declared Application class cannot be resolved.
  * The returned pair is (mutable class, method).
  */
 internal fun BytecodePatchContext.findApplicationOnCreate(): Pair<MutableClass, MutableMethod>? {
@@ -34,6 +35,8 @@ val customStartupToastPatch = bytecodePatch(
     description = "Shows a customizable toast message every time the app starts",
     default = false,
 ) {
+    dependsOn(StartupHooks.resolveRealApplicationPatch)
+
     val message by stringOption(
         title = "Toast message",
         default = "Patched by Nai's Patches",
@@ -65,25 +68,48 @@ val customStartupToastPatch = bytecodePatch(
             }
         }
 
-        val (mutableClass, onCreate) = findApplicationOnCreate()
-            ?: run {
-                logger.warning("No Application.onCreate found. No changes applied.")
-                return@execute
+        val (mutableClass, onCreate) = run {
+            val descriptor = StartupHooks.resolvedApplicationDescriptor
+            if (descriptor != null) {
+                val cls = mutableClassDefByOrNull(descriptor)
+                val om = cls?.methods?.firstOrNull {
+                    it.name == "onCreate" && it.returnType == "V" && it.parameterTypes.isEmpty()
+                }
+                if (cls != null && om != null) {
+                    return@run cls to om
+                }
             }
+            findApplicationOnCreate()
+        } ?: run {
+            logger.warning("No Application.onCreate found. No changes applied.")
+            return@execute
+        }
 
-        // Four fresh registers: text, duration, toast reference, spare.
+        // Three fresh registers: context copy (later reused for the toast
+        // reference), text, duration. The context slot is overwritten with the
+        // makeText result because its value is dead once makeText consumed it;
+        // writing a fourth register would collide with p0, which cloneMutable
+        // parks at the very top of the new register window.
+        // All multi-register invokes use the /range variant because plain
+        // invoke-* cannot address registers above v15, and Application.onCreate
+        // may well place these temporaries beyond that. The context is copied
+        // first to keep every operand list contiguous.
         val tempBase = onCreate.implementation!!.registerCount
-        val contextReg = onCreate.p0Register
+
+        // cloneMutable shifts parameters to the top of the new register
+        // window; p0 must be resolved against the CLONED method.
         val cloned = onCreate.cloneMutable(additionalRegisters = 4)
+        val contextReg = cloned.p0Register
 
         cloned.addInstructions(
             0,
             """
+            move-object/from16 v$tempBase, v$contextReg
             const-string v${tempBase + 1}, "${StartupHooks.escapeSmali(text)}"
-            const/4 v${tempBase + 2}, $durationFlag
-            invoke-static {v$contextReg, v${tempBase + 1}, v${tempBase + 2}}, Landroid/widget/Toast;->makeText(Landroid/content/Context;Ljava/lang/CharSequence;I)Landroid/widget/Toast;
-            move-result-object v${tempBase + 3}
-            invoke-virtual {v${tempBase + 3}}, Landroid/widget/Toast;->show()V
+            const/16 v${tempBase + 2}, $durationFlag
+            invoke-static/range {v$tempBase .. v${tempBase + 2}}, Landroid/widget/Toast;->makeText(Landroid/content/Context;Ljava/lang/CharSequence;I)Landroid/widget/Toast;
+            move-result-object v$tempBase
+            invoke-virtual/range {v$tempBase}, Landroid/widget/Toast;->show()V
             """.trimIndent(),
         )
 
