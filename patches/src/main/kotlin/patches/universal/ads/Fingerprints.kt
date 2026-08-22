@@ -626,6 +626,39 @@ internal object PairipResponseValidatorV3ValidateResponseFingerprint : Fingerpri
     parameters = listOf("Landroid/os/Bundle;", "Ljava/lang/String;"),
 )
 
+// -- Pairip V2 (newer licensecheck runtime) --
+// Targets the V2 license client shipped in newer Pairip-protected apps.
+// Method prototypes were dumped directly from a protected APK.
+
+internal object PairipV2CheckLicenseInternalFingerprint : Fingerprint(
+    definingClass = "Lcom/pairip/licensecheck/LicenseClient;",
+    name = "checkLicenseInternal",
+    accessFlags = listOf(AccessFlags.PRIVATE),
+    returnType = "V",
+    parameters = listOf("Landroid/os/IBinder;"),
+)
+
+internal object PairipV2LicenseResponseHelperVerifySignatureFingerprint : Fingerprint(
+    definingClass = "Lcom/pairip/licensecheck/LicenseResponseHelper;",
+    name = "verifySignature",
+    accessFlags = listOf(AccessFlags.PRIVATE, AccessFlags.STATIC),
+    returnType = "V",
+    parameters = listOf(
+        "Ljava/lang/String;",
+        "Ljava/lang/String;",
+        "Ljava/lang/String;",
+        "Ljava/security/PublicKey;",
+    ),
+)
+
+internal object PairipV2ScheduleRepeatedLicenseCheckFingerprint : Fingerprint(
+    definingClass = "Lcom/pairip/licensecheck/LicenseClient;",
+    name = "scheduleRepeatedLicenseCheck",
+    accessFlags = listOf(AccessFlags.PRIVATE),
+    returnType = "V",
+    parameters = listOf("Lcom/pairip/licensecheck/RepeatedCheckMetadata;"),
+)
+
 // AdMob (Google Mobile Ads)
 
 internal object AdMobInterstitialShowFingerprint : Fingerprint(

@@ -150,10 +150,10 @@ val pairipBypassPatch = bytecodePatch(
             logger.info("Applied Pairip LicenseClient.checkLicense root kill")
         }
 
-        // -- Strategy 9: LicenseContentProvider.onCreate --
+        // -- Strategy 9: LicenseContentProvider.onCreate (report success) --
         PairipLicenseContentProviderOnCreateFingerprint.methodOrNull?.let {
             it.addInstructions(0, listOf(
-                BuilderInstruction11n(Opcode.CONST_4, 0, 0),
+                BuilderInstruction11n(Opcode.CONST_4, 0, 1),
                 BuilderInstruction11x(Opcode.RETURN, 0),
             ))
             logger.info("Applied Pairip LicenseContentProvider.onCreate bypass")
@@ -228,6 +228,39 @@ val pairipBypassPatch = bytecodePatch(
             logger.info("Applied Pairip licensecheck3 ResponseValidator.validateResponse bypass")
         }
 
+        // -- Strategy 18: Pairip V2 checkLicenseInternal -> force license success --
+        // V2 routes the verification result back to the app through the IBinder
+        // listener supplied to checkLicenseInternal. Short-circuit it to call the
+        // success path directly so the app unlocks regardless of the (now
+        // neutralized) signature / response checks.
+        PairipV2CheckLicenseInternalFingerprint.methodOrNull?.let {
+            it.addInstructions(0, """
+                invoke-virtual {p0, p1}, Lcom/pairip/licensecheck/LicenseClient;->reportSuccessfulLicenseCheck(Landroid/os/IBinder;)V
+                return-void
+            """.trimIndent())
+            logger.info("Applied Pairip V2 checkLicenseInternal force-success")
+        }
+
+        // -- Strategy 19: Pairip V2 LicenseResponseHelper.verifySignature (void) --
+        // V2's verifySignature returns void (V1 returned Z). Neutralize it so the
+        // JWS signature of the license response is never rejected.
+        PairipV2LicenseResponseHelperVerifySignatureFingerprint.methodOrNull?.let {
+            it.addInstructions(0, """
+                return-void
+            """.trimIndent())
+            logger.info("Applied Pairip V2 LicenseResponseHelper.verifySignature bypass")
+        }
+
+        // -- Strategy 20: Pairip V2 scheduleRepeatedLicenseCheck suppress --
+        // Stops Pairip from re-verifying (and potentially re-locking) the app in
+        // the background after the initial unlock.
+        PairipV2ScheduleRepeatedLicenseCheckFingerprint.methodOrNull?.let {
+            it.addInstructions(0, """
+                return-void
+            """.trimIndent())
+            logger.info("Applied Pairip V2 scheduleRepeatedLicenseCheck suppress")
+        }
+
         val applied = listOfNotNull(
             PerformLocalInstallerCheckFingerprint.methodOrNull?.let { "performLocalInstallerCheck" },
             PairipSignatureCheckVerifyIntegrityFingerprint.methodOrNull?.let { "verifyIntegrity" },
@@ -247,6 +280,9 @@ val pairipBypassPatch = bytecodePatch(
             PairipResponseValidatorValidateResponseFingerprint.methodOrNull?.let { "validateResponse (ResponseValidator)" },
             PairipResponseValidatorVerifySignatureFingerprint.methodOrNull?.let { "verifySignature (ResponseValidator)" },
             PairipResponseValidatorV3ValidateResponseFingerprint.methodOrNull?.let { "validateResponse (V3)" },
+            PairipV2CheckLicenseInternalFingerprint.methodOrNull?.let { "checkLicenseInternal (V2)" },
+            PairipV2LicenseResponseHelperVerifySignatureFingerprint.methodOrNull?.let { "verifySignature (V2)" },
+            PairipV2ScheduleRepeatedLicenseCheckFingerprint.methodOrNull?.let { "scheduleRepeatedLicenseCheck (V2)" },
         )
         if (applied.isEmpty()) {
             logger.warning("No Pairip license methods found. No changes applied.")
