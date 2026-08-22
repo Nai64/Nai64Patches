@@ -266,3 +266,152 @@ internal fun BytecodePatchContext.foldLocaleGetDefault(tag: String): Int {
     }
     return patched
 }
+
+/**
+ * Folds any `String`-returning getter (regardless of its arguments) into a
+ * constant [value]: the invoke becomes a `const-string` into the result
+ * register and the following `move-result-object` becomes a `nop`.
+ */
+internal fun BytecodePatchContext.foldStringGetterConst(
+    definingClass: String,
+    methodNames: Set<String>,
+    value: String,
+): Int {
+    var patched = 0
+    classDefForEach { classDef ->
+        val mutableClass = mutableClassDefBy(classDef)
+        for (method in mutableClass.methods) {
+            val implementation = method.implementation ?: continue
+            val instructions: List<Instruction> = implementation.instructions.toList()
+            for ((index, instruction) in instructions.withIndex()) {
+                val reference =
+                    (instruction as? ReferenceInstruction)?.reference as? MethodReference
+                        ?: continue
+                if (reference.definingClass != definingClass) continue
+                if (reference.name !in methodNames) continue
+                if (reference.returnType != "Ljava/lang/String;") continue
+
+                val next = instructions.getOrNull(index + 1)
+                if (next != null && next.opcode == Opcode.MOVE_RESULT_OBJECT) {
+                    val resultRegister = (next as OneRegisterInstruction).registerA
+                    method.replaceInstruction(index, constString(resultRegister, value))
+                    method.replaceInstruction(index + 1, "nop")
+                    patched++
+                }
+            }
+        }
+    }
+    return patched
+}
+
+/**
+ * Folds any `boolean`-returning getter into [value] (true -> 0x1, false -> 0x0).
+ */
+internal fun BytecodePatchContext.foldBooleanGetterConst(
+    definingClass: String,
+    methodNames: Set<String>,
+    value: Boolean,
+): Int {
+    var patched = 0
+    classDefForEach { classDef ->
+        val mutableClass = mutableClassDefBy(classDef)
+        for (method in mutableClass.methods) {
+            val implementation = method.implementation ?: continue
+            val instructions: List<Instruction> = implementation.instructions.toList()
+            for ((index, instruction) in instructions.withIndex()) {
+                val reference =
+                    (instruction as? ReferenceInstruction)?.reference as? MethodReference
+                        ?: continue
+                if (reference.definingClass != definingClass) continue
+                if (reference.name !in methodNames) continue
+                if (reference.returnType != "Z") continue
+
+                val next = instructions.getOrNull(index + 1)
+                if (next != null && next.opcode == Opcode.MOVE_RESULT) {
+                    val resultRegister = (next as OneRegisterInstruction).registerA
+                    val const = if (value) {
+                        "const/4 v$resultRegister, 0x1"
+                    } else {
+                        "const/4 v$resultRegister, 0x0"
+                    }
+                    method.replaceInstruction(index, const)
+                    method.replaceInstruction(index + 1, "nop")
+                    patched++
+                }
+            }
+        }
+    }
+    return patched
+}
+
+/**
+ * Folds any object-returning getter into `null` (const/4 0x0).
+ */
+internal fun BytecodePatchContext.foldObjectGetterToNull(
+    definingClass: String,
+    methodNames: Set<String>,
+    returnType: String,
+): Int {
+    var patched = 0
+    classDefForEach { classDef ->
+        val mutableClass = mutableClassDefBy(classDef)
+        for (method in mutableClass.methods) {
+            val implementation = method.implementation ?: continue
+            val instructions: List<Instruction> = implementation.instructions.toList()
+            for ((index, instruction) in instructions.withIndex()) {
+                val reference =
+                    (instruction as? ReferenceInstruction)?.reference as? MethodReference
+                        ?: continue
+                if (reference.definingClass != definingClass) continue
+                if (reference.name !in methodNames) continue
+                if (reference.returnType != returnType) continue
+
+                val next = instructions.getOrNull(index + 1)
+                if (next != null && next.opcode == Opcode.MOVE_RESULT_OBJECT) {
+                    val resultRegister = (next as OneRegisterInstruction).registerA
+                    method.replaceInstruction(index, "const/4 v$resultRegister, 0x0")
+                    method.replaceInstruction(index + 1, "nop")
+                    patched++
+                }
+            }
+        }
+    }
+    return patched
+}
+
+/**
+ * Replaces a getter call with an arbitrary [replacementInvoke] (typically an
+ * `invoke-static` with no arguments) that returns the same type, keeping the
+ * existing `move-result-object` so the caller receives the new value. Used to
+ * swap e.g. `SensorManager.getSensorList()` for `Collections.emptyList()`.
+ */
+internal fun BytecodePatchContext.replaceGetterWithStaticCall(
+    definingClass: String,
+    methodNames: Set<String>,
+    returnType: String,
+    replacementInvoke: String,
+): Int {
+    var patched = 0
+    classDefForEach { classDef ->
+        val mutableClass = mutableClassDefBy(classDef)
+        for (method in mutableClass.methods) {
+            val implementation = method.implementation ?: continue
+            val instructions: List<Instruction> = implementation.instructions.toList()
+            for ((index, instruction) in instructions.withIndex()) {
+                val reference =
+                    (instruction as? ReferenceInstruction)?.reference as? MethodReference
+                        ?: continue
+                if (reference.definingClass != definingClass) continue
+                if (reference.name !in methodNames) continue
+                if (reference.returnType != returnType) continue
+
+                val next = instructions.getOrNull(index + 1)
+                if (next != null && next.opcode == Opcode.MOVE_RESULT_OBJECT) {
+                    method.replaceInstruction(index, replacementInvoke)
+                    patched++
+                }
+            }
+        }
+    }
+    return patched
+}
