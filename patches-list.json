@@ -1,6 +1,6 @@
 {
   "NOTE": "Do NOT manually edit this file. This file is automatically updated when semantic release (release.yml) runs. Manually editing this file can break your releases and break third party tools that use this file.",
-  "version": "1.22.0",
+  "version": "1.22.1",
   "patches": [
     {
       "name": "Ads Free Rewards",
@@ -617,7 +617,9 @@
       "name": "Custom Startup Toast",
       "description": "Shows a customizable toast message every time the app starts",
       "default": false,
-      "dependencies": [],
+      "dependencies": [
+        "ResourcePatch"
+      ],
       "compatiblePackages": null,
       "options": [
         {
@@ -647,7 +649,9 @@
       "name": "Custom Startup Dialog",
       "description": "Shows a customizable dialog once when the app is opened",
       "default": false,
-      "dependencies": [],
+      "dependencies": [
+        "ResourcePatch"
+      ],
       "compatiblePackages": null,
       "options": [
         {

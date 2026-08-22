@@ -1,3 +1,13 @@
+## [1.22.1](https://github.com/Nai64/Nai64Patches/compare/1.22.0...1.22.1) (2026-08-22)
+
+### Bug Fixes
+
+* remove emoji from README section headers ([c321936](https://github.com/Nai64/Nai64Patches/commit/c3219364920ed9f351c47a2a09b4e2d03001588b))
+* resolve real Application/launcher classes from manifest for startup patches ([689a7e7](https://github.com/Nai64/Nai64Patches/commit/689a7e7713fd546af3c146af61015c5bc1d770c3))
+* restore corrupted emoji headers in README ([dbafb6c](https://github.com/Nai64/Nai64Patches/commit/dbafb6c2b531c15bb6aa1fe57991c6f522b2a83d))
+* robust activity detection and launcher-aware injection in Custom Startup Dialog ([33e6002](https://github.com/Nai64/Nai64Patches/commit/33e6002a2607dac9919543a1b9770e94d68853f5))
+* target the real Application class in Custom Startup Toast ([c44c449](https://github.com/Nai64/Nai64Patches/commit/c44c449591e049769a9d79b5792728146629e612))
+
 ## [1.22.0](https://github.com/Nai64/Nai64Patches/compare/1.21.0...1.22.0) (2026-08-21)
 
 ### New Features
