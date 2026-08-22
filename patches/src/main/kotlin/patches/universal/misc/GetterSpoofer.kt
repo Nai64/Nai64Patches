@@ -9,6 +9,7 @@ import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction3rc
 import com.android.tools.smali.dexlib2.iface.instruction.Instruction
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
+import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 import com.android.tools.smali.dexlib2.iface.reference.StringReference
 
@@ -410,6 +411,44 @@ internal fun BytecodePatchContext.replaceGetterWithStaticCall(
                     method.replaceInstruction(index, replacementInvoke)
                     patched++
                 }
+            }
+        }
+    }
+    return patched
+}
+
+/**
+ * Replaces every `sget-object vX, <definingClass>-><FIELD>:Ljava/lang/String;`
+ * with `const-string vX, "<value>"` for fields present in [values], so an app
+ * sees the chosen static string field instead of the real device value.
+ *
+ * @return number of patched field reads.
+ */
+internal fun BytecodePatchContext.foldStaticStringField(
+    definingClass: String,
+    values: Map<String, String>,
+): Int {
+    var patched = 0
+    classDefForEach { classDef ->
+        val mutableClass = mutableClassDefBy(classDef)
+        for (method in mutableClass.methods) {
+            val implementation = method.implementation ?: continue
+            val instructions: List<Instruction> = implementation.instructions.toList()
+            for ((index, instruction) in instructions.withIndex()) {
+                if (instruction.opcode != Opcode.SGET_OBJECT) continue
+                val reference =
+                    (instruction as? ReferenceInstruction)?.reference as? FieldReference
+                        ?: continue
+                if (reference.definingClass != definingClass) continue
+                if (reference.type != "Ljava/lang/String;") continue
+                val value = values[reference.name] ?: continue
+
+                val register = (instruction as? OneRegisterInstruction)?.registerA ?: continue
+                method.replaceInstruction(
+                    index,
+                    "const-string v$register, \"${escapeSmali(value)}\"",
+                )
+                patched++
             }
         }
     }
