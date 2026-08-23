@@ -1385,6 +1385,24 @@
       ]
     },
     {
+      "name": "Spoof Target SDK",
+      "description": "Sets the app's targetSdkVersion in the manifest to a chosen value (default 34) so apps that target a too-low SDK can be installed on newer Android.",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": [
+        {
+          "key": "targetSdkVersion",
+          "title": "Target SDK version",
+          "description": "Target SDK level to report in the manifest. Android blocks installing apps targeting below a minimum level on newer versions.",
+          "required": false,
+          "type": "kotlin.Int",
+          "default": 34,
+          "values": null
+        }
+      ]
+    },
+    {
       "name": "Spoof SIM Country",
       "description": "Reports a chosen ISO country (e.g. us) from TelephonyManager.getSimCountryIso() and getNetworkCountryIso() to bypass region locks and geo-restrictions.",
       "default": false,
