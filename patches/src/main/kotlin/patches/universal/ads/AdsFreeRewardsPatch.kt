@@ -48,6 +48,12 @@ val adsFreeRewardsPatch = bytecodePatch(
         title = "Instant reward",
         description = "Claim the reward immediately without showing an ad (applies to the current patch version)",
     )
+    val fakeAdAvailability by booleanOption(
+        key = "fakeAdAvailability",
+        default = true,
+        title = "Fake ad availability",
+        description = "Force ad SDKs to report ads as available so the reward flow triggers (needed when no real ad can fill)",
+    )
 
     execute {
         val logger = Logger.getLogger(this::class.java.name)
@@ -60,6 +66,43 @@ val adsFreeRewardsPatch = bytecodePatch(
             "1.18.1" -> applyAdsFreeRewardsV1181(logger)
             else -> applyAdsFreeRewardsV1190(logger, rewardStrategy, instantReward)
         }
+        if (fakeAdAvailability == true) {
+            forceAdAvailability(logger)
+        }
+    }
+}
+
+/**
+ * Forces ad SDKs to report that an ad is currently available.
+ *
+ * Many games gate their rewarded / interstitial buttons behind an SDK
+ * "isReady" / "isAvailable" check (e.g. Unity Ads Advertisement.isReady,
+ * ironSource isRewardedVideoAvailable, AppLovin MAX isReady). When no real
+ * ad can fill (no network, ad-blocker, or re-signed build), these return
+ * false and the game never calls show(), so the instant-reward hooks above
+ * never fire. Forcing the gates to return true makes the game proceed to
+ * show(), letting the reward flow grant without a real ad.
+ */
+private fun BytecodePatchContext.forceAdAvailability(logger: Logger) {
+    val targets = listOf(
+        "Unity Ads Advertisement.isReady()" to UnityAdsAdvertisementIsReadyFingerprint.methodOrNull,
+        "Unity Ads Advertisement.isReady(placement)" to UnityAdsAdvertisementIsReadyPlacementFingerprint.methodOrNull,
+        "Unity Ads UnityAds.isReady()" to UnityAdsSdkIsReadyFingerprint.methodOrNull,
+        "ironSource isRewardedVideoAvailable()" to IronSourceIsRewardedVideoAvailableFingerprint.methodOrNull,
+        "ironSource isInterstitialReady()" to IronSourceIsInterstitialReadyFingerprint.methodOrNull,
+        "AppLovin MAX InterstitialAd.isReady()" to MaxInterstitialAdIsReadyFingerprint.methodOrNull,
+        "AppLovin MAX AppOpenAd.isReady()" to MaxAppOpenAdIsReadyFingerprint.methodOrNull,
+    )
+    for ((label, method) in targets) {
+        method ?: continue
+        method.addInstructions(
+            0,
+            """
+            const/4 v0, 0x1
+            return v0
+            """.trimIndent(),
+        )
+        logger.info("Ads Free Rewards: faked availability for $label")
     }
 }
 

@@ -708,3 +708,63 @@ internal object AdMobLegacyRewardedVideoShowFingerprint : Fingerprint(
     returnType = "V",
     parameters = emptyList(),
 )
+
+// -- Ad "available / ready" gates (Fake Ad Availability patch) --
+// These report whether an ad can currently be shown. Forcing them to
+// return true makes the game's UI treat ads as available, so it proceeds
+// to call show() and the existing Ads Free Rewards instant-reward hooks fire.
+// All are matched opportunistically (methodOrNull); a wrong guess simply
+// does not apply on a given app.
+
+// Unity Ads SDK: Advertisement.isReady() / isReady(String)
+internal object UnityAdsAdvertisementIsReadyFingerprint : Fingerprint(
+    definingClass = "Lcom/unity3d/ads/Advertisement;",
+    name = "isReady",
+    returnType = "Z",
+    parameters = emptyList(),
+)
+
+internal object UnityAdsAdvertisementIsReadyPlacementFingerprint : Fingerprint(
+    definingClass = "Lcom/unity3d/ads/Advertisement;",
+    name = "isReady",
+    returnType = "Z",
+    parameters = listOf("Ljava/lang/String;"),
+)
+
+// Unity Ads SDK: UnityAds.isReady() (legacy static entry point)
+internal object UnityAdsSdkIsReadyFingerprint : Fingerprint(
+    definingClass = "Lcom/unity3d/ads/UnityAds;",
+    name = "isReady",
+    returnType = "Z",
+    parameters = emptyList(),
+)
+
+// ironSource / LevelPlay: isRewardedVideoAvailable / isInterstitialReady
+internal object IronSourceIsRewardedVideoAvailableFingerprint : Fingerprint(
+    definingClass = "Lcom/ironsource/mediationsdk/IronSource;",
+    name = "isRewardedVideoAvailable",
+    returnType = "Z",
+    parameters = emptyList(),
+)
+
+internal object IronSourceIsInterstitialReadyFingerprint : Fingerprint(
+    definingClass = "Lcom/ironsource/mediationsdk/IronSource;",
+    name = "isInterstitialReady",
+    returnType = "Z",
+    parameters = emptyList(),
+)
+
+// AppLovin MAX: interstitial / app-open readiness
+internal object MaxInterstitialAdIsReadyFingerprint : Fingerprint(
+    definingClass = "Lcom/applovin/mediation/ads/MaxInterstitialAd;",
+    name = "isReady",
+    returnType = "Z",
+    parameters = emptyList(),
+)
+
+internal object MaxAppOpenAdIsReadyFingerprint : Fingerprint(
+    definingClass = "Lcom/applovin/mediation/ads/MaxAppOpenAd;",
+    name = "isReady",
+    returnType = "Z",
+    parameters = emptyList(),
+)
