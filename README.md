@@ -18,7 +18,7 @@ A curated collection of Morphe patches that tune, unlock and declutter Android g
 
 ---
 
-## Table of Contents
+![Table of Contents](images/header-table-of-contents.png)
 
 - [Overview](#overview)
 - [Features](#features)
@@ -32,7 +32,7 @@ A curated collection of Morphe patches that tune, unlock and declutter Android g
 ---
 
 <a name="overview"></a>
-## Overview
+![Overview](images/header-overview.png)
 
 Nai's Patches is a set of ready made patches built for the [Morphe](https://github.com/MorpheApp) patcher. Each patch targets a common annoyance found in modern Android games: rewarded ad walls, forced splash screens, license popups, root and integrity detection, and locked in app purchases.
 
@@ -44,7 +44,7 @@ The project is open source and community driven. New patches and fixes land thro
 ---
 
 <a name="install"></a>
-## Install Source
+![Install Source](images/header-install-source.png)
 
 Add Nai's Patches as a source inside the Morphe patcher.
 
@@ -57,7 +57,7 @@ Add Nai's Patches as a source inside the Morphe patcher.
 > Tap the deep link on a device that already has Morphe installed to add the source in one step.
 
 <a name="features"></a>
-## Features
+![Features](images/header-features.png)
 
 Patches are grouped by what they affect. The table below lists every available patch and a short description.
 
@@ -207,7 +207,7 @@ Patches are grouped by what they affect. The table below lists every available p
 ---
 
 <a name="how-to-use"></a>
-## How to Use
+![How to Use](images/header-how-to-use.png)
 
 1. Open your game APK in the Morphe patcher.
 2. Browse the patch list and toggle the patches you want.
@@ -222,7 +222,7 @@ Most patches expose friendly dropdowns or toggles instead of raw text fields, so
 ---
 
 <a name="patch-options"></a>
-## Patch Options
+![Patch Options](images/header-patch-options.png)
 
 Some patches are highly configurable. Expand a section to see its options.
 
@@ -335,7 +335,7 @@ Twelve independent toggles let you block each analytics SDK on its own. All defa
 ---
 
 <a name="tips"></a>
-## Tips
+![Tips](images/header-tips.png)
 
 - Start with a minimal set of patches, then add more only if needed. Smaller changes are easier to debug.
 - If a game crashes after patching, disable the most recent patch you enabled and test again.
@@ -349,7 +349,7 @@ Twelve independent toggles let you block each analytics SDK on its own. All defa
 ---
 
 <a name="warnings"></a>
-## Warnings
+![Warnings](images/header-warnings.png)
 
 > [!WARNING]
 > Patches marked Experimental, such as Pairip Bypass, Custom App Resolution and Skip Splash Screen, hook deeper into app internals. They may not work on every game and can cause crashes or visual glitches.
@@ -364,7 +364,7 @@ Twelve independent toggles let you block each analytics SDK on its own. All defa
 ---
 
 <a name="compatibility"></a>
-## Compatibility
+![Compatibility](images/header-compatibility.png)
 
 - Targets Android games packaged as APK or XAPK.
 - Requires the Morphe patcher and a Java runtime.
@@ -377,7 +377,7 @@ Twelve independent toggles let you block each analytics SDK on its own. All defa
 ---
 
 <a name="disclaimer"></a>
-## Disclaimer
+![Disclaimer](images/header-disclaimer.png)
 
 Nai's Patches is provided as is, without warranty of any kind. It is intended for learning, accessibility and personal customization of software you legally own. It is not a piracy tool and should not be used to bypass paid content you have not licensed.
 
