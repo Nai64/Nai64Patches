@@ -6,6 +6,7 @@ import app.morphe.patcher.patch.BytecodePatchContext
 import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction35c
 import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction3rc
 import com.android.tools.smali.dexlib2.iface.instruction.Instruction
+import com.android.tools.smali.dexlib2.iface.instruction.NarrowLiteralInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
@@ -142,4 +143,72 @@ internal fun BytecodePatchContext.replaceArrayGetterWithEmpty(
         }
     }
     return patched
+}
+
+private fun BytecodePatchContext.forceSetterLiteral(
+    targetClass: String,
+    setters: Set<String>,
+    paramTypes: List<String>,
+    literal: String,
+): Int {
+    var patched = 0
+    classDefForEach { classDef ->
+        val mutableClass = mutableClassDefBy(classDef)
+        for (method in mutableClass.methods) {
+            val impl = method.implementation ?: continue
+            val instructions = impl.instructions.toList()
+            for ((index, insn) in instructions.withIndex()) {
+                if (insn !is ReferenceInstruction) continue
+                val ref = insn.reference as? MethodReference ?: continue
+                if (ref.definingClass != targetClass) continue
+                if (ref.name !in setters) continue
+                if (ref.returnType != "V") continue
+                if (ref.parameterTypes != paramTypes) continue
+
+                val reg = when (insn) {
+                    is BuilderInstruction35c -> insn.registerC + 1
+                    is BuilderInstruction3rc -> insn.startRegister + 1
+                    else -> continue
+                }
+
+                for (j in index - 1 downTo 0) {
+                    val prev = instructions[j]
+                    if (prev.opcode == Opcode.NOP) continue
+                    if (prev is NarrowLiteralInstruction &&
+                        prev is OneRegisterInstruction &&
+                        prev.registerA == reg
+                    ) {
+                        method.replaceInstruction(j, "const/4 v$reg, $literal")
+                        patched++
+                        break
+                    }
+                    break
+                }
+            }
+        }
+    }
+    return patched
+}
+
+/**
+ * Forces a boolean setter (`(Z)V`) of [targetClass] to [value] by rewriting the
+ * const that feeds its argument register.
+ */
+internal fun BytecodePatchContext.forceBooleanValue(
+    targetClass: String,
+    setters: Set<String>,
+    value: Boolean,
+): Int = forceSetterLiteral(targetClass, setters, listOf("Z"), if (value) "0x1" else "0x0")
+
+/**
+ * Forces an int setter (`(I)V`) of [targetClass] to [value] by rewriting the
+ * const that feeds its argument register.
+ */
+internal fun BytecodePatchContext.forceIntValue(
+    targetClass: String,
+    setters: Set<String>,
+    value: Int,
+): Int {
+    val literal = if (value in -8..7) "0x${value.toString(16)}" else "0x${value.toString(16)}"
+    return forceSetterLiteral(targetClass, setters, listOf("I"), literal)
 }
