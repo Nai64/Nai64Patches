@@ -61,7 +61,9 @@ Add Nai's Patches as a source inside the Morphe patcher.
 
 Patches are grouped by what they affect. The table below lists every available patch and a short description.
 
-### Ads, Tracking and Consent
+<details>
+<summary><b>Ads, Tracking and Consent</b></summary>
+
 
 | Patch | What it does |
 | :--- | :--- |
@@ -76,7 +78,11 @@ Patches are grouped by what they affect. The table below lists every available p
 | Disable Firebase Auto-Init | Stop Firebase components initializing themselves |
 | Disable Facebook SDK Auto-Init | Stop Facebook auto-init, auto-logging and ad ID collection |
 
-### Unlocks and Licensing
+</details>
+
+<details>
+<summary><b>Unlocks and Licensing</b></summary>
+
 
 | Patch | What it does |
 | :--- | :--- |
@@ -88,7 +94,11 @@ Patches are grouped by what they affect. The table below lists every available p
 | Spoof Play Integrity | Spoof Play Integrity verdicts |
 | Spoof Signature Match | Make signature checks report a match |
 
-### Display and Interface
+</details>
+
+<details>
+<summary><b>Display and Interface</b></summary>
+
 
 | Patch | What it does |
 | :--- | :--- |
@@ -109,7 +119,11 @@ Patches are grouped by what they affect. The table below lists every available p
 | Custom Startup Dialog | Show a customizable dialog once per launch |
 | Force Left-to-Right Layout | Fix layouts that break under right-to-left languages |
 
-### Privacy and Security
+</details>
+
+<details>
+<summary><b>Privacy and Security</b></summary>
+
 
 | Patch | What it does |
 | :--- | :--- |
@@ -123,7 +137,11 @@ Patches are grouped by what they affect. The table below lists every available p
 | Remove Network Security Config | Drop pinning configs for HTTPS inspection |
 | Allow Cleartext Traffic | Permit plain HTTP requests for local proxy debugging |
 
-### Device State Spoofs
+</details>
+
+<details>
+<summary><b>Device State Spoofs</b></summary>
+
 
 | Patch | What it does |
 | :--- | :--- |
@@ -148,7 +166,11 @@ Patches are grouped by what they affect. The table below lists every available p
 | Hide Emulator Radio | Radio type reports GSM instead of none |
 | Ignore Touch Exploration | Ignore TalkBack exploration state |
 
-### Hardware and System Spoofs
+</details>
+
+<details>
+<summary><b>Hardware and System Spoofs</b></summary>
+
 
 | Patch | What it does |
 | :--- | :--- |
@@ -158,7 +180,11 @@ Patches are grouped by what they affect. The table below lists every available p
 | Spoof SDK Level | Override reads of Build.VERSION.SDK_INT (advanced) |
 | Enable WebView Debugging | Inspect WebViews via chrome://inspect |
 
-### Storage and Backups
+</details>
+
+<details>
+<summary><b>Storage and Backups</b></summary>
+
 
 | Patch | What it does |
 | :--- | :--- |
@@ -168,7 +194,11 @@ Patches are grouped by what they affect. The table below lists every available p
 | Remove Backup Restrictions | Let Android back up and transfer all app data |
 | Keep Data on Uninstall | Offer to keep app data when uninstalling |
 
-### Manifest and App Tweaks
+</details>
+
+<details>
+<summary><b>Manifest and App Tweaks</b></summary>
+
 
 | Patch | What it does |
 | :--- | :--- |
@@ -200,6 +230,8 @@ Patches are grouped by what they affect. The table below lists every available p
 | Remove Permissions | Remove permissions from the app manifest |
 | Remove Hardware Requirements | Remove uses feature entries so the app installs on more devices |
 | Disable StrictMode | No-op StrictMode policy installs made by the app |
+
+</details>
 
 > [!TIP]
 > Combine **No Ads** with **Disable Telemetry** for the quietest possible session, and add **Ads Free Rewards** only when a game gates progress behind rewarded ads.
