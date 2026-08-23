@@ -782,7 +782,7 @@
     },
     {
       "name": "Spoof Play Integrity",
-      "description": "Force Play Integrity checks to pass",
+      "description": "Forces Google Play Integrity attestation to pass, so the app runs on modified or unsupported devices instead of being blocked.",
       "default": false,
       "dependencies": [],
       "compatiblePackages": null,
@@ -790,7 +790,7 @@
     },
     {
       "name": "Bypass License Verification",
-      "description": "Always pass Google Play license checks",
+      "description": "Forces Google Play's license (LVL) check to pass, so the app does not refuse to run on unlicensed or modified builds.",
       "default": false,
       "dependencies": [],
       "compatiblePackages": null,
@@ -798,7 +798,7 @@
     },
     {
       "name": "Bypass Google Play Services Check",
-      "description": "Always report Google Play Services as available",
+      "description": "Tricks the app into thinking Google Play Services is installed and working, so it does not disable features that depend on it.",
       "default": false,
       "dependencies": [],
       "compatiblePackages": null,
@@ -806,7 +806,7 @@
     },
     {
       "name": "Pairip Bypass (Experimental)",
-      "description": "Bypass Pairip license protection",
+      "description": "Pairip is anti-tamper / license protection used by some games. This bypasses its checks so patched or modified builds run instead of being blocked.",
       "default": false,
       "dependencies": [
         "ResourcePatch"
@@ -816,7 +816,7 @@
     },
     {
       "name": "Unlock RevenueCat Entitlements",
-      "description": "Unlock all RevenueCat entitlements",
+      "description": "RevenueCat powers in-app subscriptions and 'pro' unlocks. This marks every entitlement (premium, ad-free, etc.) as active, so paid features are available without purchasing.",
       "default": false,
       "dependencies": [],
       "compatiblePackages": null,

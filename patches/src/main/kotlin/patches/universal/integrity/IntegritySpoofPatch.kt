@@ -8,7 +8,7 @@ import java.util.logging.Logger
 @Suppress("unused")
 val spoofPlayIntegrityPatch = bytecodePatch(
     name = "Spoof Play Integrity",
-    description = "Force Play Integrity checks to pass",
+    description = "Forces Google Play Integrity attestation to pass, so the app runs on modified or unsupported devices instead of being blocked.",
     default = false,
 ) {
     execute {

@@ -65,7 +65,7 @@ private fun ResourcePatchContext.discoverPairipAppClass(logger: Logger): String?
 @Suppress("unused")
 val pairipBypassPatch = bytecodePatch(
     name = "Pairip Bypass (Experimental)",
-    description = "Bypass Pairip license protection",
+    description = "Pairip is anti-tamper / license protection used by some games. This bypasses its checks so patched or modified builds run instead of being blocked.",
     default = false,
 ) {
     dependsOn(applicationRedirectPatch)

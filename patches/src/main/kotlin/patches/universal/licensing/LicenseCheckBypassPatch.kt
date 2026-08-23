@@ -17,7 +17,7 @@ internal object LicenseCheckVerifyFingerprint : Fingerprint(
 @Suppress("unused")
 val bypassLicenseVerificationPatch = bytecodePatch(
     name = "Bypass License Verification",
-    description = "Always pass Google Play license checks",
+    description = "Forces Google Play's license (LVL) check to pass, so the app does not refuse to run on unlicensed or modified builds.",
     default = false,
 ) {
     execute {

@@ -49,7 +49,7 @@ internal object GooglePlayServicesUtilContextFingerprint : Fingerprint(
 @Suppress("unused")
 val bypassGooglePlayServicesCheckPatch = bytecodePatch(
     name = "Bypass Google Play Services Check",
-    description = "Always report Google Play Services as available",
+    description = "Tricks the app into thinking Google Play Services is installed and working, so it does not disable features that depend on it.",
     default = false,
 ) {
     execute {
