@@ -31,12 +31,10 @@ private val BUILD_STRING_FIELDS = setOf(
     "TYPE",
     "TAGS",
     "SERIAL",
-)
-
-/** System properties that reveal an emulator/QEMU environment. */
-private val QEMU_PROPERTIES = setOf(
-    "ro.kernel.qemu",
-    "ro.kernel.qemu.device",
+    "USER",
+    "HOST",
+    "RADIO",
+    "BOOTLOADER",
 )
 
 /**
@@ -111,8 +109,9 @@ internal fun BytecodePatchContext.foldBuildGetSerial(value: String): Int {
 }
 
 /**
- * Folds `System.getProperty(key)` call sites for [properties] into a constant
- * `0` (no QEMU), so emulators that probe `ro.kernel.qemu` cannot tell.
+ * Folds `System.getProperty(key)` call sites into the mapped constant string,
+ * so emulators that probe telltale properties (`ro.kernel.qemu`, `ro.hardware`,
+ * `ro.product.model`, etc.) cannot tell.
  *
  * The key is matched via the `const-string` immediately preceding the invoke
  * (the standard single-argument layout), which avoids register parsing that
@@ -120,7 +119,7 @@ internal fun BytecodePatchContext.foldBuildGetSerial(value: String): Int {
  *
  * @return number of patched call sites.
  */
-internal fun BytecodePatchContext.foldQemuProperties(properties: Set<String>, value: String): Int {
+internal fun BytecodePatchContext.foldSystemPropertyMap(properties: Map<String, String>): Int {
     var patched = 0
     classDefForEach { classDef ->
         val mutableClass = mutableClassDefBy(classDef)
@@ -142,7 +141,8 @@ internal fun BytecodePatchContext.foldQemuProperties(properties: Set<String>, va
                 } else {
                     null
                 }
-                if (keyValue !in properties) continue
+                val value = if (keyValue != null) properties[keyValue] else null
+                if (value == null) continue
 
                 val next = instructions.getOrNull(index + 1)
                 val register = (next as? OneRegisterInstruction)?.registerA
@@ -151,6 +151,93 @@ internal fun BytecodePatchContext.foldQemuProperties(properties: Set<String>, va
                         next.opcode == Opcode.MOVE_RESULT_OBJECT)
                 ) {
                     method.replaceInstruction(index, "const-string v$register, \"${escapeSmali(value)}\"")
+                    method.replaceInstruction(index + 1, "nop")
+                } else {
+                    method.replaceInstruction(index, "nop")
+                }
+                patched++
+            }
+        }
+    }
+    return patched
+}
+
+/** Backwards-compatible wrapper: fold the given properties all to [value]. */
+internal fun BytecodePatchContext.foldQemuProperties(properties: Set<String>, value: String): Int =
+    foldSystemPropertyMap(properties.associateWith { value })
+
+/**
+ * Folds a no-argument `Build.<method>()` call that returns a String (e.g.
+ * `getSerial()`, `getRadioVersion()`) into a constant string. Emulators often
+ * report a null/empty radio version, which some apps use to detect them.
+ *
+ * @return number of patched call sites.
+ */
+internal fun BytecodePatchContext.foldBuildMethodResult(methodName: String, value: String): Int {
+    var patched = 0
+    classDefForEach { classDef ->
+        val mutableClass = mutableClassDefBy(classDef)
+        for (method in mutableClass.methods) {
+            val implementation = method.implementation ?: continue
+            val instructions: List<Instruction> = implementation.instructions.toList()
+            for ((index, instruction) in instructions.withIndex()) {
+                val reference =
+                    (instruction as? ReferenceInstruction)?.reference as? MethodReference
+                        ?: continue
+                if (reference.definingClass != "Landroid/os/Build;") continue
+                if (reference.name != methodName || reference.returnType != "Ljava/lang/String;") continue
+                if (reference.parameterTypes.isNotEmpty()) continue
+
+                val next = instructions.getOrNull(index + 1)
+                val register = (next as? OneRegisterInstruction)?.registerA
+                if (next != null &&
+                    (next.opcode == Opcode.MOVE_RESULT ||
+                        next.opcode == Opcode.MOVE_RESULT_OBJECT)
+                ) {
+                    method.replaceInstruction(index, "const-string v$register, \"${escapeSmali(value)}\"")
+                    method.replaceInstruction(index + 1, "nop")
+                } else {
+                    method.replaceInstruction(index, "nop")
+                }
+                patched++
+            }
+        }
+    }
+    return patched
+}
+
+/** Convenience wrapper for `Build.getRadioVersion()`. */
+internal fun BytecodePatchContext.foldBuildGetRadioVersion(value: String): Int =
+    foldBuildMethodResult("getRadioVersion", value)
+
+/**
+ * Folds no-argument `TelephonyManager.getPhoneType()` into a constant
+ * (default GSM), so emulators that report no phone type (NONE) cannot tell.
+ *
+ * @return number of patched call sites.
+ */
+internal fun BytecodePatchContext.foldPhoneType(value: Int): Int {
+    var patched = 0
+    classDefForEach { classDef ->
+        val mutableClass = mutableClassDefBy(classDef)
+        for (method in mutableClass.methods) {
+            val implementation = method.implementation ?: continue
+            val instructions: List<Instruction> = implementation.instructions.toList()
+            for ((index, instruction) in instructions.withIndex()) {
+                val reference =
+                    (instruction as? ReferenceInstruction)?.reference as? MethodReference
+                        ?: continue
+                if (reference.definingClass != "Landroid/telephony/TelephonyManager;") continue
+                if (reference.name != "getPhoneType" || reference.returnType != "I") continue
+                if (reference.parameterTypes.isNotEmpty()) continue
+
+                val next = instructions.getOrNull(index + 1)
+                val register = (next as? OneRegisterInstruction)?.registerA
+                if (next != null &&
+                    (next.opcode == Opcode.MOVE_RESULT ||
+                        next.opcode == Opcode.MOVE_RESULT_OBJECT)
+                ) {
+                    method.replaceInstruction(index, "const/4 v$register, ${value.and(0xf)}")
                     method.replaceInstruction(index + 1, "nop")
                 } else {
                     method.replaceInstruction(index, "nop")
@@ -178,6 +265,10 @@ private val DEVICE_PRESETS = mapOf(
         "TYPE" to "user",
         "TAGS" to "release-keys",
         "SERIAL" to "1A2B3C4D5E6F",
+        "USER" to "android",
+        "HOST" to "aosp-build",
+        "BOOTLOADER" to "redfin-1.0",
+        "RADIO" to "g5123b-220720-2307180001",
     ),
     "samsungS23" to mapOf(
         "MODEL" to "SM-S918B",
@@ -193,6 +284,10 @@ private val DEVICE_PRESETS = mapOf(
         "TYPE" to "user",
         "TAGS" to "release-keys",
         "SERIAL" to "RZ8N70ABCD12EF",
+        "USER" to "android",
+        "HOST" to "aosp-build",
+        "BOOTLOADER" to "r0s-1.0",
+        "RADIO" to "g0sxx-220720-2307180001",
     ),
     "xiaomi13" to mapOf(
         "MODEL" to "Xiaomi 13",
@@ -208,6 +303,10 @@ private val DEVICE_PRESETS = mapOf(
         "TYPE" to "user",
         "TAGS" to "release-keys",
         "SERIAL" to "abcdef0123456789",
+        "USER" to "android",
+        "HOST" to "aosp-build",
+        "BOOTLOADER" to "fuxi-1.0",
+        "RADIO" to "vk3a-220720-2307180001",
     ),
 )
 
@@ -216,9 +315,11 @@ val bypassEmulatorDetectionPatch = bytecodePatch(
     name = "Bypass Emulator Detection",
     description =
         "Spoofs android.os.Build identity (model, device, manufacturer, hardware, " +
-            "fingerprint, serial) and the ro.kernel.qemu property so apps and games that " +
-            "refuse to run, crash or match you with emulator lobbies cannot tell they are " +
-            "on an emulator. Does not hide root or a debugger connection.",
+            "fingerprint, serial, user, host, radio, bootloader) and Build.getRadioVersion(), " +
+            "TelephonyManager.getPhoneType(), and telltale system properties " +
+            "(ro.kernel.qemu, ro.hardware, ro.product.model/device, ro.bootloader, ro.radio) so " +
+            "apps and games that refuse to run, crash or match you with emulator lobbies cannot " +
+            "tell they are on an emulator. Does not hide root or a debugger connection.",
     default = false,
 ) {
     val profile by stringOption(
@@ -240,9 +341,25 @@ val bypassEmulatorDetectionPatch = bytecodePatch(
 
         val patchedBuild = foldBuildStringFields(preset)
         val patchedSerial = foldBuildGetSerial(preset.getValue("SERIAL"))
-        val patchedQemu = foldQemuProperties(QEMU_PROPERTIES, "0")
+        val patchedRadio = foldBuildGetRadioVersion(preset.getValue("RADIO"))
+        val patchedPhone = foldPhoneType(1)
 
-        val total = patchedBuild + patchedSerial + patchedQemu
+        // Spoof emulator-revealing system properties to the chosen device's
+        // identity (or "0" for pure QEMU flags).
+        val emulatorProps = mapOf(
+            "ro.kernel.qemu" to "0",
+            "ro.kernel.qemu.device" to "0",
+            "ro.hardware" to preset.getValue("HARDWARE"),
+            "ro.kernel.androidboot.hardware" to preset.getValue("HARDWARE"),
+            "ro.product.model" to preset.getValue("MODEL"),
+            "ro.product.device" to preset.getValue("DEVICE"),
+            "ro.bootloader" to preset.getValue("BOOTLOADER"),
+            "ro.radio" to preset.getValue("RADIO"),
+            "qemu.hw.mainkeys" to "0",
+        )
+        val patchedProps = foldSystemPropertyMap(emulatorProps)
+
+        val total = patchedBuild + patchedSerial + patchedRadio + patchedPhone + patchedProps
         if (total > 0) {
             logger.info("Spoofed $total emulator-detection check(s) [profile=${profile.orEmpty()}]")
         } else {
