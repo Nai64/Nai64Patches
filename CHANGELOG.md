@@ -1,3 +1,12 @@
+## [1.25.0](https://github.com/Nai64/Nai64Patches/compare/1.24.0...1.25.0) (2026-08-23)
+
+### New Features
+
+* add fake ad availability toggle to Ads Free Rewards ([88275d8](https://github.com/Nai64/Nai64Patches/commit/88275d82798c4a221f6adcc55c2e1483f807252f))
+* add Pairip V2 license bypass strategies ([0eaf96d](https://github.com/Nai64/Nai64Patches/commit/0eaf96df418fd3afc40afb602167aa63d0853da6))
+* add Spoof Target SDK patch (issue [#30](https://github.com/Nai64/Nai64Patches/issues/30)) ([6af6221](https://github.com/Nai64/Nai64Patches/commit/6af622164785082613405bc9505188c926d7dec1))
+* broaden Bypass Emulator Detection coverage (issue [#29](https://github.com/Nai64/Nai64Patches/issues/29)) ([187ca16](https://github.com/Nai64/Nai64Patches/commit/187ca165fc3966343f8621a07827eb51519c2ac1))
+
 ## [1.24.0](https://github.com/Nai64/Nai64Patches/compare/1.23.0...1.24.0) (2026-08-22)
 
 ### New Features
