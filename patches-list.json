@@ -814,14 +814,6 @@
       "options": []
     },
     {
-      "name": "Unlock All IAPs (Unity IAP)",
-      "description": "Unlock all in-app purchases in Unity IAP games (Experimental)",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
       "name": "Custom App Resolution (Experimental)",
       "description": "Set a custom resolution for the game",
       "default": false,
