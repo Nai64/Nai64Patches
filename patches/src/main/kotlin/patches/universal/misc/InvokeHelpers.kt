@@ -1,5 +1,6 @@
 package patches.universal.misc
 
+import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
 import app.morphe.patcher.patch.BytecodePatchContext
 import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction35c
@@ -89,6 +90,54 @@ internal fun BytecodePatchContext.forceNullParam(
                     method.replaceInstruction(index - 1, "const/4 v$nullReg, 0x0")
                     patched++
                 }
+            }
+        }
+    }
+    return patched
+}
+
+/**
+ * Replaces every array-returning getter [methods] of [targetClass] with an empty
+ * array of [elementType] (e.g. `"Landroid/accounts/Account;"`), keeping the
+ * following `move-result-object` valid. Used for privacy-by-denial (return
+ * nothing instead of the real collection).
+ *
+ * Emits, in place of the invoke:
+ *   const/4 vR, 0x0
+ *   new-array vR, vR, [<elementType>   ; (size 0 -> empty array)
+ * and rewrites the original `move-result-object vR` to `nop`.
+ *
+ * @return number of call sites patched.
+ */
+internal fun BytecodePatchContext.replaceArrayGetterWithEmpty(
+    targetClass: String,
+    methods: Set<String>,
+    elementType: String,
+): Int {
+    var patched = 0
+    classDefForEach { classDef ->
+        val mutableClass = mutableClassDefBy(classDef)
+        for (method in mutableClass.methods) {
+            val impl = method.implementation ?: continue
+            val instructions = impl.instructions.toList()
+            for ((index, insn) in instructions.withIndex()) {
+                if (insn !is ReferenceInstruction) continue
+                val ref = insn.reference as? MethodReference ?: continue
+                if (ref.definingClass != targetClass) continue
+                if (ref.name !in methods) continue
+                if (!ref.returnType.endsWith("]")) continue
+
+                val next = instructions.getOrNull(index + 1)
+                if (next !is OneRegisterInstruction || next.opcode != Opcode.MOVE_RESULT_OBJECT) continue
+                val resultReg = next.registerA
+
+                method.replaceInstruction(index, "const/4 v$resultReg, 0x0")
+                method.addInstruction(
+                    index + 1,
+                    "new-array v$resultReg, v$resultReg, [$elementType",
+                )
+                method.replaceInstruction(index + 2, "nop")
+                patched++
             }
         }
     }
