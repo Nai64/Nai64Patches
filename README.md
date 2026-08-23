@@ -64,172 +64,56 @@ Patches are grouped by what they affect. The table below lists every available p
 <details>
 <summary><b>Ads, Tracking and Consent</b></summary>
 
-
-| Patch | What it does |
-| :--- | :--- |
-| Ads Free Rewards | Skip rewarded ads and claim rewards instantly |
-| No Ads | Remove interstitial, banner, app open, MREC and rewarded ads |
-| Block Push Ads | Silence notification ads |
-| Skip Consent Popup | Skip the Google consent, GDPR, popup |
-| Skip Rate-Us Prompt | Dismiss the annoying rate this app prompt |
-| Spoof Play Store Install Source | Make the app believe it was installed from the Play Store |
-| Limit Ad Tracking | Reduce ad tracking identifiers |
-| Disable Telemetry | Block analytics and tracking SDKs |
-| Disable Firebase Auto-Init | Stop Firebase components initializing themselves |
-| Disable Facebook SDK Auto-Init | Stop Facebook auto-init, auto-logging and ad ID collection |
+![Ads, Tracking and Consent](images/table-ads-tracking-and-consent.png)
 
 </details>
 
 <details>
 <summary><b>Unlocks and Licensing</b></summary>
 
-
-| Patch | What it does |
-| :--- | :--- |
-| Bypass License Verification | Skip Google Play license checks |
-| Bypass Google Play Services Check | Neutralize Play Services availability checks |
-| Pairip Bypass (Experimental) | Bypass Pairip license protection |
-| Unlock RevenueCat Entitlements | Unlock RevenueCat entitlements |
-| Unlock All IAPs (Unity IAP) | Unlock all in app purchases in Unity IAP games |
-| Spoof Play Integrity | Spoof Play Integrity verdicts |
-| Spoof Signature Match | Make signature checks report a match |
+![Unlocks and Licensing](images/table-unlocks-and-licensing.png)
 
 </details>
 
 <details>
 <summary><b>Display and Interface</b></summary>
 
-
-| Patch | What it does |
-| :--- | :--- |
-| Unlock Rotation | Allow the app to rotate freely |
-| Force Landscape / Portrait | Force a fixed screen orientation |
-| Custom App Resolution (Experimental) | Set a custom resolution for the game |
-| Allow Screenshots | Remove the screenshot blocking window flag |
-| Block Screenshot Detection | Block screenshots, recording and recents previews |
-| Skip Splash Screen (Experimental) | Skip or shorten splash screen delays |
-| Force Resizable Activity | Enable split-screen, free-form windows, DeX and Chromebooks |
-| Immersive Fullscreen | Hide the status bar by forcing fullscreen themes |
-| Keep Screen On | Keep the display on while any activity of the app is visible |
-| Disable Vibration | Stop apps from making the device buzz |
-| Status Bar Icons | Force white or dark system bar icon color in every theme |
-| Transparent System Bars | Render edge-to-edge with transparent system bars |
-| Unlock Max Aspect Ratio | Fill tall screens instead of letterboxing |
-| Custom Startup Toast | Show a customizable toast on every launch |
-| Custom Startup Dialog | Show a customizable dialog once per launch |
-| Force Left-to-Right Layout | Fix layouts that break under right-to-left languages |
+![Display and Interface](images/table-display-and-interface.png)
 
 </details>
 
 <details>
 <summary><b>Privacy and Security</b></summary>
 
-
-| Patch | What it does |
-| :--- | :--- |
-| Disable Crash Reporters | Neutralize Crashlytics, Sentry, Bugsnag, ACRA and similar SDKs |
-| Disable Root Checks | Disable root detection |
-| Disable Update Checks | Stop forced update prompts |
-| Hide Debugger Connection | Let apps run even while a debugger is attached |
-| Empty Clipboard Report | Stop apps harvesting clipboard content |
-| Trust User Certificates | Accept any certificate in bundled trust managers |
-| Bypass OkHttp Pinning | Disable certificate pinning in OkHttp clients |
-| Remove Network Security Config | Drop pinning configs for HTTPS inspection |
-| Allow Cleartext Traffic | Permit plain HTTP requests for local proxy debugging |
+![Privacy and Security](images/table-privacy-and-security.png)
 
 </details>
 
 <details>
 <summary><b>Device State Spoofs</b></summary>
 
-
-| Patch | What it does |
-| :--- | :--- |
-| Fake Online State | Connectivity checks always report an active connection |
-| Treat Network as Unmetered | Lift download restrictions on mobile data |
-| Bypass VPN Detection | Apps cannot detect an active VPN |
-| Fake Battery Whitelist | Battery optimization exemption checks return true |
-| Ignore Power Save Mode | Ignore battery saver and Doze throttling |
-| Treat Screen as On | Keep apps running while the screen is off |
-| Ignore Low RAM Device | Stop degrading quality on entry-level devices |
-| Allow Background Activity | Ignore background activity restrictions |
-| Ignore Screen Lock | Report an unlocked device to lock-state checks |
-| Always Allow Biometrics | Biometric capability checks report success |
-| Fake Fingerprint Hardware | Report fingerprint hardware present and enrolled |
-| Fake Bluetooth Enabled | Bluetooth state checks report enabled |
-| Fake NFC Enabled | NFC state checks report enabled |
-| Force Notifications Enabled | Notification-state checks report enabled |
-| Hide Mock Location | Hide spoofed GPS from mock-location detection |
-| Ignore GPS Disabled | Location service checks report enabled |
-| Ignore Location Services Off | The master location switch reports on |
-| Hide Roaming Status | Roaming checks report home network |
-| Hide Emulator Radio | Radio type reports GSM instead of none |
-| Ignore Touch Exploration | Ignore TalkBack exploration state |
+![Device State Spoofs](images/table-device-state-spoofs.png)
 
 </details>
 
 <details>
 <summary><b>Hardware and System Spoofs</b></summary>
 
-
-| Patch | What it does |
-| :--- | :--- |
-| Spoof Device Model | Replace Build model, manufacturer and brand values |
-| Spoof Build Fingerprint | Replace every read of Build.FINGERPRINT |
-| Spoof CPU Architecture | Replace legacy CPU_ABI field reads |
-| Spoof SDK Level | Override reads of Build.VERSION.SDK_INT (advanced) |
-| Enable WebView Debugging | Inspect WebViews via chrome://inspect |
+![Hardware and System Spoofs](images/table-hardware-and-system-spoofs.png)
 
 </details>
 
 <details>
 <summary><b>Storage and Backups</b></summary>
 
-
-| Patch | What it does |
-| :--- | :--- |
-| Legacy External Storage | Use classic shared storage instead of scoped storage |
-| Grant All-Files Access | All-files-access checks report granted |
-| Report Legacy Storage | Storage-model checks report classic access |
-| Remove Backup Restrictions | Let Android back up and transfer all app data |
-| Keep Data on Uninstall | Offer to keep app data when uninstalling |
+![Storage and Backups](images/table-storage-and-backups.png)
 
 </details>
 
 <details>
 <summary><b>Manifest and App Tweaks</b></summary>
 
-
-| Patch | What it does |
-| :--- | :--- |
-| Make App Debuggable | Let debuggers and profiling tools attach |
-| Change Version Code | Override the version code reported to the system |
-| Change Version Name | Override the version name shown in settings |
-| Rename App | Change the launcher name of the app |
-| Remove App Icon | Replace the launcher icon with a transparent drawable |
-| Enable Large Heap | Give the app a bigger Java heap where supported |
-| Force Hardware Acceleration | GPU render every activity, even if the app opts out |
-| Set Install Location | Prefer internal storage, external storage or let the system decide |
-| Set Profileable | Allow profilers to attach to release builds |
-| Optimize as Game | Apply Android game mode optimizations |
-| VM Safe Mode | Run without AOT/JIT optimizations for stability |
-| Unmark Test Only | Install test-only marked builds like normal apps |
-| Disable Heap Pointer Tagging | Fix crashes from Android 12+ tagged pointers |
-| Export All Activities | Make every activity launchable by other apps and ADB |
-| Disable Battery Optimization Prompt | Remove the ignore-battery-optimizations dialog |
-| Disable App Links Verification | Stop domain verification prompts and link hijacking |
-| Support All Screens | Install on devices the manifest would reject |
-| Remove Ad Services Entries | Strip Privacy Sandbox permissions and metadata |
-| Disable Permission Auto-Revoke | Stop Android resetting unused permissions |
-| Ensure Internet Permission | Add the INTERNET permission when missing |
-| Relax Shared Libraries | Make required shared libraries optional |
-| Allow Clearing App Data | Keep the Clear Data button available |
-| Classic Back Gesture | Restore classic back behavior on Android 13+ |
-| Force Extract Native Libs | Extract native libraries for mod loaders and tools |
-| Strip Translations | Delete translated resources to shrink the APK |
-| Remove Permissions | Remove permissions from the app manifest |
-| Remove Hardware Requirements | Remove uses feature entries so the app installs on more devices |
-| Disable StrictMode | No-op StrictMode policy installs made by the app |
+![Manifest and App Tweaks](images/table-manifest-and-app-tweaks.png)
 
 </details>
 
