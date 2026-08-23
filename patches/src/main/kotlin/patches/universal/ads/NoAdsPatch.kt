@@ -1,6 +1,5 @@
 package patches.universal.ads
 
-import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.patch.booleanOption
 import app.morphe.patcher.patch.bytecodePatch
@@ -9,8 +8,24 @@ import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.patch.BytecodePatchContext
 import java.util.logging.Logger
 
+private val logger = Logger.getLogger("patches.universal.ads.NoAdsPatch")
+
+// Resolve [fingerprint] and inject [instructions] at the start of its method.
+// Skips silently when the method is absent, and logs a warning then skips when
+// the method is present but has no implementation (for example an abstract or
+// stub match). This keeps a single uninjectable fingerprint from aborting the
+// whole No Ads patch (see issue #25).
+private fun BytecodePatchContext.injectOrSkip(fingerprint: Fingerprint, instructions: String) {
+    val method = fingerprint.methodOrNull ?: return
+    if (method.implementation == null) {
+        logger.warning("No Ads: skipping ${fingerprint.name}: method has no implementation")
+        return
+    }
+    method.addInstructions(0, instructions)
+}
+
 private fun BytecodePatchContext.returnVoid(fingerprint: Fingerprint) =
-    fingerprint.methodOrNull?.addInstruction(0, "return-void")
+    injectOrSkip(fingerprint, "return-void")
 
 @Suppress("unused")
 val noAdsPatch = bytecodePatch(
@@ -50,7 +65,7 @@ val noAdsPatch = bytecodePatch(
     )
 
     execute {
-        val logger = Logger.getLogger(this::class.java.name)
+        val detectionLogger = Logger.getLogger(this::class.java.name)
 
         val hasMaxUnity = ShowInterstitialFingerprint.methodOrNull != null ||
             ShowAppOpenAdFingerprint.methodOrNull != null ||
@@ -80,7 +95,7 @@ val noAdsPatch = bytecodePatch(
             PangleRewardedShowFingerprint.methodOrNull != null
 
         if (!hasMaxUnity && !hasNativeMax && !hasAdMob && !hasUnityAdsV3 && !hasIronSource && !hasAppLovinLegacy && !hasVungle && !hasFacebook && !hasPangle) {
-            logger.warning("Could not find supported ad SDK (MAX Unity, native MAX, AdMob, Unity Ads, ironSource, AppLovin, Vungle, Meta or Pangle). No changes applied.")
+            detectionLogger.warning("Could not find supported ad SDK (MAX Unity, native MAX, AdMob, Unity Ads, ironSource, AppLovin, Vungle, Meta or Pangle). No changes applied.")
             return@execute
         }
 
@@ -102,14 +117,16 @@ val noAdsPatch = bytecodePatch(
 
         // -- Native MAX (non-Unity) --
         if (blockInterstitials == true) {
-            MaxInterstitialAdShowAdFingerprint.methodOrNull?.let {
-                it.addInstructions(0, fireHiddenCallbacks("Lcom/applovin/mediation/ads/MaxInterstitialAd;"))
-            }
+            injectOrSkip(
+                MaxInterstitialAdShowAdFingerprint,
+                fireHiddenCallbacks("Lcom/applovin/mediation/ads/MaxInterstitialAd;"),
+            )
         }
         if (blockAppOpen == true) {
-            MaxAppOpenAdShowAdFingerprint.methodOrNull?.let {
-                it.addInstructions(0, fireHiddenCallbacks("Lcom/applovin/mediation/ads/MaxAppOpenAd;"))
-            }
+            injectOrSkip(
+                MaxAppOpenAdShowAdFingerprint,
+                fireHiddenCallbacks("Lcom/applovin/mediation/ads/MaxAppOpenAd;"),
+            )
         }
         if (blockBanners == true || blockMRec == true) {
             returnVoid(MaxAdViewStartAutoRefreshFingerprint)
@@ -131,22 +148,25 @@ val noAdsPatch = bytecodePatch(
 
         // -- Rewarded ads --
         if (blockRewarded == true) {
-            IsRewardedAdReadyFingerprint.methodOrNull?.let {
-                it.addInstructions(0, """
+            injectOrSkip(
+                IsRewardedAdReadyFingerprint,
+                """
                     const/4 v0, 0x0
                     return v0
-                """.trimIndent())
-            }
+                """.trimIndent(),
+            )
             returnVoid(ShowRewardedAdFingerprint)
-            MaxRewardedAdIsReadyFingerprint.methodOrNull?.let {
-                it.addInstructions(0, """
+            injectOrSkip(
+                MaxRewardedAdIsReadyFingerprint,
+                """
                     const/4 v0, 0x0
                     return v0
-                """.trimIndent())
-            }
-            MaxRewardedAdShowAdFingerprint.methodOrNull?.let {
-                it.addInstructions(0, fireHiddenCallbacks("Lcom/applovin/mediation/ads/MaxRewardedAd;"))
-            }
+                """.trimIndent(),
+            )
+            injectOrSkip(
+                MaxRewardedAdShowAdFingerprint,
+                fireHiddenCallbacks("Lcom/applovin/mediation/ads/MaxRewardedAd;"),
+            )
         }
 
         // -- Unity Ads v3 (legacy) --
@@ -191,26 +211,14 @@ val noAdsPatch = bytecodePatch(
 
         // -- Meta Audience Network (facebook/ads) --
         if (blockInterstitials == true) {
-            FacebookInterstitialAdShowFingerprint.methodOrNull?.let {
-                it.addInstructions(0, "const/4 v0, 0x0\nreturn v0")
-            }
-            FacebookInterstitialAdShowConfigFingerprint.methodOrNull?.let {
-                it.addInstructions(0, "const/4 v0, 0x0\nreturn v0")
-            }
+            injectOrSkip(FacebookInterstitialAdShowFingerprint, "const/4 v0, 0x0\nreturn v0")
+            injectOrSkip(FacebookInterstitialAdShowConfigFingerprint, "const/4 v0, 0x0\nreturn v0")
         }
         if (blockRewarded == true) {
-            FacebookRewardedVideoAdShowFingerprint.methodOrNull?.let {
-                it.addInstructions(0, "const/4 v0, 0x0\nreturn v0")
-            }
-            FacebookRewardedVideoAdShowConfigFingerprint.methodOrNull?.let {
-                it.addInstructions(0, "const/4 v0, 0x0\nreturn v0")
-            }
-            FacebookRewardedInterstitialShowFingerprint.methodOrNull?.let {
-                it.addInstructions(0, "const/4 v0, 0x0\nreturn v0")
-            }
-            FacebookRewardedInterstitialShowConfigFingerprint.methodOrNull?.let {
-                it.addInstructions(0, "const/4 v0, 0x0\nreturn v0")
-            }
+            injectOrSkip(FacebookRewardedVideoAdShowFingerprint, "const/4 v0, 0x0\nreturn v0")
+            injectOrSkip(FacebookRewardedVideoAdShowConfigFingerprint, "const/4 v0, 0x0\nreturn v0")
+            injectOrSkip(FacebookRewardedInterstitialShowFingerprint, "const/4 v0, 0x0\nreturn v0")
+            injectOrSkip(FacebookRewardedInterstitialShowConfigFingerprint, "const/4 v0, 0x0\nreturn v0")
         }
 
         // -- Pangle (bytedance) --
