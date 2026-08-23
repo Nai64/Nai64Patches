@@ -1,7 +1,7 @@
 {
-  "created_at": "2026-08-23T15:27:58",
-  "description": "## [1.25.0](https://github.com/Nai64/Nai64Patches/compare/1.24.0...1.25.0) (2026-08-23)\n\n### New Features\n\n* add fake ad availability toggle to Ads Free Rewards ([88275d8](https://github.com/Nai64/Nai64Patches/commit/88275d82798c4a221f6adcc55c2e1483f807252f))\n* add Pairip V2 license bypass strategies ([0eaf96d](https://github.com/Nai64/Nai64Patches/commit/0eaf96df418fd3afc40afb602167aa63d0853da6))\n* add Spoof Target SDK patch (issue [#30](https://github.com/Nai64/Nai64Patches/issues/30)) ([6af6221](https://github.com/Nai64/Nai64Patches/commit/6af622164785082613405bc9505188c926d7dec1))\n* broaden Bypass Emulator Detection coverage (issue [#29](https://github.com/Nai64/Nai64Patches/issues/29)) ([187ca16](https://github.com/Nai64/Nai64Patches/commit/187ca165fc3966343f8621a07827eb51519c2ac1))",
-  "download_url": "https://github.com/Nai64/Nai64Patches/releases/download/1.25.0/patches-1.25.0.mpp",
+  "created_at": "2026-08-23T15:43:06",
+  "description": "## [1.25.1](https://github.com/Nai64/Nai64Patches/compare/1.25.0...1.25.1) (2026-08-23)\n\n### Bug Fixes\n\n* prevent No Ads patch from crashing on uninjectable fingerprint (issue [#25](https://github.com/Nai64/Nai64Patches/issues/25)) ([99f5bc4](https://github.com/Nai64/Nai64Patches/commit/99f5bc4c4a3471e2d800faaf44e5b1ad0f280197))",
+  "download_url": "https://github.com/Nai64/Nai64Patches/releases/download/1.25.1/patches-1.25.1.mpp",
   "signature_download_url": "",
-  "version": "1.25.0"
+  "version": "1.25.1"
 }

@@ -1,3 +1,9 @@
+## [1.25.1](https://github.com/Nai64/Nai64Patches/compare/1.25.0...1.25.1) (2026-08-23)
+
+### Bug Fixes
+
+* prevent No Ads patch from crashing on uninjectable fingerprint (issue [#25](https://github.com/Nai64/Nai64Patches/issues/25)) ([99f5bc4](https://github.com/Nai64/Nai64Patches/commit/99f5bc4c4a3471e2d800faaf44e5b1ad0f280197))
+
 ## [1.25.0](https://github.com/Nai64/Nai64Patches/compare/1.24.0...1.25.0) (2026-08-23)
 
 ### New Features
