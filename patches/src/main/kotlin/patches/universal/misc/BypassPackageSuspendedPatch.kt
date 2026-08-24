@@ -5,7 +5,8 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val bypassPackageSuspendedPatch = bytecodePatch(
-    name = "Bypass Package Suspended",
+    // Loaded through a category patch; kept as an executable implementation.
+    name = null,
     description = "Makes PackageManager.isPackageSuspended() report false so apps that refuse to run while suspended keep working.",
     default = false,
 ) {

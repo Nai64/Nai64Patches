@@ -60,7 +60,8 @@ private fun BytecodePatchContext.forceBooleanSetter(
 
 @Suppress("unused")
 val enableWebViewWideViewportPatch = bytecodePatch(
-    name = "Enable WebView Wide Viewport",
+    // Loaded through a category patch; kept as an executable implementation.
+    name = null,
     description = "Forces WebViews to use the viewport meta tag and load with overview mode for proper desktop-style layout.",
     default = false,
 ) {

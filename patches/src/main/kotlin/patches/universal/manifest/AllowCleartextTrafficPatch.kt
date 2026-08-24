@@ -5,7 +5,8 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val allowCleartextTrafficPatch = resourcePatch(
-    name = "Allow Cleartext Traffic",
+    // Loaded through a category patch; kept as an executable implementation.
+    name = null,
     description =
         "Sets android:usesCleartextTraffic and drops any network security config so plain " +
             "HTTP requests are allowed (useful for debugging through local proxies)",

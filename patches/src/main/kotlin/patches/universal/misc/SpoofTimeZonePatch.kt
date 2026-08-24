@@ -5,7 +5,8 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val spoofTimeZonePatch = bytecodePatch(
-    name = "Spoof Time Zone",
+    // Loaded through a category patch; kept as an executable implementation.
+    name = null,
     description = "Forces TimeZone.getDefault().getID() to return UTC so region- or time-zone-locked apps see a constant zone.",
     default = false,
 ) {

@@ -12,7 +12,8 @@ private val languageOnlyValuesDir = Regex("^values-(b\\+[a-zA-Z0-9_-]+|[a-z]{2,3
 
 @Suppress("unused")
 val stripTranslationsPatch = resourcePatch(
-    name = "Strip Translations",
+    // Loaded through a category patch; kept as an executable implementation.
+    name = null,
     description =
         "Deletes all translated resources so only the default language remains, reducing " +
             "APK size. Android falls back to the default strings automatically.",

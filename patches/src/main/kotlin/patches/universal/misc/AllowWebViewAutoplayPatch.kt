@@ -60,7 +60,8 @@ private fun BytecodePatchContext.forceBooleanSetter(
 
 @Suppress("unused")
 val allowWebViewAutoplayPatch = bytecodePatch(
-    name = "Allow WebView Autoplay",
+    // Loaded through a category patch; kept as an executable implementation.
+    name = null,
     description = "Forces WebSettings.setMediaPlaybackRequiresUserGesture(false) so media in WebViews can autoplay without a tap.",
     default = false,
 ) {

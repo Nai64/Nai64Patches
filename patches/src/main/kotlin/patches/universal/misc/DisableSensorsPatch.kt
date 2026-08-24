@@ -5,7 +5,8 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val disableSensorsPatch = bytecodePatch(
-    name = "Disable Sensors",
+    // Loaded through a category patch; kept as an executable implementation.
+    name = null,
     description = "Makes SensorManager.registerListener(...) report false (and register nothing) so the app cannot read motion, orientation, or other sensor data.",
     default = false,
 ) {

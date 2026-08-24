@@ -5,7 +5,8 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val disableNotificationSoundPatch = bytecodePatch(
-    name = "Disable Notification Sound",
+    // Loaded through a category patch; kept as an executable implementation.
+    name = null,
     description = "Forces Notification(.Builder/Channel).setSound(...) to receive a null Uri so posted notifications play no sound. Vibration patterns are left untouched.",
     default = false,
 ) {

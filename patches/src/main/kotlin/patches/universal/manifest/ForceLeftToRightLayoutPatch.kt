@@ -5,7 +5,8 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val forceLeftToRightLayoutPatch = resourcePatch(
-    name = "Force Left-to-Right Layout",
+    // Loaded through a category patch; kept as an executable implementation.
+    name = null,
     description =
         "Sets android:supportsRtl to false so the app always renders left-to-right, fixing " +
             "layouts that break under right-to-left system languages",

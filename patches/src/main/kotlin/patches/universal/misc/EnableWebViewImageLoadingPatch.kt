@@ -60,7 +60,8 @@ private fun BytecodePatchContext.forceBooleanSetter(
 
 @Suppress("unused")
 val enableWebViewImageLoadingPatch = bytecodePatch(
-    name = "Enable WebView Image Loading",
+    // Loaded through a category patch; kept as an executable implementation.
+    name = null,
     description = "Forces WebViews to load images and never block network image or resource loads.",
     default = false,
 ) {

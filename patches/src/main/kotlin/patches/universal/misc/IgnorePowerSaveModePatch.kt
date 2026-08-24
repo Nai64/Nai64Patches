@@ -5,7 +5,8 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val ignorePowerSaveModePatch = bytecodePatch(
-    name = "Ignore Power Save Mode",
+    // Loaded through a category patch; kept as an executable implementation.
+    name = null,
     description =
         "Makes PowerManager.isPowerSaveMode and isDeviceIdleMode always return false so apps " +
             "do not throttle features or downloads while battery saver or Doze is active",

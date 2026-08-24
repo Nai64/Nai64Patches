@@ -11,7 +11,8 @@ private val restrictedBackupAttributes = listOf(
 
 @Suppress("unused")
 val removeBackupRestrictionsPatch = resourcePatch(
-    name = "Remove Backup Restrictions",
+    // Loaded through a category patch; kept as an executable implementation.
+    name = null,
     description =
         "Sets android:allowBackup and removes data extraction / full backup rules that " +
             "exclude app data from device transfers and cloud backups",

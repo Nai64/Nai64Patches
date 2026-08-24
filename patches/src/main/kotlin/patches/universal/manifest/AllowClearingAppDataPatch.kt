@@ -5,7 +5,8 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val allowClearingAppDataPatch = resourcePatch(
-    name = "Allow Clearing App Data",
+    // Loaded through a category patch; kept as an executable implementation.
+    name = null,
     description =
         "Sets android:allowClearUserData so the system's Clear Data button stays available " +
             "even for apps that try to disable it",

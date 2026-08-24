@@ -5,7 +5,8 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val bypassLowEndDevicePatch = bytecodePatch(
-    name = "Bypass Low-End Device",
+    // Loaded through a category patch; kept as an executable implementation.
+    name = null,
     description = "Makes ActivityManager.isLowEndDevice() report false so apps stop applying low-end-device restrictions and degraded quality.",
     default = false,
 ) {

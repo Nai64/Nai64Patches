@@ -5,7 +5,8 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val spoofGroupIdLevel1Patch = bytecodePatch(
-    name = "Spoof Group ID Level 1",
+    // Loaded through a category patch; kept as an executable implementation.
+    name = null,
     description = "Reports a constant value from TelephonyManager.getGroupIdLevel1() so apps cannot read the real SIM GID1.",
     default = false,
 ) {

@@ -5,7 +5,8 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val spoofStorageStatePatch = bytecodePatch(
-    name = "Spoof Storage State",
+    // Loaded through a category patch; kept as an executable implementation.
+    name = null,
     description = "Reports 'mounted' from Environment.getExternalStorageState() so apps that require mounted external storage run normally.",
     default = false,
 ) {

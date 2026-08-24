@@ -5,7 +5,8 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val spoofBssidPatch = bytecodePatch(
-    name = "Spoof BSSID",
+    // Loaded through a category patch; kept as an executable implementation.
+    name = null,
     description = "Reports a constant value from WifiInfo.getBSSID() so apps cannot read the real access point MAC address.",
     default = false,
 ) {

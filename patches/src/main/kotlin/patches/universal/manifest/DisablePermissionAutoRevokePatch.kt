@@ -5,7 +5,8 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val disablePermissionAutoRevokePatch = resourcePatch(
-    name = "Disable Permission Auto-Revoke",
+    // Loaded through a category patch; kept as an executable implementation.
+    name = null,
     description =
         "Sets android:autoRevokePermissions to discouraged so Android stops resetting unused " +
             "permissions of apps you rarely open",

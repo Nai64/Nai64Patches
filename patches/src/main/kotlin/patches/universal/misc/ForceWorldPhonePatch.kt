@@ -5,7 +5,8 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val forceWorldPhonePatch = bytecodePatch(
-    name = "Force World Phone",
+    // Loaded through a category patch; kept as an executable implementation.
+    name = null,
     description = "Makes TelephonyManager.isWorldPhone() report true so apps that gate features to world phones run normally.",
     default = false,
 ) {

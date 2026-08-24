@@ -5,7 +5,8 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val disableLocationRequestsPatch = bytecodePatch(
-    name = "Disable Location Requests",
+    // Loaded through a category patch; kept as an executable implementation.
+    name = null,
     description = "No-ops LocationManager.requestLocationUpdates/requestSingleUpdate and FusedLocationProviderClient.requestLocationUpdates so the app receives no location updates at all.",
     default = false,
 ) {

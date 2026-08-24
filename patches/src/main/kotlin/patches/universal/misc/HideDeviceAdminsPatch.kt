@@ -5,7 +5,8 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val hideDeviceAdminsPatch = bytecodePatch(
-    name = "Hide Device Admins",
+    // Loaded through a category patch; kept as an executable implementation.
+    name = null,
     description = "Redirects DevicePolicyManager.getActiveAdmins() to Collections.emptyList() so the app sees no active device admins.",
     default = false,
 ) {

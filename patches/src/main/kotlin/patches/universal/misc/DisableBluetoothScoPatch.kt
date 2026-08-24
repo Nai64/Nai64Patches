@@ -5,7 +5,8 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val disableBluetoothScoPatch = bytecodePatch(
-    name = "Disable Bluetooth SCO",
+    // Loaded through a category patch; kept as an executable implementation.
+    name = null,
     description = "Makes AudioManager.isBluetoothScoOn() report false so apps that change behavior when a Bluetooth SCO link is active run normally.",
     default = false,
 ) {

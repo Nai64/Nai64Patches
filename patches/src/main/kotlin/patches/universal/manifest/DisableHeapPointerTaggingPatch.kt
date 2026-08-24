@@ -5,7 +5,8 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val disableHeapPointerTaggingPatch = resourcePatch(
-    name = "Disable Heap Pointer Tagging",
+    // Loaded through a category patch; kept as an executable implementation.
+    name = null,
     description =
         "Sets android:allowNativeHeapPointerTagging to false so older native games that break " +
             "under Android 12+ tagged pointers keep running",

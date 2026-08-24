@@ -10,7 +10,8 @@ import java.util.logging.Logger
  */
 @Suppress("unused")
 val hideDisplayCutoutPatch = resourcePatch(
-    name = "Hide Display Cutout",
+    // Loaded through a category patch; kept as an executable implementation.
+    name = null,
     description = "Forces windowLayoutInDisplayCutoutMode=never on every activity so notched or punch-hole screens use the full display without a black bar.",
     default = false,
 ) {

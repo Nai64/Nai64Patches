@@ -8,7 +8,8 @@ private const val INTERNET_PERMISSION = "android.permission.INTERNET"
 
 @Suppress("unused")
 val ensureInternetPermissionPatch = resourcePatch(
-    name = "Ensure Internet Permission",
+    // Loaded through a category patch; kept as an executable implementation.
+    name = null,
     description =
         "Adds the INTERNET permission if it is missing. Useful after aggressive permission " +
             "stripping or for offline builds that still need web endpoints",

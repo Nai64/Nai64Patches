@@ -60,7 +60,8 @@ private fun BytecodePatchContext.forceBooleanSetter(
 
 @Suppress("unused")
 val enableWebViewDomStoragePatch = bytecodePatch(
-    name = "Enable WebView DOM Storage",
+    // Loaded through a category patch; kept as an executable implementation.
+    name = null,
     description = "Forces WebSettings DOM storage and database storage on so WebViews that disable web storage work fully.",
     default = false,
 ) {

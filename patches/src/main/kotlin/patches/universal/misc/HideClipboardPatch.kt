@@ -5,7 +5,8 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val hideClipboardPatch = bytecodePatch(
-    name = "Hide Clipboard",
+    // Loaded through a category patch; kept as an executable implementation.
+    name = null,
     description = "Forces ClipboardManager.getPrimaryClip() to return null so the app cannot read the system clipboard.",
     default = false,
 ) {

@@ -5,7 +5,8 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val bypassPipModePatch = bytecodePatch(
-    name = "Bypass Picture-in-Picture Mode",
+    // Loaded through a category patch; kept as an executable implementation.
+    name = null,
     description = "Makes Activity.isInPictureInPictureMode() report false so apps that change behavior in PiP keep their full UI.",
     default = false,
 ) {

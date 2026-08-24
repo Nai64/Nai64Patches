@@ -5,7 +5,8 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val forceIdleCallStatePatch = bytecodePatch(
-    name = "Force Idle Call State",
+    // Loaded through a category patch; kept as an executable implementation.
+    name = null,
     description = "Makes TelephonyManager.getCallState() report CALL_STATE_IDLE (0) so apps that react to active calls behave as if none are in progress.",
     default = false,
 ) {

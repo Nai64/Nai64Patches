@@ -5,7 +5,8 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val ignoreLocationServicesOffPatch = bytecodePatch(
-    name = "Ignore Location Services Off",
+    // Loaded through a category patch; kept as an executable implementation.
+    name = null,
     description =
         "Makes LocationManager.isLocationEnabled always return true so apps that refuse to " +
             "run when location services are disabled keep working",

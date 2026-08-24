@@ -5,7 +5,8 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val removeNetworkSecurityConfigPatch = resourcePatch(
-    name = "Remove Network Security Config",
+    // Loaded through a category patch; kept as an executable implementation.
+    name = null,
     description =
         "Removes the app's network security config so certificate pinning and cleartext " +
             "restrictions fall back to platform defaults (useful for HTTPS inspection)",

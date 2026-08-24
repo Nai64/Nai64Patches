@@ -6,7 +6,8 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val disableHardwareAccelerationPatch = resourcePatch(
-    name = "Disable Hardware Acceleration",
+    // Loaded through a category patch; kept as an executable implementation.
+    name = null,
     description = "Sets android:hardwareAccelerated=\"false\" on the <application> so the app renders on the software path (fixes some rendering/compat bugs).",
     default = false,
 ) {

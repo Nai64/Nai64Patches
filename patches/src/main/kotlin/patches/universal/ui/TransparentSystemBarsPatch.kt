@@ -7,7 +7,8 @@ import org.w3c.dom.Element
 
 @Suppress("unused")
 val transparentSystemBarsPatch = resourcePatch(
-    name = "Transparent System Bars",
+    // Loaded through a category patch; kept as an executable implementation.
+    name = null,
     description =
         "Forces the status bar and navigation bar to render transparent in every theme so " +
             "app content draws edge-to-edge behind them",

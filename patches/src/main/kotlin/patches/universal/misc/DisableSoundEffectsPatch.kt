@@ -5,7 +5,8 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val disableSoundEffectsPatch = bytecodePatch(
-    name = "Disable Sound Effects",
+    // Loaded through a category patch; kept as an executable implementation.
+    name = null,
     description = "Forces AudioManager.setSoundEffectsEnabled(false) so system UI sound effects (locks, clicks, navigation) are silenced within the app.",
     default = false,
 ) {

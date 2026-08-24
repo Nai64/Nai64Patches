@@ -112,6 +112,34 @@ internal object FallbackStringInstallerCheckFingerprint : Fingerprint(
     strings = listOf("com.android.vending"),
 )
 
+// -- Amazon Appstore availability fingerprints --
+// These target app-specific checks that directly reference an Amazon
+// Appstore package name. They do not modify PackageManager globally.
+
+internal object AmazonVeneziaBooleanAvailabilityFingerprint : Fingerprint(
+    returnType = "Z",
+    parameters = emptyList(),
+    strings = listOf("com.amazon.venezia"),
+)
+
+internal object AmazonVeneziaStringAvailabilityFingerprint : Fingerprint(
+    returnType = "Ljava/lang/String;",
+    parameters = emptyList(),
+    strings = listOf("com.amazon.venezia"),
+)
+
+internal object AmazonMarketplaceBooleanAvailabilityFingerprint : Fingerprint(
+    returnType = "Z",
+    parameters = emptyList(),
+    strings = listOf("com.amazon.device.marketplace"),
+)
+
+internal object AmazonMarketplaceStringAvailabilityFingerprint : Fingerprint(
+    returnType = "Ljava/lang/String;",
+    parameters = emptyList(),
+    strings = listOf("com.amazon.device.marketplace"),
+)
+
 internal object PairipSignatureCheckVerifyIntegrityFingerprint : Fingerprint(
     definingClass = "Lcom/pairip/SignatureCheck;",
     name = "verifyIntegrity",
@@ -343,6 +371,57 @@ internal object UnityAdsV3ShowOptionsFingerprint : Fingerprint(
         "Ljava/lang/String;",
         "Lcom/unity3d/ads/UnityAdsShowOptions;",
     ),
+)
+
+// -- VK MyTarget / RuStore distribution ad fingerprints --
+// MyTarget's InterstitialAd and RewardedAd inherit show(Context) from the
+// common BaseInterstitialAd implementation.
+internal object MyTargetBaseInterstitialShowFingerprint : Fingerprint(
+    definingClass = "Lcom/my/target/ads/BaseInterstitialAd;",
+    name = "show",
+    accessFlags = listOf(AccessFlags.PUBLIC),
+    returnType = "V",
+    parameters = listOf("Landroid/content/Context;"),
+)
+
+internal object YandexUnityRewardedWrapperShowFingerprint : Fingerprint(
+    definingClass = "Lcom/yandex/mobile/ads/unity/wrapper/rewarded/RewardedAdWrapper;",
+    name = "show",
+    accessFlags = listOf(AccessFlags.PUBLIC),
+    returnType = "V",
+    parameters = listOf("Landroid/app/Activity;"),
+)
+
+internal object YandexUnityRewardedListenerOnRewardedFingerprint : Fingerprint(
+    definingClass = "Lcom/yandex/mobile/ads/unity/wrapper/rewarded/a;",
+    name = "onRewarded",
+    accessFlags = listOf(AccessFlags.PUBLIC),
+    returnType = "V",
+    parameters = listOf("Lcom/yandex/mobile/ads/rewarded/Reward;"),
+)
+
+internal object YandexUnityInterstitialWrapperShowFingerprint : Fingerprint(
+    definingClass = "Lcom/yandex/mobile/ads/unity/wrapper/interstitial/InterstitialAdWrapper;",
+    name = "show",
+    accessFlags = listOf(AccessFlags.PUBLIC),
+    returnType = "V",
+    parameters = listOf("Landroid/app/Activity;"),
+)
+
+internal object YandexMyTargetRewardedIsLoadedFingerprint : Fingerprint(
+    definingClass = "Lcom/yandex/mobile/ads/mediation/mytarget/m;",
+    name = "isLoaded",
+    accessFlags = listOf(AccessFlags.PUBLIC),
+    returnType = "Z",
+    parameters = emptyList(),
+)
+
+internal object YandexMyTargetInterstitialIsLoadedFingerprint : Fingerprint(
+    definingClass = "Lcom/yandex/mobile/ads/mediation/mytarget/c0;",
+    name = "isLoaded",
+    accessFlags = listOf(AccessFlags.PUBLIC),
+    returnType = "Z",
+    parameters = emptyList(),
 )
 
 // -- ironSource (LevelPlay) public API --

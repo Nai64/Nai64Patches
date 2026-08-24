@@ -10,7 +10,8 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val bypassVpnDetectionPatch = bytecodePatch(
-    name = "Bypass VPN Detection",
+    // Loaded through a category patch; kept as an executable implementation.
+    name = null,
     description =
         "Makes NetworkCapabilities report no VPN: hasTransport always returns false and " +
             "hasCapability always returns true, so apps cannot block or alter behavior on VPN",

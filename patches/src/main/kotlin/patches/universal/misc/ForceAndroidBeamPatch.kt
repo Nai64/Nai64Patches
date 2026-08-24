@@ -5,7 +5,8 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val forceAndroidBeamPatch = bytecodePatch(
-    name = "Force Android Beam",
+    // Loaded through a category patch; kept as an executable implementation.
+    name = null,
     description = "Makes NfcAdapter.isNdefPushEnabled() report true so apps that require Android Beam (NDEF push) run normally.",
     default = false,
 ) {

@@ -2,6 +2,7 @@ package patches.universal.misc
 
 import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
 import app.morphe.patcher.patch.BytecodePatchContext
+import app.morphe.patcher.patch.booleanOption
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.patch.stringOption
 import com.android.tools.smali.dexlib2.Opcode
@@ -333,6 +334,18 @@ val bypassEmulatorDetectionPatch = bytecodePatch(
         key = "emulatorProfile",
         description = "Which real device identity to imitate.",
     )
+    val hideEmulatorRadio by booleanOption(
+        title = "Hide Emulator Radio",
+        default = false,
+        key = "hideEmulatorRadio",
+        description = "Make TelephonyManager report a normal GSM radio type.",
+    )
+    val spoofBuildExtras by booleanOption(
+        title = "Spoof Build Extras",
+        default = false,
+        key = "spoofBuildExtras",
+        description = "Spoof additional Build and Build.VERSION fields used by emulator checks.",
+    )
 
     execute {
         val logger = Logger.getLogger(this::class.java.name)
@@ -358,6 +371,13 @@ val bypassEmulatorDetectionPatch = bytecodePatch(
             "qemu.hw.mainkeys" to "0",
         )
         val patchedProps = foldSystemPropertyMap(emulatorProps)
+
+        if (hideEmulatorRadio == true) {
+            hideEmulatorRadioPatch.execute(this)
+        }
+        if (spoofBuildExtras == true) {
+            spoofBuildExtrasPatch.execute(this)
+        }
 
         val total = patchedBuild + patchedSerial + patchedRadio + patchedPhone + patchedProps
         if (total > 0) {

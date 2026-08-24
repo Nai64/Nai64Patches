@@ -5,7 +5,8 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val disableBluetoothA2dpPatch = bytecodePatch(
-    name = "Disable Bluetooth A2DP",
+    // Loaded through a category patch; kept as an executable implementation.
+    name = null,
     description = "Makes AudioManager.isBluetoothA2dpOn() report false so apps that change behavior when Bluetooth audio is streaming run normally.",
     default = false,
 ) {

@@ -5,7 +5,8 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val bypassLinkedUserPatch = bytecodePatch(
-    name = "Bypass Linked User",
+    // Loaded through a category patch; kept as an executable implementation.
+    name = null,
     description = "Makes UserManager.isLinkedUser() report false so apps that restrict linked/secondary profiles run normally.",
     default = false,
 ) {

@@ -5,7 +5,8 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val disableBackgroundSyncPatch = bytecodePatch(
-    name = "Disable Background Sync",
+    // Loaded through a category patch; kept as an executable implementation.
+    name = null,
     description = "No-ops ContentResolver.setSyncAutomatically/requestSync(...) so the app stops auto-uploading data (contacts, photos, files) to cloud accounts in the background.",
     default = false,
 ) {

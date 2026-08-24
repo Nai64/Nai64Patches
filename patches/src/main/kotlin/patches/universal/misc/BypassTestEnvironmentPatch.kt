@@ -5,7 +5,8 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val bypassTestEnvironmentPatch = bytecodePatch(
-    name = "Bypass Test Environment",
+    // Loaded through a category patch; kept as an executable implementation.
+    name = null,
     description = "Makes ActivityManager.isUserAMonkey() and isRunningInTestHarness() report false so apps that alter behavior under test/automation frameworks run normally.",
     default = false,
 ) {

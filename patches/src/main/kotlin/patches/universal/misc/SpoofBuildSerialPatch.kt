@@ -9,7 +9,8 @@ import java.util.logging.Logger
  */
 @Suppress("unused")
 val spoofBuildSerialPatch = bytecodePatch(
-    name = "Spoof Build Serial",
+    // Loaded through a category patch; kept as an executable implementation.
+    name = null,
     description = "Reports a fake device serial through Build.getSerial() so apps that fingerprint by serial number see a constant value.",
     default = false,
 ) {

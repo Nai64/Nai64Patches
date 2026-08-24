@@ -5,7 +5,8 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val forceSingleSimPatch = bytecodePatch(
-    name = "Force Single SIM",
+    // Loaded through a category patch; kept as an executable implementation.
+    name = null,
     description = "Makes TelephonyManager.getSimCount() report 1 so apps that require or count multiple SIMs run on a single-SIM device.",
     default = false,
 ) {

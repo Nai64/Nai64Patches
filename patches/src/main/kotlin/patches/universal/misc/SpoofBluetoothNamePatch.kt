@@ -5,7 +5,8 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val spoofBluetoothNamePatch = bytecodePatch(
-    name = "Spoof Bluetooth Name",
+    // Loaded through a category patch; kept as an executable implementation.
+    name = null,
     description = "Reports a constant name from BluetoothAdapter.getName() so apps cannot read the real local Bluetooth adapter name.",
     default = false,
 ) {

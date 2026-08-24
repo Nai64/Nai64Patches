@@ -62,7 +62,7 @@ val pairipBypassPatch = bytecodePatch(
     ) {
         execute {
             val logger = Logger.getLogger(this::class.java.name)
-            val applyManifestChanges = automaticStrategySelection == true || manifestCleanupStrategy == true
+            val applyManifestChanges = manifestCleanupStrategy == true
             if (!applyManifestChanges) {
                 logger.info("Pairip Application redirect disabled by strategy selection")
                 return@execute
@@ -100,7 +100,7 @@ val pairipBypassPatch = bytecodePatch(
 
         execute {
             val logger = Logger.getLogger(this::class.java.name)
-            val applyManifestCleanup = automaticStrategySelection == true || manifestCleanupStrategy == true
+            val applyManifestCleanup = manifestCleanupStrategy == true
             if (!applyManifestCleanup) {
                 logger.info("Pairip XML manifest cleanup disabled by strategy selection")
                 return@execute

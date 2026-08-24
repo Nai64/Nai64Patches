@@ -5,7 +5,8 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val enableLargeHeapPatch = resourcePatch(
-    name = "Enable Large Heap",
+    // Loaded through a category patch; kept as an executable implementation.
+    name = null,
     description =
         "Sets android:largeHeap so the app gets a bigger Java heap on devices that allow it, " +
             "reducing OutOfMemoryError crashes in memory-hungry games",

@@ -5,7 +5,8 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val spoofNaiPatch = bytecodePatch(
-    name = "Spoof NAI",
+    // Loaded through a category patch; kept as an executable implementation.
+    name = null,
     description = "Reports an empty string from TelephonyManager.getNai() so apps cannot read the Network Access Identifier.",
     default = false,
 ) {

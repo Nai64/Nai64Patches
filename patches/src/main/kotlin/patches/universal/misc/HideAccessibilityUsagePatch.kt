@@ -5,7 +5,8 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val hideAccessibilityUsagePatch = bytecodePatch(
-    name = "Hide Accessibility Usage",
+    // Loaded through a category patch; kept as an executable implementation.
+    name = null,
     description = "Makes AccessibilityManager.isEnabled() report false so apps cannot tell an accessibility service is running.",
     default = false,
 ) {

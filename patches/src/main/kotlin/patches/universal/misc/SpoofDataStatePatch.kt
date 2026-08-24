@@ -5,7 +5,8 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val spoofDataStatePatch = bytecodePatch(
-    name = "Spoof Data State",
+    // Loaded through a category patch; kept as an executable implementation.
+    name = null,
     description =
         "Reports an active data connection from TelephonyManager.getDataState() " +
             "(DATA_CONNECTED) and getDataActivity() (DATA_ACTIVITY_INOUT) so apps that " +

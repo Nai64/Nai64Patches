@@ -6,7 +6,8 @@ import org.w3c.dom.Element
 
 @Suppress("unused")
 val unmarkTestOnlyPatch = resourcePatch(
-    name = "Unmark Test Only",
+    // Loaded through a category patch; kept as an executable implementation.
+    name = null,
     description =
         "Removes android:testOnly from the manifest so builds marked as test-only can be " +
             "installed and launched like normal apps",

@@ -5,7 +5,8 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val spoofLastKnownLocationPatch = bytecodePatch(
-    name = "Spoof Last Known Location",
+    // Loaded through a category patch; kept as an executable implementation.
+    name = null,
     description =
         "Forces LocationManager.getLastKnownLocation() to return null so apps cannot " +
             "read the device's last cached GPS/network position.",

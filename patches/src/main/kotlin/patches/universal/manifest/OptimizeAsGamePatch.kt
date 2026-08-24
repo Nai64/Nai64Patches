@@ -5,7 +5,8 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val optimizeAsGamePatch = resourcePatch(
-    name = "Optimize as Game",
+    // Loaded through a category patch; kept as an executable implementation.
+    name = null,
     description =
         "Sets android:appCategory to game so Android applies game mode, battery and " +
             "screenshot optimizations tuned for games",

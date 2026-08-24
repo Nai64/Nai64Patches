@@ -60,7 +60,8 @@ private fun BytecodePatchContext.forceBooleanSetter(
 
 @Suppress("unused")
 val enableWebViewZoomPatch = bytecodePatch(
-    name = "Enable WebView Zoom",
+    // Loaded through a category patch; kept as an executable implementation.
+    name = null,
     description = "Enables built-in pinch zoom in WebViews and hides the zoom controls for a cleaner view.",
     default = false,
 ) {

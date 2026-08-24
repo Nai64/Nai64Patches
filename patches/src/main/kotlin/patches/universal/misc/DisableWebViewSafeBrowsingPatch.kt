@@ -60,7 +60,8 @@ private fun BytecodePatchContext.forceBooleanSetter(
 
 @Suppress("unused")
 val disableWebViewSafeBrowsingPatch = bytecodePatch(
-    name = "Disable WebView Safe Browsing",
+    // Loaded through a category patch; kept as an executable implementation.
+    name = null,
     description = "Forces WebSettings.setSafeBrowsingEnabled(false) to disable WebView Google Safe Browsing checks (complements the callback bypass).",
     default = false,
 ) {

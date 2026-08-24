@@ -5,7 +5,8 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val disableAnimationsPatch = bytecodePatch(
-    name = "Disable Animations",
+    // Loaded through a category patch; kept as an executable implementation.
+    name = null,
     description =
         "Forces Settings.Global window/transition/animator scale values to 0 so the app " +
             "runs without UI animations (faster, less motion).",

@@ -5,7 +5,8 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val forceNotificationsEnabledPatch = bytecodePatch(
-    name = "Force Notifications Enabled",
+    // Loaded through a category patch; kept as an executable implementation.
+    name = null,
     description =
         "Makes NotificationManager.areNotificationsEnabled always return true so apps that " +
             "refuse to run when notifications are blocked keep working",

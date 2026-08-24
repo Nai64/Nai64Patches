@@ -6,7 +6,8 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val exportAllActivitiesPatch = resourcePatch(
-    name = "Export All Activities",
+    // Loaded through a category patch; kept as an executable implementation.
+    name = null,
     description = "Marks every activity as android:exported so other apps and ADB can launch them",
     default = false,
 ) {

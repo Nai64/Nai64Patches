@@ -5,7 +5,8 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val forceAppActivePatch = bytecodePatch(
-    name = "Force App Active",
+    // Loaded through a category patch; kept as an executable implementation.
+    name = null,
     description = "Makes UsageStatsManager.isAppInactive() report false so apps are not throttled by Android's app-standby buckets.",
     default = false,
 ) {

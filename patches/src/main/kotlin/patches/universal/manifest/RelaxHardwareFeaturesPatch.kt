@@ -6,7 +6,8 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val relaxHardwareFeaturesPatch = resourcePatch(
-    name = "Relax Hardware Features",
+    // Loaded through a category patch; kept as an executable implementation.
+    name = null,
     description = "Sets android:required=\"false\" on every <uses-feature> so the app installs on devices that lack those hardware features.",
     default = false,
 ) {

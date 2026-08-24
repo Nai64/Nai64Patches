@@ -7,7 +7,8 @@ import java.util.logging.Logger
 
 internal object FirebaseMessagingServiceOnMessageReceivedFingerprint : Fingerprint(
     definingClass = "Lcom/google/firebase/messaging/FirebaseMessagingService;",
-    name = "onMessageReceived",
+    // Loaded through a category patch; kept as an executable implementation.
+    name = null,
     returnType = "V",
     parameters = listOf("Lcom/google/firebase/messaging/RemoteMessage;"),
 )

@@ -5,7 +5,8 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val bypassUserRestrictedPatch = bytecodePatch(
-    name = "Bypass User Restricted",
+    // Loaded through a category patch; kept as an executable implementation.
+    name = null,
     description = "Makes UserManager.isUserRestricted() report false so apps that limit restricted accounts run normally.",
     default = false,
 ) {

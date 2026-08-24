@@ -5,7 +5,8 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val hideAccountsPatch = bytecodePatch(
-    name = "Hide Accounts",
+    // Loaded through a category patch; kept as an executable implementation.
+    name = null,
     description = "Redirects AccountManager.getAccounts/getAccountsByType(...) to an empty Account[] so the app sees no linked accounts.",
     default = false,
 ) {

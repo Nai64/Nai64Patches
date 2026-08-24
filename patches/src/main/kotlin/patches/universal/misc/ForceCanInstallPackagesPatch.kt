@@ -5,7 +5,8 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val forceCanInstallPackagesPatch = bytecodePatch(
-    name = "Force Can Install Packages",
+    // Loaded through a category patch; kept as an executable implementation.
+    name = null,
     description = "Makes PackageManager.canRequestPackageInstalls() report true so sideload/unknown-source install prompts are treated as already granted.",
     default = false,
 ) {

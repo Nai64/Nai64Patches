@@ -5,7 +5,8 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val disableMusicDetectionPatch = bytecodePatch(
-    name = "Disable Music Detection",
+    // Loaded through a category patch; kept as an executable implementation.
+    name = null,
     description = "Makes AudioManager.isMusicActive() report false so apps that react to playing music behave as if nothing is playing.",
     default = false,
 ) {

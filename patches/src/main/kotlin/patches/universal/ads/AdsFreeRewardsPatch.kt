@@ -40,6 +40,7 @@ val adsFreeRewardsPatch = bytecodePatch(
             "AppLovin MAX" to "max",
             "Unity Ads" to "unityAds",
             "ironSource / LevelPlay" to "ironSource",
+            "RuStore / VK MyTarget" to "rustore",
         ),
     )
     val instantReward by booleanOption(
@@ -77,11 +78,12 @@ val adsFreeRewardsPatch = bytecodePatch(
  *
  * Many games gate their rewarded / interstitial buttons behind an SDK
  * "isReady" / "isAvailable" check (e.g. Unity Ads Advertisement.isReady,
- * ironSource isRewardedVideoAvailable, AppLovin MAX isReady). When no real
- * ad can fill (no network, ad-blocker, or re-signed build), these return
- * false and the game never calls show(), so the instant-reward hooks above
- * never fire. Forcing the gates to return true makes the game proceed to
- * show(), letting the reward flow grant without a real ad.
+ * ironSource isRewardedVideoAvailable, AppLovin MAX isReady, or the Yandex
+ * MyTarget mediation adapter's isLoaded). When no real ad can fill (no
+ * network, ad-blocker, or re-signed build), these return false and the game
+ * never calls show(), so the instant-reward hooks above never fire. Forcing
+ * the gates to return true makes the game proceed to show(), letting the
+ * reward flow grant without a real ad.
  */
 private fun BytecodePatchContext.forceAdAvailability(logger: Logger) {
     val targets = listOf(
@@ -92,6 +94,8 @@ private fun BytecodePatchContext.forceAdAvailability(logger: Logger) {
         "ironSource isInterstitialReady()" to IronSourceIsInterstitialReadyFingerprint.methodOrNull,
         "AppLovin MAX InterstitialAd.isReady()" to MaxInterstitialAdIsReadyFingerprint.methodOrNull,
         "AppLovin MAX AppOpenAd.isReady()" to MaxAppOpenAdIsReadyFingerprint.methodOrNull,
+        "Yandex/MyTarget rewarded mediation isLoaded()" to YandexMyTargetRewardedIsLoadedFingerprint.methodOrNull,
+        "Yandex/MyTarget interstitial mediation isLoaded()" to YandexMyTargetInterstitialIsLoadedFingerprint.methodOrNull,
     )
     for ((label, method) in targets) {
         method ?: continue
@@ -111,6 +115,7 @@ private fun BytecodePatchContext.applyAdsFreeRewardsV1190(logger: Logger, reward
     val useMax = strategy == "auto" || strategy == "max"
     val useUnityAds = strategy == "auto" || strategy == "unityAds"
     val useIronSource = strategy == "auto" || strategy == "ironSource"
+    val useRustore = strategy == "auto" || strategy == "rustore"
 
     // -- SDK detection --
     val hasMaxUnity = ShowRewardedAdFingerprint.methodOrNull != null &&
@@ -123,9 +128,65 @@ private fun BytecodePatchContext.applyAdsFreeRewardsV1190(logger: Logger, reward
     val hasLevelPlay = LevelPlayRewardedAdIsReadyFingerprint.methodOrNull != null
     val hasIronSourceUnityBridge = IronSourceUnityRewardedAdIsReadyFingerprint.methodOrNull != null &&
         IronSourceLevelPlayFullScreenShowAdFingerprint.methodOrNull != null
+    val hasMyTarget = MyTargetBaseInterstitialShowFingerprint.methodOrNull != null
+    val hasYandexUnityRewarded = YandexUnityRewardedWrapperShowFingerprint.methodOrNull != null
 
-    if (!hasMaxUnity && !hasNativeMax && !hasUnityAds && !hasUnityAdsV4 && !hasLevelPlay && !hasIronSourceUnityBridge) {
+    if (!hasMaxUnity && !hasNativeMax && !hasUnityAds && !hasUnityAdsV4 && !hasLevelPlay && !hasIronSourceUnityBridge && !hasMyTarget && !hasYandexUnityRewarded) {
         return
+    }
+
+    // -- Strategy 3c: VK MyTarget used by the RuStore build --
+    // MyTarget's RewardedAd inherits show(Context) from BaseInterstitialAd.
+    // Detect the runtime object so ordinary MyTarget interstitials continue
+    // through the original implementation, while rewarded callbacks are
+    // delivered without displaying an ad.
+    val myTargetShow = MyTargetBaseInterstitialShowFingerprint.methodOrNull
+    if (useRustore && instantReward == true && myTargetShow != null) {
+        logger.info("RuStore / VK MyTarget rewarded patch succeeded")
+        myTargetShow.addInstructions(0, """
+            instance-of v0, p0, Lcom/my/target/ads/RewardedAd;
+            if-eqz v0, :morphe_rustore_mytarget_original_show
+            check-cast p0, Lcom/my/target/ads/RewardedAd;
+            invoke-virtual {p0}, Lcom/my/target/ads/RewardedAd;->getListener()Lcom/my/target/ads/RewardedAd${'$'}RewardedAdListener;
+            move-result-object v0
+            if-eqz v0, :morphe_rustore_mytarget_done
+            invoke-interface {v0, p0}, Lcom/my/target/ads/RewardedAd${'$'}RewardedAdListener;->onDisplay(Lcom/my/target/ads/RewardedAd;)V
+            invoke-static {}, Lcom/my/target/ads/Reward;->getDefault()Lcom/my/target/ads/Reward;
+            move-result-object p1
+            invoke-interface {v0, p1, p0}, Lcom/my/target/ads/RewardedAd${'$'}RewardedAdListener;->onReward(Lcom/my/target/ads/Reward;Lcom/my/target/ads/RewardedAd;)V
+            invoke-interface {v0, p0}, Lcom/my/target/ads/RewardedAd${'$'}RewardedAdListener;->onDismiss(Lcom/my/target/ads/RewardedAd;)V
+            :morphe_rustore_mytarget_done
+            return-void
+            :morphe_rustore_mytarget_original_show
+        """.trimIndent())
+    }
+
+    // Yandex Unity wrapper used by the Rustore build. The wrapper forwards
+    // events through its private listener object, so normalize the reward
+    // callback and synthesize the shown -> rewarded -> dismissed lifecycle.
+    val yandexRewardedShow = YandexUnityRewardedWrapperShowFingerprint.methodOrNull
+    val yandexOnRewarded = YandexUnityRewardedListenerOnRewardedFingerprint.methodOrNull
+    if (useRustore && instantReward == true && yandexRewardedShow != null && yandexOnRewarded != null) {
+        logger.info("RuStore / Yandex Unity rewarded patch succeeded")
+        yandexOnRewarded.addInstructions(0, """
+            iget-object v0, p0, Lcom/yandex/mobile/ads/unity/wrapper/rewarded/a;->b:Lcom/yandex/mobile/ads/unity/wrapper/rewarded/UnityRewardedAdListener;
+            if-eqz v0, :morphe_rustore_yandex_reward_done
+            const/4 v1, 0x1
+            const-string p1, "default"
+            invoke-interface {v0, v1, p1}, Lcom/yandex/mobile/ads/unity/wrapper/rewarded/UnityRewardedAdListener;->onRewarded(ILjava/lang/String;)V
+            :morphe_rustore_yandex_reward_done
+            return-void
+        """.trimIndent())
+        yandexRewardedShow.addInstructions(0, """
+            iget-object v0, p0, Lcom/yandex/mobile/ads/unity/wrapper/rewarded/RewardedAdWrapper;->b:Lcom/yandex/mobile/ads/unity/wrapper/rewarded/a;
+            if-eqz v0, :morphe_rustore_yandex_show_done
+            invoke-virtual {v0}, Lcom/yandex/mobile/ads/unity/wrapper/rewarded/a;->onAdShown()V
+            const/4 v1, 0x0
+            invoke-virtual {v0, v1}, Lcom/yandex/mobile/ads/unity/wrapper/rewarded/a;->onRewarded(Lcom/yandex/mobile/ads/rewarded/Reward;)V
+            invoke-virtual {v0}, Lcom/yandex/mobile/ads/unity/wrapper/rewarded/a;->onAdDismissed()V
+            :morphe_rustore_yandex_show_done
+            return-void
+        """.trimIndent())
     }
 
     // -- Strategy 1: MAX Unity wrapper --

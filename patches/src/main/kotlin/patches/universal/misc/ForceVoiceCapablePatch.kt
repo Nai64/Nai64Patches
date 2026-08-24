@@ -5,7 +5,8 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val forceVoiceCapablePatch = bytecodePatch(
-    name = "Force Voice Capable",
+    // Loaded through a category patch; kept as an executable implementation.
+    name = null,
     description = "Makes TelephonyManager.isVoiceCapable() report true so apps that require voice-call support run on data-only devices.",
     default = false,
 ) {

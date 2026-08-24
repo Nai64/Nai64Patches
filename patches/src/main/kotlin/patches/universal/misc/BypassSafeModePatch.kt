@@ -5,7 +5,8 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val bypassSafeModePatch = bytecodePatch(
-    name = "Bypass Safe Mode",
+    // Loaded through a category patch; kept as an executable implementation.
+    name = null,
     description = "Makes PackageManager.isSafeMode() report false so apps that disable functionality in safe mode behave normally.",
     default = false,
 ) {

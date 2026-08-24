@@ -5,7 +5,8 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val disableQuietModePatch = bytecodePatch(
-    name = "Disable Quiet Mode",
+    // Loaded through a category patch; kept as an executable implementation.
+    name = null,
     description = "Makes UserManager.isQuietModeEnabled() report false so apps behave as if quiet mode is off.",
     default = false,
 ) {

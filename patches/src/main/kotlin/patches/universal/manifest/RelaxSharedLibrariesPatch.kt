@@ -6,7 +6,8 @@ import org.w3c.dom.Element
 
 @Suppress("unused")
 val relaxSharedLibrariesPatch = resourcePatch(
-    name = "Relax Shared Libraries",
+    // Loaded through a category patch; kept as an executable implementation.
+    name = null,
     description =
         "Marks every <uses-library> entry as optional so missing shared libraries no longer " +
             "block the app from installing on devices that lack them",

@@ -5,7 +5,8 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val spoofAirplaneModePatch = bytecodePatch(
-    name = "Spoof Airplane Mode",
+    // Loaded through a category patch; kept as an executable implementation.
+    name = null,
     description =
         "Forces Settings.Global AIRPLANE_MODE_ON reads to 0 (off) so apps that change " +
             "behavior in airplane mode see a normal connection state.",

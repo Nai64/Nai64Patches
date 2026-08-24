@@ -15,7 +15,8 @@ private val facebookAutoInitSwitches = mapOf(
 
 @Suppress("unused")
 val disableFacebookAutoInitPatch = resourcePatch(
-    name = "Disable Facebook SDK Auto-Init",
+    // Loaded through a category patch; kept as an executable implementation.
+    name = null,
     description =
         "Adds Facebook SDK manifest switches that stop auto-initialization, automatic app " +
             "event logging and advertiser ID collection at startup",

@@ -5,7 +5,8 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val hideInstalledAppsPatch = bytecodePatch(
-    name = "Hide Installed Apps",
+    // Loaded through a category patch; kept as an executable implementation.
+    name = null,
     description = "Redirects PackageManager.getInstalledPackages/getInstalledApplications to Collections.emptyList() so the app sees no other installed apps.",
     default = false,
 ) {

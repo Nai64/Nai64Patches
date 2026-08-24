@@ -5,7 +5,8 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val forceEmulatedStoragePatch = bytecodePatch(
-    name = "Force Emulated Storage",
+    // Loaded through a category patch; kept as an executable implementation.
+    name = null,
     description = "Makes Environment.isExternalStorageEmulated() report true so apps that expect emulated storage behave normally.",
     default = false,
 ) {

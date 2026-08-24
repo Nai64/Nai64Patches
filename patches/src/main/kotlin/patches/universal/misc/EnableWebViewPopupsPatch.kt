@@ -60,7 +60,8 @@ private fun BytecodePatchContext.forceBooleanSetter(
 
 @Suppress("unused")
 val enableWebViewPopupsPatch = bytecodePatch(
-    name = "Enable WebView Popups",
+    // Loaded through a category patch; kept as an executable implementation.
+    name = null,
     description = "Lets WebViews open popups and new windows (JavaScript window.open, target=_blank).",
     default = false,
 ) {

@@ -17,7 +17,8 @@ import java.util.logging.Logger
  */
 @Suppress("unused")
 val forceMaxBrightnessPatch = bytecodePatch(
-    name = "Force Max Brightness",
+    // Loaded through a category patch; kept as an executable implementation.
+    name = null,
     description = "Forces the system screen brightness setting to maximum (255) so apps that read it cannot dim or restrict the screen.",
     default = false,
 ) {

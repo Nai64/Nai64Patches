@@ -5,7 +5,8 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val disableHighTextContrastPatch = bytecodePatch(
-    name = "Disable High Text Contrast",
+    // Loaded through a category patch; kept as an executable implementation.
+    name = null,
     description = "Makes AccessibilityManager.isHighTextContrastEnabled() report false so apps do not alter layouts for high-contrast text.",
     default = false,
 ) {

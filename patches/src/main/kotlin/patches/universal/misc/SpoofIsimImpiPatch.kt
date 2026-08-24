@@ -5,7 +5,8 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val spoofIsimImpiPatch = bytecodePatch(
-    name = "Spoof ISIM IMPI",
+    // Loaded through a category patch; kept as an executable implementation.
+    name = null,
     description = "Reports an empty string from TelephonyManager.getIsimImpi() so apps cannot read the ISIM private identity.",
     default = false,
 ) {

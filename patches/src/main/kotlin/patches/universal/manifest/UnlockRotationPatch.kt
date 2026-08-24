@@ -5,7 +5,8 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val unlockRotationPatch = resourcePatch(
-    name = "Unlock Rotation",
+    // Loaded through a category patch; kept as an executable implementation.
+    name = null,
     description = "Remove screenOrientation locks so the app rotates freely",
     default = false,
 ) {

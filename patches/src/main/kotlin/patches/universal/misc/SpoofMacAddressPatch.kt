@@ -5,7 +5,8 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val spoofMacAddressPatch = bytecodePatch(
-    name = "Spoof MAC Address",
+    // Loaded through a category patch; kept as an executable implementation.
+    name = null,
     description = "Reports a constant MAC address through WifiInfo.getMacAddress() so apps cannot fingerprint the device by its Wi-Fi MAC.",
     default = false,
 ) {

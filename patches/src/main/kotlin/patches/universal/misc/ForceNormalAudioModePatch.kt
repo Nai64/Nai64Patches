@@ -5,7 +5,8 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val forceNormalAudioModePatch = bytecodePatch(
-    name = "Force Normal Audio Mode",
+    // Loaded through a category patch; kept as an executable implementation.
+    name = null,
     description = "Makes AudioManager.getMode() report MODE_NORMAL (0) so apps that change behavior in call/ringtone modes run normally.",
     default = false,
 ) {

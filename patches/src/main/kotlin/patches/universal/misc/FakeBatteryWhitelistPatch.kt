@@ -10,7 +10,8 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val fakeBatteryWhitelistPatch = bytecodePatch(
-    name = "Fake Battery Whitelist",
+    // Loaded through a category patch; kept as an executable implementation.
+    name = null,
     description =
         "Makes PowerManager.isIgnoringBatteryOptimizations always return true so apps stop " +
             "nagging about battery optimization exemptions",

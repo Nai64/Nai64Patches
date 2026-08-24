@@ -5,7 +5,8 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val forceSpeakerphoneOffPatch = bytecodePatch(
-    name = "Force Speakerphone Off",
+    // Loaded through a category patch; kept as an executable implementation.
+    name = null,
     description = "Makes AudioManager.isSpeakerphoneOn() report false so apps that react to speakerphone state behave as if it is off.",
     default = false,
 ) {

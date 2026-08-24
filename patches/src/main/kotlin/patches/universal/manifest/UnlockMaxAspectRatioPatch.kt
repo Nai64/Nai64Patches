@@ -6,7 +6,8 @@ import org.w3c.dom.Element
 
 @Suppress("unused")
 val unlockMaxAspectRatioPatch = resourcePatch(
-    name = "Unlock Max Aspect Ratio",
+    // Loaded through a category patch; kept as an executable implementation.
+    name = null,
     description =
         "Removes maxAspectRatio limits from the application, activities and metadata so the " +
             "app fills tall edge-to-edge screens instead of letterboxing",

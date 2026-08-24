@@ -5,7 +5,8 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val disableToastsPatch = bytecodePatch(
-    name = "Disable Toasts",
+    // Loaded through a category patch; kept as an executable implementation.
+    name = null,
     description = "No-ops Toast.show() so the app cannot display toast pop-ups.",
     default = false,
 ) {

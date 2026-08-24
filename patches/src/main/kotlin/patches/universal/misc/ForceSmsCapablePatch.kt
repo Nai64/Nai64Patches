@@ -5,7 +5,8 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val forceSmsCapablePatch = bytecodePatch(
-    name = "Force SMS Capable",
+    // Loaded through a category patch; kept as an executable implementation.
+    name = null,
     description = "Makes TelephonyManager.isSmsCapable() report true so apps that require SMS support run on devices without a cellular radio.",
     default = false,
 ) {

@@ -5,7 +5,8 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val spoofRingerModePatch = bytecodePatch(
-    name = "Spoof Ringer Mode",
+    // Loaded through a category patch; kept as an executable implementation.
+    name = null,
     description =
         "Forces AudioManager.getRingerMode() to report RINGER_MODE_NORMAL (2) so apps " +
             "cannot detect silent or vibrate mode.",

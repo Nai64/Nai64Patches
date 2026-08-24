@@ -5,7 +5,8 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val disableScrollbarsPatch = bytecodePatch(
-    name = "Disable Scrollbars",
+    // Loaded through a category patch; kept as an executable implementation.
+    name = null,
     description = "Forces View.setVerticalScrollBarEnabled/setHorizontalScrollBarEnabled(false) so scrollbars are never drawn.",
     default = false,
 ) {

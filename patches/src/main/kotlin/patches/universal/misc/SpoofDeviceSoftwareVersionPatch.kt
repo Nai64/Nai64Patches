@@ -5,7 +5,8 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val spoofDeviceSoftwareVersionPatch = bytecodePatch(
-    name = "Spoof Device Software Version",
+    // Loaded through a category patch; kept as an executable implementation.
+    name = null,
     description = "Reports a constant value from TelephonyManager.getDeviceSoftwareVersion() so apps cannot read the real radio/software version.",
     default = false,
 ) {

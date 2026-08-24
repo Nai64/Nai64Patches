@@ -5,7 +5,8 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val spoofSensorListPatch = bytecodePatch(
-    name = "Spoof Sensor List",
+    // Loaded through a category patch; kept as an executable implementation.
+    name = null,
     description =
         "Forces SensorManager.getSensorList() to return an empty list so apps cannot " +
             "enumerate the device's sensors for fingerprinting or capability checks.",

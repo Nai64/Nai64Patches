@@ -5,7 +5,8 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val ignoreGpsDisabledPatch = bytecodePatch(
-    name = "Ignore GPS Disabled",
+    // Loaded through a category patch; kept as an executable implementation.
+    name = null,
     description =
         "Makes LocationManager.isProviderEnabled always return true so apps that refuse to " +
             "run without location services keep working",

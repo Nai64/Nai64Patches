@@ -19,7 +19,8 @@ import java.util.logging.Logger
  */
 @Suppress("unused")
 val spoofBatteryLevelPatch = bytecodePatch(
-    name = "Spoof Battery Level",
+    // Loaded through a category patch; kept as an executable implementation.
+    name = null,
     description = "Reports a full battery (100%) through BatteryManager.getIntProperty for the capacity property, so apps that restrict features on low battery stop doing so.",
     default = false,
 ) {

@@ -60,7 +60,8 @@ private fun BytecodePatchContext.forceBooleanSetter(
 
 @Suppress("unused")
 val enableWebViewZoomSupportPatch = bytecodePatch(
-    name = "Enable WebView Zoom Support",
+    // Loaded through a category patch; kept as an executable implementation.
+    name = null,
     description = "Forces WebSettings.setSupportZoom(true) so WebViews permit zooming the page.",
     default = false,
 ) {

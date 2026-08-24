@@ -1,7 +1,7 @@
 {
-  "created_at": "2026-08-24T19:39:10",
-  "description": "## [1.27.0](https://github.com/Zanuaimi/Nai64Patches/compare/1.26.0...1.27.0) (2026-08-24)\n\n### Bug Fixes\n\n* retain generated patch bundle for releases ([b3f11fe](https://github.com/Zanuaimi/Nai64Patches/commit/b3f11fed14b2154d916e56ab5e1f7f50cee9e9e5))\n\n### New Features\n\n* expand PairIP bypass strategies ([95712f0](https://github.com/Zanuaimi/Nai64Patches/commit/95712f0a8feb9f36fc54b08891924b4b7b3edb86))",
-  "download_url": "https://github.com/Zanuaimi/Nai64Patches/releases/download/1.27.0/patches-1.27.0.mpp",
+  "created_at": "2026-08-25T00:00:00",
+  "description": "## [1.28.0](https://github.com/Zanuaimi/Nai64Patches/compare/1.27.0...1.28.0) (2026-08-25)\\n\\n### New Features\\n\\n* add grouped Manifest & Resource Tweaks and System & Device Tweaks categories\\n* add Amazon Appstore availability spoof patch\\n* add RuStore / VK MyTarget support to Ads Free Rewards and No Ads\\n\\n### Improvements\\n\\n* move 214 small standalone patches into disabled-by-default category options\\n* add emulator-radio and Build-extras options to Bypass Emulator Detection\\n* expand fake ad availability for Yandex / MyTarget mediation\\n\\n### Bug Fixes\\n\\n* correct PairIP manifest strategy selection",
+  "download_url": "https://github.com/Zanuaimi/Nai64Patches/releases/download/1.28.0/patches-1.28.0.mpp",
   "signature_download_url": "",
-  "version": "1.27.0"
+  "version": "1.28.0"
 }

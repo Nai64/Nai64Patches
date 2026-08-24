@@ -5,7 +5,8 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val disableActivityTransitionsPatch = bytecodePatch(
-    name = "Disable Activity Transitions",
+    // Loaded through a category patch; kept as an executable implementation.
+    name = null,
     description = "No-ops Activity.overridePendingTransition(...) so the app's custom activity enter/exit animations are skipped.",
     default = false,
 ) {

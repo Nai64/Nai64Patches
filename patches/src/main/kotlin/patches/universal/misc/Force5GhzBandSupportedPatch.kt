@@ -5,7 +5,8 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val force5GhzBandSupportedPatch = bytecodePatch(
-    name = "Force 5GHz Band Supported",
+    // Loaded through a category patch; kept as an executable implementation.
+    name = null,
     description = "Makes WifiManager.is5GHzBandSupported() report true so apps that require 5GHz Wi-Fi functionality run normally.",
     default = false,
 ) {

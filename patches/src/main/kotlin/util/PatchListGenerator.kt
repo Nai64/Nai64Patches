@@ -39,9 +39,12 @@ private fun generatePatchList(version: String, patches: Set<Patch<*>>) {
     val patchOrder = listOf(
         "Ads Free Rewards",
         "No Ads",
+        "Manifest & Resource Tweaks",
+        "System & Device Tweaks",
         "Skip Consent Popup",
         "Skip Rate-Us Prompt",
         "Spoof Play Store Install Source",
+        "Spoof Amazon Appstore Availability",
         "Limit Ad Tracking",
         "Remove Permissions",
         "Remove Hardware Requirements",

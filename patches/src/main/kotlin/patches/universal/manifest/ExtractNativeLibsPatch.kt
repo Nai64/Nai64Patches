@@ -5,7 +5,8 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val extractNativeLibsPatch = resourcePatch(
-    name = "Force Extract Native Libs",
+    // Loaded through a category patch; kept as an executable implementation.
+    name = null,
     description =
         "Sets android:extractNativeLibs so native libraries are extracted at install time. " +
             "Some mod loaders, hooks and older tools only work with extracted libs",

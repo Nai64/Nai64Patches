@@ -15,7 +15,8 @@ private val vibratorClasses = setOf(
 
 @Suppress("unused")
 val disableVibrationPatch = bytecodePatch(
-    name = "Disable Vibration",
+    // Loaded through a category patch; kept as an executable implementation.
+    name = null,
     description =
         "Replaces framework Vibrator.vibrate calls with no-ops so apps cannot make the " +
             "device buzz",

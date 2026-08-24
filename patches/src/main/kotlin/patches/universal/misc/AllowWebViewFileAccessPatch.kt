@@ -60,7 +60,8 @@ private fun BytecodePatchContext.forceBooleanSetter(
 
 @Suppress("unused")
 val allowWebViewFileAccessPatch = bytecodePatch(
-    name = "Allow WebView File Access",
+    // Loaded through a category patch; kept as an executable implementation.
+    name = null,
     description = "Forces WebSettings file-access flags on so WebViews can load local files and content URLs.",
     default = false,
 ) {

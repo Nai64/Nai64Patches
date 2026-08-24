@@ -1,3 +1,21 @@
+## [1.28.0](https://github.com/Zanuaimi/Nai64Patches/compare/1.27.0...1.28.0) (2026-08-25)
+
+### New Features
+
+* add grouped Manifest & Resource Tweaks and System & Device Tweaks categories
+* add Amazon Appstore availability spoof patch
+* add RuStore / VK MyTarget support to Ads Free Rewards and No Ads
+
+### Improvements
+
+* move 214 small standalone patches into disabled-by-default category options
+* add emulator-radio and Build-extras options to Bypass Emulator Detection
+* expand fake ad availability for Yandex / MyTarget mediation
+
+### Bug Fixes
+
+* correct PairIP manifest strategy selection
+
 ## [1.27.0](https://github.com/Zanuaimi/Nai64Patches/compare/1.26.0...1.27.0) (2026-08-24)
 
 ### Bug Fixes

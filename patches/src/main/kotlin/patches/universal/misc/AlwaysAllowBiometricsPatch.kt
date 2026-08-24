@@ -5,7 +5,8 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val alwaysAllowBiometricsPatch = bytecodePatch(
-    name = "Always Allow Biometrics",
+    // Loaded through a category patch; kept as an executable implementation.
+    name = null,
     description =
         "Makes BiometricManager.canAuthenticate always return BIOMETRIC_SUCCESS so apps do " +
             "not block biometric features on unsupported or unenrolled devices",

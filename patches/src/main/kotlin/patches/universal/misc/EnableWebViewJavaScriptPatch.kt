@@ -60,7 +60,8 @@ private fun BytecodePatchContext.forceBooleanSetter(
 
 @Suppress("unused")
 val enableWebViewJavaScriptPatch = bytecodePatch(
-    name = "Enable WebView JavaScript",
+    // Loaded through a category patch; kept as an executable implementation.
+    name = null,
     description = "Forces WebSettings.setJavaScriptEnabled(true) so WebViews that disable JS still run scripts.",
     default = false,
 ) {

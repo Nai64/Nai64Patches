@@ -5,7 +5,8 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val disableClipboardWritePatch = bytecodePatch(
-    name = "Disable Clipboard Write",
+    // Loaded through a category patch; kept as an executable implementation.
+    name = null,
     description = "No-ops ClipboardManager.setPrimaryClip(...) so the app cannot silently overwrite the system clipboard.",
     default = false,
 ) {

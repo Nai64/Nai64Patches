@@ -10,7 +10,8 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val fakeOnlineStatePatch = bytecodePatch(
-    name = "Fake Online State",
+    // Loaded through a category patch; kept as an executable implementation.
+    name = null,
     description =
         "Makes connectivity checks report an active connection: WifiManager.isWifiEnabled, " +
             "NetworkInfo.isConnected/isAvailable/isConnectedOrConnecting all return true",

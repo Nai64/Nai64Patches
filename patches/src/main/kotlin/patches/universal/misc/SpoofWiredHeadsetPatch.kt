@@ -5,7 +5,8 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val spoofWiredHeadsetPatch = bytecodePatch(
-    name = "Spoof Wired Headset",
+    // Loaded through a category patch; kept as an executable implementation.
+    name = null,
     description = "Makes AudioManager.isWiredHeadsetOn() report true so apps that require a wired headset think one is connected.",
     default = false,
 ) {

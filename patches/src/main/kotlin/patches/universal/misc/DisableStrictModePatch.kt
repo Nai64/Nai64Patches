@@ -8,7 +8,8 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val disableStrictModePatch = bytecodePatch(
-    name = "Disable StrictMode",
+    // Loaded through a category patch; kept as an executable implementation.
+    name = null,
     description =
         "No-ops StrictMode policy installs made by the app so debug builds that enable strict " +
             "disk or network checks stop crashing on release-like usage",

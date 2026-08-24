@@ -6,7 +6,8 @@ import org.w3c.dom.Element
 
 @Suppress("unused")
 val forceHardwareAccelerationPatch = resourcePatch(
-    name = "Force Hardware Acceleration",
+    // Loaded through a category patch; kept as an executable implementation.
+    name = null,
     description =
         "Sets android:hardwareAccelerated so every activity renders with GPU acceleration, " +
             "even when the app disables it globally",

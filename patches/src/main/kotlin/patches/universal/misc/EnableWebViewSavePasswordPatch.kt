@@ -60,7 +60,8 @@ private fun BytecodePatchContext.forceBooleanSetter(
 
 @Suppress("unused")
 val enableWebViewSavePasswordPatch = bytecodePatch(
-    name = "Enable WebView Save Password",
+    // Loaded through a category patch; kept as an executable implementation.
+    name = null,
     description = "Forces WebSettings.setSavePassword(true) so WebViews can store passwords.",
     default = false,
 ) {

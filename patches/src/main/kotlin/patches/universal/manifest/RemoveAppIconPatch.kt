@@ -18,7 +18,8 @@ private val TRANSPARENT_XML = """
 
 @Suppress("unused")
 val removeAppIconPatch = resourcePatch(
-    name = "Remove App Icon",
+    // Loaded through a category patch; kept as an executable implementation.
+    name = null,
     description = "Replaces the launcher icon with a transparent drawable",
     default = false,
 ) {

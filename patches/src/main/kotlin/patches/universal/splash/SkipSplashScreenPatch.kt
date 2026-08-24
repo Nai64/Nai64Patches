@@ -10,7 +10,8 @@ import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 import java.util.logging.Logger
 
 internal object SplashOnCreateFingerprint : Fingerprint(
-    name = "onCreate",
+    // Loaded through a category patch; kept as an executable implementation.
+    name = null,
     returnType = "V",
     custom = { method, classDef ->
         classDef.type.contains("splash", ignoreCase = true) &&

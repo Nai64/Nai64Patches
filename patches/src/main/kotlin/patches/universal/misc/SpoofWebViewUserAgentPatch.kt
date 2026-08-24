@@ -12,7 +12,8 @@ private const val DESKTOP_USER_AGENT =
  */
 @Suppress("unused")
 val spoofWebViewUserAgentPatch = bytecodePatch(
-    name = "Spoof WebView User Agent",
+    // Loaded through a category patch; kept as an executable implementation.
+    name = null,
     description = "Replaces WebSettings.getUserAgentString() with a desktop browser user agent so embedded webviews load desktop versions of sites.",
     default = false,
 ) {

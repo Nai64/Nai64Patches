@@ -5,7 +5,8 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val disableCameraShutterSoundPatch = bytecodePatch(
-    name = "Disable Camera Shutter Sound",
+    // Loaded through a category patch; kept as an executable implementation.
+    name = null,
     description = "Silences the camera shutter and video-record sounds by neutralizing MediaActionSound.play(...) and Camera.playSound(...).",
     default = false,
 ) {

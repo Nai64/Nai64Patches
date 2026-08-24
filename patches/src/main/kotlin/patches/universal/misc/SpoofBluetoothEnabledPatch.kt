@@ -5,7 +5,8 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val spoofBluetoothEnabledPatch = bytecodePatch(
-    name = "Spoof Bluetooth Enabled",
+    // Loaded through a category patch; kept as an executable implementation.
+    name = null,
     description =
         "Forces Settings.Global BLUETOOTH_ON reads to 0 (off) so apps that behave " +
             "differently when Bluetooth is enabled cannot tell it is on.",

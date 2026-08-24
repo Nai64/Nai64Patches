@@ -10,7 +10,8 @@ private const val FLAG_SECURE = "0x2000"
 
 @Suppress("unused")
 val blockScreenshotDetectionPatch = bytecodePatch(
-    name = "Block Screenshot Detection",
+    // Loaded through a category patch; kept as an executable implementation.
+    name = null,
     description =
         "Adds FLAG_SECURE to every activity window so the system blocks screenshots, screen " +
             "recording and recents previews of the app",

@@ -5,7 +5,8 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val disableFixedVolumePatch = bytecodePatch(
-    name = "Disable Fixed Volume",
+    // Loaded through a category patch; kept as an executable implementation.
+    name = null,
     description = "Makes AudioManager.isVolumeFixed() report false so volume keys and stream changes work even when an app pins the volume.",
     default = false,
 ) {

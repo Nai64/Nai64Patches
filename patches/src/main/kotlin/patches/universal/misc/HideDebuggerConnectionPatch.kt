@@ -5,7 +5,8 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val hideDebuggerConnectionPatch = bytecodePatch(
-    name = "Hide Debugger Connection",
+    // Loaded through a category patch; kept as an executable implementation.
+    name = null,
     description =
         "Makes Debug.isDebuggerConnected and waitingForDebugger always return false so apps " +
             "that refuse to run under a debugger keep working",

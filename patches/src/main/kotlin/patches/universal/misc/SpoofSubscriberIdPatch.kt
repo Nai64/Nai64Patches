@@ -9,7 +9,8 @@ import java.util.logging.Logger
  */
 @Suppress("unused")
 val spoofSubscriberIdPatch = bytecodePatch(
-    name = "Spoof Subscriber ID",
+    // Loaded through a category patch; kept as an executable implementation.
+    name = null,
     description = "Reports a fake subscriber id (IMSI) through TelephonyManager.getSubscriberId() so apps that fingerprint by IMSI see a constant value.",
     default = false,
 ) {

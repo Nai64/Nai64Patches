@@ -5,7 +5,8 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val bypassGuestUserPatch = bytecodePatch(
-    name = "Bypass Guest User",
+    // Loaded through a category patch; kept as an executable implementation.
+    name = null,
     description = "Makes UserManager.isGuestUser() report false so apps that limit guest accounts behave as on a primary account.",
     default = false,
 ) {
