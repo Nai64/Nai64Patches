@@ -9,6 +9,7 @@ import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction3rc
 import com.android.tools.smali.dexlib2.iface.instruction.Instruction
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
+import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 import com.android.tools.smali.dexlib2.iface.reference.StringReference
 import java.util.logging.Logger
@@ -76,15 +77,31 @@ internal fun BytecodePatchContext.foldSettingsGetters(
                     else -> continue
                 }
 
-                // Walk backwards for the const-string that fills the key register.
+                // Walk backwards for the const-string or sget-object that fills the key register.
                 var keyValue: String? = null
                 for (j in index - 1 downTo 0) {
                     val prev = instructions[j]
-                    if (prev.opcode != Opcode.CONST_STRING) continue
                     val reg = (prev as? OneRegisterInstruction)?.registerA ?: continue
                     if (reg != keyRegister) continue
-                    keyValue = ((prev as? ReferenceInstruction)?.reference as? StringReference)?.string
-                    break
+                    when (prev.opcode) {
+                        Opcode.CONST_STRING -> {
+                            keyValue = ((prev as? ReferenceInstruction)?.reference as? StringReference)?.string
+                            break
+                        }
+                        Opcode.SGET_OBJECT -> {
+                            val field = (prev as? ReferenceInstruction)?.reference as? FieldReference ?: continue
+                            val fieldKey = field.name.lowercase()
+                            if (fieldKey in keys) {
+                                keyValue = fieldKey
+                                break
+                            }
+                            if (field.name in keys) {
+                                keyValue = field.name
+                                break
+                            }
+                        }
+                        else -> continue
+                    }
                 }
                 if (keyValue !in keys) continue
 
