@@ -152,6 +152,41 @@ internal object PairipLicenseActivityShowPaywallFingerprint : Fingerprint(
     parameters = emptyList(),
 )
 
+internal object PairipLicenseActivityNnStartFingerprint : Fingerprint(
+    definingClass = "Lcom/pairip/licensecheck/LicenseActivity;",
+    name = "nnStart",
+    returnType = "V",
+    parameters = emptyList(),
+)
+
+internal object PairipLicenseActivityCloseAppFingerprint : Fingerprint(
+    definingClass = "Lcom/pairip/licensecheck/LicenseActivity;",
+    name = "closeApp",
+    returnType = "V",
+    parameters = emptyList(),
+)
+
+internal object PairipLicenseActivityExitAppFingerprint : Fingerprint(
+    definingClass = "Lcom/pairip/licensecheck/LicenseActivity;",
+    name = "exitApp",
+    returnType = "V",
+    parameters = emptyList(),
+)
+
+internal object PairipLicenseActivityCloseappFingerprint : Fingerprint(
+    definingClass = "Lcom/pairip/licensecheck/LicenseActivity;",
+    name = "closeapp",
+    returnType = "V",
+    parameters = emptyList(),
+)
+
+internal object PairipLicenseActivityExitappFingerprint : Fingerprint(
+    definingClass = "Lcom/pairip/licensecheck/LicenseActivity;",
+    name = "exitapp",
+    returnType = "V",
+    parameters = emptyList(),
+)
+
 // -- Pairip Application class bypass --
 // Prevents Pairip from loading libpairipcore.so and starting the VM
 // by neutering the Application entry point methods.
@@ -545,6 +580,13 @@ internal object PairipLicenseClientCheckLicenseFingerprint : Fingerprint(
     name = "checkLicense",
     returnType = "V",
     parameters = listOf("Landroid/content/Context;"),
+)
+
+internal object PairipLicenseClientInitializeLicenseCheckFingerprint : Fingerprint(
+    definingClass = "Lcom/pairip/licensecheck/LicenseClient;",
+    name = "initializeLicenseCheck",
+    returnType = "V",
+    parameters = emptyList(),
 )
 
 // -- Pairip LicenseContentProvider lifecycle neuter --

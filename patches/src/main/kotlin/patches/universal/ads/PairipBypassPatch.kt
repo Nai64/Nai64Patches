@@ -41,6 +41,50 @@ private val applicationRedirectPatch = resourcePatch(
     }
 }
 
+private val pairipLicenseManifestCleanupPatch = resourcePatch(
+    name = "Pairip License Manifest Cleanup (internal)",
+    default = false,
+) {
+    dependsOn(applicationRedirectPatch)
+
+    execute {
+        val logger = Logger.getLogger(this::class.java.name)
+        val androidNamespace = "http://schemas.android.com/apk/res/android"
+        val pairipComponents = setOf(
+            "com.pairip.licensecheck.LicenseActivity",
+            "com.pairip.licensecheck.LicenseContentProvider",
+        )
+        var removed = 0
+
+        document("AndroidManifest.xml").use { manifest ->
+            for (tag in listOf("activity", "provider")) {
+                val nodes = manifest.getElementsByTagName(tag)
+                for (index in nodes.length - 1 downTo 0) {
+                    val component = nodes.item(index) as? Element ?: continue
+                    val name = component.getAttributeNS(androidNamespace, "name")
+                    if (name in pairipComponents) {
+                        component.parentNode?.removeChild(component)
+                        removed++
+                    }
+                }
+            }
+
+            val permissions = manifest.getElementsByTagName("uses-permission")
+            for (index in permissions.length - 1 downTo 0) {
+                val permission = permissions.item(index) as? Element ?: continue
+                if (permission.getAttributeNS(androidNamespace, "name") == "com.android.vending.CHECK_LICENSE") {
+                    permission.parentNode?.removeChild(permission)
+                    removed++
+                }
+            }
+        }
+
+        if (removed > 0) {
+            logger.info("Removed $removed Pairip license manifest entr${if (removed == 1) "y" else "ies"}")
+        }
+    }
+}
+
 private fun ResourcePatchContext.discoverPairipAppClass(logger: Logger): String? {
     val dir = try { get("AndroidManifest.xml", false)?.parentFile } catch (_: Exception) { null }
         ?: return null.also { logger.warning("Cannot determine APK directory") }
@@ -69,7 +113,7 @@ val pairipBypassPatch = bytecodePatch(
     description = "Pairip is anti-tamper / license protection used by some games. This bypasses its checks so patched or modified builds run instead of being blocked.",
     default = false,
 ) {
-    dependsOn(applicationRedirectPatch)
+    dependsOn(pairipLicenseManifestCleanupPatch)
 
     val automaticStrategySelection by booleanOption(
         key = "automaticStrategySelection",
@@ -148,6 +192,14 @@ val pairipBypassPatch = bytecodePatch(
             logger.info("Applied Pairip performLocalInstallerCheck spoof")
         }
 
+        GenericStringInstallerCheckFingerprint.methodOrNull?.let {
+            it.addInstructions(0, """
+                const-string v0, "com.android.vending"
+                return-object v0
+            """.trimIndent())
+            logger.info("Applied Play Store installer source spoof")
+        }
+
         }
 
         if (applySignatureChecks) {
@@ -195,13 +247,37 @@ val pairipBypassPatch = bytecodePatch(
             logger.info("Applied Pairip LicenseActivity paywall suppress")
         }
 
+        PairipLicenseActivityNnStartFingerprint.methodOrNull?.let {
+            it.addInstructions(0, "return-void")
+            logger.info("Applied Pairip LicenseActivity.nnStart suppress")
+        }
+
+        PairipLicenseActivityCloseAppFingerprint.methodOrNull?.let {
+            it.addInstructions(0, "return-void")
+            logger.info("Applied Pairip LicenseActivity.closeApp suppress")
+        }
+
+        PairipLicenseActivityExitAppFingerprint.methodOrNull?.let {
+            it.addInstructions(0, "return-void")
+            logger.info("Applied Pairip LicenseActivity.exitApp suppress")
+        }
+
+        PairipLicenseActivityCloseappFingerprint.methodOrNull?.let {
+            it.addInstructions(0, "return-void")
+            logger.info("Applied Pairip LicenseActivity.closeapp suppress")
+        }
+
+        PairipLicenseActivityExitappFingerprint.methodOrNull?.let {
+            it.addInstructions(0, "return-void")
+            logger.info("Applied Pairip LicenseActivity.exitapp suppress")
+        }
+
         }
 
         if (applyApplicationStartupHooks) {
         // -- Strategy 7a: Application.attachBaseContext - main entry point --
         PairipApplicationAttachBaseContextFingerprint.methodOrNull?.let {
             it.addInstructions(0, """
-                invoke-static {p1}, Lcom/pairip/VMRunner;->setContext(Landroid/content/Context;)V
                 invoke-super {p0, p1}, Landroid/app/Application;->attachBaseContext(Landroid/content/Context;)V
                 return-void
             """.trimIndent())
@@ -226,6 +302,11 @@ val pairipBypassPatch = bytecodePatch(
                 return-void
             """.trimIndent())
             logger.info("Applied Pairip LicenseClient.checkLicense root kill")
+        }
+
+        PairipLicenseClientInitializeLicenseCheckFingerprint.methodOrNull?.let {
+            it.addInstructions(0, "return-void")
+            logger.info("Applied Pairip LicenseClient.initializeLicenseCheck suppress")
         }
 
         }
@@ -356,14 +437,21 @@ val pairipBypassPatch = bytecodePatch(
             }
 
             addIfMatched(applyLocalInstallerChecks, "performLocalInstallerCheck", PerformLocalInstallerCheckFingerprint.methodOrNull != null)
+            addIfMatched(applyLocalInstallerChecks, "installer source", GenericStringInstallerCheckFingerprint.methodOrNull != null)
             addIfMatched(applySignatureChecks, "verifyIntegrity", PairipSignatureCheckVerifyIntegrityFingerprint.methodOrNull != null)
             addIfMatched(applySignatureChecks, "verifySignatureMatches", PairipSignatureCheckVerifySignatureMatchesFingerprint.methodOrNull != null)
             addIfMatched(applyLicenseUiSuppression, "errorDialog", PairipLicenseClientStartErrorDialogFingerprint.methodOrNull != null)
             addIfMatched(applyLicenseUiSuppression, "paywall", PairipLicenseClientStartPaywallFingerprint.methodOrNull != null)
             addIfMatched(applyLicenseUiSuppression, "showPaywallAndCloseApp", PairipLicenseActivityShowPaywallFingerprint.methodOrNull != null)
+            addIfMatched(applyLicenseUiSuppression, "nnStart", PairipLicenseActivityNnStartFingerprint.methodOrNull != null)
+            addIfMatched(applyLicenseUiSuppression, "closeApp", PairipLicenseActivityCloseAppFingerprint.methodOrNull != null)
+            addIfMatched(applyLicenseUiSuppression, "exitApp", PairipLicenseActivityExitAppFingerprint.methodOrNull != null)
+            addIfMatched(applyLicenseUiSuppression, "closeapp", PairipLicenseActivityCloseappFingerprint.methodOrNull != null)
+            addIfMatched(applyLicenseUiSuppression, "exitapp", PairipLicenseActivityExitappFingerprint.methodOrNull != null)
             addIfMatched(applyApplicationStartupHooks, "attachBaseContext", PairipApplicationAttachBaseContextFingerprint.methodOrNull != null)
             addIfMatched(applyApplicationStartupHooks, "onCreate", PairipApplicationOnCreateFingerprint.methodOrNull != null)
             addIfMatched(applyLicenseClientChecks, "checkLicense", PairipLicenseClientCheckLicenseFingerprint.methodOrNull != null)
+            addIfMatched(applyLicenseClientChecks, "initializeLicenseCheck", PairipLicenseClientInitializeLicenseCheckFingerprint.methodOrNull != null)
             addIfMatched(applyContentProviderChecks, "onCreate (ContentProvider)", PairipLicenseContentProviderOnCreateFingerprint.methodOrNull != null)
             addIfMatched(applyContentProviderChecks, "query", PairipLicenseContentProviderQueryFingerprint.methodOrNull != null)
             addIfMatched(applyContentProviderChecks, "getContext", PairipInitContextProviderGetContextFingerprint.methodOrNull != null)
