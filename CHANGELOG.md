@@ -1,3 +1,9 @@
+## [1.1.0](https://github.com/Zanuaimi/Nai64Patches/compare/1.0.0...1.1.0) (2026-08-24)
+
+### New Features
+
+* expand PairIP bypass strategies ([95712f0](https://github.com/Zanuaimi/Nai64Patches/commit/95712f0a8feb9f36fc54b08891924b4b7b3edb86))
+
 ## [1.27.0](https://github.com/Zanuaimi/Nai64Patches/compare/1.26.0...1.27.0) (2026-08-24)
 
 ### New Features
