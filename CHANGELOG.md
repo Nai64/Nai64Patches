@@ -1,4 +1,4 @@
-## [1.26.2](https://github.com/Nai64/Nai64Patches/compare/1.26.0...1.26.2) (2026-08-24)
+## [1.27.0](https://github.com/Zanuaimi/Nai64Patches/compare/1.26.0...1.27.0) (2026-08-24)
 
 ### New Features
 
