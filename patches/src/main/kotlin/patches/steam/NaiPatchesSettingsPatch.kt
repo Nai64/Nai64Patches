@@ -29,11 +29,66 @@ val naiPatchesSettingsPatch = bytecodePatch(
             return@execute
         }
 
-        // Add field to hold settings layout
+        // Add fields to hold settings layout and Custom RP edits
         if (mutable.fields.none { it.name == "naiSettingsLayout" }) {
             mutable.fields.add(
                 ImmutableField(target, "naiSettingsLayout", "Landroid/widget/LinearLayout;", AccessFlags.PRIVATE.value, null, emptySet(), emptySet()).toMutable()
             )
+        }
+        if (mutable.fields.none { it.name == "customAppIdEdit" }) {
+            mutable.fields.add(
+                ImmutableField(target, "customAppIdEdit", "Landroid/widget/EditText;", AccessFlags.PRIVATE.value, null, emptySet(), emptySet()).toMutable()
+            )
+        }
+        if (mutable.fields.none { it.name == "customStatusEdit" }) {
+            mutable.fields.add(
+                ImmutableField(target, "customStatusEdit", "Landroid/widget/EditText;", AccessFlags.PRIVATE.value, null, emptySet(), emptySet()).toMutable()
+            )
+        }
+        // Ensure MainActivity can handle Custom RP dialog save
+        val dialogIface2 = "Landroid/content/DialogInterface${'$'}OnClickListener;"
+        if (dialogIface2 !in mutable.interfaces) mutable.interfaces.add(dialogIface2)
+        if (mutable.methods.none { it.name == "onClick" && it.parameterTypes == listOf("Landroid/content/DialogInterface;", "I") }) {
+            val emptyImpl2 = ImmutableMethodImplementation(6, emptyList(), emptyList(), emptyList())
+            val m2 = ImmutableMethod(
+                target, "onClick",
+                listOf(
+                    ImmutableMethodParameter("Landroid/content/DialogInterface;", emptySet(), null),
+                    ImmutableMethodParameter("I", emptySet(), null)
+                ),
+                "V", AccessFlags.PUBLIC.value, emptySet(), emptySet(), emptyImpl2
+            ).toMutable()
+            mutable.methods.add(m2)
+            val smali2 = """
+                iget-object v0, p0, Lcom/valvesoftware/android/steam/community/MainActivity;->customAppIdEdit:Landroid/widget/EditText;
+                if-eqz v0, :no_save2
+                iget-object v1, p0, Lcom/valvesoftware/android/steam/community/MainActivity;->customStatusEdit:Landroid/widget/EditText;
+                if-eqz v1, :no_save2
+                invoke-virtual {v0}, Landroid/widget/EditText;->getText()Landroid/text/Editable;
+                move-result-object v0
+                invoke-virtual {v0}, Ljava/lang/Object;->toString()Ljava/lang/String;
+                move-result-object v0
+                invoke-virtual {v1}, Landroid/widget/EditText;->getText()Landroid/text/Editable;
+                move-result-object v1
+                invoke-virtual {v1}, Ljava/lang/Object;->toString()Ljava/lang/String;
+                move-result-object v1
+                const-string v2, "custom_presence"
+                const/4 v3, 0x0
+                invoke-virtual {p0, v2, v3}, Landroid/app/Activity;->getSharedPreferences(Ljava/lang/String;I)Landroid/content/SharedPreferences;
+                move-result-object v2
+                invoke-interface {v2}, Landroid/content/SharedPreferences;->edit()Landroid/content/SharedPreferences${'$'}Editor;
+                move-result-object v2
+                const-string v3, "appId"
+                invoke-interface {v2, v3, v0}, Landroid/content/SharedPreferences${'$'}Editor;->putString(Ljava/lang/String;Ljava/lang/String;)Landroid/content/SharedPreferences${'$'}Editor;
+                move-result-object v2
+                const-string v3, "status"
+                invoke-interface {v2, v3, v1}, Landroid/content/SharedPreferences${'$'}Editor;->putString(Ljava/lang/String;Ljava/lang/String;)Landroid/content/SharedPreferences${'$'}Editor;
+                move-result-object v2
+                invoke-interface {v2}, Landroid/content/SharedPreferences${'$'}Editor;->apply()V
+                :no_save2
+                return-void
+            """.trimIndent()
+            m2.addInstructionsWithLabels(0, smali2)
         }
 
         val checkIface = "Landroid/widget/CompoundButton${'$'}OnCheckedChangeListener;"
@@ -131,7 +186,6 @@ val naiPatchesSettingsPatch = bytecodePatch(
                 const/4 v0, 0x0
                 return v0
                 :show_custom_rp_fallback
-                # Custom RP fallback - show its dialog (duplicate from CustomPresencePatch but inlined here for standalone)
                 new-instance v0, Landroid/widget/LinearLayout;
                 invoke-direct {v0, p0}, Landroid/widget/LinearLayout;-><init>(Landroid/content/Context;)V
                 const/4 v1, 0x1
@@ -140,19 +194,47 @@ val naiPatchesSettingsPatch = bytecodePatch(
                 invoke-virtual {v0, v1}, Landroid/widget/LinearLayout;->setPadding(IIII)V
                 new-instance v1, Landroid/widget/EditText;
                 invoke-direct {v1, p0}, Landroid/widget/EditText;-><init>(Landroid/content/Context;)V
-                const-string v2, "App ID"
+                const-string v2, "App ID (e.g. 730)"
                 invoke-virtual {v1, v2}, Landroid/widget/EditText;->setHint(Ljava/lang/CharSequence;)V
+                const-string v2, "custom_presence"
+                const/4 v3, 0x0
+                invoke-virtual {p0, v2, v3}, Landroid/app/Activity;->getSharedPreferences(Ljava/lang/String;I)Landroid/content/SharedPreferences;
+                move-result-object v2
+                const-string v3, "appId"
+                const-string v4, ""
+                invoke-interface {v2, v3, v4}, Landroid/content/SharedPreferences;->getString(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
+                move-result-object v2
+                invoke-virtual {v1, v2}, Landroid/widget/EditText;->setText(Ljava/lang/CharSequence;)V
+                iput-object v1, p0, Lcom/valvesoftware/android/steam/community/MainActivity;->customAppIdEdit:Landroid/widget/EditText;
+                invoke-virtual {v0, v1}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;)V
+                new-instance v1, Landroid/widget/EditText;
+                invoke-direct {v1, p0}, Landroid/widget/EditText;-><init>(Landroid/content/Context;)V
+                const-string v2, "Status text"
+                invoke-virtual {v1, v2}, Landroid/widget/EditText;->setHint(Ljava/lang/CharSequence;)V
+                const-string v2, "custom_presence"
+                const/4 v3, 0x0
+                invoke-virtual {p0, v2, v3}, Landroid/app/Activity;->getSharedPreferences(Ljava/lang/String;I)Landroid/content/SharedPreferences;
+                move-result-object v2
+                const-string v3, "status"
+                const-string v4, ""
+                invoke-interface {v2, v3, v4}, Landroid/content/SharedPreferences;->getString(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
+                move-result-object v2
+                invoke-virtual {v1, v2}, Landroid/widget/EditText;->setText(Ljava/lang/CharSequence;)V
+                iput-object v1, p0, Lcom/valvesoftware/android/steam/community/MainActivity;->customStatusEdit:Landroid/widget/EditText;
                 invoke-virtual {v0, v1}, Landroid/widget/LinearLayout;->addView(Landroid/view/View;)V
                 new-instance v1, Landroid/app/AlertDialog${'$'}Builder;
                 invoke-direct {v1, p0}, Landroid/app/AlertDialog${'$'}Builder;-><init>(Landroid/content/Context;)V
-                const-string v2, "Custom RP"
+                const-string v2, "Custom Rich Presence"
                 invoke-virtual {v1, v2}, Landroid/app/AlertDialog${'$'}Builder;->setTitle(Ljava/lang/CharSequence;)Landroid/app/AlertDialog${'$'}Builder;
                 move-result-object v1
                 invoke-virtual {v1, v0}, Landroid/app/AlertDialog${'$'}Builder;->setView(Landroid/view/View;)Landroid/app/AlertDialog${'$'}Builder;
                 move-result-object v1
-                const-string v2, "Close"
+                const-string v2, "Save"
+                invoke-virtual {v1, v2, p0}, Landroid/app/AlertDialog${'$'}Builder;->setPositiveButton(Ljava/lang/CharSequence;Landroid/content/DialogInterface${'$'}OnClickListener;)Landroid/app/AlertDialog${'$'}Builder;
+                move-result-object v1
+                const-string v2, "Cancel"
                 const/4 v3, 0x0
-                invoke-virtual {v1, v2, v3}, Landroid/app/AlertDialog${'$'}Builder;->setPositiveButton(Ljava/lang/CharSequence;Landroid/content/DialogInterface${'$'}OnClickListener;)Landroid/app/AlertDialog${'$'}Builder;
+                invoke-virtual {v1, v2, v3}, Landroid/app/AlertDialog${'$'}Builder;->setNegativeButton(Ljava/lang/CharSequence;Landroid/content/DialogInterface${'$'}OnClickListener;)Landroid/app/AlertDialog${'$'}Builder;
                 move-result-object v1
                 invoke-virtual {v1}, Landroid/app/AlertDialog${'$'}Builder;->show()Landroid/app/AlertDialog;
                 const/4 v0, 0x1
