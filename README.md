@@ -290,6 +290,9 @@ Twelve independent toggles let you block each analytics SDK on its own. All defa
 > [!NOTE]
 > Because each app is different, no single configuration fits all titles. Treat the patch list as a toolkit and tune it per app.
 
+- **Compatibility reports (community):** the maintainer does not test every app — search and contribute via [`COMPATIBILITY.md`](COMPATIBILITY.md) and the [Compatibility Report](.github/ISSUE_TEMPLATE/compatibility-report.yml) issue template ([label:compatibility](https://github.com/Nai64/Nai64Patches/issues?q=label%3Acompatibility) issues).
+- **Troubleshooting:** see [`TROUBLESHOOTING.md`](TROUBLESHOOTING.md) — `Got this error? Try enabling x patch.` Common install errors, save-data preservation (`Preserve App Data` / `Keep Data on Uninstall`), Unity/Il2Cpp limits.
+
 ---
 
 <a name="disclaimer"></a>
