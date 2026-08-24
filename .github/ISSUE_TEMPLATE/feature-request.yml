@@ -16,7 +16,7 @@ body:
     attributes:
       label: Use case
       description: Which app(s) would benefit and why?
-      placeholder: e.g. Offline music player com.piyush.music needs crossfade, or all dark-mode apps...
+      placeholder: e.g. YouTube needs AMOLED, or all dark-mode apps...
     validations:
       required: false
 

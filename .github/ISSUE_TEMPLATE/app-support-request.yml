@@ -15,7 +15,7 @@ body:
     attributes:
       label: Package name
       description: Play Store URL id=... or Morphe header
-      placeholder: e.g. com.piyush.music
+      placeholder: e.g. com.google.android.youtube
     validations:
       required: true
 
@@ -23,7 +23,7 @@ body:
     id: link
     attributes:
       label: Play Store / APK link
-      placeholder: https://play.google.com/store/apps/details?id=com.piyush.music
+      placeholder: https://play.google.com/store/apps/details?id=com.google.android.youtube
     validations:
       required: false
 
