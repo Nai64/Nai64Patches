@@ -1,5 +1,6 @@
 package patches.universal.ui
 
+import app.morphe.patcher.patch.booleanOption
 import app.morphe.patcher.patch.resourcePatch
 import java.util.logging.Logger
 import org.w3c.dom.Document
@@ -11,9 +12,22 @@ val amoledThemePatch = resourcePatch(
     description =
         "Forces pure-black (#FF000000) backgrounds and surfaces on every dark theme so apps that " +
             "support dark mode render true AMOLED-black instead of dark grey. Light themes are left " +
-            "untouched, so text stays readable",
+            "untouched, so text stays readable. Optional toggles can also blacken the system bars",
     default = false,
 ) {
+    val blackenStatusBar by booleanOption(
+        title = "Blacken Status Bar",
+        default = false,
+        key = "amoledBlackenStatusBar",
+        description = "Also force the status bar background to pure black on dark themes.",
+    )
+    val blackenNavigationBar by booleanOption(
+        title = "Blacken Navigation Bar",
+        default = false,
+        key = "amoledBlackenNavigationBar",
+        description = "Also force the navigation bar background to pure black on dark themes.",
+    )
+
     execute {
         val logger = Logger.getLogger(this::class.java.name)
 
@@ -26,13 +40,15 @@ val amoledThemePatch = resourcePatch(
         // Framework color attributes always exist, so overriding them never breaks compilation
         // on apps that do not use Material/AppCompat theming.
         val amoled = "#FF000000"
-        val targets = listOf(
-            "android:colorBackground",
-            "android:colorBackgroundFloating",
-            "android:windowBackground",
-            "android:colorSurface",
-            "android:colorPrimarySurface",
-        )
+        val targets = buildList {
+            add("android:colorBackground")
+            add("android:colorBackgroundFloating")
+            add("android:windowBackground")
+            add("android:colorSurface")
+            add("android:colorPrimarySurface")
+            if (blackenStatusBar == true) add("android:statusBarColor")
+            if (blackenNavigationBar == true) add("android:navigationBarColor")
+        }
 
         var updatedStyles = 0
         resDir.walkTopDown()
