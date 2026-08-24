@@ -48,6 +48,19 @@ body:
       required: true
 
   - type: textarea
+    id: log
+    attributes:
+      label: Patcher log
+      description: Paste the FULL log from Morphe after patching (Share → Copy). Contains manager/patcher version, package, patches, device — one paste replaces many fields.
+      placeholder: |
+        [INFO] Build: manager=1.27.1-dev.1 patcher=1.10.1-dev.1
+        [INFO] Device: android=16 api=36
+        [INFO] Applying patches...
+      render: shell
+    validations:
+      required: true
+
+  - type: textarea
     id: issue
     attributes:
       label: What happens?
