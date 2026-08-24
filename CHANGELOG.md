@@ -1,3 +1,15 @@
+## [1.26.2](https://github.com/Nai64/Nai64Patches/compare/1.26.0...1.26.2) (2026-08-24)
+
+### New Features
+
+* add Clearing Split Metadata patch for split APK manifest metadata
+* expand PairIP Bypass with Application, VMRunner, StartupLauncher, and LicenseClient V3 strategies
+
+### Improvements
+
+* add automatic PairIP strategy selection and grouped strategy options
+* add PairIP Application redirection and license manifest cleanup handling
+
 ## 1.0.0 (2026-08-24)
 
 ### Bug Fixes

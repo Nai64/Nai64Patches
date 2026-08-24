@@ -205,6 +205,40 @@ internal object PairipApplicationOnCreateFingerprint : Fingerprint(
     parameters = emptyList(),
 )
 
+// -- Pairip runtime interception strategies --
+
+internal object PairipApplicationClinitFingerprint : Fingerprint(
+    definingClass = "Lcom/pairip/application/Application;",
+    name = "<clinit>",
+    accessFlags = listOf(AccessFlags.STATIC),
+    returnType = "V",
+    parameters = emptyList(),
+)
+
+internal object PairipStartupLauncherLaunchFingerprint : Fingerprint(
+    definingClass = "Lcom/pairip/StartupLauncher;",
+    name = "launch",
+    returnType = "V",
+)
+
+internal object PairipStartupLauncherPairipFingerprint : Fingerprint(
+    definingClass = "Lcom/pairip/StartupLauncher;",
+    name = "pairip",
+    returnType = "V",
+)
+
+internal object PairipVMRunnerInvokeFingerprint : Fingerprint(
+    definingClass = "Lcom/pairip/VMRunner;",
+    name = "invoke",
+    returnType = "Ljava/lang/Object;",
+)
+
+internal object PairipLicenseClientV3OnActivityCreateFingerprint : Fingerprint(
+    definingClass = "Lcom/pairip/licensecheck3/LicenseClientV3;",
+    name = "onActivityCreate",
+    returnType = "V",
+)
+
 // -- Native MAX (non-Unity) fingerprints --
 
 internal object MaxRewardedAdIsReadyFingerprint : Fingerprint(
