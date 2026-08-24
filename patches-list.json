@@ -1,6 +1,6 @@
 {
   "NOTE": "Do NOT manually edit this file. This file is automatically updated when semantic release (release.yml) runs. Manually editing this file can break your releases and break third party tools that use this file.",
-  "version": "1.26.0",
+  "version": "1.26.1",
   "patches": [
     {
       "name": "Ads Free Rewards",
@@ -812,7 +812,89 @@
         "ResourcePatch"
       ],
       "compatiblePackages": null,
-      "options": []
+      "options": [
+        {
+          "key": "automaticStrategySelection",
+          "title": "Automatic strategy selection",
+          "description": "Apply every compatible PairIP strategy whose target is found. Turn this off to select only the strategy groups needed for testing.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": true,
+          "values": null
+        },
+        {
+          "key": "localInstallerChecks",
+          "title": "Local installer checks",
+          "description": "Spoof checks that verify which installer installed the app.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "signatureChecks",
+          "title": "Signature checks",
+          "description": "Bypass APK integrity and signature-match checks.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "licenseUiSuppression",
+          "title": "License error and paywall UI",
+          "description": "Suppress PairIP error dialogs, paywalls, and close-app screens.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "applicationStartupHooks",
+          "title": "Application startup hooks",
+          "description": "Bypass PairIP Application attachBaseContext and onCreate hooks. These run early and may be less compatible with some apps.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "licenseClientChecks",
+          "title": "License client checks",
+          "description": "Disable the legacy LicenseClient license-check and root-termination path.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "contentProviderChecks",
+          "title": "Content provider checks",
+          "description": "Bypass PairIP content-provider initialization and query checks.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "responseValidationChecks",
+          "title": "Response validation checks",
+          "description": "Bypass license-response validation, metadata, and signature checks across legacy validator variants.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "pairipV2Checks",
+          "title": "PairIP V2 checks",
+          "description": "Bypass PairIP V2 license flow, response signature verification, and repeated background checks.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        }
+      ]
     },
     {
       "name": "Unlock RevenueCat Entitlements",
