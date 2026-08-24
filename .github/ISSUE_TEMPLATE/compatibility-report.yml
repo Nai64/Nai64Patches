@@ -1,0 +1,95 @@
+name: Compatibility Report
+description: Share whether patches worked on a specific app or game (community-driven list)
+labels: ["compatibility"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting! The maintainer does not test every app — this database is built by the community.
+        Search existing [compatibility reports](https://github.com/Nai64/Nai64Patches/issues?q=label%3Acompatibility) before submitting.
+
+  - type: input
+    id: app
+    attributes:
+      label: App / Game name
+      placeholder: e.g. Candy Crush Saga, Spotify, Bandcamp
+    validations:
+      required: true
+
+  - type: input
+    id: package
+    attributes:
+      label: Package name
+      description: Find it in Play Store URL (id=...) or in Morphe
+      placeholder: e.g. com.king.candycrushsaga
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: App version tested
+      placeholder: e.g. 1.2.3 (from Settings > Apps)
+    validations:
+      required: true
+
+  - type: textarea
+    id: patches
+    attributes:
+      label: Patches tested
+      description: List exactly which patches you enabled (copy from Morphe or write names)
+      placeholder: |
+        e.g.
+        - No Ads (all toggles on) -> worked
+        - Ads Free Rewards (Unity Ads) -> no effect
+        - AMOLED Theme -> worked (dark mode only)
+    validations:
+      required: true
+
+  - type: dropdown
+    id: result
+    attributes:
+      label: Result
+      options:
+        - Working - all tested patches had effect, no crash
+        - Partial - some patches worked, some had no effect
+        - Not working - no effect or app crashes / won't install
+        - Needs options tweak - works only with specific patch options
+      default: 0
+    validations:
+      required: true
+
+  - type: input
+    id: android
+    attributes:
+      label: Android version
+      placeholder: e.g. 14
+    validations:
+      required: true
+
+  - type: input
+    id: device
+    attributes:
+      label: Device / ROM
+      placeholder: e.g. Pixel 7 stock, Xiaomi HyperOS
+    validations:
+      required: false
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: Notes / log
+      description: Anything useful: Unity vs native, online vs offline, did Preserve App Data help, logcat snippet
+      placeholder: Unity Il2Cpp game - No Ads had no effect (expected). Preserve App Data kept save on reinstall.
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before submitting
+      options:
+        - label: I searched existing compatibility reports for this package
+          required: true
+        - label: I tested the unpatched app first - it works without patches
+          required: true
+        - label: I tested the latest Nai64Patches release
+          required: false
