@@ -1,0 +1,63 @@
+name: App Support Request
+description: Request patches for a specific app or game
+labels: ["enhancement"]
+body:
+  - type: input
+    id: app
+    attributes:
+      label: App / Game name
+      placeholder: e.g. Oto Music, PvZ 2
+    validations:
+      required: true
+
+  - type: input
+    id: package
+    attributes:
+      label: Package name
+      description: Play Store URL id=... or Morphe header
+      placeholder: e.g. com.piyush.music
+    validations:
+      required: true
+
+  - type: input
+    id: link
+    attributes:
+      label: Play Store / APK link
+      placeholder: https://play.google.com/store/apps/details?id=com.piyush.music
+    validations:
+      required: false
+
+  - type: input
+    id: version
+    attributes:
+      label: App version
+      placeholder: e.g. 2.5
+    validations:
+      required: false
+
+  - type: textarea
+    id: need
+    attributes:
+      label: What do you need?
+      description: Which patch/feature do you want for this app?
+      placeholder: e.g. crossfade, remove ads, keep save data...
+    validations:
+      required: true
+
+  - type: textarea
+    id: tried
+    attributes:
+      label: What have you tried?
+      placeholder: Tried No Ads / Ads Free Rewards, other source's patch, etc.
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before requesting
+      options:
+        - label: I searched existing compatibility reports for this package
+          required: true
+        - label: I tested the latest Nai64Patches on this app
+          required: false

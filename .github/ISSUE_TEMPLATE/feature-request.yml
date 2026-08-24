@@ -1,0 +1,35 @@
+name: Feature Request / Suggestion
+description: Suggest a new patch, improvement or idea
+labels: ["suggestion"]
+body:
+  - type: textarea
+    id: idea
+    attributes:
+      label: Idea
+      description: What do you want? One idea per issue.
+      placeholder: e.g. AMOLED black theme for dark mode, strip unused native libs...
+    validations:
+      required: true
+
+  - type: textarea
+    id: use_case
+    attributes:
+      label: Use case
+      description: Which app(s) would benefit and why?
+      placeholder: e.g. Offline music player com.piyush.music needs crossfade, or all dark-mode apps...
+    validations:
+      required: false
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives you considered
+      placeholder: Tried other source's patch, manually editing manifest, etc.
+    validations:
+      required: false
+
+  - type: input
+    id: app
+    attributes:
+      label: App / Game if specific (optional)
+      placeholder: e.g. com.piyush.music v2.5
