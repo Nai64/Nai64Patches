@@ -1,3 +1,9 @@
+## [1.28.0](https://github.com/Zanuaimi/Nai64Patches/compare/1.27.0...1.28.0) (2026-08-24)
+
+### New Features
+
+* group standalone patches into categories ([e590177](https://github.com/Zanuaimi/Nai64Patches/commit/e590177e557e7dcae3f4f9b9ea1315e3e12d119c))
+
 ## [1.28.0](https://github.com/Zanuaimi/Nai64Patches/compare/1.27.0...1.28.0) (2026-08-25)
 
 ### New Features

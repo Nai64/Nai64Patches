@@ -37,7 +37,8 @@
             "Auto (all networks)": "auto",
             "AppLovin MAX": "max",
             "Unity Ads": "unityAds",
-            "ironSource / LevelPlay": "ironSource"
+            "ironSource / LevelPlay": "ironSource",
+            "RuStore / VK MyTarget": "rustore"
           }
         },
         {
@@ -115,6 +116,1932 @@
       ]
     },
     {
+      "name": "Manifest & Resource Tweaks",
+      "description": "Grouped settings for small standalone patches. Every option is disabled by default.",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": [
+        {
+          "key": "allowClearingAppDataEnabled",
+          "title": "Allow Clearing App Data",
+          "description": "Apply the Allow Clearing App Data patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "allowCleartextTrafficEnabled",
+          "title": "Allow Cleartext Traffic",
+          "description": "Apply the Allow Cleartext Traffic patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "classicBackGestureEnabled",
+          "title": "Classic Back Gesture",
+          "description": "Apply the Classic Back Gesture patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "clearingSplitMetadataEnabled",
+          "title": "Clearing Split Metadata",
+          "description": "Apply the Clearing Split Metadata patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "disableAppBackupEnabled",
+          "title": "Disable App Backup",
+          "description": "Apply the Disable App Backup patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "disableAppLinksVerificationEnabled",
+          "title": "Disable App Links Verification",
+          "description": "Apply the Disable App Links Verification patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "disableBatteryOptimizationPromptEnabled",
+          "title": "Disable Battery Optimization Prompt",
+          "description": "Apply the Disable Battery Optimization Prompt patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "disableBootAutoStartEnabled",
+          "title": "Disable Boot Auto-Start",
+          "description": "Apply the Disable Boot Auto-Start patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "disableHardwareAccelerationEnabled",
+          "title": "Disable Hardware Acceleration",
+          "description": "Apply the Disable Hardware Acceleration patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "disableHeapPointerTaggingEnabled",
+          "title": "Disable Heap Pointer Tagging",
+          "description": "Apply the Disable Heap Pointer Tagging patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "disablePermissionAutoRevokeEnabled",
+          "title": "Disable Permission Auto-Revoke",
+          "description": "Apply the Disable Permission Auto-Revoke patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "enableLargeHeapEnabled",
+          "title": "Enable Large Heap",
+          "description": "Apply the Enable Large Heap patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "ensureInternetPermissionEnabled",
+          "title": "Ensure Internet Permission",
+          "description": "Apply the Ensure Internet Permission patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "excludeFromRecentsEnabled",
+          "title": "Exclude From Recents",
+          "description": "Apply the Exclude From Recents patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "exportAllActivitiesEnabled",
+          "title": "Export All Activities",
+          "description": "Apply the Export All Activities patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "forceExtractNativeLibsEnabled",
+          "title": "Force Extract Native Libs",
+          "description": "Apply the Force Extract Native Libs patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "forceHardwareAccelerationEnabled",
+          "title": "Force Hardware Acceleration",
+          "description": "Apply the Force Hardware Acceleration patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "forceLeftToRightLayoutEnabled",
+          "title": "Force Left-to-Right Layout",
+          "description": "Apply the Force Left-to-Right Layout patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "forcePictureInPictureEnabled",
+          "title": "Force Picture-in-Picture",
+          "description": "Apply the Force Picture-in-Picture patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "forceResizableActivityEnabled",
+          "title": "Force Resizable Activity",
+          "description": "Apply the Force Resizable Activity patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "hideDisplayCutoutEnabled",
+          "title": "Hide Display Cutout",
+          "description": "Apply the Hide Display Cutout patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "keepDataOnUninstallEnabled",
+          "title": "Keep Data on Uninstall",
+          "description": "Apply the Keep Data on Uninstall patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "keepScreenOnEnabled",
+          "title": "Keep Screen On",
+          "description": "Apply the Keep Screen On patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "legacyExternalStorageEnabled",
+          "title": "Legacy External Storage",
+          "description": "Apply the Legacy External Storage patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "makeAppDebuggableEnabled",
+          "title": "Make App Debuggable",
+          "description": "Apply the Make App Debuggable patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "optimizeAsGameEnabled",
+          "title": "Optimize as Game",
+          "description": "Apply the Optimize as Game patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "relaxHardwareFeaturesEnabled",
+          "title": "Relax Hardware Features",
+          "description": "Apply the Relax Hardware Features patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "relaxRequiredLibrariesEnabled",
+          "title": "Relax Required Libraries",
+          "description": "Apply the Relax Required Libraries patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "relaxSharedLibrariesEnabled",
+          "title": "Relax Shared Libraries",
+          "description": "Apply the Relax Shared Libraries patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "removeAdServicesEntriesEnabled",
+          "title": "Remove Ad Services Entries",
+          "description": "Apply the Remove Ad Services Entries patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "removeAppIconEnabled",
+          "title": "Remove App Icon",
+          "description": "Apply the Remove App Icon patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "removeBackupRestrictionsEnabled",
+          "title": "Remove Backup Restrictions",
+          "description": "Apply the Remove Backup Restrictions patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "removeCompatibleScreensEnabled",
+          "title": "Remove Compatible Screens",
+          "description": "Apply the Remove Compatible Screens patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "removeNetworkSecurityConfigEnabled",
+          "title": "Remove Network Security Config",
+          "description": "Apply the Remove Network Security Config patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "setProfileableEnabled",
+          "title": "Set Profileable",
+          "description": "Apply the Set Profileable patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "stripTranslationsEnabled",
+          "title": "Strip Translations",
+          "description": "Apply the Strip Translations patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "supportAllScreensEnabled",
+          "title": "Support All Screens",
+          "description": "Apply the Support All Screens patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "trustUserCasConfigEnabled",
+          "title": "Trust User CAs (Config)",
+          "description": "Apply the Trust User CAs (Config) patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "unlockMaxAspectRatioEnabled",
+          "title": "Unlock Max Aspect Ratio",
+          "description": "Apply the Unlock Max Aspect Ratio patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "unlockRotationEnabled",
+          "title": "Unlock Rotation",
+          "description": "Apply the Unlock Rotation patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "unmarkTestOnlyEnabled",
+          "title": "Unmark Test Only",
+          "description": "Apply the Unmark Test Only patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "vmSafeModeEnabled",
+          "title": "VM Safe Mode",
+          "description": "Apply the VM Safe Mode patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "disableFacebookSdkAutoInitEnabled",
+          "title": "Disable Facebook SDK Auto-Init",
+          "description": "Apply the Disable Facebook SDK Auto-Init patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "disableFirebaseAutoInitEnabled",
+          "title": "Disable Firebase Auto-Init",
+          "description": "Apply the Disable Firebase Auto-Init patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "immersiveFullscreenEnabled",
+          "title": "Immersive Fullscreen",
+          "description": "Apply the Immersive Fullscreen patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "transparentSystemBarsEnabled",
+          "title": "Transparent System Bars",
+          "description": "Apply the Transparent System Bars patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        }
+      ]
+    },
+    {
+      "name": "System & Device Tweaks",
+      "description": "Grouped settings for small standalone patches. Every option is disabled by default.",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": [
+        {
+          "key": "allowBackgroundActivityEnabled",
+          "title": "Allow Background Activity",
+          "description": "Apply the Allow Background Activity patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "allowMixedContentEnabled",
+          "title": "Allow Mixed Content",
+          "description": "Apply the Allow Mixed Content patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "allowTextSelectionEnabled",
+          "title": "Allow Text Selection",
+          "description": "Apply the Allow Text Selection patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "allowWebviewAutoplayEnabled",
+          "title": "Allow WebView Autoplay",
+          "description": "Apply the Allow WebView Autoplay patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "allowWebviewFileAccessEnabled",
+          "title": "Allow WebView File Access",
+          "description": "Apply the Allow WebView File Access patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "alwaysAllowBiometricsEnabled",
+          "title": "Always Allow Biometrics",
+          "description": "Apply the Always Allow Biometrics patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "bypassDemoUserEnabled",
+          "title": "Bypass Demo User",
+          "description": "Apply the Bypass Demo User patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "bypassDndPolicyAccessEnabled",
+          "title": "Bypass DND Policy Access",
+          "description": "Apply the Bypass DND Policy Access patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "bypassGuestUserEnabled",
+          "title": "Bypass Guest User",
+          "description": "Apply the Bypass Guest User patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "bypassHostnameVerificationEnabled",
+          "title": "Bypass Hostname Verification",
+          "description": "Apply the Bypass Hostname Verification patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "bypassInstantAppEnabled",
+          "title": "Bypass Instant App",
+          "description": "Apply the Bypass Instant App patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "bypassKeyguardSecureEnabled",
+          "title": "Bypass Keyguard Secure",
+          "description": "Apply the Bypass Keyguard Secure patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "bypassLinkedUserEnabled",
+          "title": "Bypass Linked User",
+          "description": "Apply the Bypass Linked User patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "bypassLockTaskModeEnabled",
+          "title": "Bypass Lock Task Mode",
+          "description": "Apply the Bypass Lock Task Mode patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "bypassLowEndDeviceEnabled",
+          "title": "Bypass Low-End Device",
+          "description": "Apply the Bypass Low-End Device patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "bypassManagedProfileEnabled",
+          "title": "Bypass Managed Profile",
+          "description": "Apply the Bypass Managed Profile patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "bypassOkhttpPinningEnabled",
+          "title": "Bypass OkHttp Pinning",
+          "description": "Apply the Bypass OkHttp Pinning patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "bypassOverlayDetectionEnabled",
+          "title": "Bypass Overlay Detection",
+          "description": "Apply the Bypass Overlay Detection patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "bypassPackageSuspendedEnabled",
+          "title": "Bypass Package Suspended",
+          "description": "Apply the Bypass Package Suspended patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "bypassPictureInPictureModeEnabled",
+          "title": "Bypass Picture-in-Picture Mode",
+          "description": "Apply the Bypass Picture-in-Picture Mode patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "bypassSafeModeEnabled",
+          "title": "Bypass Safe Mode",
+          "description": "Apply the Bypass Safe Mode patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "bypassSystemUserEnabled",
+          "title": "Bypass System User",
+          "description": "Apply the Bypass System User patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "bypassTestEnvironmentEnabled",
+          "title": "Bypass Test Environment",
+          "description": "Apply the Bypass Test Environment patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "bypassUserRestrictedEnabled",
+          "title": "Bypass User Restricted",
+          "description": "Apply the Bypass User Restricted patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "bypassVpnDetectionEnabled",
+          "title": "Bypass VPN Detection",
+          "description": "Apply the Bypass VPN Detection patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "bypassWebviewSafeBrowsingEnabled",
+          "title": "Bypass WebView Safe Browsing",
+          "description": "Apply the Bypass WebView Safe Browsing patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "bypassWebviewSslErrorsEnabled",
+          "title": "Bypass WebView SSL Errors",
+          "description": "Apply the Bypass WebView SSL Errors patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "disableActivityTransitionsEnabled",
+          "title": "Disable Activity Transitions",
+          "description": "Apply the Disable Activity Transitions patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "disableAnalyticsEventsEnabled",
+          "title": "Disable Analytics Events",
+          "description": "Apply the Disable Analytics Events patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "disableAnimationsEnabled",
+          "title": "Disable Animations",
+          "description": "Apply the Disable Animations patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "disableBackgroundSyncEnabled",
+          "title": "Disable Background Sync",
+          "description": "Apply the Disable Background Sync patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "disableBluetoothA2dpEnabled",
+          "title": "Disable Bluetooth A2DP",
+          "description": "Apply the Disable Bluetooth A2DP patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "disableBluetoothDiscoveringEnabled",
+          "title": "Disable Bluetooth Discovering",
+          "description": "Apply the Disable Bluetooth Discovering patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "disableBluetoothScoEnabled",
+          "title": "Disable Bluetooth SCO",
+          "description": "Apply the Disable Bluetooth SCO patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "disableCameraShutterSoundEnabled",
+          "title": "Disable Camera Shutter Sound",
+          "description": "Apply the Disable Camera Shutter Sound patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "disableClipboardWriteEnabled",
+          "title": "Disable Clipboard Write",
+          "description": "Apply the Disable Clipboard Write patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "disableFixedVolumeEnabled",
+          "title": "Disable Fixed Volume",
+          "description": "Apply the Disable Fixed Volume patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "disableHapticFeedbackEnabled",
+          "title": "Disable Haptic Feedback",
+          "description": "Apply the Disable Haptic Feedback patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "disableHeadsUpNotificationsEnabled",
+          "title": "Disable Heads-up Notifications",
+          "description": "Apply the Disable Heads-up Notifications patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "disableHighTextContrastEnabled",
+          "title": "Disable High Text Contrast",
+          "description": "Apply the Disable High Text Contrast patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "disableKeyboardSoundEnabled",
+          "title": "Disable Keyboard Sound",
+          "description": "Apply the Disable Keyboard Sound patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "disableLocationRequestsEnabled",
+          "title": "Disable Location Requests",
+          "description": "Apply the Disable Location Requests patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "disableMusicDetectionEnabled",
+          "title": "Disable Music Detection",
+          "description": "Apply the Disable Music Detection patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "disableNotificationSoundEnabled",
+          "title": "Disable Notification Sound",
+          "description": "Apply the Disable Notification Sound patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "disableNotificationVibrationEnabled",
+          "title": "Disable Notification Vibration",
+          "description": "Apply the Disable Notification Vibration patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "disableNotificationsEnabled",
+          "title": "Disable Notifications",
+          "description": "Apply the Disable Notifications patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "disableOrientationLockEnabled",
+          "title": "Disable Orientation Lock",
+          "description": "Apply the Disable Orientation Lock patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "disableOverscrollEffectEnabled",
+          "title": "Disable Overscroll Effect",
+          "description": "Apply the Disable Overscroll Effect patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "disableQuietModeEnabled",
+          "title": "Disable Quiet Mode",
+          "description": "Apply the Disable Quiet Mode patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "disableRttEnabled",
+          "title": "Disable RTT",
+          "description": "Apply the Disable RTT patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "disableScrollbarsEnabled",
+          "title": "Disable Scrollbars",
+          "description": "Apply the Disable Scrollbars patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "disableSecureSurfacesEnabled",
+          "title": "Disable Secure Surfaces",
+          "description": "Apply the Disable Secure Surfaces patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "disableSensorsEnabled",
+          "title": "Disable Sensors",
+          "description": "Apply the Disable Sensors patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "disableSnackbarsEnabled",
+          "title": "Disable Snackbars",
+          "description": "Apply the Disable Snackbars patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "disableSoundEffectsEnabled",
+          "title": "Disable Sound Effects",
+          "description": "Apply the Disable Sound Effects patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "disableStrictmodeEnabled",
+          "title": "Disable StrictMode",
+          "description": "Apply the Disable StrictMode patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "disableToastsEnabled",
+          "title": "Disable Toasts",
+          "description": "Apply the Disable Toasts patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "disableVibrationEnabled",
+          "title": "Disable Vibration",
+          "description": "Apply the Disable Vibration patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "disableWakeLocksEnabled",
+          "title": "Disable Wake Locks",
+          "description": "Apply the Disable Wake Locks patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "disableWebviewSafeBrowsingEnabled",
+          "title": "Disable WebView Safe Browsing",
+          "description": "Apply the Disable WebView Safe Browsing patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "emptyClipboardReportEnabled",
+          "title": "Empty Clipboard Report",
+          "description": "Apply the Empty Clipboard Report patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "enableWebviewAppCacheEnabled",
+          "title": "Enable WebView App Cache",
+          "description": "Apply the Enable WebView App Cache patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "enableWebviewCacheEnabled",
+          "title": "Enable WebView Cache",
+          "description": "Apply the Enable WebView Cache patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "enableWebviewContentAccessEnabled",
+          "title": "Enable WebView Content Access",
+          "description": "Apply the Enable WebView Content Access patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "enableWebviewDebuggingEnabled",
+          "title": "Enable WebView Debugging",
+          "description": "Apply the Enable WebView Debugging patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "enableWebviewDomStorageEnabled",
+          "title": "Enable WebView DOM Storage",
+          "description": "Apply the Enable WebView DOM Storage patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "enableWebviewGeolocationEnabled",
+          "title": "Enable WebView Geolocation",
+          "description": "Apply the Enable WebView Geolocation patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "enableWebviewImageLoadingEnabled",
+          "title": "Enable WebView Image Loading",
+          "description": "Apply the Enable WebView Image Loading patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "enableWebviewInitialFocusEnabled",
+          "title": "Enable WebView Initial Focus",
+          "description": "Apply the Enable WebView Initial Focus patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "enableWebviewJavascriptEnabled",
+          "title": "Enable WebView JavaScript",
+          "description": "Apply the Enable WebView JavaScript patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "enableWebviewOffscreenPreRasterEnabled",
+          "title": "Enable WebView Offscreen Pre-Raster",
+          "description": "Apply the Enable WebView Offscreen Pre-Raster patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "enableWebviewPopupsEnabled",
+          "title": "Enable WebView Popups",
+          "description": "Apply the Enable WebView Popups patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "enableWebviewSaveFormDataEnabled",
+          "title": "Enable WebView Save Form Data",
+          "description": "Apply the Enable WebView Save Form Data patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "enableWebviewSavePasswordEnabled",
+          "title": "Enable WebView Save Password",
+          "description": "Apply the Enable WebView Save Password patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "enableWebviewWideViewportEnabled",
+          "title": "Enable WebView Wide Viewport",
+          "description": "Apply the Enable WebView Wide Viewport patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "enableWebviewZoomEnabled",
+          "title": "Enable WebView Zoom",
+          "description": "Apply the Enable WebView Zoom patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "enableWebviewZoomSupportEnabled",
+          "title": "Enable WebView Zoom Support",
+          "description": "Apply the Enable WebView Zoom Support patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "fakeBatteryWhitelistEnabled",
+          "title": "Fake Battery Whitelist",
+          "description": "Apply the Fake Battery Whitelist patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "fakeBluetoothEnabledEnabled",
+          "title": "Fake Bluetooth Enabled",
+          "description": "Apply the Fake Bluetooth Enabled patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "fakeFingerprintHardwareEnabled",
+          "title": "Fake Fingerprint Hardware",
+          "description": "Apply the Fake Fingerprint Hardware patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "fakeNfcEnabledEnabled",
+          "title": "Fake NFC Enabled",
+          "description": "Apply the Fake NFC Enabled patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "fakeOnlineStateEnabled",
+          "title": "Fake Online State",
+          "description": "Apply the Fake Online State patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "force5ghzBandSupportedEnabled",
+          "title": "Force 5GHz Band Supported",
+          "description": "Apply the Force 5GHz Band Supported patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "forceAndroidBeamEnabled",
+          "title": "Force Android Beam",
+          "description": "Apply the Force Android Beam patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "forceAppActiveEnabled",
+          "title": "Force App Active",
+          "description": "Apply the Force App Active patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "forceBatteryPresentEnabled",
+          "title": "Force Battery Present",
+          "description": "Apply the Force Battery Present patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "forceCanInstallPackagesEnabled",
+          "title": "Force Can Install Packages",
+          "description": "Apply the Force Can Install Packages patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "forceDataCapableEnabled",
+          "title": "Force Data Capable",
+          "description": "Apply the Force Data Capable patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "forceEmulatedStorageEnabled",
+          "title": "Force Emulated Storage",
+          "description": "Apply the Force Emulated Storage patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "forceHapticsAvailableEnabled",
+          "title": "Force Haptics Available",
+          "description": "Apply the Force Haptics Available patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "forceIdleCallStateEnabled",
+          "title": "Force Idle Call State",
+          "description": "Apply the Force Idle Call State patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "forceMaxBrightnessEnabled",
+          "title": "Force Max Brightness",
+          "description": "Apply the Force Max Brightness patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "forceMicrophoneUnmutedEnabled",
+          "title": "Force Microphone Unmuted",
+          "description": "Apply the Force Microphone Unmuted patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "forceMultiSimEnabled",
+          "title": "Force Multi-SIM",
+          "description": "Apply the Force Multi-SIM patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "forceNormalAudioModeEnabled",
+          "title": "Force Normal Audio Mode",
+          "description": "Apply the Force Normal Audio Mode patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "forceNotificationsEnabledEnabled",
+          "title": "Force Notifications Enabled",
+          "description": "Apply the Force Notifications Enabled patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "forceScreenInteractiveEnabled",
+          "title": "Force Screen Interactive",
+          "description": "Apply the Force Screen Interactive patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "forceSimReadyEnabled",
+          "title": "Force SIM Ready",
+          "description": "Apply the Force SIM Ready patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "forceSinglePhoneEnabled",
+          "title": "Force Single Phone",
+          "description": "Apply the Force Single Phone patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "forceSingleSimEnabled",
+          "title": "Force Single SIM",
+          "description": "Apply the Force Single SIM patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "forceSmsCapableEnabled",
+          "title": "Force SMS Capable",
+          "description": "Apply the Force SMS Capable patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "forceSpeakerphoneOffEnabled",
+          "title": "Force Speakerphone Off",
+          "description": "Apply the Force Speakerphone Off patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "forceStorageNonRemovableEnabled",
+          "title": "Force Storage Non-Removable",
+          "description": "Apply the Force Storage Non-Removable patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "forceUserUnlockedEnabled",
+          "title": "Force User Unlocked",
+          "description": "Apply the Force User Unlocked patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "forceVoiceCapableEnabled",
+          "title": "Force Voice Capable",
+          "description": "Apply the Force Voice Capable patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "forceWifiP2pSupportedEnabled",
+          "title": "Force WiFi P2P Supported",
+          "description": "Apply the Force WiFi P2P Supported patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "forceWifiScanAlwaysAvailableEnabled",
+          "title": "Force WiFi Scan Always Available",
+          "description": "Apply the Force WiFi Scan Always Available patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "forceWorldPhoneEnabled",
+          "title": "Force World Phone",
+          "description": "Apply the Force World Phone patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "grantAllFilesAccessEnabled",
+          "title": "Grant All-Files Access",
+          "description": "Apply the Grant All-Files Access patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "grantWebviewGeolocationEnabled",
+          "title": "Grant WebView Geolocation",
+          "description": "Apply the Grant WebView Geolocation patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "hideAccessibilityUsageEnabled",
+          "title": "Hide Accessibility Usage",
+          "description": "Apply the Hide Accessibility Usage patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "hideAccountsEnabled",
+          "title": "Hide Accounts",
+          "description": "Apply the Hide Accounts patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "hideClipboardEnabled",
+          "title": "Hide Clipboard",
+          "description": "Apply the Hide Clipboard patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "hideDebuggerConnectionEnabled",
+          "title": "Hide Debugger Connection",
+          "description": "Apply the Hide Debugger Connection patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "hideDeviceAdminsEnabled",
+          "title": "Hide Device Admins",
+          "description": "Apply the Hide Device Admins patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "hideInstalledAppsEnabled",
+          "title": "Hide Installed Apps",
+          "description": "Apply the Hide Installed Apps patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "hideMockLocationEnabled",
+          "title": "Hide Mock Location",
+          "description": "Apply the Hide Mock Location patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "hideRoamingStatusEnabled",
+          "title": "Hide Roaming Status",
+          "description": "Apply the Hide Roaming Status patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "ignoreGpsDisabledEnabled",
+          "title": "Ignore GPS Disabled",
+          "description": "Apply the Ignore GPS Disabled patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "ignoreLocationServicesOffEnabled",
+          "title": "Ignore Location Services Off",
+          "description": "Apply the Ignore Location Services Off patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "ignoreLowRamDeviceEnabled",
+          "title": "Ignore Low RAM Device",
+          "description": "Apply the Ignore Low RAM Device patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "ignorePowerSaveModeEnabled",
+          "title": "Ignore Power Save Mode",
+          "description": "Apply the Ignore Power Save Mode patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "ignoreScreenLockEnabled",
+          "title": "Ignore Screen Lock",
+          "description": "Apply the Ignore Screen Lock patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "ignoreTouchExplorationEnabled",
+          "title": "Ignore Touch Exploration",
+          "description": "Apply the Ignore Touch Exploration patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "reportLegacyStorageEnabled",
+          "title": "Report Legacy Storage",
+          "description": "Apply the Report Legacy Storage patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "spoofAirplaneModeEnabled",
+          "title": "Spoof Airplane Mode",
+          "description": "Apply the Spoof Airplane Mode patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "spoofBatteryChargingStateEnabled",
+          "title": "Spoof Battery Charging State",
+          "description": "Apply the Spoof Battery Charging State patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "spoofBatteryLevelEnabled",
+          "title": "Spoof Battery Level",
+          "description": "Apply the Spoof Battery Level patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "spoofBluetoothEnabledEnabled",
+          "title": "Spoof Bluetooth Enabled",
+          "description": "Apply the Spoof Bluetooth Enabled patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "spoofBluetoothNameEnabled",
+          "title": "Spoof Bluetooth Name",
+          "description": "Apply the Spoof Bluetooth Name patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "spoofBssidEnabled",
+          "title": "Spoof BSSID",
+          "description": "Apply the Spoof BSSID patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "spoofBuildSerialEnabled",
+          "title": "Spoof Build Serial",
+          "description": "Apply the Spoof Build Serial patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "spoofDataStateEnabled",
+          "title": "Spoof Data State",
+          "description": "Apply the Spoof Data State patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "spoofDeveloperOptionsEnabled",
+          "title": "Spoof Developer Options",
+          "description": "Apply the Spoof Developer Options patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "spoofDeviceSoftwareVersionEnabled",
+          "title": "Spoof Device Software Version",
+          "description": "Apply the Spoof Device Software Version patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "spoofGroupIdLevel1Enabled",
+          "title": "Spoof Group ID Level 1",
+          "description": "Apply the Spoof Group ID Level 1 patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "spoofImeiEnabled",
+          "title": "Spoof IMEI",
+          "description": "Apply the Spoof IMEI patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "spoofIsimImpiEnabled",
+          "title": "Spoof ISIM IMPI",
+          "description": "Apply the Spoof ISIM IMPI patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "spoofLastKnownLocationEnabled",
+          "title": "Spoof Last Known Location",
+          "description": "Apply the Spoof Last Known Location patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "spoofLocationProviderEnabled",
+          "title": "Spoof Location Provider",
+          "description": "Apply the Spoof Location Provider patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "spoofMacAddressEnabled",
+          "title": "Spoof MAC Address",
+          "description": "Apply the Spoof MAC Address patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "spoofNaiEnabled",
+          "title": "Spoof NAI",
+          "description": "Apply the Spoof NAI patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "spoofNetworkTypeLteEnabled",
+          "title": "Spoof Network Type LTE",
+          "description": "Apply the Spoof Network Type LTE patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "spoofPhoneNumberEnabled",
+          "title": "Spoof Phone Number",
+          "description": "Apply the Spoof Phone Number patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "spoofRingerModeEnabled",
+          "title": "Spoof Ringer Mode",
+          "description": "Apply the Spoof Ringer Mode patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "spoofSensorListEnabled",
+          "title": "Spoof Sensor List",
+          "description": "Apply the Spoof Sensor List patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "spoofSignatureMatchEnabled",
+          "title": "Spoof Signature Match",
+          "description": "Apply the Spoof Signature Match patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "spoofSimSerialNumberEnabled",
+          "title": "Spoof SIM Serial Number",
+          "description": "Apply the Spoof SIM Serial Number patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "spoofStorageStateEnabled",
+          "title": "Spoof Storage State",
+          "description": "Apply the Spoof Storage State patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "spoofSubscriberIdEnabled",
+          "title": "Spoof Subscriber ID",
+          "description": "Apply the Spoof Subscriber ID patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "spoofTimeZoneEnabled",
+          "title": "Spoof Time Zone",
+          "description": "Apply the Spoof Time Zone patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "spoofVoiceMailEnabled",
+          "title": "Spoof Voice Mail",
+          "description": "Apply the Spoof Voice Mail patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "spoofWebviewUserAgentEnabled",
+          "title": "Spoof WebView User Agent",
+          "description": "Apply the Spoof WebView User Agent patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "spoofWifiEnabledEnabled",
+          "title": "Spoof WiFi Enabled",
+          "description": "Apply the Spoof WiFi Enabled patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "spoofWifiRssiEnabled",
+          "title": "Spoof WiFi RSSI",
+          "description": "Apply the Spoof WiFi RSSI patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "spoofWifiSsidEnabled",
+          "title": "Spoof WiFi SSID",
+          "description": "Apply the Spoof WiFi SSID patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "spoofWiredHeadsetEnabled",
+          "title": "Spoof Wired Headset",
+          "description": "Apply the Spoof Wired Headset patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "treatScreenAsOnEnabled",
+          "title": "Treat Screen as On",
+          "description": "Apply the Treat Screen as On patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "trustUserCertificatesEnabled",
+          "title": "Trust User Certificates",
+          "description": "Apply the Trust User Certificates patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "treatNetworkAsUnmeteredEnabled",
+          "title": "Treat Network as Unmetered",
+          "description": "Apply the Treat Network as Unmetered patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "onmessagereceivedEnabled",
+          "title": "onMessageReceived",
+          "description": "Apply the onMessageReceived patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "blockScreenshotDetectionEnabled",
+          "title": "Block Screenshot Detection",
+          "description": "Apply the Block Screenshot Detection patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "getidEnabled",
+          "title": "getId",
+          "description": "Apply the getId patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "requestreviewflowEnabled",
+          "title": "requestReviewFlow",
+          "description": "Apply the requestReviewFlow patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "oncreateEnabled",
+          "title": "onCreate",
+          "description": "Apply the onCreate patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "allowScreenshotsEnabled",
+          "title": "Allow Screenshots",
+          "description": "Apply the Allow Screenshots patch.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        }
+      ]
+    },
+    {
       "name": "Skip Consent Popup",
       "description": "Skip the Google consent (GDPR) popup",
       "default": false,
@@ -133,6 +2060,14 @@
     {
       "name": "Spoof Play Store Install Source",
       "description": "Make the app believe it was installed from the Play Store",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": []
+    },
+    {
+      "name": "Spoof Amazon Appstore Availability",
+      "description": "Makes app-specific Amazon Appstore availability checks succeed without changing the system package manager.",
       "default": false,
       "dependencies": [],
       "compatiblePackages": null,
@@ -183,14 +2118,6 @@
       ]
     },
     {
-      "name": "Unlock Rotation",
-      "description": "Remove screenOrientation locks so the app rotates freely",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
       "name": "Force Landscape / Portrait",
       "description": "Force the app to a fixed screen orientation",
       "default": false,
@@ -214,14 +2141,6 @@
           }
         }
       ]
-    },
-    {
-      "name": "Make App Debuggable",
-      "description": "Sets android:debuggable so debuggers and profiling tools can attach",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
     },
     {
       "name": "Change Version Code",
@@ -278,94 +2197,6 @@
       ]
     },
     {
-      "name": "Remove App Icon",
-      "description": "Replaces the launcher icon with a transparent drawable",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Allow Cleartext Traffic",
-      "description": "Sets android:usesCleartextTraffic and drops any network security config so plain HTTP requests are allowed (useful for debugging through local proxies)",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Keep Screen On",
-      "description": "Adds android:keepScreenOn to every theme so the display stays on while any activity of the app is visible",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Remove Backup Restrictions",
-      "description": "Sets android:allowBackup and removes data extraction / full backup rules that exclude app data from device transfers and cloud backups",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Export All Activities",
-      "description": "Marks every activity as android:exported so other apps and ADB can launch them",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Disable Battery Optimization Prompt",
-      "description": "Removes the permission and intent filters apps use to ask for battery optimization exemptions, so the 'Ignore battery optimizations?' dialog never appears",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Remove Network Security Config",
-      "description": "Removes the app's network security config so certificate pinning and cleartext restrictions fall back to platform defaults (useful for HTTPS inspection)",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Enable Large Heap",
-      "description": "Sets android:largeHeap so the app gets a bigger Java heap on devices that allow it, reducing OutOfMemoryError crashes in memory-hungry games",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Force Hardware Acceleration",
-      "description": "Sets android:hardwareAccelerated so every activity renders with GPU acceleration, even when the app disables it globally",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Legacy External Storage",
-      "description": "Sets android:requestLegacyExternalStorage so the app keeps using the classic shared-storage model instead of scoped storage (Android 10; ignored on 11+)",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Keep Data on Uninstall",
-      "description": "Sets android:hasFragileUserData so Android offers to keep the app's data when uninstalling (the confirmation dialog appears on Android 10+)",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
       "name": "Set Install Location",
       "description": "Overrides the android:installLocation declared in the manifest",
       "default": false,
@@ -388,80 +2219,8 @@
       ]
     },
     {
-      "name": "Force Resizable Activity",
-      "description": "Sets android:resizeableActivity and drops the required touchscreen feature so the app can run in split-screen, free-form windows, DeX, and Chromebooks",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Immersive Fullscreen",
-      "description": "Adds android:windowFullscreen to every theme so activities render edge-to-edge without the status bar",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Strip Translations",
-      "description": "Deletes all translated resources so only the default language remains, reducing APK size. Android falls back to the default strings automatically.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Disable Vibration",
-      "description": "Replaces framework Vibrator.vibrate calls with no-ops so apps cannot make the device buzz",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
       "name": "Disable Crash Reporters",
       "description": "No-ops the static init/start/register methods of bundled crash-reporting SDKs (Crashlytics, Fabric, Sentry, Bugsnag, ACRA, HockeyApp, AppCenter, Instabug, Countly)",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Disable App Links Verification",
-      "description": "Removes android:autoVerify from intent filters so Android stops prompting to verify the app's web domains and never converts links into app opens",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Support All Screens",
-      "description": "Removes compatible-screens restrictions and marks every screen size supported so the app installs on devices it would otherwise reject",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Remove Ad Services Entries",
-      "description": "Strips Privacy Sandbox (AdServices) permissions, the ad ID permission and their config metadata from the manifest",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Disable Permission Auto-Revoke",
-      "description": "Sets android:autoRevokePermissions to discouraged so Android stops resetting unused permissions of apps you rarely open",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Ensure Internet Permission",
-      "description": "Adds the INTERNET permission if it is missing. Useful after aggressive permission stripping or for offline builds that still need web endpoints",
       "default": false,
       "dependencies": [],
       "compatiblePackages": null,
@@ -487,46 +2246,6 @@
           }
         }
       ]
-    },
-    {
-      "name": "Fake Online State",
-      "description": "Makes connectivity checks report an active connection: WifiManager.isWifiEnabled, NetworkInfo.isConnected/isAvailable/isConnectedOrConnecting all return true",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Set Profileable",
-      "description": "Adds <profileable android:shell=\"true\"/> so profilers (Android Studio, simpleperf, Perfetto) can attach to release builds for performance analysis",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Force Extract Native Libs",
-      "description": "Sets android:extractNativeLibs so native libraries are extracted at install time. Some mod loaders, hooks and older tools only work with extracted libs",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Unlock Max Aspect Ratio",
-      "description": "Removes maxAspectRatio limits from the application, activities and metadata so the app fills tall edge-to-edge screens instead of letterboxing",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Bypass VPN Detection",
-      "description": "Makes NetworkCapabilities report no VPN: hasTransport always returns false and hasCapability always returns true, so apps cannot block or alter behavior on VPN",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
     },
     {
       "name": "Spoof Device Model",
@@ -565,22 +2284,6 @@
       ]
     },
     {
-      "name": "Bypass OkHttp Pinning",
-      "description": "No-ops the certificate verification entry points of bundled OkHttp clients so certificate pinning never rejects connections",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Trust User Certificates",
-      "description": "No-ops the check methods of app-bundled X509TrustManager implementations so custom certificate validation (including pinning reimplemented by hand) accepts anything",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
       "name": "Spoof Build Fingerprint",
       "description": "Replaces every read of Build.FINGERPRINT with a custom value, useful for integrity and device checks. Leave empty to keep the original fingerprint",
       "default": false,
@@ -597,30 +2300,6 @@
           "values": null
         }
       ]
-    },
-    {
-      "name": "Optimize as Game",
-      "description": "Sets android:appCategory to game so Android applies game mode, battery and screenshot optimizations tuned for games",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Relax Shared Libraries",
-      "description": "Marks every <uses-library> entry as optional so missing shared libraries no longer block the app from installing on devices that lack them",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Transparent System Bars",
-      "description": "Forces the status bar and navigation bar to render transparent in every theme so app content draws edge-to-edge behind them",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
     },
     {
       "name": "Custom Startup Toast",
@@ -691,94 +2370,6 @@
           "values": null
         }
       ]
-    },
-    {
-      "name": "Enable WebView Debugging",
-      "description": "Turns on WebView remote debugging: existing setWebContentsDebuggingEnabled calls are forced to true and it is actively enabled at startup, so WebViews can be inspected via chrome://inspect",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Fake Battery Whitelist",
-      "description": "Makes PowerManager.isIgnoringBatteryOptimizations always return true so apps stop nagging about battery optimization exemptions",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Spoof Signature Match",
-      "description": "Makes PackageManager.checkSignatures always return SIGNATURE_MATCH so apps that verify their own or another package's signature accept any build",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Treat Network as Unmetered",
-      "description": "Makes ConnectivityManager.isActiveNetworkMetered always return false so apps lift download restrictions and quality caps on mobile data",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Grant All-Files Access",
-      "description": "Makes Environment.isExternalStorageManager always return true so apps accept the storage permission state without the special Android 11+ prompt",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Hide Roaming Status",
-      "description": "Makes TelephonyManager.isNetworkRoaming always return false so apps that block or warn while roaming behave as if the device is on its home network",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Ignore Power Save Mode",
-      "description": "Makes PowerManager.isPowerSaveMode and isDeviceIdleMode always return false so apps do not throttle features or downloads while battery saver or Doze is active",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Force Notifications Enabled",
-      "description": "Makes NotificationManager.areNotificationsEnabled always return true so apps that refuse to run when notifications are blocked keep working",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Ignore Screen Lock",
-      "description": "Makes KeyguardManager lock-state checks report an unlocked device so apps that gate features behind a screen lock behave as if none is set",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Ignore GPS Disabled",
-      "description": "Makes LocationManager.isProviderEnabled always return true so apps that refuse to run without location services keep working",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Hide Mock Location",
-      "description": "Makes Location.isMock and Location.isFromMockProvider always return false so apps cannot detect spoofed GPS apps",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
     },
     {
       "name": "Spoof Play Integrity",
@@ -979,14 +2570,6 @@
       ]
     },
     {
-      "name": "Allow Screenshots",
-      "description": "Remove the screenshot-blocking window flag",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
       "name": "Skip Splash Screen (Experimental)",
       "description": "Skip or shorten splash screen delays",
       "default": false,
@@ -1128,88 +2711,8 @@
       ]
     },
     {
-      "name": "Allow Background Activity",
-      "description": "Makes ActivityManager.isBackgroundRestricted always return false so apps ignore background activity restrictions imposed by the system or user",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Allow Clearing App Data",
-      "description": "Sets android:allowClearUserData so the system's Clear Data button stays available even for apps that try to disable it",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Allow Mixed Content",
-      "description": "Forces WebSettings.setMixedContentMode(MIXED_CONTENT_ALWAYS_ALLOW) so WebViews load HTTP resources on HTTPS pages.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Allow Text Selection",
-      "description": "Forces TextView text to be selectable and long-clickable by flipping setTextIsSelectable(false) and setLongClickable(false) to true, so copy-protected text becomes selectable and copyable.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Allow WebView Autoplay",
-      "description": "Forces WebSettings.setMediaPlaybackRequiresUserGesture(false) so media in WebViews can autoplay without a tap.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Allow WebView File Access",
-      "description": "Forces WebSettings file-access flags on so WebViews can load local files and content URLs.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Always Allow Biometrics",
-      "description": "Makes BiometricManager.canAuthenticate always return BIOMETRIC_SUCCESS so apps do not block biometric features on unsupported or unenrolled devices",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
       "name": "Block Push Ads",
       "description": "Block push notification ads (Firebase Cloud Messaging). Also blocks legitimate notifications.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Block Screenshot Detection",
-      "description": "Adds FLAG_SECURE to every activity window so the system blocks screenshots, screen recording and recents previews of the app",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Bypass DND Policy Access",
-      "description": "Forces NotificationManager.isNotificationPolicyAccessGranted() to return true so automation and ringer-control apps that require Do Not Disturb access work without granting it.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Bypass Demo User",
-      "description": "Makes UserManager.isDemoUser() report false so apps that gate functionality in retail/demo mode run normally.",
       "default": false,
       "dependencies": [],
       "compatiblePackages": null,
@@ -1234,160 +2737,26 @@
             "Samsung Galaxy S23": "samsungS23",
             "Xiaomi 13": "xiaomi13"
           }
+        },
+        {
+          "key": "hideEmulatorRadio",
+          "title": "Hide Emulator Radio",
+          "description": "Make TelephonyManager report a normal GSM radio type.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "spoofBuildExtras",
+          "title": "Spoof Build Extras",
+          "description": "Spoof additional Build and Build.VERSION fields used by emulator checks.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
         }
       ]
-    },
-    {
-      "name": "Bypass Guest User",
-      "description": "Makes UserManager.isGuestUser() report false so apps that limit guest accounts behave as on a primary account.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Bypass Hostname Verification",
-      "description": "Makes any HostnameVerifier.verify(String, SSLSession) always return true, accepting any certificate hostname without errors.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Bypass Instant App",
-      "description": "Makes PackageManager.isInstantApp() report false so apps that restrict features or purchases on instant-app installs behave as a full install.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Bypass Keyguard Secure",
-      "description": "Makes KeyguardManager.isKeyguardSecure() report false so apps that require a secure lock screen run without one.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Bypass Linked User",
-      "description": "Makes UserManager.isLinkedUser() report false so apps that restrict linked/secondary profiles run normally.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Bypass Lock Task Mode",
-      "description": "Makes ActivityManager.isInLockTaskMode() report false so apps that change behavior under screen-pinning or kiosk mode run normally.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Bypass Low-End Device",
-      "description": "Makes ActivityManager.isLowEndDevice() report false so apps stop applying low-end-device restrictions and degraded quality.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Bypass Managed Profile",
-      "description": "Makes UserManager.isManagedProfile() report false so apps that restrict features on work/managed profiles behave as on a normal profile.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Bypass Overlay Detection",
-      "description": "Forces android.provider.Settings.canDrawOverlays() to return true so apps that block screen recorders, accessibility overlays or chat heads stop disabling themselves.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Bypass Package Suspended",
-      "description": "Makes PackageManager.isPackageSuspended() report false so apps that refuse to run while suspended keep working.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Bypass Picture-in-Picture Mode",
-      "description": "Makes Activity.isInPictureInPictureMode() report false so apps that change behavior in PiP keep their full UI.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Bypass Safe Mode",
-      "description": "Makes PackageManager.isSafeMode() report false so apps that disable functionality in safe mode behave normally.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Bypass System User",
-      "description": "Makes UserManager.isSystemUser() report false so apps gating behavior to the system user treat the current user as normal.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Bypass Test Environment",
-      "description": "Makes ActivityManager.isUserAMonkey() and isRunningInTestHarness() report false so apps that alter behavior under test/automation frameworks run normally.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Bypass User Restricted",
-      "description": "Makes UserManager.isUserRestricted() report false so apps that limit restricted accounts run normally.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Bypass WebView SSL Errors",
-      "description": "Makes WebViewClient.onReceivedSslError call proceed() instead of cancel() so WebView cert errors no longer block the page.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Bypass WebView Safe Browsing",
-      "description": "Makes WebViewClient.onSafeBrowsingHit call proceed() instead of backToSafety()/showInterstitial(), so deceptive-site warnings do not block navigation.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Classic Back Gesture",
-      "description": "Sets android:enableOnBackInvokedCallback to false so apps that break under the Android 13+ predictive back system keep the classic back behavior",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Clearing Split Metadata",
-      "description": "Removes split-install manifest attributes and Play Store split metadata from the app manifest.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
     },
     {
       "name": "Custom App Icon",
@@ -1408,822 +2777,6 @@
       ]
     },
     {
-      "name": "Disable Activity Transitions",
-      "description": "No-ops Activity.overridePendingTransition(...) so the app's custom activity enter/exit animations are skipped.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Disable Analytics Events",
-      "description": "No-ops FirebaseAnalytics and Facebook AppEventsLogger logEvent(...) calls so the app cannot send analytics/usage events to tracking servers.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Disable Animations",
-      "description": "Forces Settings.Global window/transition/animator scale values to 0 so the app runs without UI animations (faster, less motion).",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Disable App Backup",
-      "description": "Sets android:allowBackup=\"false\" and drops any backupAgent so the app's data is never uploaded to cloud/device backup.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Disable Background Sync",
-      "description": "No-ops ContentResolver.setSyncAutomatically/requestSync(...) so the app stops auto-uploading data (contacts, photos, files) to cloud accounts in the background.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Disable Bluetooth A2DP",
-      "description": "Makes AudioManager.isBluetoothA2dpOn() report false so apps that change behavior when Bluetooth audio is streaming run normally.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Disable Bluetooth Discovering",
-      "description": "Makes BluetoothAdapter.isDiscovering() report false so apps cannot tell the adapter is in discovery mode.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Disable Bluetooth SCO",
-      "description": "Makes AudioManager.isBluetoothScoOn() report false so apps that change behavior when a Bluetooth SCO link is active run normally.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Disable Boot Auto-Start",
-      "description": "Removes <receiver> components that listen for android.intent.action.BOOT_COMPLETED so the app can no longer start itself on device boot.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Disable Camera Shutter Sound",
-      "description": "Silences the camera shutter and video-record sounds by neutralizing MediaActionSound.play(...) and Camera.playSound(...).",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Disable Clipboard Write",
-      "description": "No-ops ClipboardManager.setPrimaryClip(...) so the app cannot silently overwrite the system clipboard.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Disable Facebook SDK Auto-Init",
-      "description": "Adds Facebook SDK manifest switches that stop auto-initialization, automatic app event logging and advertiser ID collection at startup",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Disable Firebase Auto-Init",
-      "description": "Adds Firebase manifest switches that stop Analytics, Messaging, Crashlytics and Performance from initializing themselves at startup",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Disable Fixed Volume",
-      "description": "Makes AudioManager.isVolumeFixed() report false so volume keys and stream changes work even when an app pins the volume.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Disable Haptic Feedback",
-      "description": "Makes View.performHapticFeedback(...) report false (and do nothing) so the app's haptic/vibration feedback is suppressed.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Disable Hardware Acceleration",
-      "description": "Sets android:hardwareAccelerated=\"false\" on the <application> so the app renders on the software path (fixes some rendering/compat bugs).",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Disable Heads-up Notifications",
-      "description": "Forces Notification(.Builder).setFullScreenIntent(...) to receive a null PendingIntent so heads-up/peek pop-overs no longer appear.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Disable Heap Pointer Tagging",
-      "description": "Sets android:allowNativeHeapPointerTagging to false so older native games that break under Android 12+ tagged pointers keep running",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Disable High Text Contrast",
-      "description": "Makes AccessibilityManager.isHighTextContrastEnabled() report false so apps do not alter layouts for high-contrast text.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Disable Keyboard Sound",
-      "description": "No-ops AudioManager.playSoundEffect(...) so keyboard/typing and other system sound effects are silenced inside the patched app (typically an IME).",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Disable Location Requests",
-      "description": "No-ops LocationManager.requestLocationUpdates/requestSingleUpdate and FusedLocationProviderClient.requestLocationUpdates so the app receives no location updates at all.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Disable Music Detection",
-      "description": "Makes AudioManager.isMusicActive() report false so apps that react to playing music behave as if nothing is playing.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Disable Notification Sound",
-      "description": "Forces Notification(.Builder/Channel).setSound(...) to receive a null Uri so posted notifications play no sound. Vibration patterns are left untouched.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Disable Notification Vibration",
-      "description": "Forces Notification(.Builder/Channel).setVibrate(...) to receive a null pattern so posted notifications do not vibrate.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Disable Notifications",
-      "description": "No-ops NotificationManager.notify(...) so the app cannot post any notifications at all.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Disable Orientation Lock",
-      "description": "No-ops Activity.setRequestedOrientation(...) so the app cannot force a fixed screen orientation; the device rotation is respected.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Disable Overscroll Effect",
-      "description": "Forces View.setOverScrollMode(OVER_SCROLL_NEVER) so the edge glow/bounce at list boundaries is disabled.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Disable Quiet Mode",
-      "description": "Makes UserManager.isQuietModeEnabled() report false so apps behave as if quiet mode is off.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Disable RTT",
-      "description": "Makes TelephonyManager.isRttSupported() report false so apps that require RTT calling run normally.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Disable Scrollbars",
-      "description": "Forces View.setVerticalScrollBarEnabled/setHorizontalScrollBarEnabled(false) so scrollbars are never drawn.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Disable Secure Surfaces",
-      "description": "Forces Surface.setSecure() and SurfaceView.setSecure() to false so secure surfaces no longer block screenshots and screen recording.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Disable Sensors",
-      "description": "Makes SensorManager.registerListener(...) report false (and register nothing) so the app cannot read motion, orientation, or other sensor data.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Disable Snackbars",
-      "description": "No-ops com.google.android.material.snackbar.Snackbar.show() so Material Design snackbars no longer appear.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Disable Sound Effects",
-      "description": "Forces AudioManager.setSoundEffectsEnabled(false) so system UI sound effects (locks, clicks, navigation) are silenced within the app.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Disable StrictMode",
-      "description": "No-ops StrictMode policy installs made by the app so debug builds that enable strict disk or network checks stop crashing on release-like usage",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Disable Toasts",
-      "description": "No-ops Toast.show() so the app cannot display toast pop-ups.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Disable Wake Locks",
-      "description": "Prevents the app from holding PowerManager.WakeLock.acquire(...) so it can no longer keep the CPU/screen awake in the background, reducing battery drain.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Disable WebView Safe Browsing",
-      "description": "Forces WebSettings.setSafeBrowsingEnabled(false) to disable WebView Google Safe Browsing checks (complements the callback bypass).",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Empty Clipboard Report",
-      "description": "Makes ClipboardManager.hasPrimaryClip always return false so apps stop harvesting or acting on clipboard content copied from other apps",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Enable WebView App Cache",
-      "description": "Enables the WebView HTML5 application cache so offline-capable web apps work.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Enable WebView Cache",
-      "description": "Forces WebSettings.setCacheMode(LOAD_CACHE_ELSE_NETWORK) so WebViews reuse cached resources and work better offline.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Enable WebView Content Access",
-      "description": "Forces WebSettings.setAllowContentAccess(true) so WebViews can access content providers.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Enable WebView DOM Storage",
-      "description": "Forces WebSettings DOM storage and database storage on so WebViews that disable web storage work fully.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Enable WebView Geolocation",
-      "description": "Forces WebSettings.setGeolocationEnabled(true) so WebViews expose the HTML5 Geolocation API (pairs with auto-granting prompts).",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Enable WebView Image Loading",
-      "description": "Forces WebViews to load images and never block network image or resource loads.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Enable WebView Initial Focus",
-      "description": "Forces WebSettings.setNeedInitialFocus(true) so a WebView requests focus when created.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Enable WebView JavaScript",
-      "description": "Forces WebSettings.setJavaScriptEnabled(true) so WebViews that disable JS still run scripts.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Enable WebView Offscreen Pre-Raster",
-      "description": "Forces WebSettings.setOffscreenPreRaster(true) to rasterize WebView content off-screen for snappier scrolling.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Enable WebView Popups",
-      "description": "Lets WebViews open popups and new windows (JavaScript window.open, target=_blank).",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Enable WebView Save Form Data",
-      "description": "Forces WebSettings.setSaveFormData(true) so WebViews remember entered form data.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Enable WebView Save Password",
-      "description": "Forces WebSettings.setSavePassword(true) so WebViews can store passwords.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Enable WebView Wide Viewport",
-      "description": "Forces WebViews to use the viewport meta tag and load with overview mode for proper desktop-style layout.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Enable WebView Zoom",
-      "description": "Enables built-in pinch zoom in WebViews and hides the zoom controls for a cleaner view.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Enable WebView Zoom Support",
-      "description": "Forces WebSettings.setSupportZoom(true) so WebViews permit zooming the page.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Exclude From Recents",
-      "description": "Hides the app from the Android recent-tasks list by setting excludeFromRecents on the application, so it does not appear in the overview screen.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Fake Bluetooth Enabled",
-      "description": "Makes BluetoothAdapter.isEnabled always return true so apps that require Bluetooth stop nagging about it being turned off",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Fake Fingerprint Hardware",
-      "description": "Makes FingerprintManager report available hardware and enrolled fingerprints so apps unlock fingerprint-gated features on any device",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Fake NFC Enabled",
-      "description": "Makes NfcAdapter.isEnabled always return true so apps that require NFC stop blocking features on devices without it",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Force 5GHz Band Supported",
-      "description": "Makes WifiManager.is5GHzBandSupported() report true so apps that require 5GHz Wi-Fi functionality run normally.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Force Android Beam",
-      "description": "Makes NfcAdapter.isNdefPushEnabled() report true so apps that require Android Beam (NDEF push) run normally.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Force App Active",
-      "description": "Makes UsageStatsManager.isAppInactive() report false so apps are not throttled by Android's app-standby buckets.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Force Battery Present",
-      "description": "Makes BatteryManager.isBatteryPresent() report true so apps that refuse to run without a battery work on batteryless devices.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Force Can Install Packages",
-      "description": "Makes PackageManager.canRequestPackageInstalls() report true so sideload/unknown-source install prompts are treated as already granted.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Force Data Capable",
-      "description": "Makes TelephonyManager.isDataCapable() report true so apps that require mobile-data support run on Wi-Fi-only devices.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Force Emulated Storage",
-      "description": "Makes Environment.isExternalStorageEmulated() report true so apps that expect emulated storage behave normally.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Force Haptics Available",
-      "description": "Makes Vibrator.hasVibrator() report true so apps that require vibration/haptics run on devices without a vibrator.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Force Idle Call State",
-      "description": "Makes TelephonyManager.getCallState() report CALL_STATE_IDLE (0) so apps that react to active calls behave as if none are in progress.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Force Left-to-Right Layout",
-      "description": "Sets android:supportsRtl to false so the app always renders left-to-right, fixing layouts that break under right-to-left system languages",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Force Max Brightness",
-      "description": "Forces the system screen brightness setting to maximum (255) so apps that read it cannot dim or restrict the screen.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Force Microphone Unmuted",
-      "description": "Makes AudioManager.isMicrophoneMute() report false so apps that pause or alter behavior when the mic is muted keep running normally.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Force Multi-SIM",
-      "description": "Makes TelephonyManager.isMultiSimEnabled() report true so apps that require multiple SIMs run on single-SIM devices.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Force Normal Audio Mode",
-      "description": "Makes AudioManager.getMode() report MODE_NORMAL (0) so apps that change behavior in call/ringtone modes run normally.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Force Picture-in-Picture",
-      "description": "Enables picture-in-picture for every activity by setting supportsPictureInPicture=true, so videos can be popped into a floating window.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Force SIM Ready",
-      "description": "Makes TelephonyManager.getSimState() report SIM_STATE_READY (5) so apps that wait for a ready SIM run immediately.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Force SMS Capable",
-      "description": "Makes TelephonyManager.isSmsCapable() report true so apps that require SMS support run on devices without a cellular radio.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Force Screen Interactive",
-      "description": "Makes PowerManager.isInteractive() report true so apps that pause or degrade when the screen is off keep running.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Force Single Phone",
-      "description": "Makes TelephonyManager.getPhoneCount() report 1 so apps that branch on multiple phones/radios behave as a single-phone device.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Force Single SIM",
-      "description": "Makes TelephonyManager.getSimCount() report 1 so apps that require or count multiple SIMs run on a single-SIM device.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Force Speakerphone Off",
-      "description": "Makes AudioManager.isSpeakerphoneOn() report false so apps that react to speakerphone state behave as if it is off.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Force Storage Non-Removable",
-      "description": "Makes Environment.isExternalStorageRemovable() report false so apps that refuse to run from removable storage treat it as internal.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Force User Unlocked",
-      "description": "Makes UserManager.isUserUnlocked() report true so direct-boot restricted features and storage become available immediately.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Force Voice Capable",
-      "description": "Makes TelephonyManager.isVoiceCapable() report true so apps that require voice-call support run on data-only devices.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Force WiFi P2P Supported",
-      "description": "Makes WifiManager.isP2pSupported() report true so apps that need Wi-Fi Direct run on devices without P2P support.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Force WiFi Scan Always Available",
-      "description": "Makes WifiManager.isScanAlwaysAvailable() report true so apps that need background scanning see it as enabled.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Force World Phone",
-      "description": "Makes TelephonyManager.isWorldPhone() report true so apps that gate features to world phones run normally.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Grant WebView Geolocation",
-      "description": "Auto-grants WebView geolocation requests inside onGeolocationPermissionsShowPrompt so location prompts never block the page.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Hide Accessibility Usage",
-      "description": "Makes AccessibilityManager.isEnabled() report false so apps cannot tell an accessibility service is running.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Hide Accounts",
-      "description": "Redirects AccountManager.getAccounts/getAccountsByType(...) to an empty Account[] so the app sees no linked accounts.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Hide Clipboard",
-      "description": "Forces ClipboardManager.getPrimaryClip() to return null so the app cannot read the system clipboard.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Hide Debugger Connection",
-      "description": "Makes Debug.isDebuggerConnected and waitingForDebugger always return false so apps that refuse to run under a debugger keep working",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Hide Device Admins",
-      "description": "Redirects DevicePolicyManager.getActiveAdmins() to Collections.emptyList() so the app sees no active device admins.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Hide Display Cutout",
-      "description": "Forces windowLayoutInDisplayCutoutMode=never on every activity so notched or punch-hole screens use the full display without a black bar.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Hide Emulator Radio",
-      "description": "Makes TelephonyManager.getPhoneType always report GSM so emulator detection based on a missing radio reports a normal device",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Hide Installed Apps",
-      "description": "Redirects PackageManager.getInstalledPackages/getInstalledApplications to Collections.emptyList() so the app sees no other installed apps.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Ignore Location Services Off",
-      "description": "Makes LocationManager.isLocationEnabled always return true so apps that refuse to run when location services are disabled keep working",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Ignore Low RAM Device",
-      "description": "Makes ActivityManager.isLowRamDevice always return false so apps stop degrading graphics or features on entry-level devices",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Ignore Touch Exploration",
-      "description": "Makes AccessibilityManager.isTouchExplorationEnabled always return false so games that disable or alter gameplay under TalkBack behave normally",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Relax Hardware Features",
-      "description": "Sets android:required=\"false\" on every <uses-feature> so the app installs on devices that lack those hardware features.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Relax Required Libraries",
-      "description": "Sets android:required=\"false\" on every <uses-library> so the app installs even when optional system libraries are missing.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Remove Compatible Screens",
-      "description": "Removes the <compatible-screens> block so the app is not restricted to a fixed set of screen sizes/densities.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Report Legacy Storage",
-      "description": "Makes Environment.isExternalStorageLegacy always return true so apps behave as if they got classic shared-storage access",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Spoof Airplane Mode",
-      "description": "Forces Settings.Global AIRPLANE_MODE_ON reads to 0 (off) so apps that change behavior in airplane mode see a normal connection state.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
       "name": "Spoof Android ID",
       "description": "Replaces Settings.Secure.ANDROID_ID reads with a fixed value so the patched app cannot be tracked across reinstalls or matched to a specific device.",
       "default": false,
@@ -2240,38 +2793,6 @@
           "values": null
         }
       ]
-    },
-    {
-      "name": "Spoof BSSID",
-      "description": "Reports a constant value from WifiInfo.getBSSID() so apps cannot read the real access point MAC address.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Spoof Battery Charging State",
-      "description": "Forces BatteryManager.isCharging() to return true so apps that restrict features unless the device is charging stop doing so.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Spoof Battery Level",
-      "description": "Reports a full battery (100%) through BatteryManager.getIntProperty for the capacity property, so apps that restrict features on low battery stop doing so.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Spoof Bluetooth Enabled",
-      "description": "Forces Settings.Global BLUETOOTH_ON reads to 0 (off) so apps that behave differently when Bluetooth is enabled cannot tell it is on.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
     },
     {
       "name": "Spoof Bluetooth Identity",
@@ -2301,30 +2822,6 @@
       ]
     },
     {
-      "name": "Spoof Bluetooth Name",
-      "description": "Reports a constant name from BluetoothAdapter.getName() so apps cannot read the real local Bluetooth adapter name.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Spoof Build Extras",
-      "description": "Spoofs the remaining android.os.Build identity fields not covered by Bypass Emulator Detection (BOOTLOADER, RADIO, USER, HOST, getRadioVersion, and Build.VERSION RELEASE/INCREMENTAL/SECURITY_PATCH/CODENAME) with values from a real Pixel 6, so apps cannot fingerprint the device through these fields.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Spoof Build Serial",
-      "description": "Reports a fake device serial through Build.getSerial() so apps that fingerprint by serial number see a constant value.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
       "name": "Spoof CPU Architecture",
       "description": "Replaces reads of Build.CPU_ABI and Build.CPU_ABI2 with a custom value. Leave empty to keep the original",
       "default": false,
@@ -2349,62 +2846,6 @@
       ]
     },
     {
-      "name": "Spoof Data State",
-      "description": "Reports an active data connection from TelephonyManager.getDataState() (DATA_CONNECTED) and getDataActivity() (DATA_ACTIVITY_INOUT) so apps that change behavior based on mobile data state see a live connection.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Spoof Developer Options",
-      "description": "Forces Settings.Global/Settings.Secure getters for developer options, USB debugging and wireless debugging to report disabled (0), so apps that refuse to run or crash when they detect debugging cannot tell it is on.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Spoof Device Software Version",
-      "description": "Reports a constant value from TelephonyManager.getDeviceSoftwareVersion() so apps cannot read the real radio/software version.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Spoof Group ID Level 1",
-      "description": "Reports a constant value from TelephonyManager.getGroupIdLevel1() so apps cannot read the real SIM GID1.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Spoof IMEI",
-      "description": "Reports a fake IMEI through TelephonyManager.getDeviceId()/getImei() so apps that fingerprint the device by IMEI see a constant value.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Spoof ISIM IMPI",
-      "description": "Reports an empty string from TelephonyManager.getIsimImpi() so apps cannot read the ISIM private identity.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Spoof Last Known Location",
-      "description": "Forces LocationManager.getLastKnownLocation() to return null so apps cannot read the device's last cached GPS/network position.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
       "name": "Spoof Locale",
       "description": "Forces Locale.getDefault() to return a chosen BCP-47 language tag (e.g. en-US) so region- or language-locked apps see the locale you pick.",
       "default": false,
@@ -2421,54 +2862,6 @@
           "values": null
         }
       ]
-    },
-    {
-      "name": "Spoof Location Provider",
-      "description": "Forces LocationManager.getBestProvider() to report \"gps\" and isProviderEnabled() to report true, so location-dependent apps believe a GPS provider is always available and enabled.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Spoof MAC Address",
-      "description": "Reports a constant MAC address through WifiInfo.getMacAddress() so apps cannot fingerprint the device by its Wi-Fi MAC.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Spoof NAI",
-      "description": "Reports an empty string from TelephonyManager.getNai() so apps cannot read the Network Access Identifier.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Spoof Network Type LTE",
-      "description": "Reports NETWORK_TYPE_LTE (13) from TelephonyManager.getNetworkType() so apps that require an LTE connection run on any network.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Spoof Phone Number",
-      "description": "Reports an empty string from TelephonyManager.getLine1Number() and getLine2Number() so apps cannot read the device's phone number.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Spoof Ringer Mode",
-      "description": "Forces AudioManager.getRingerMode() to report RINGER_MODE_NORMAL (2) so apps cannot detect silent or vibrate mode.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
     },
     {
       "name": "Spoof SDK Level",
@@ -2543,38 +2936,6 @@
       ]
     },
     {
-      "name": "Spoof SIM Serial Number",
-      "description": "Reports a fake SIM serial number through TelephonyManager.getSimSerialNumber() so apps that fingerprint by ICCID see a constant value.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Spoof Sensor List",
-      "description": "Forces SensorManager.getSensorList() to return an empty list so apps cannot enumerate the device's sensors for fingerprinting or capability checks.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Spoof Storage State",
-      "description": "Reports 'mounted' from Environment.getExternalStorageState() so apps that require mounted external storage run normally.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Spoof Subscriber ID",
-      "description": "Reports a fake subscriber id (IMSI) through TelephonyManager.getSubscriberId() so apps that fingerprint by IMSI see a constant value.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
       "name": "Spoof Target SDK",
       "description": "Sets the app's targetSdkVersion in the manifest to a chosen value (default 34) so apps that target a too-low SDK can be installed on newer Android.",
       "default": false,
@@ -2591,94 +2952,6 @@
           "values": null
         }
       ]
-    },
-    {
-      "name": "Spoof Time Zone",
-      "description": "Forces TimeZone.getDefault().getID() to return UTC so region- or time-zone-locked apps see a constant zone.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Spoof Voice Mail",
-      "description": "Reports empty strings from TelephonyManager.getVoiceMailNumber() and getVoiceMailAlphaTag() so apps cannot read the voicemail number or tag.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Spoof WebView User Agent",
-      "description": "Replaces WebSettings.getUserAgentString() with a desktop browser user agent so embedded webviews load desktop versions of sites.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Spoof WiFi Enabled",
-      "description": "Forces WifiManager.isWifiEnabled() to report true and getWifiState() to report WIFI_STATE_ENABLED (3) so apps cannot tell Wi-Fi is off.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Spoof WiFi RSSI",
-      "description": "Reports a fixed signal strength (-50 dBm) from WifiInfo.getRssi() so apps cannot read the real Wi-Fi signal level.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Spoof WiFi SSID",
-      "description": "Reports a constant value from WifiInfo.getSSID() so apps cannot read the real connected network name.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Spoof Wired Headset",
-      "description": "Makes AudioManager.isWiredHeadsetOn() report true so apps that require a wired headset think one is connected.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Treat Screen as On",
-      "description": "Makes PowerManager.isInteractive always return true so apps keep playing audio or progressing instead of pausing while the screen is off",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Trust User CAs (Config)",
-      "description": "Injects a network security config that trusts user-installed CA certificates, enabling MITM/proxy interception for the app.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Unmark Test Only",
-      "description": "Removes android:testOnly from the manifest so builds marked as test-only can be installed and launched like normal apps",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "VM Safe Mode",
-      "description": "Sets android:vmSafeMode so the app runs with AOT/JIT optimizations disabled, which can stabilize apps that crash from compiler optimizations on some devices",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
     }
   ]
 }
