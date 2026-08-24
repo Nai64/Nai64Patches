@@ -129,7 +129,40 @@ included_optional_tools: []
 # fixed set of tools to use as the base tool set (if non-empty), replacing Serena's default set of tools.
 # This cannot be combined with non-empty excluded_tools or included_optional_tools.
 # Find the list of tools here: https://oraios.github.io/serena/01-about/035_tools.html
-fixed_tools: []
+fixed_tools:
+- get_current_config
+- initial_instructions
+- onboarding
+- serena_info
+- list_memories
+- read_memory
+- write_memory
+- edit_memory
+- rename_memory
+- delete_memory
+- get_symbols_overview
+- find_symbol
+- find_declaration
+- find_implementations
+- find_referencing_symbols
+- find_file
+- search_for_pattern
+- read_file
+- list_dir
+- get_diagnostics_for_file
+- get_diagnostics_for_symbol
+- replace_content
+- replace_in_files
+- replace_lines
+- replace_symbol_body
+- insert_after_symbol
+- insert_at_line
+- insert_before_symbol
+- rename_symbol
+- safe_delete_symbol
+- delete_lines
+- create_text_file
+- restart_language_server
 
 # list of mode names that are to be activated by default, overriding the setting in the global configuration.
 # The full set of modes to be activated is base_modes (from global config) + default_modes + added_modes.
