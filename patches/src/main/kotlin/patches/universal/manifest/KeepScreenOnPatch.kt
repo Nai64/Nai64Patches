@@ -43,26 +43,8 @@ val keepScreenOnPatch = resourcePatch(
                                 continue
                             }
 
-                            val items = style.getElementsByTagName("item")
-                            var found = false
-                            for (j in 0 until items.length) {
-                                val item = items.item(j) as? Element ?: continue
-                                if (item.getAttribute("name") == "android:keepScreenOn") {
-                                    if (item.textContent != "true") {
-                                        item.textContent = "true"
-                                        changed = true
-                                    }
-                                    found = true
-                                    break
-                                }
-                            }
-                            if (!found) {
-                                val item = doc.createElement("item")
-                                item.setAttribute("name", "android:keepScreenOn")
-                                item.textContent = "true"
-                                style.appendChild(item)
-                                changed = true
-                            }
+                            ensureThemeItem(doc, style, "android:keepScreenOn", "true")
+                            changed = true
                         }
                         if (changed) updatedThemes++
                     }

@@ -4,6 +4,7 @@ import app.morphe.patcher.patch.resourcePatch
 import app.morphe.patcher.patch.stringOption
 import java.util.logging.Logger
 import org.w3c.dom.Element
+import patches.universal.manifest.ensureThemeItem
 
 @Suppress("unused")
 val statusBarIconsPatch = resourcePatch(
@@ -65,7 +66,7 @@ val statusBarIconsPatch = resourcePatch(
                             }
 
                             for (attribute in listOf("windowLightStatusBar", "windowLightNavigationBar")) {
-                                ensureItem(doc, style, attribute, lightIcons)
+                                ensureThemeItem(doc, style, "android:$attribute", lightIcons)
                                 changed = true
                             }
                         }
@@ -84,18 +85,4 @@ val statusBarIconsPatch = resourcePatch(
     }
 }
 
-/** Sets an existing theme item or appends a new one. */
-private fun ensureItem(doc: org.w3c.dom.Document, style: Element, name: String, value: String) {
-    val items = style.getElementsByTagName("item")
-    for (i in 0 until items.length) {
-        val item = items.item(i) as? Element ?: continue
-        if (item.getAttribute("name") == "android:$name") {
-            item.textContent = value
-            return
-        }
-    }
-    val item = doc.createElement("item")
-    item.setAttribute("name", "android:$name")
-    item.textContent = value
-    style.appendChild(item)
-}
+

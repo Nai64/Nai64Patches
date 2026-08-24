@@ -3,6 +3,7 @@ package patches.universal.ui
 import app.morphe.patcher.patch.resourcePatch
 import java.util.logging.Logger
 import org.w3c.dom.Element
+import patches.universal.manifest.ensureThemeItem
 
 @Suppress("unused")
 val immersiveFullscreenPatch = resourcePatch(
@@ -43,26 +44,8 @@ val immersiveFullscreenPatch = resourcePatch(
                                 continue
                             }
 
-                            val items = style.getElementsByTagName("item")
-                            var found = false
-                            for (j in 0 until items.length) {
-                                val item = items.item(j) as? Element ?: continue
-                                if (item.getAttribute("name") == "android:windowFullscreen") {
-                                    if (item.textContent != "true") {
-                                        item.textContent = "true"
-                                        changed = true
-                                    }
-                                    found = true
-                                    break
-                                }
-                            }
-                            if (!found) {
-                                val item = doc.createElement("item")
-                                item.setAttribute("name", "android:windowFullscreen")
-                                item.textContent = "true"
-                                style.appendChild(item)
-                                changed = true
-                            }
+                            ensureThemeItem(doc, style, "android:windowFullscreen", "true")
+                            changed = true
                         }
                         if (changed) updatedFiles++
                     }

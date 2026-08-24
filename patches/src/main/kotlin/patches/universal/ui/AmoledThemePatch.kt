@@ -3,8 +3,8 @@ package patches.universal.ui
 import app.morphe.patcher.patch.booleanOption
 import app.morphe.patcher.patch.resourcePatch
 import java.util.logging.Logger
-import org.w3c.dom.Document
 import org.w3c.dom.Element
+import patches.universal.manifest.ensureThemeItem
 
 @Suppress("unused")
 val amoledThemePatch = resourcePatch(
@@ -79,7 +79,7 @@ val amoledThemePatch = resourcePatch(
                             if (!isDark) continue
 
                             for (attribute in targets) {
-                                ensureItem(doc, style, attribute, amoled)
+                                ensureThemeItem(doc, style, attribute, amoled)
                             }
                             changed = true
                         }
@@ -96,18 +96,4 @@ val amoledThemePatch = resourcePatch(
     }
 }
 
-/** Sets an existing theme item or appends a new one. */
-private fun ensureItem(doc: Document, style: Element, attrName: String, value: String) {
-    val items = style.getElementsByTagName("item")
-    for (i in 0 until items.length) {
-        val item = items.item(i) as? Element ?: continue
-        if (item.getAttribute("name") == attrName) {
-            item.textContent = value
-            return
-        }
-    }
-    val item = doc.createElement("item")
-    item.setAttribute("name", attrName)
-    item.textContent = value
-    style.appendChild(item)
-}
+
