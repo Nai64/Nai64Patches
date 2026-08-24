@@ -53,6 +53,7 @@ fabric.properties
 ### Gradle template
 .gradle
 **/build/
+**/bin/
 !src/**/build/
 gradle-app.setting
 !gradle-wrapper.jar
