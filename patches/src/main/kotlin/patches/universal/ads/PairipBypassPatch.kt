@@ -1,6 +1,7 @@
 package patches.universal.ads
 
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
+import app.morphe.patcher.patch.booleanOption
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.patch.ResourcePatchContext
 import app.morphe.patcher.patch.resourcePatch
@@ -70,9 +71,74 @@ val pairipBypassPatch = bytecodePatch(
 ) {
     dependsOn(applicationRedirectPatch)
 
+    val automaticStrategySelection by booleanOption(
+        key = "automaticStrategySelection",
+        default = true,
+        title = "Automatic strategy selection",
+        description = "Apply every compatible PairIP strategy whose target is found. Turn this off to select only the strategy groups needed for testing.",
+    )
+    val localInstallerChecks by booleanOption(
+        key = "localInstallerChecks",
+        default = false,
+        title = "Local installer checks",
+        description = "Spoof checks that verify which installer installed the app.",
+    )
+    val signatureChecks by booleanOption(
+        key = "signatureChecks",
+        default = false,
+        title = "Signature checks",
+        description = "Bypass APK integrity and signature-match checks.",
+    )
+    val licenseUiSuppression by booleanOption(
+        key = "licenseUiSuppression",
+        default = false,
+        title = "License error and paywall UI",
+        description = "Suppress PairIP error dialogs, paywalls, and close-app screens.",
+    )
+    val applicationStartupHooks by booleanOption(
+        key = "applicationStartupHooks",
+        default = false,
+        title = "Application startup hooks",
+        description = "Bypass PairIP Application attachBaseContext and onCreate hooks. These run early and may be less compatible with some apps.",
+    )
+    val licenseClientChecks by booleanOption(
+        key = "licenseClientChecks",
+        default = false,
+        title = "License client checks",
+        description = "Disable the legacy LicenseClient license-check and root-termination path.",
+    )
+    val contentProviderChecks by booleanOption(
+        key = "contentProviderChecks",
+        default = false,
+        title = "Content provider checks",
+        description = "Bypass PairIP content-provider initialization and query checks.",
+    )
+    val responseValidationChecks by booleanOption(
+        key = "responseValidationChecks",
+        default = false,
+        title = "Response validation checks",
+        description = "Bypass license-response validation, metadata, and signature checks across legacy validator variants.",
+    )
+    val pairipV2Checks by booleanOption(
+        key = "pairipV2Checks",
+        default = false,
+        title = "PairIP V2 checks",
+        description = "Bypass PairIP V2 license flow, response signature verification, and repeated background checks.",
+    )
+
     execute {
         val logger = Logger.getLogger(this::class.java.name)
 
+        val applyLocalInstallerChecks = automaticStrategySelection == true || localInstallerChecks == true
+        val applySignatureChecks = automaticStrategySelection == true || signatureChecks == true
+        val applyLicenseUiSuppression = automaticStrategySelection == true || licenseUiSuppression == true
+        val applyApplicationStartupHooks = automaticStrategySelection == true || applicationStartupHooks == true
+        val applyLicenseClientChecks = automaticStrategySelection == true || licenseClientChecks == true
+        val applyContentProviderChecks = automaticStrategySelection == true || contentProviderChecks == true
+        val applyResponseValidationChecks = automaticStrategySelection == true || responseValidationChecks == true
+        val applyPairipV2Checks = automaticStrategySelection == true || pairipV2Checks == true
+
+        if (applyLocalInstallerChecks) {
         // -- Strategy 1: Local installer check --
         PerformLocalInstallerCheckFingerprint.methodOrNull?.let {
             it.addInstructions(0, listOf(
@@ -82,6 +148,9 @@ val pairipBypassPatch = bytecodePatch(
             logger.info("Applied Pairip performLocalInstallerCheck spoof")
         }
 
+        }
+
+        if (applySignatureChecks) {
         // -- Strategy 2: APK signature integrity check --
         PairipSignatureCheckVerifyIntegrityFingerprint.methodOrNull?.let {
             it.addInstructions(0, """
@@ -99,6 +168,9 @@ val pairipBypassPatch = bytecodePatch(
             logger.info("Applied Pairip SignatureCheck.verifySignatureMatches bypass")
         }
 
+        }
+
+        if (applyLicenseUiSuppression) {
         // -- Strategy 4: LicenseClient error dialog --
         PairipLicenseClientStartErrorDialogFingerprint.methodOrNull?.let {
             it.addInstructions(0, """
@@ -123,6 +195,9 @@ val pairipBypassPatch = bytecodePatch(
             logger.info("Applied Pairip LicenseActivity paywall suppress")
         }
 
+        }
+
+        if (applyApplicationStartupHooks) {
         // -- Strategy 7a: Application.attachBaseContext - main entry point --
         PairipApplicationAttachBaseContextFingerprint.methodOrNull?.let {
             it.addInstructions(0, """
@@ -142,6 +217,9 @@ val pairipBypassPatch = bytecodePatch(
             logger.info("Applied Pairip Application.onCreate bypass")
         }
 
+        }
+
+        if (applyLicenseClientChecks) {
         // -- Strategy 8: LicenseClient.checkLicense - root kill --
         PairipLicenseClientCheckLicenseFingerprint.methodOrNull?.let {
             it.addInstructions(0, """
@@ -150,6 +228,9 @@ val pairipBypassPatch = bytecodePatch(
             logger.info("Applied Pairip LicenseClient.checkLicense root kill")
         }
 
+        }
+
+        if (applyContentProviderChecks) {
         // -- Strategy 9: LicenseContentProvider.onCreate (report success) --
         PairipLicenseContentProviderOnCreateFingerprint.methodOrNull?.let {
             it.addInstructions(0, listOf(
@@ -177,6 +258,9 @@ val pairipBypassPatch = bytecodePatch(
             logger.info("Applied Pairip InitContextProvider.getContext bypass")
         }
 
+        }
+
+        if (applyResponseValidationChecks) {
         // -- Strategy 12: LicenseResponseHelper.validateResponse --
         PairipLicenseResponseHelperValidateResponseFingerprint.methodOrNull?.let {
             it.addInstructions(0, """
@@ -228,6 +312,9 @@ val pairipBypassPatch = bytecodePatch(
             logger.info("Applied Pairip licensecheck3 ResponseValidator.validateResponse bypass")
         }
 
+        }
+
+        if (applyPairipV2Checks) {
         // -- Strategy 18: Pairip V2 checkLicenseInternal -> force license success --
         // V2 routes the verification result back to the app through the IBinder
         // listener supplied to checkLicenseInternal. Short-circuit it to call the
@@ -261,31 +348,42 @@ val pairipBypassPatch = bytecodePatch(
             logger.info("Applied Pairip V2 scheduleRepeatedLicenseCheck suppress")
         }
 
-        val applied = listOfNotNull(
-            PerformLocalInstallerCheckFingerprint.methodOrNull?.let { "performLocalInstallerCheck" },
-            PairipSignatureCheckVerifyIntegrityFingerprint.methodOrNull?.let { "verifyIntegrity" },
-            PairipSignatureCheckVerifySignatureMatchesFingerprint.methodOrNull?.let { "verifySignatureMatches" },
-            PairipLicenseClientStartErrorDialogFingerprint.methodOrNull?.let { "errorDialog" },
-            PairipLicenseClientStartPaywallFingerprint.methodOrNull?.let { "paywall" },
-            PairipLicenseActivityShowPaywallFingerprint.methodOrNull?.let { "showPaywallAndCloseApp" },
-            PairipApplicationAttachBaseContextFingerprint.methodOrNull?.let { "attachBaseContext" },
-            PairipApplicationOnCreateFingerprint.methodOrNull?.let { "onCreate" },
-            PairipLicenseClientCheckLicenseFingerprint.methodOrNull?.let { "checkLicense" },
-            PairipLicenseContentProviderOnCreateFingerprint.methodOrNull?.let { "onCreate (ContentProvider)" },
-            PairipLicenseContentProviderQueryFingerprint.methodOrNull?.let { "query" },
-            PairipInitContextProviderGetContextFingerprint.methodOrNull?.let { "getContext" },
-            PairipLicenseResponseHelperValidateResponseFingerprint.methodOrNull?.let { "validateResponse" },
-            PairipLicenseResponseHelperGetRepeatedCheckMetadataFingerprint.methodOrNull?.let { "getRepeatedCheckMetadata" },
-            PairipLicenseResponseHelperVerifySignatureFingerprint.methodOrNull?.let { "verifySignature (ResponseHelper)" },
-            PairipResponseValidatorValidateResponseFingerprint.methodOrNull?.let { "validateResponse (ResponseValidator)" },
-            PairipResponseValidatorVerifySignatureFingerprint.methodOrNull?.let { "verifySignature (ResponseValidator)" },
-            PairipResponseValidatorV3ValidateResponseFingerprint.methodOrNull?.let { "validateResponse (V3)" },
-            PairipV2CheckLicenseInternalFingerprint.methodOrNull?.let { "checkLicenseInternal (V2)" },
-            PairipV2LicenseResponseHelperVerifySignatureFingerprint.methodOrNull?.let { "verifySignature (V2)" },
-            PairipV2ScheduleRepeatedLicenseCheckFingerprint.methodOrNull?.let { "scheduleRepeatedLicenseCheck (V2)" },
-        )
+        }
+
+        val applied = buildList {
+            fun addIfMatched(enabled: Boolean, name: String, matched: Boolean) {
+                if (enabled && matched) add(name)
+            }
+
+            addIfMatched(applyLocalInstallerChecks, "performLocalInstallerCheck", PerformLocalInstallerCheckFingerprint.methodOrNull != null)
+            addIfMatched(applySignatureChecks, "verifyIntegrity", PairipSignatureCheckVerifyIntegrityFingerprint.methodOrNull != null)
+            addIfMatched(applySignatureChecks, "verifySignatureMatches", PairipSignatureCheckVerifySignatureMatchesFingerprint.methodOrNull != null)
+            addIfMatched(applyLicenseUiSuppression, "errorDialog", PairipLicenseClientStartErrorDialogFingerprint.methodOrNull != null)
+            addIfMatched(applyLicenseUiSuppression, "paywall", PairipLicenseClientStartPaywallFingerprint.methodOrNull != null)
+            addIfMatched(applyLicenseUiSuppression, "showPaywallAndCloseApp", PairipLicenseActivityShowPaywallFingerprint.methodOrNull != null)
+            addIfMatched(applyApplicationStartupHooks, "attachBaseContext", PairipApplicationAttachBaseContextFingerprint.methodOrNull != null)
+            addIfMatched(applyApplicationStartupHooks, "onCreate", PairipApplicationOnCreateFingerprint.methodOrNull != null)
+            addIfMatched(applyLicenseClientChecks, "checkLicense", PairipLicenseClientCheckLicenseFingerprint.methodOrNull != null)
+            addIfMatched(applyContentProviderChecks, "onCreate (ContentProvider)", PairipLicenseContentProviderOnCreateFingerprint.methodOrNull != null)
+            addIfMatched(applyContentProviderChecks, "query", PairipLicenseContentProviderQueryFingerprint.methodOrNull != null)
+            addIfMatched(applyContentProviderChecks, "getContext", PairipInitContextProviderGetContextFingerprint.methodOrNull != null)
+            addIfMatched(applyResponseValidationChecks, "validateResponse", PairipLicenseResponseHelperValidateResponseFingerprint.methodOrNull != null)
+            addIfMatched(applyResponseValidationChecks, "getRepeatedCheckMetadata", PairipLicenseResponseHelperGetRepeatedCheckMetadataFingerprint.methodOrNull != null)
+            addIfMatched(applyResponseValidationChecks, "verifySignature (ResponseHelper)", PairipLicenseResponseHelperVerifySignatureFingerprint.methodOrNull != null)
+            addIfMatched(applyResponseValidationChecks, "validateResponse (ResponseValidator)", PairipResponseValidatorValidateResponseFingerprint.methodOrNull != null)
+            addIfMatched(applyResponseValidationChecks, "verifySignature (ResponseValidator)", PairipResponseValidatorVerifySignatureFingerprint.methodOrNull != null)
+            addIfMatched(applyResponseValidationChecks, "validateResponse (V3)", PairipResponseValidatorV3ValidateResponseFingerprint.methodOrNull != null)
+            addIfMatched(applyPairipV2Checks, "checkLicenseInternal (V2)", PairipV2CheckLicenseInternalFingerprint.methodOrNull != null)
+            addIfMatched(applyPairipV2Checks, "verifySignature (V2)", PairipV2LicenseResponseHelperVerifySignatureFingerprint.methodOrNull != null)
+            addIfMatched(applyPairipV2Checks, "scheduleRepeatedLicenseCheck (V2)", PairipV2ScheduleRepeatedLicenseCheckFingerprint.methodOrNull != null)
+        }
         if (applied.isEmpty()) {
-            logger.warning("No Pairip license methods found. No changes applied.")
+            val reason = if (automaticStrategySelection == true) {
+                "No Pairip license methods found. No changes applied."
+            } else {
+                "No selected Pairip strategies matched. No changes applied."
+            }
+            logger.warning(reason)
         } else {
             logger.info("Pairip Bypass (Experimental) patch succeeded (${applied.size} strategy(s) applied)")
         }
