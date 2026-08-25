@@ -200,9 +200,6 @@ val noAdsPatch = bytecodePatch(
         val hasYandexInterstitial = YandexUnityInterstitialWrapperShowFingerprint.methodOrNull != null
         val hasLevelPlay = LevelPlayRewardedAdIsReadyFingerprint.methodOrNull != null ||
             IronSourceLevelPlayFullScreenShowAdFingerprint.methodOrNull != null
-        val hasHuawei = HuaweiRewardAdIsLoadedFingerprint.methodOrNull != null ||
-            HuaweiRewardAdShowFingerprint.methodOrNull != null ||
-            HuaweiInterstitialAdShowFingerprint.methodOrNull != null
 
         if (
             !hasMaxUnity &&
@@ -218,13 +215,12 @@ val noAdsPatch = bytecodePatch(
             !hasLevelPlay &&
             !hasMyTarget &&
             !hasYandexRewarded &&
-            !hasYandexInterstitial &&
-            !hasHuawei
+            !hasYandexInterstitial
         ) {
             detectionLogger.warning(
                 "Could not find supported ad SDK (MAX Unity, native MAX, AdMob, " +
                     "Unity Ads v3/v4, ironSource/LevelPlay, AppLovin, Vungle, " +
-                    "Meta, Pangle, VK MyTarget, Yandex or Huawei Ads Kit). No changes applied.",
+                    "Meta, Pangle, VK MyTarget or Yandex). No changes applied.",
             )
             return@execute
         }
@@ -259,15 +255,6 @@ val noAdsPatch = bytecodePatch(
         }
 
         var totalPatched = 0
-
-        // -- Huawei Ads Kit / Petal Ads --
-        if (blockInterstitials == true) {
-            totalPatched += patchVoid(HuaweiInterstitialAdShowFingerprint)
-        }
-        if (blockRewarded == true) {
-            totalPatched += patchReturnFalse(HuaweiRewardAdIsLoadedFingerprint)
-            totalPatched += patchVoid(HuaweiRewardAdShowFingerprint)
-        }
 
         // -- MAX Unity wrapper --
         if (blockInterstitials == true) {

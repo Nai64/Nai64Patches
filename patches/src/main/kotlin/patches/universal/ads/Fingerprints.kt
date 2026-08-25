@@ -24,38 +24,6 @@ internal object IsRewardedAdReadyFingerprint : Fingerprint(
     parameters = listOf("Ljava/lang/String;"),
 )
 
-// Huawei Ads Kit / Petal Ads
-internal object HuaweiRewardAdIsLoadedFingerprint : Fingerprint(
-    definingClass = "Lcom/huawei/hms/ads/reward/RewardAd;",
-    name = "isLoaded",
-    returnType = "Z",
-    parameters = emptyList(),
-)
-
-internal object HuaweiRewardAdShowFingerprint : Fingerprint(
-    definingClass = "Lcom/huawei/hms/ads/reward/RewardAd;",
-    name = "show",
-    returnType = "V",
-    parameters = listOf(
-        "Landroid/app/Activity;",
-        "Lcom/huawei/hms/ads/reward/RewardAdStatusListener;",
-    ),
-)
-
-internal object HuaweiInterstitialAdIsLoadedFingerprint : Fingerprint(
-    definingClass = "Lcom/huawei/hms/ads/InterstitialAd;",
-    name = "isLoaded",
-    returnType = "Z",
-    parameters = emptyList(),
-)
-
-internal object HuaweiInterstitialAdShowFingerprint : Fingerprint(
-    definingClass = "Lcom/huawei/hms/ads/InterstitialAd;",
-    name = "show",
-    returnType = "V",
-    parameters = listOf("Landroid/app/Activity;"),
-)
-
 internal object MaxUnityAdManagerOnAdHiddenFingerprint : Fingerprint(
     name = "onAdHidden",
     accessFlags = listOf(AccessFlags.PUBLIC),

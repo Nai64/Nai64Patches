@@ -4,13 +4,11 @@ import app.morphe.patcher.patch.bytecodePatch
 import java.util.logging.Logger
 
 @Suppress("unused")
-val spoofNotificationsEnabledPatch = bytecodePatch(
-    name = "Spoof Notifications as Enabled",
+val forceNotificationsEnabledPatch = bytecodePatch(
+    name = "Force Notifications Enabled",
     description =
         "Makes NotificationManager.areNotificationsEnabled always return true so apps that " +
-            "refuse to run when notifications are blocked keep working. This only changes the " +
-            "app's internal check; it does not grant POST_NOTIFICATIONS or enable notifications " +
-            "in Android system settings. Use Ensure Notification Permission for the manifest entry.",
+            "refuse to run when notifications are blocked keep working",
     default = false,
 ) {
     execute {
