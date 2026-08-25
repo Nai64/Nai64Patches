@@ -1,7 +1,7 @@
 {
   "created_at": "2026-08-25T02:41:31",
-  "description": "## [1.28.1](https://github.com/Zanuaimi/Nai64Patches/compare/1.28.0...1.28.1) (2026-08-25)\n\n### Bug Fixes\n\n* restore standalone patch list ([9f2b647](https://github.com/Zanuaimi/Nai64Patches/commit/9f2b647ea89317c254c5b4f1b5dc58baa0de3a4f))",
-  "download_url": "https://github.com/Zanuaimi/Nai64Patches/releases/download/1.28.1/patches-1.28.1.mpp",
+  "description": "## [1.28.2](https://github.com/Zanuaimi/Nai64Patches/compare/1.28.1...1.28.2) (2026-08-25)\\n\\n### Improvements\\n\\n* sync upstream patches, including the new Gemini, Veo, Bandcamp, Steam, and universal patches\\n* retain fork-specific RuStore/Yandex ad support alongside upstream LevelPlay support",
+  "download_url": "https://github.com/Zanuaimi/Nai64Patches/releases/download/1.28.2/patches-1.28.2.mpp",
   "signature_download_url": "",
-  "version": "1.28.1"
+  "version": "1.28.2"
 }

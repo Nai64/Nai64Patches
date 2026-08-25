@@ -1,3 +1,10 @@
+## [1.28.2](https://github.com/Zanuaimi/Nai64Patches/compare/1.28.1...1.28.2) (2026-08-25)
+
+### Improvements
+
+- sync upstream patches, including the new Gemini, Veo, Bandcamp, Steam, and universal patches
+- retain fork-specific RuStore/Yandex ad support alongside upstream LevelPlay support
+
 ## [1.28.1](https://github.com/Zanuaimi/Nai64Patches/compare/1.28.0...1.28.1) (2026-08-25)
 
 ### Bug Fixes
