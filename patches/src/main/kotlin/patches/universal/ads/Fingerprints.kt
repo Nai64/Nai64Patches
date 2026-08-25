@@ -187,6 +187,13 @@ internal object PairipLicenseActivityNnStartFingerprint : Fingerprint(
     parameters = emptyList(),
 )
 
+internal object PairipLicenseActivityOnStartFingerprint : Fingerprint(
+    definingClass = "Lcom/pairip/licensecheck/LicenseActivity;",
+    name = "onStart",
+    returnType = "V",
+    parameters = emptyList(),
+)
+
 internal object PairipLicenseActivityCloseAppFingerprint : Fingerprint(
     definingClass = "Lcom/pairip/licensecheck/LicenseActivity;",
     name = "closeApp",

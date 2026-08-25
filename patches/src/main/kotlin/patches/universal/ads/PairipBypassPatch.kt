@@ -302,11 +302,16 @@ val pairipBypassPatch = bytecodePatch(
             logger.info("Applied Pairip LicenseActivity paywall suppress")
         }
 
-        // -- Strategy 8: LicenseActivity.nnStart --
-        // Suppress the PairIP license activity startup routine.
+        // -- Strategy 8: LicenseActivity.nnStart / onStart --
+        // Suppress PairIP license activity startup variants used across
+        // obfuscated and non-obfuscated PairIP builds.
         PairipLicenseActivityNnStartFingerprint.methodOrNull?.let {
             it.addInstructions(0, "return-void")
             logger.info("Applied Pairip LicenseActivity.nnStart suppress")
+        }
+        PairipLicenseActivityOnStartFingerprint.methodOrNull?.let {
+            it.addInstructions(0, "return-void")
+            logger.info("Applied Pairip LicenseActivity.onStart suppress")
         }
 
         // -- Strategy 9: LicenseActivity.closeApp --
@@ -570,6 +575,7 @@ val pairipBypassPatch = bytecodePatch(
             addIfMatched(applyLicenseUiSuppression, "paywall", PairipLicenseClientStartPaywallFingerprint.methodOrNull != null)
             addIfMatched(applyLicenseUiSuppression, "showPaywallAndCloseApp", PairipLicenseActivityShowPaywallFingerprint.methodOrNull != null)
             addIfMatched(applyLicenseUiSuppression, "nnStart", PairipLicenseActivityNnStartFingerprint.methodOrNull != null)
+            addIfMatched(applyLicenseUiSuppression, "onStart", PairipLicenseActivityOnStartFingerprint.methodOrNull != null)
             addIfMatched(applyLicenseUiSuppression, "closeApp", PairipLicenseActivityCloseAppFingerprint.methodOrNull != null)
             addIfMatched(applyLicenseUiSuppression, "exitApp", PairipLicenseActivityExitAppFingerprint.methodOrNull != null)
             addIfMatched(applyLicenseUiSuppression, "closeapp", PairipLicenseActivityCloseappFingerprint.methodOrNull != null)
