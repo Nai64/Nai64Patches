@@ -3,6 +3,9 @@ package patches.universal.misc
 import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.resourcePatch
+import patches.universal.manifest.NS_ANDROID
+import patches.universal.manifest.applicationOrNull
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction35c
 import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction3rc
@@ -129,6 +132,34 @@ internal fun BytecodePatchContext.foldSettingsGetters(
     return patched
 }
 
+private val minSdkGuardPatch = app.morphe.patcher.patch.resourcePatch(
+    name = "Spoof Developer Options (manifest guard) [internal]",
+    description = "Ensures AndroidManifest.xml retains a valid uses-sdk/minSdkVersion so apksig can sign the patched APK (fixes MinSdkVersionException on some Huawei APKs)",
+    default = false,
+) {
+    execute {
+        val logger = Logger.getLogger(this::class.java.name)
+        document("AndroidManifest.xml").use { manifest ->
+            val root = manifest.documentElement
+            if (root == null || root.tagName != "manifest") return@use
+            var usesSdk = root.getElementsByTagName("uses-sdk")?.item(0) as? org.w3c.dom.Element
+            if (usesSdk == null) {
+                usesSdk = manifest.createElement("uses-sdk")
+                val app = root.applicationOrNull()
+                if (app != null) root.insertBefore(usesSdk, app) else root.appendChild(usesSdk)
+                logger.info("Created missing <uses-sdk> for signing guard")
+            }
+            // apksig MinSdkVersionException happens when minSdkVersion is missing or is a resource reference that aapt can't resolve
+            // Ensure it's a literal 24 (the APK's original minSdk) if absent
+            val hasMinSdk = usesSdk.hasAttributeNS(NS_ANDROID, "minSdkVersion") || usesSdk.hasAttribute("android:minSdkVersion")
+            if (!hasMinSdk) {
+                usesSdk.setAttributeNS(NS_ANDROID, "android:minSdkVersion", "24")
+                logger.info("Added missing android:minSdkVersion=\"24\" to <uses-sdk> to fix signing")
+            }
+        }
+    }
+}
+
 @Suppress("unused")
 val spoofDeveloperOptionsPatch = bytecodePatch(
     name = "Spoof Developer Options",
@@ -138,6 +169,8 @@ val spoofDeveloperOptionsPatch = bytecodePatch(
             "to run or crash when they detect debugging cannot tell it is on.",
     default = false,
 ) {
+    dependsOn(minSdkGuardPatch)
+
     execute {
         val logger = Logger.getLogger(this::class.java.name)
 
