@@ -41,6 +41,7 @@ val adsFreeRewardsPatch = bytecodePatch(
             "Unity Ads" to "unityAds",
             "ironSource / LevelPlay" to "ironSource",
             "RuStore / VK MyTarget" to "rustore",
+            "Huawei Ads Kit / Petal Ads" to "huawei",
         ),
     )
     val instantReward by booleanOption(
@@ -118,6 +119,7 @@ private fun BytecodePatchContext.forceAdAvailability(logger: Logger): Int {
     patchIsReady("AppLovin MAX AppOpenAd.isReady()", MaxAppOpenAdIsReadyFingerprint)
     patchIsReady("Yandex/MyTarget rewarded mediation isLoaded()", YandexMyTargetRewardedIsLoadedFingerprint)
     patchIsReady("Yandex/MyTarget interstitial mediation isLoaded()", YandexMyTargetInterstitialIsLoadedFingerprint)
+    patchIsReady("Huawei Ads Kit RewardAd.isLoaded()", HuaweiRewardAdIsLoadedFingerprint)
     return patched
 }
 
@@ -127,6 +129,7 @@ private fun BytecodePatchContext.applyAdsFreeRewardsV1190(logger: Logger, reward
     val useUnityAds = strategy == "auto" || strategy == "unityAds"
     val useIronSource = strategy == "auto" || strategy == "ironSource"
     val useRustore = strategy == "auto" || strategy == "rustore"
+    val useHuawei = strategy == "auto" || strategy == "huawei"
 
     val hasMaxUnity = ShowRewardedAdFingerprint.methodOrNull != null &&
         IsRewardedAdReadyFingerprint.methodOrNull != null
@@ -140,9 +143,33 @@ private fun BytecodePatchContext.applyAdsFreeRewardsV1190(logger: Logger, reward
         IronSourceLevelPlayFullScreenShowAdFingerprint.methodOrNull != null
     val hasMyTarget = MyTargetBaseInterstitialShowFingerprint.methodOrNull != null
     val hasYandexUnityRewarded = YandexUnityRewardedWrapperShowFingerprint.methodOrNull != null
+    val hasHuawei = HuaweiRewardAdIsLoadedFingerprint.methodOrNull != null &&
+        HuaweiRewardAdShowFingerprint.methodOrNull != null
 
-    if (!hasMaxUnity && !hasNativeMax && !hasUnityAds && !hasUnityAdsV4 && !hasLevelPlay && !hasIronSourceUnityBridge && !hasMyTarget && !hasYandexUnityRewarded) {
+    if (!hasMaxUnity && !hasNativeMax && !hasUnityAds && !hasUnityAdsV4 && !hasLevelPlay && !hasIronSourceUnityBridge && !hasMyTarget && !hasYandexUnityRewarded && !hasHuawei) {
         return
+    }
+
+    // -- Huawei Ads Kit / Petal Ads --
+    // Huawei's rewarded callback carries the reward object as a singleton
+    // DEFAULT value, so no SDK-internal implementation class is required.
+    val huaweiReady = HuaweiRewardAdIsLoadedFingerprint.methodOrNull
+    val huaweiShow = HuaweiRewardAdShowFingerprint.methodOrNull
+    if (useHuawei && instantReward == true && huaweiReady != null && huaweiShow != null) {
+        val showClass = HuaweiRewardAdShowFingerprint.classDefOrNull
+        if (showClass != null) {
+            val clonedShow = huaweiShow.cloneMutableAndPreserveParameters(showClass)
+            clonedShow.addInstructions(0, """
+                if-eqz p2, :morphe_huawei_reward_done
+                invoke-virtual {p2}, Lcom/huawei/hms/ads/reward/RewardAdStatusListener;->onRewardAdOpened()V
+                sget-object v0, Lcom/huawei/hms/ads/reward/Reward;->DEFAULT:Lcom/huawei/hms/ads/reward/Reward;
+                invoke-virtual {p2, v0}, Lcom/huawei/hms/ads/reward/RewardAdStatusListener;->onRewarded(Lcom/huawei/hms/ads/reward/Reward;)V
+                invoke-virtual {p2}, Lcom/huawei/hms/ads/reward/RewardAdStatusListener;->onRewardAdClosed()V
+                :morphe_huawei_reward_done
+                return-void
+            """.trimIndent())
+            logger.info("Huawei Ads Kit rewarded patch succeeded")
+        }
     }
 
     if (useRustore && instantReward == true) {
