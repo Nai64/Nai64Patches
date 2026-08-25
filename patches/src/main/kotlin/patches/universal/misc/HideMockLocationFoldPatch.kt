@@ -5,8 +5,7 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val hideMockLocationPatch = bytecodePatch(
-    // Loaded through a category patch; kept as an executable implementation.
-    name = null,
+    name = "Hide Mock Location",
     description =
         "Makes Location.isMock and Location.isFromMockProvider always return false so apps " +
             "cannot detect spoofed GPS apps",

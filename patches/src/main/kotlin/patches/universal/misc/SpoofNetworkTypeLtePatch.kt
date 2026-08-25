@@ -5,8 +5,7 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val spoofNetworkTypeLtePatch = bytecodePatch(
-    // Loaded through a category patch; kept as an executable implementation.
-    name = null,
+    name = "Spoof Network Type LTE",
     description = "Reports NETWORK_TYPE_LTE (13) from TelephonyManager.getNetworkType() so apps that require an LTE connection run on any network.",
     default = false,
 ) {

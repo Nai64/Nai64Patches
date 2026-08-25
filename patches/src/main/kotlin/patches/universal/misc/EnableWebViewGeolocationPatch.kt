@@ -60,8 +60,7 @@ private fun BytecodePatchContext.forceBooleanSetter(
 
 @Suppress("unused")
 val enableWebViewGeolocationPatch = bytecodePatch(
-    // Loaded through a category patch; kept as an executable implementation.
-    name = null,
+    name = "Enable WebView Geolocation",
     description = "Forces WebSettings.setGeolocationEnabled(true) so WebViews expose the HTML5 Geolocation API (pairs with auto-granting prompts).",
     default = false,
 ) {

@@ -5,8 +5,7 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val disableOverscrollEffectPatch = bytecodePatch(
-    // Loaded through a category patch; kept as an executable implementation.
-    name = null,
+    name = "Disable Overscroll Effect",
     description = "Forces View.setOverScrollMode(OVER_SCROLL_NEVER) so the edge glow/bounce at list boundaries is disabled.",
     default = false,
 ) {

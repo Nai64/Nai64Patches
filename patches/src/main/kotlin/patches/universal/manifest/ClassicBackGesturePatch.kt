@@ -5,8 +5,7 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val classicBackGesturePatch = resourcePatch(
-    // Loaded through a category patch; kept as an executable implementation.
-    name = null,
+    name = "Classic Back Gesture",
     description =
         "Sets android:enableOnBackInvokedCallback to false so apps that break under the " +
             "Android 13+ predictive back system keep the classic back behavior",

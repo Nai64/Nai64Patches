@@ -5,8 +5,7 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val spoofLocationProviderPatch = bytecodePatch(
-    // Loaded through a category patch; kept as an executable implementation.
-    name = null,
+    name = "Spoof Location Provider",
     description =
         "Forces LocationManager.getBestProvider() to report \"gps\" and " +
             "isProviderEnabled() to report true, so location-dependent apps believe a GPS " +

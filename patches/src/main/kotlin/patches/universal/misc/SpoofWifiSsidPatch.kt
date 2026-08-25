@@ -5,8 +5,7 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val spoofWifiSsidPatch = bytecodePatch(
-    // Loaded through a category patch; kept as an executable implementation.
-    name = null,
+    name = "Spoof WiFi SSID",
     description = "Reports a constant value from WifiInfo.getSSID() so apps cannot read the real connected network name.",
     default = false,
 ) {

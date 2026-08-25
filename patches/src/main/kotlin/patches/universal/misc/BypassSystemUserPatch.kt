@@ -5,8 +5,7 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val bypassSystemUserPatch = bytecodePatch(
-    // Loaded through a category patch; kept as an executable implementation.
-    name = null,
+    name = "Bypass System User",
     description = "Makes UserManager.isSystemUser() report false so apps gating behavior to the system user treat the current user as normal.",
     default = false,
 ) {

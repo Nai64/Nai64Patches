@@ -5,8 +5,7 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val forceBatteryPresentPatch = bytecodePatch(
-    // Loaded through a category patch; kept as an executable implementation.
-    name = null,
+    name = "Force Battery Present",
     description = "Makes BatteryManager.isBatteryPresent() report true so apps that refuse to run without a battery work on batteryless devices.",
     default = false,
 ) {

@@ -5,7 +5,6 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val spoofBuildExtrasPatch = bytecodePatch(
-    // Loaded through a category patch; kept as an executable implementation.
     name = null,
     description =
         "Spoofs the remaining android.os.Build identity fields not covered by Bypass " +

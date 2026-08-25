@@ -5,8 +5,7 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val forceMicrophoneUnmutedPatch = bytecodePatch(
-    // Loaded through a category patch; kept as an executable implementation.
-    name = null,
+    name = "Force Microphone Unmuted",
     description = "Makes AudioManager.isMicrophoneMute() report false so apps that pause or alter behavior when the mic is muted keep running normally.",
     default = false,
 ) {

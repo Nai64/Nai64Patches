@@ -5,8 +5,7 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val keepDataOnUninstallPatch = resourcePatch(
-    // Loaded through a category patch; kept as an executable implementation.
-    name = null,
+    name = "Keep Data on Uninstall",
     description =
         "Sets android:hasFragileUserData so Android offers to keep the app's data when " +
             "uninstalling (the confirmation dialog appears on Android 10+)",

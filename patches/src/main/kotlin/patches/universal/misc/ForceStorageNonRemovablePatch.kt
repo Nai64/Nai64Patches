@@ -5,8 +5,7 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val forceStorageNonRemovablePatch = bytecodePatch(
-    // Loaded through a category patch; kept as an executable implementation.
-    name = null,
+    name = "Force Storage Non-Removable",
     description = "Makes Environment.isExternalStorageRemovable() report false so apps that refuse to run from removable storage treat it as internal.",
     default = false,
 ) {

@@ -5,8 +5,7 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val disableSnackbarsPatch = bytecodePatch(
-    // Loaded through a category patch; kept as an executable implementation.
-    name = null,
+    name = "Disable Snackbars",
     description = "No-ops com.google.android.material.snackbar.Snackbar.show() so Material Design snackbars no longer appear.",
     default = false,
 ) {

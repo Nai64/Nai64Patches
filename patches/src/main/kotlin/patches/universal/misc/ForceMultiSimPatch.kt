@@ -5,8 +5,7 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val forceMultiSimPatch = bytecodePatch(
-    // Loaded through a category patch; kept as an executable implementation.
-    name = null,
+    name = "Force Multi-SIM",
     description = "Makes TelephonyManager.isMultiSimEnabled() report true so apps that require multiple SIMs run on single-SIM devices.",
     default = false,
 ) {

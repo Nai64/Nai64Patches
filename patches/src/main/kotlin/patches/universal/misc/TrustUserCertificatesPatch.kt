@@ -8,8 +8,7 @@ private const val TRUST_MANAGER = "Ljavax/net/ssl/X509TrustManager;"
 
 @Suppress("unused")
 val trustUserCertificatesPatch = bytecodePatch(
-    // Loaded through a category patch; kept as an executable implementation.
-    name = null,
+    name = "Trust User Certificates",
     description =
         "No-ops the check methods of app-bundled X509TrustManager implementations so custom " +
             "certificate validation (including pinning reimplemented by hand) accepts anything",

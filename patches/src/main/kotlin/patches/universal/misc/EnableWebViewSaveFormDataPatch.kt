@@ -60,8 +60,7 @@ private fun BytecodePatchContext.forceBooleanSetter(
 
 @Suppress("unused")
 val enableWebViewSaveFormDataPatch = bytecodePatch(
-    // Loaded through a category patch; kept as an executable implementation.
-    name = null,
+    name = "Enable WebView Save Form Data",
     description = "Forces WebSettings.setSaveFormData(true) so WebViews remember entered form data.",
     default = false,
 ) {

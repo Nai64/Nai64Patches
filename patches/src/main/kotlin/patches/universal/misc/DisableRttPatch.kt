@@ -5,8 +5,7 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val disableRttPatch = bytecodePatch(
-    // Loaded through a category patch; kept as an executable implementation.
-    name = null,
+    name = "Disable RTT",
     description = "Makes TelephonyManager.isRttSupported() report false so apps that require RTT calling run normally.",
     default = false,
 ) {

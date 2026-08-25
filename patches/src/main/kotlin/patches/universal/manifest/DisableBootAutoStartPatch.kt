@@ -8,8 +8,7 @@ private const val BOOT_COMPLETED = "android.intent.action.BOOT_COMPLETED"
 
 @Suppress("unused")
 val disableBootAutoStartPatch = resourcePatch(
-    // Loaded through a category patch; kept as an executable implementation.
-    name = null,
+    name = "Disable Boot Auto-Start",
     description = "Removes <receiver> components that listen for android.intent.action.BOOT_COMPLETED so the app can no longer start itself on device boot.",
     default = false,
 ) {

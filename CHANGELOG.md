@@ -1,21 +1,20 @@
-## [1.28.0](https://github.com/Zanuaimi/Nai64Patches/compare/1.27.0...1.28.0) (2026-08-24)
+## [1.28.1](https://github.com/Zanuaimi/Nai64Patches/compare/1.28.0...1.28.1) (2026-08-25)
 
-### New Features
+### Bug Fixes
 
-* group standalone patches into categories ([e590177](https://github.com/Zanuaimi/Nai64Patches/commit/e590177e557e7dcae3f4f9b9ea1315e3e12d119c))
+* restore standalone patches to Morphe search results instead of category settings
+* move Hide Emulator Radio and Spoof Build Extras into Bypass Emulator Detection settings
+* exclude internal helper patches from the generated patch list
 
 ## [1.28.0](https://github.com/Zanuaimi/Nai64Patches/compare/1.27.0...1.28.0) (2026-08-25)
 
 ### New Features
 
-* add grouped Manifest & Resource Tweaks and System & Device Tweaks categories
 * add Amazon Appstore availability spoof patch
 * add RuStore / VK MyTarget support to Ads Free Rewards and No Ads
 
 ### Improvements
 
-* move 214 small standalone patches into disabled-by-default category options
-* add emulator-radio and Build-extras options to Bypass Emulator Detection
 * expand fake ad availability for Yandex / MyTarget mediation
 
 ### Bug Fixes

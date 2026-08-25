@@ -23,8 +23,7 @@ private val splitMetadataNames = setOf(
 
 @Suppress("unused")
 val clearSplitMetadataPatch = resourcePatch(
-    // Loaded through a category patch; kept as an executable implementation.
-    name = null,
+    name = "Clearing Split Metadata",
     description = "Removes split-install manifest attributes and Play Store split metadata from the app manifest.",
     default = false,
 ) {

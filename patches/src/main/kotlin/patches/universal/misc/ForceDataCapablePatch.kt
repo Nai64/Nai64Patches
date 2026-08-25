@@ -5,8 +5,7 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val forceDataCapablePatch = bytecodePatch(
-    // Loaded through a category patch; kept as an executable implementation.
-    name = null,
+    name = "Force Data Capable",
     description = "Makes TelephonyManager.isDataCapable() report true so apps that require mobile-data support run on Wi-Fi-only devices.",
     default = false,
 ) {

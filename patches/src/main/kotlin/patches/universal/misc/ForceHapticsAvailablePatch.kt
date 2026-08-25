@@ -5,8 +5,7 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val forceHapticsAvailablePatch = bytecodePatch(
-    // Loaded through a category patch; kept as an executable implementation.
-    name = null,
+    name = "Force Haptics Available",
     description = "Makes Vibrator.hasVibrator() report true so apps that require vibration/haptics run on devices without a vibrator.",
     default = false,
 ) {

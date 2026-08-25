@@ -5,8 +5,7 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val forceScreenInteractivePatch = bytecodePatch(
-    // Loaded through a category patch; kept as an executable implementation.
-    name = null,
+    name = "Force Screen Interactive",
     description = "Makes PowerManager.isInteractive() report true so apps that pause or degrade when the screen is off keep running.",
     default = false,
 ) {

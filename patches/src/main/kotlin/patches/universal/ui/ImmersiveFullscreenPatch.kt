@@ -6,8 +6,7 @@ import org.w3c.dom.Element
 
 @Suppress("unused")
 val immersiveFullscreenPatch = resourcePatch(
-    // Loaded through a category patch; kept as an executable implementation.
-    name = null,
+    name = "Immersive Fullscreen",
     description =
         "Adds android:windowFullscreen to every theme so activities render edge-to-edge " +
             "without the status bar",

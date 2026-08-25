@@ -320,7 +320,9 @@ val bypassEmulatorDetectionPatch = bytecodePatch(
             "TelephonyManager.getPhoneType(), and telltale system properties " +
             "(ro.kernel.qemu, ro.hardware, ro.product.model/device, ro.bootloader, ro.radio) so " +
             "apps and games that refuse to run, crash or match you with emulator lobbies cannot " +
-            "tell they are on an emulator. Does not hide root or a debugger connection.",
+            "tell they are on an emulator. Optional Hide Emulator Radio and Spoof Build Extras " +
+            "settings also cover TelephonyManager radio type and additional Build/Build.VERSION " +
+            "identity fields. Does not hide root or a debugger connection.",
     default = false,
 ) {
     val profile by stringOption(

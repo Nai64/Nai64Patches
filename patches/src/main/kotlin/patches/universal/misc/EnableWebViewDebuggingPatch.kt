@@ -14,8 +14,7 @@ private const val SET_DEBUGGING = "setWebContentsDebuggingEnabled"
 
 @Suppress("unused")
 val enableWebViewDebuggingPatch = bytecodePatch(
-    // Loaded through a category patch; kept as an executable implementation.
-    name = null,
+    name = "Enable WebView Debugging",
     description =
         "Turns on WebView remote debugging: existing setWebContentsDebuggingEnabled calls are " +
             "forced to true and it is actively enabled at startup, so WebViews can be inspected " +

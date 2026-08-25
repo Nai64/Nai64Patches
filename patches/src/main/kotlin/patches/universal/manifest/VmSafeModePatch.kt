@@ -5,8 +5,7 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val vmSafeModePatch = resourcePatch(
-    // Loaded through a category patch; kept as an executable implementation.
-    name = null,
+    name = "VM Safe Mode",
     description =
         "Sets android:vmSafeMode so the app runs with AOT/JIT optimizations disabled, which " +
             "can stabilize apps that crash from compiler optimizations on some devices",

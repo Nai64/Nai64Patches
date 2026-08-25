@@ -5,8 +5,7 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val spoofVoiceMailPatch = bytecodePatch(
-    // Loaded through a category patch; kept as an executable implementation.
-    name = null,
+    name = "Spoof Voice Mail",
     description =
         "Reports empty strings from TelephonyManager.getVoiceMailNumber() and " +
             "getVoiceMailAlphaTag() so apps cannot read the voicemail number or tag.",

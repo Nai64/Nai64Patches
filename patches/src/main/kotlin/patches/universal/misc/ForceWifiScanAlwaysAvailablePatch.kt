@@ -5,8 +5,7 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val forceWifiScanAlwaysAvailablePatch = bytecodePatch(
-    // Loaded through a category patch; kept as an executable implementation.
-    name = null,
+    name = "Force WiFi Scan Always Available",
     description = "Makes WifiManager.isScanAlwaysAvailable() report true so apps that need background scanning see it as enabled.",
     default = false,
 ) {

@@ -65,8 +65,7 @@ private fun BytecodePatchContext.forceIntSetter(
 
 @Suppress("unused")
 val enableWebViewCachePatch = bytecodePatch(
-    // Loaded through a category patch; kept as an executable implementation.
-    name = null,
+    name = "Enable WebView Cache",
     description = "Forces WebSettings.setCacheMode(LOAD_CACHE_ELSE_NETWORK) so WebViews reuse cached resources and work better offline.",
     default = false,
 ) {

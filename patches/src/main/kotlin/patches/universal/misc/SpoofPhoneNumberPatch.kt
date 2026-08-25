@@ -5,8 +5,7 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val spoofPhoneNumberPatch = bytecodePatch(
-    // Loaded through a category patch; kept as an executable implementation.
-    name = null,
+    name = "Spoof Phone Number",
     description =
         "Reports an empty string from TelephonyManager.getLine1Number() and " +
             "getLine2Number() so apps cannot read the device's phone number.",

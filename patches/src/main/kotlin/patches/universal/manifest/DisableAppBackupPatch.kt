@@ -6,8 +6,7 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val disableAppBackupPatch = resourcePatch(
-    // Loaded through a category patch; kept as an executable implementation.
-    name = null,
+    name = "Disable App Backup",
     description = "Sets android:allowBackup=\"false\" and drops any backupAgent so the app's data is never uploaded to cloud/device backup.",
     default = false,
 ) {

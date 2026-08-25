@@ -15,8 +15,7 @@ private const val AD_ID_PERMISSION = "com.google.android.gms.permission.AD_ID"
 
 @Suppress("unused")
 val removeAdServicesEntriesPatch = resourcePatch(
-    // Loaded through a category patch; kept as an executable implementation.
-    name = null,
+    name = "Remove Ad Services Entries",
     description =
         "Strips Privacy Sandbox (AdServices) permissions, the ad ID permission and their " +
             "config metadata from the manifest",

@@ -6,8 +6,7 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val grantWebViewGeolocationPatch = bytecodePatch(
-    // Loaded through a category patch; kept as an executable implementation.
-    name = null,
+    name = "Grant WebView Geolocation",
     description = "Auto-grants WebView geolocation requests inside onGeolocationPermissionsShowPrompt so location prompts never block the page.",
     default = false,
 ) {

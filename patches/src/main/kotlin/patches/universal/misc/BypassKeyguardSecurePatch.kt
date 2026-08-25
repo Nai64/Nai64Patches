@@ -5,8 +5,7 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val bypassKeyguardSecurePatch = bytecodePatch(
-    // Loaded through a category patch; kept as an executable implementation.
-    name = null,
+    name = "Bypass Keyguard Secure",
     description = "Makes KeyguardManager.isKeyguardSecure() report false so apps that require a secure lock screen run without one.",
     default = false,
 ) {

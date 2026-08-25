@@ -5,8 +5,7 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val ignoreScreenLockPatch = bytecodePatch(
-    // Loaded through a category patch; kept as an executable implementation.
-    name = null,
+    name = "Ignore Screen Lock",
     description =
         "Makes KeyguardManager lock-state checks report an unlocked device so apps that gate " +
             "features behind a screen lock behave as if none is set",

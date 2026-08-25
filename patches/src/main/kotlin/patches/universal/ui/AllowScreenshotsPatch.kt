@@ -47,8 +47,7 @@ private data class FlagSecureMatch(
 
 @Suppress("unused")
 val allowScreenshotsPatch = bytecodePatch(
-    // Loaded through a category patch; kept as an executable implementation.
-    name = null,
+    name = "Allow Screenshots",
     description = "Remove the screenshot-blocking window flag",
     default = false,
 ) {

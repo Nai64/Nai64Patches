@@ -13,8 +13,7 @@ private val screenSizes = listOf(
 
 @Suppress("unused")
 val supportAllScreensPatch = resourcePatch(
-    // Loaded through a category patch; kept as an executable implementation.
-    name = null,
+    name = "Support All Screens",
     description =
         "Removes compatible-screens restrictions and marks every screen size supported so " +
             "the app installs on devices it would otherwise reject",

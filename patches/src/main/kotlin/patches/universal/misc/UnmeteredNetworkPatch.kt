@@ -5,8 +5,7 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val unmeteredNetworkPatch = bytecodePatch(
-    // Loaded through a category patch; kept as an executable implementation.
-    name = null,
+    name = "Treat Network as Unmetered",
     description =
         "Makes ConnectivityManager.isActiveNetworkMetered always return false so apps lift " +
             "download restrictions and quality caps on mobile data",

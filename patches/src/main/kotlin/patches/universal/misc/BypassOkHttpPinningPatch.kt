@@ -12,8 +12,7 @@ private val pinnerClasses = listOf(
 
 @Suppress("unused")
 val bypassOkHttpPinningPatch = bytecodePatch(
-    // Loaded through a category patch; kept as an executable implementation.
-    name = null,
+    name = "Bypass OkHttp Pinning",
     description =
         "No-ops the certificate verification entry points of bundled OkHttp clients so " +
             "certificate pinning never rejects connections",

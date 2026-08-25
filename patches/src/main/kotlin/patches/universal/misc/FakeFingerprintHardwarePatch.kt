@@ -5,8 +5,7 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val fakeFingerprintHardwarePatch = bytecodePatch(
-    // Loaded through a category patch; kept as an executable implementation.
-    name = null,
+    name = "Fake Fingerprint Hardware",
     description =
         "Makes FingerprintManager report available hardware and enrolled fingerprints so " +
             "apps unlock fingerprint-gated features on any device",

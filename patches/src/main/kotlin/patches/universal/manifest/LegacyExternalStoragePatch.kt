@@ -8,8 +8,7 @@ private const val WRITE_EXTERNAL_STORAGE = "android.permission.WRITE_EXTERNAL_ST
 
 @Suppress("unused")
 val legacyExternalStoragePatch = resourcePatch(
-    // Loaded through a category patch; kept as an executable implementation.
-    name = null,
+    name = "Legacy External Storage",
     description =
         "Sets android:requestLegacyExternalStorage so the app keeps using the classic " +
             "shared-storage model instead of scoped storage (Android 10; ignored on 11+)",

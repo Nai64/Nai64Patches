@@ -5,8 +5,7 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val treatScreenAsOnPatch = bytecodePatch(
-    // Loaded through a category patch; kept as an executable implementation.
-    name = null,
+    name = "Treat Screen as On",
     description =
         "Makes PowerManager.isInteractive always return true so apps keep playing audio or " +
             "progressing instead of pausing while the screen is off",

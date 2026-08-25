@@ -20,8 +20,7 @@ import java.util.logging.Logger
  */
 @Suppress("unused")
 val allowTextSelectionPatch = bytecodePatch(
-    // Loaded through a category patch; kept as an executable implementation.
-    name = null,
+    name = "Allow Text Selection",
     description = "Forces TextView text to be selectable and long-clickable by flipping setTextIsSelectable(false) and setLongClickable(false) to true, so copy-protected text becomes selectable and copyable.",
     default = false,
 ) {

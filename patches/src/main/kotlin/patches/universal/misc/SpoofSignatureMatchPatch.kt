@@ -10,8 +10,7 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val spoofSignatureMatchPatch = bytecodePatch(
-    // Loaded through a category patch; kept as an executable implementation.
-    name = null,
+    name = "Spoof Signature Match",
     description =
         "Makes PackageManager.checkSignatures always return SIGNATURE_MATCH so apps that " +
             "verify their own or another package's signature accept any build",

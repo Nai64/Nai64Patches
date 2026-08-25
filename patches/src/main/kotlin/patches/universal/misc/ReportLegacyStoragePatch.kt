@@ -5,8 +5,7 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val reportLegacyStoragePatch = bytecodePatch(
-    // Loaded through a category patch; kept as an executable implementation.
-    name = null,
+    name = "Report Legacy Storage",
     description =
         "Makes Environment.isExternalStorageLegacy always return true so apps behave as if " +
             "they got classic shared-storage access",

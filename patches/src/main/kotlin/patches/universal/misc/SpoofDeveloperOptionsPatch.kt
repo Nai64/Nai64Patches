@@ -114,8 +114,7 @@ internal fun BytecodePatchContext.foldSettingsGetters(
 
 @Suppress("unused")
 val spoofDeveloperOptionsPatch = bytecodePatch(
-    // Loaded through a category patch; kept as an executable implementation.
-    name = null,
+    name = "Spoof Developer Options",
     description =
         "Forces Settings.Global/Settings.Secure getters for developer options, USB " +
             "debugging and wireless debugging to report disabled (0), so apps that refuse " +

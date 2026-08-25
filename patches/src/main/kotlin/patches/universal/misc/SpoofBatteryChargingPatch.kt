@@ -9,8 +9,7 @@ import java.util.logging.Logger
  */
 @Suppress("unused")
 val spoofBatteryChargingPatch = bytecodePatch(
-    // Loaded through a category patch; kept as an executable implementation.
-    name = null,
+    name = "Spoof Battery Charging State",
     description = "Forces BatteryManager.isCharging() to return true so apps that restrict features unless the device is charging stop doing so.",
     default = false,
 ) {

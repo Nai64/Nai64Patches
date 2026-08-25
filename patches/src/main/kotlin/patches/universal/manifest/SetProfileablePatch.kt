@@ -6,8 +6,7 @@ import org.w3c.dom.Element
 
 @Suppress("unused")
 val setProfileablePatch = resourcePatch(
-    // Loaded through a category patch; kept as an executable implementation.
-    name = null,
+    name = "Set Profileable",
     description =
         "Adds <profileable android:shell=\"true\"/> so profilers (Android Studio, simpleperf, " +
             "Perfetto) can attach to release builds for performance analysis",

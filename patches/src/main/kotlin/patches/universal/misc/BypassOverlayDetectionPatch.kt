@@ -11,8 +11,7 @@ import java.util.logging.Logger
  */
 @Suppress("unused")
 val bypassOverlayDetectionPatch = bytecodePatch(
-    // Loaded through a category patch; kept as an executable implementation.
-    name = null,
+    name = "Bypass Overlay Detection",
     description = "Forces android.provider.Settings.canDrawOverlays() to return true so apps that block screen recorders, accessibility overlays or chat heads stop disabling themselves.",
     default = false,
 ) {

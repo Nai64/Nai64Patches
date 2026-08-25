@@ -5,8 +5,7 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val forceUserUnlockedPatch = bytecodePatch(
-    // Loaded through a category patch; kept as an executable implementation.
-    name = null,
+    name = "Force User Unlocked",
     description = "Makes UserManager.isUserUnlocked() report true so direct-boot restricted features and storage become available immediately.",
     default = false,
 ) {

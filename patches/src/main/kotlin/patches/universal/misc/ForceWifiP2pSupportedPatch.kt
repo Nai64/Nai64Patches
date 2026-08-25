@@ -5,8 +5,7 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val forceWifiP2pSupportedPatch = bytecodePatch(
-    // Loaded through a category patch; kept as an executable implementation.
-    name = null,
+    name = "Force WiFi P2P Supported",
     description = "Makes WifiManager.isP2pSupported() report true so apps that need Wi-Fi Direct run on devices without P2P support.",
     default = false,
 ) {

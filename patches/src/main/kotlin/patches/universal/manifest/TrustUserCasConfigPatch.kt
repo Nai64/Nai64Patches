@@ -20,8 +20,7 @@ private val NSC_XML = """
 
 @Suppress("unused")
 val trustUserCasConfigPatch = resourcePatch(
-    // Loaded through a category patch; kept as an executable implementation.
-    name = null,
+    name = "Trust User CAs (Config)",
     description = "Injects a network security config that trusts user-installed CA certificates, enabling MITM/proxy interception for the app.",
     default = false,
 ) {

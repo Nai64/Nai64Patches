@@ -14,8 +14,7 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val allowMixedContentPatch = bytecodePatch(
-    // Loaded through a category patch; kept as an executable implementation.
-    name = null,
+    name = "Allow Mixed Content",
     description = "Forces WebSettings.setMixedContentMode(MIXED_CONTENT_ALWAYS_ALLOW) so WebViews load HTTP resources on HTTPS pages.",
     default = false,
 ) {

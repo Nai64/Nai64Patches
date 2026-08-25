@@ -43,8 +43,7 @@ private fun BytecodePatchContext.replaceVoidCallsWithProceed(
 
 @Suppress("unused")
 val bypassWebViewSafeBrowsingPatch = bytecodePatch(
-    // Loaded through a category patch; kept as an executable implementation.
-    name = null,
+    name = "Bypass WebView Safe Browsing",
     description = "Makes WebViewClient.onSafeBrowsingHit call proceed() instead of backToSafety()/showInterstitial(), so deceptive-site warnings do not block navigation.",
     default = false,
 ) {

@@ -5,8 +5,7 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val emptyClipboardReportPatch = bytecodePatch(
-    // Loaded through a category patch; kept as an executable implementation.
-    name = null,
+    name = "Empty Clipboard Report",
     description =
         "Makes ClipboardManager.hasPrimaryClip always return false so apps stop harvesting or " +
             "acting on clipboard content copied from other apps",

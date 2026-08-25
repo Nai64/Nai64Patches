@@ -5,8 +5,7 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val grantAllFilesAccessPatch = bytecodePatch(
-    // Loaded through a category patch; kept as an executable implementation.
-    name = null,
+    name = "Grant All-Files Access",
     description =
         "Makes Environment.isExternalStorageManager always return true so apps accept the " +
             "storage permission state without the special Android 11+ prompt",

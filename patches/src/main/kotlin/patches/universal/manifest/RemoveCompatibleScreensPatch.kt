@@ -5,8 +5,7 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val removeCompatibleScreensPatch = resourcePatch(
-    // Loaded through a category patch; kept as an executable implementation.
-    name = null,
+    name = "Remove Compatible Screens",
     description = "Removes the <compatible-screens> block so the app is not restricted to a fixed set of screen sizes/densities.",
     default = false,
 ) {

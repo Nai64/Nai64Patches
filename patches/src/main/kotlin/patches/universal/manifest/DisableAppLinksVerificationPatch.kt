@@ -6,8 +6,7 @@ import org.w3c.dom.Element
 
 @Suppress("unused")
 val disableAppLinksVerificationPatch = resourcePatch(
-    // Loaded through a category patch; kept as an executable implementation.
-    name = null,
+    name = "Disable App Links Verification",
     description =
         "Removes android:autoVerify from intent filters so Android stops prompting to verify " +
             "the app's web domains and never converts links into app opens",

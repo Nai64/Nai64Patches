@@ -60,8 +60,7 @@ private fun BytecodePatchContext.forceBooleanSetter(
 
 @Suppress("unused")
 val enableWebViewInitialFocusPatch = bytecodePatch(
-    // Loaded through a category patch; kept as an executable implementation.
-    name = null,
+    name = "Enable WebView Initial Focus",
     description = "Forces WebSettings.setNeedInitialFocus(true) so a WebView requests focus when created.",
     default = false,
 ) {

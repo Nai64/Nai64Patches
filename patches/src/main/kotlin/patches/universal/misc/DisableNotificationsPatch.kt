@@ -5,8 +5,7 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val disableNotificationsPatch = bytecodePatch(
-    // Loaded through a category patch; kept as an executable implementation.
-    name = null,
+    name = "Disable Notifications",
     description = "No-ops NotificationManager.notify(...) so the app cannot post any notifications at all.",
     default = false,
 ) {

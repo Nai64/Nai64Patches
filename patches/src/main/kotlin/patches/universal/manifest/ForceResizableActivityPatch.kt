@@ -6,8 +6,7 @@ import org.w3c.dom.Element
 
 @Suppress("unused")
 val forceResizableActivityPatch = resourcePatch(
-    // Loaded through a category patch; kept as an executable implementation.
-    name = null,
+    name = "Force Resizable Activity",
     description =
         "Sets android:resizeableActivity and drops the required touchscreen feature so the " +
             "app can run in split-screen, free-form windows, DeX, and Chromebooks",

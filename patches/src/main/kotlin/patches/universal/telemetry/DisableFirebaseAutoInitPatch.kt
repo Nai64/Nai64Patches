@@ -16,8 +16,7 @@ private val firebaseAutoInitSwitches = mapOf(
 
 @Suppress("unused")
 val disableFirebaseAutoInitPatch = resourcePatch(
-    // Loaded through a category patch; kept as an executable implementation.
-    name = null,
+    name = "Disable Firebase Auto-Init",
     description =
         "Adds Firebase manifest switches that stop Analytics, Messaging, Crashlytics and " +
             "Performance from initializing themselves at startup",

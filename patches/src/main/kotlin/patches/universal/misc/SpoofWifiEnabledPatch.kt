@@ -5,8 +5,7 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val spoofWifiEnabledPatch = bytecodePatch(
-    // Loaded through a category patch; kept as an executable implementation.
-    name = null,
+    name = "Spoof WiFi Enabled",
     description =
         "Forces WifiManager.isWifiEnabled() to report true and getWifiState() to report " +
             "WIFI_STATE_ENABLED (3) so apps cannot tell Wi-Fi is off.",

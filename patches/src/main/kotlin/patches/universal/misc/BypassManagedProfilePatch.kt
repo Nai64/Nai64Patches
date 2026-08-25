@@ -5,8 +5,7 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val bypassManagedProfilePatch = bytecodePatch(
-    // Loaded through a category patch; kept as an executable implementation.
-    name = null,
+    name = "Bypass Managed Profile",
     description = "Makes UserManager.isManagedProfile() report false so apps that restrict features on work/managed profiles behave as on a normal profile.",
     default = false,
 ) {

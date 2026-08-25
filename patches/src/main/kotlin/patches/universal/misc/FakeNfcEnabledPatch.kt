@@ -5,8 +5,7 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val fakeNfcEnabledPatch = bytecodePatch(
-    // Loaded through a category patch; kept as an executable implementation.
-    name = null,
+    name = "Fake NFC Enabled",
     description =
         "Makes NfcAdapter.isEnabled always return true so apps that require NFC stop blocking " +
             "features on devices without it",

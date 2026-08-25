@@ -9,8 +9,7 @@ import java.util.logging.Logger
  */
 @Suppress("unused")
 val spoofImeiPatch = bytecodePatch(
-    // Loaded through a category patch; kept as an executable implementation.
-    name = null,
+    name = "Spoof IMEI",
     description = "Reports a fake IMEI through TelephonyManager.getDeviceId()/getImei() so apps that fingerprint the device by IMEI see a constant value.",
     default = false,
 ) {

@@ -6,8 +6,7 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val bypassHostnameVerificationPatch = bytecodePatch(
-    // Loaded through a category patch; kept as an executable implementation.
-    name = null,
+    name = "Bypass Hostname Verification",
     description = "Makes any HostnameVerifier.verify(String, SSLSession) always return true, accepting any certificate hostname without errors.",
     default = false,
 ) {

@@ -5,8 +5,7 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val allowBackgroundActivityPatch = bytecodePatch(
-    // Loaded through a category patch; kept as an executable implementation.
-    name = null,
+    name = "Allow Background Activity",
     description =
         "Makes ActivityManager.isBackgroundRestricted always return false so apps ignore " +
             "background activity restrictions imposed by the system or user",

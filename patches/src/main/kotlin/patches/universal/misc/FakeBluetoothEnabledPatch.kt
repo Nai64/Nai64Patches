@@ -5,8 +5,7 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val fakeBluetoothEnabledPatch = bytecodePatch(
-    // Loaded through a category patch; kept as an executable implementation.
-    name = null,
+    name = "Fake Bluetooth Enabled",
     description =
         "Makes BluetoothAdapter.isEnabled always return true so apps that require Bluetooth " +
             "stop nagging about it being turned off",

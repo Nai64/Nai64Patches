@@ -5,8 +5,7 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val spoofWifiRssiPatch = bytecodePatch(
-    // Loaded through a category patch; kept as an executable implementation.
-    name = null,
+    name = "Spoof WiFi RSSI",
     description = "Reports a fixed signal strength (-50 dBm) from WifiInfo.getRssi() so apps cannot read the real Wi-Fi signal level.",
     default = false,
 ) {

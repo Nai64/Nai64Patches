@@ -5,8 +5,7 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val ignoreTouchExplorationPatch = bytecodePatch(
-    // Loaded through a category patch; kept as an executable implementation.
-    name = null,
+    name = "Ignore Touch Exploration",
     description =
         "Makes AccessibilityManager.isTouchExplorationEnabled always return false so games " +
             "that disable or alter gameplay under TalkBack behave normally",

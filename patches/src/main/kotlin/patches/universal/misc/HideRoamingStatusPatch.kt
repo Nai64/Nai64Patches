@@ -5,8 +5,7 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val hideRoamingStatusPatch = bytecodePatch(
-    // Loaded through a category patch; kept as an executable implementation.
-    name = null,
+    name = "Hide Roaming Status",
     description =
         "Makes TelephonyManager.isNetworkRoaming always return false so apps that block or " +
             "warn while roaming behave as if the device is on its home network",

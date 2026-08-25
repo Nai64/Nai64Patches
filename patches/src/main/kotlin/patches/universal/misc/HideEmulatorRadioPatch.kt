@@ -5,7 +5,6 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val hideEmulatorRadioPatch = bytecodePatch(
-    // Loaded through a category patch; kept as an executable implementation.
     name = null,
     description =
         "Makes TelephonyManager.getPhoneType always report GSM so emulator detection based on " +

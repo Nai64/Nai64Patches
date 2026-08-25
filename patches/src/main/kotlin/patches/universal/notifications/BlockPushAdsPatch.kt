@@ -7,8 +7,7 @@ import java.util.logging.Logger
 
 internal object FirebaseMessagingServiceOnMessageReceivedFingerprint : Fingerprint(
     definingClass = "Lcom/google/firebase/messaging/FirebaseMessagingService;",
-    // Loaded through a category patch; kept as an executable implementation.
-    name = null,
+    name = "Block Push Ads",
     returnType = "V",
     parameters = listOf("Lcom/google/firebase/messaging/RemoteMessage;"),
 )

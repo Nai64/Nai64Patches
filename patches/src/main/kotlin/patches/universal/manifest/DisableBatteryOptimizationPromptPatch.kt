@@ -14,8 +14,7 @@ private val batteryOptimizationActions = setOf(
 
 @Suppress("unused")
 val disableBatteryOptimizationPromptPatch = resourcePatch(
-    // Loaded through a category patch; kept as an executable implementation.
-    name = null,
+    name = "Disable Battery Optimization Prompt",
     description =
         "Removes the permission and intent filters apps use to ask for battery optimization " +
             "exemptions, so the 'Ignore battery optimizations?' dialog never appears",

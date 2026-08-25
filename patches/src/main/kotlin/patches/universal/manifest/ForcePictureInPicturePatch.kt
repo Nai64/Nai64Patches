@@ -11,8 +11,7 @@ import java.util.logging.Logger
  */
 @Suppress("unused")
 val forcePictureInPicturePatch = resourcePatch(
-    // Loaded through a category patch; kept as an executable implementation.
-    name = null,
+    name = "Force Picture-in-Picture",
     description = "Enables picture-in-picture for every activity by setting supportsPictureInPicture=true, so videos can be popped into a floating window.",
     default = false,
 ) {

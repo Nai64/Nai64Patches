@@ -39,8 +39,6 @@ private fun generatePatchList(version: String, patches: Set<Patch<*>>) {
     val patchOrder = listOf(
         "Ads Free Rewards",
         "No Ads",
-        "Manifest & Resource Tweaks",
-        "System & Device Tweaks",
         "Skip Consent Popup",
         "Skip Rate-Us Prompt",
         "Spoof Play Store Install Source",
@@ -117,7 +115,13 @@ private fun generatePatchList(version: String, patches: Set<Patch<*>>) {
     )
     val orderMap = patchOrder.withIndex().associate { (i, name) -> name to i }
 
-    val patchesMap = patches.sortedWith(compareBy({ orderMap[it.name] ?: Int.MAX_VALUE }, { it.name ?: "" })).map { patch ->
+    // Null-named patches are implementation helpers used by a visible patch.
+    // Keep them available to Kotlin dependencies without exposing them as
+    // standalone entries in Morphe Manager.
+    val patchesMap = patches
+        .filter { it.name != null }
+        .sortedWith(compareBy({ orderMap[it.name] ?: Int.MAX_VALUE }, { it.name ?: "" }))
+        .map { patch ->
         JsonPatch(
             name = patch.name!!,
             description = patch.description,

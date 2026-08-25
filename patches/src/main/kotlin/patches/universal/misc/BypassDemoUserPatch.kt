@@ -5,8 +5,7 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val bypassDemoUserPatch = bytecodePatch(
-    // Loaded through a category patch; kept as an executable implementation.
-    name = null,
+    name = "Bypass Demo User",
     description = "Makes UserManager.isDemoUser() report false so apps that gate functionality in retail/demo mode run normally.",
     default = false,
 ) {

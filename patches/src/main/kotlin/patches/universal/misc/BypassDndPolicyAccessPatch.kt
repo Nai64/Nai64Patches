@@ -10,8 +10,7 @@ import java.util.logging.Logger
  */
 @Suppress("unused")
 val bypassDndPolicyAccessPatch = bytecodePatch(
-    // Loaded through a category patch; kept as an executable implementation.
-    name = null,
+    name = "Bypass DND Policy Access",
     description = "Forces NotificationManager.isNotificationPolicyAccessGranted() to return true so automation and ringer-control apps that require Do Not Disturb access work without granting it.",
     default = false,
 ) {

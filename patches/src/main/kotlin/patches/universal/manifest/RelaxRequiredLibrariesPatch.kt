@@ -6,8 +6,7 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val relaxRequiredLibrariesPatch = resourcePatch(
-    // Loaded through a category patch; kept as an executable implementation.
-    name = null,
+    name = "Relax Required Libraries",
     description = "Sets android:required=\"false\" on every <uses-library> so the app installs even when optional system libraries are missing.",
     default = false,
 ) {

@@ -6,8 +6,7 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val keepScreenOnPatch = resourcePatch(
-    // Loaded through a category patch; kept as an executable implementation.
-    name = null,
+    name = "Keep Screen On",
     description =
         "Adds android:keepScreenOn to every theme so the display stays on while any " +
             "activity of the app is visible",

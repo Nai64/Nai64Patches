@@ -43,8 +43,7 @@ private fun BytecodePatchContext.replaceVoidCallsWithProceed(
 
 @Suppress("unused")
 val bypassWebViewSslErrorsPatch = bytecodePatch(
-    // Loaded through a category patch; kept as an executable implementation.
-    name = null,
+    name = "Bypass WebView SSL Errors",
     description = "Makes WebViewClient.onReceivedSslError call proceed() instead of cancel() so WebView cert errors no longer block the page.",
     default = false,
 ) {

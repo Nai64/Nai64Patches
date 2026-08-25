@@ -60,8 +60,7 @@ private fun BytecodePatchContext.forceBooleanSetter(
 
 @Suppress("unused")
 val enableWebViewAppCachePatch = bytecodePatch(
-    // Loaded through a category patch; kept as an executable implementation.
-    name = null,
+    name = "Enable WebView App Cache",
     description = "Enables the WebView HTML5 application cache so offline-capable web apps work.",
     default = false,
 ) {

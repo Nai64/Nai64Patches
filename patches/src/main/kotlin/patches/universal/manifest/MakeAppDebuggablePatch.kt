@@ -6,8 +6,7 @@ import org.w3c.dom.Element
 
 @Suppress("unused")
 val makeAppDebuggablePatch = resourcePatch(
-    // Loaded through a category patch; kept as an executable implementation.
-    name = null,
+    name = "Make App Debuggable",
     description = "Sets android:debuggable so debuggers and profiling tools can attach",
     default = false,
 ) {

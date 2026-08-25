@@ -60,8 +60,7 @@ private fun BytecodePatchContext.forceBooleanSetter(
 
 @Suppress("unused")
 val enableWebViewContentAccessPatch = bytecodePatch(
-    // Loaded through a category patch; kept as an executable implementation.
-    name = null,
+    name = "Enable WebView Content Access",
     description = "Forces WebSettings.setAllowContentAccess(true) so WebViews can access content providers.",
     default = false,
 ) {

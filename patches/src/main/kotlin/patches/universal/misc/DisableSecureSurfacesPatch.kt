@@ -60,8 +60,7 @@ private fun BytecodePatchContext.forceBooleanSetter(
 
 @Suppress("unused")
 val disableSecureSurfacesPatch = bytecodePatch(
-    // Loaded through a category patch; kept as an executable implementation.
-    name = null,
+    name = "Disable Secure Surfaces",
     description = "Forces Surface.setSecure() and SurfaceView.setSecure() to false so secure surfaces no longer block screenshots and screen recording.",
     default = false,
 ) {

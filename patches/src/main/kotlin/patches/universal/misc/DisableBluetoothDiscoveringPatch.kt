@@ -5,8 +5,7 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val disableBluetoothDiscoveringPatch = bytecodePatch(
-    // Loaded through a category patch; kept as an executable implementation.
-    name = null,
+    name = "Disable Bluetooth Discovering",
     description = "Makes BluetoothAdapter.isDiscovering() report false so apps cannot tell the adapter is in discovery mode.",
     default = false,
 ) {

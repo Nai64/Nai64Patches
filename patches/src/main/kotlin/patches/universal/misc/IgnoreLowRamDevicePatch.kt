@@ -5,8 +5,7 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val ignoreLowRamDevicePatch = bytecodePatch(
-    // Loaded through a category patch; kept as an executable implementation.
-    name = null,
+    name = "Ignore Low RAM Device",
     description =
         "Makes ActivityManager.isLowRamDevice always return false so apps stop degrading " +
             "graphics or features on entry-level devices",
