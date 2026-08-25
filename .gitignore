@@ -64,7 +64,6 @@ gradle-app.setting
 !README.md
 !COMPATIBILITY.md
 !TROUBLESHOOTING.md
-!docs/pixel-combat-pairip-investigation.md
 *.apk
 *.xapk
 *.mpp
