@@ -1,3 +1,9 @@
+## [1.30.0](https://github.com/Zanuaimi/Nai64Patches/compare/1.29.1...1.30.0) (2026-08-25)
+
+### New Features
+
+* add Huawei Ads Kit support ([f227219](https://github.com/Zanuaimi/Nai64Patches/commit/f2272192c10d4369cdc6d120f91be2a762b86407))
+
 ## [1.28.0](https://github.com/Nai64/Nai64Patches/compare/1.27.1...1.28.0) (2026-08-25)
 
 ### Bug Fixes
