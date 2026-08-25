@@ -37,7 +37,8 @@
             "Auto (all networks)": "auto",
             "AppLovin MAX": "max",
             "Unity Ads": "unityAds",
-            "ironSource / LevelPlay": "ironSource"
+            "ironSource / LevelPlay": "ironSource",
+            "RuStore / VK MyTarget": "rustore"
           }
         },
         {
@@ -133,6 +134,14 @@
     {
       "name": "Spoof Play Store Install Source",
       "description": "Make the app believe it was installed from the Play Store",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": []
+    },
+    {
+      "name": "Spoof Amazon Appstore Availability",
+      "description": "Makes app-specific Amazon Appstore availability checks succeed without changing the system package manager.",
       "default": false,
       "dependencies": [],
       "compatiblePackages": null,

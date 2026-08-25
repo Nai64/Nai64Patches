@@ -1,6 +1,6 @@
 {
-  "created_at": "2026-08-25T00:00:00",
-  "description": "## [1.28.1](https://github.com/Zanuaimi/Nai64Patches/compare/1.28.0...1.28.1) (2026-08-25)\\n\\n### Bug Fixes\\n\\n* restore standalone patches to Morphe search results instead of category settings\\n* move Hide Emulator Radio and Spoof Build Extras into Bypass Emulator Detection settings\\n* exclude internal helper patches from the generated patch list\\n\\n### Improvements\\n\\n* sync the fork with upstream patch changes",
+  "created_at": "2026-08-25T02:41:31",
+  "description": "## [1.28.1](https://github.com/Zanuaimi/Nai64Patches/compare/1.28.0...1.28.1) (2026-08-25)\n\n### Bug Fixes\n\n* restore standalone patch list ([9f2b647](https://github.com/Zanuaimi/Nai64Patches/commit/9f2b647ea89317c254c5b4f1b5dc58baa0de3a4f))",
   "download_url": "https://github.com/Zanuaimi/Nai64Patches/releases/download/1.28.1/patches-1.28.1.mpp",
   "signature_download_url": "",
   "version": "1.28.1"
