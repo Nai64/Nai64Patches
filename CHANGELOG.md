@@ -6,6 +6,10 @@
 * move Hide Emulator Radio and Spoof Build Extras into Bypass Emulator Detection settings
 * exclude internal helper patches from the generated patch list
 
+### Improvements
+
+* sync the fork with upstream patch changes
+
 ## [1.28.0](https://github.com/Zanuaimi/Nai64Patches/compare/1.27.0...1.28.0) (2026-08-25)
 
 ### New Features
