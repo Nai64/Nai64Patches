@@ -62,6 +62,7 @@ private fun generatePatchList(version: String, patches: Set<Patch<*>>) {
         "Remove Network Security Config",
         "Enable Large Heap",
         "Force Hardware Acceleration",
+        "Prefer ANGLE Graphics Driver",
         "Legacy External Storage",
         "Ensure Storage Permissions",
         "Ensure Modern Media Permissions",
