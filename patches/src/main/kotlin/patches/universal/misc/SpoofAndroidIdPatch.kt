@@ -22,7 +22,9 @@ val spoofAndroidIdPatch = bytecodePatch(
     execute {
         val logger = Logger.getLogger(this::class.java.name)
 
-        val value = (androidId ?: "0123456789abcdef").trim()
+        val raw = androidId?.trim()
+        val value = if (raw.isNullOrEmpty()) "0123456789abcdef" else raw
+        logger.info("Spoofing Android ID to \"$value\"")
         val patched = foldSettingsGetterConst(
             classes = setOf("Landroid/provider/Settings\$Secure;"),
             keys = setOf("android_id"),
@@ -30,7 +32,7 @@ val spoofAndroidIdPatch = bytecodePatch(
         )
 
         if (patched > 0) {
-            logger.info("Spoofed $patched Android ID read(s)")
+            logger.info("Spoofed $patched Android ID read(s) to \"$value\"")
         } else {
             logger.warning("No Android ID reads found. No changes applied.")
         }

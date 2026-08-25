@@ -2,8 +2,8 @@ package patches.universal.ui
 
 import app.morphe.patcher.patch.resourcePatch
 import java.util.logging.Logger
-import org.w3c.dom.Document
 import org.w3c.dom.Element
+import patches.universal.manifest.ensureThemeItem
 
 @Suppress("unused")
 val transparentSystemBarsPatch = resourcePatch(
@@ -44,9 +44,9 @@ val transparentSystemBarsPatch = resourcePatch(
                                 continue
                             }
 
-                            ensureItem(doc, style, "statusBarColor", "@android:color/transparent")
-                            ensureItem(doc, style, "navigationBarColor", "@android:color/transparent")
-                            ensureItem(doc, style, "windowDrawsSystemBarBackgrounds", "true")
+                            ensureThemeItem(doc, style, "android:statusBarColor", "@android:color/transparent")
+                            ensureThemeItem(doc, style, "android:navigationBarColor", "@android:color/transparent")
+                            ensureThemeItem(doc, style, "android:windowDrawsSystemBarBackgrounds", "true")
                             changed = true
                         }
                         if (changed) updatedFiles++
@@ -62,18 +62,4 @@ val transparentSystemBarsPatch = resourcePatch(
     }
 }
 
-/** Sets an existing theme item or appends a new one. */
-private fun ensureItem(doc: Document, style: Element, name: String, value: String) {
-    val items = style.getElementsByTagName("item")
-    for (i in 0 until items.length) {
-        val item = items.item(i) as? Element ?: continue
-        if (item.getAttribute("name") == "android:$name") {
-            item.textContent = value
-            return
-        }
-    }
-    val item = doc.createElement("item")
-    item.setAttribute("name", "android:$name")
-    item.textContent = value
-    style.appendChild(item)
-}
+

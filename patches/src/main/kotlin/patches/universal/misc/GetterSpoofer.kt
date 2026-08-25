@@ -85,15 +85,33 @@ internal fun BytecodePatchContext.foldSettingsGetterConst(
                     else -> continue
                 }
 
-                // Walk backwards for the const-string that fills the key register.
+                // Walk backwards for the const-string or sget-object that fills the key register.
                 var keyValue: String? = null
                 for (j in index - 1 downTo 0) {
                     val prev = instructions[j]
-                    if (prev.opcode != Opcode.CONST_STRING) continue
                     val reg = (prev as? OneRegisterInstruction)?.registerA ?: continue
                     if (reg != keyRegister) continue
-                    keyValue = ((prev as? ReferenceInstruction)?.reference as? StringReference)?.string
-                    break
+                    when (prev.opcode) {
+                        Opcode.CONST_STRING -> {
+                            keyValue = ((prev as? ReferenceInstruction)?.reference as? StringReference)?.string
+                            break
+                        }
+                        Opcode.SGET_OBJECT -> {
+                            val field = (prev as? ReferenceInstruction)?.reference as? FieldReference ?: continue
+                            // Field like Settings.Secure.ANDROID_ID -> "android_id"
+                            val fieldKey = field.name.lowercase()
+                            if (fieldKey in keys) {
+                                keyValue = fieldKey
+                                break
+                            }
+                            // also handle exact match (some keys are not just lowercased field)
+                            if (field.name in keys) {
+                                keyValue = field.name
+                                break
+                            }
+                        }
+                        else -> continue
+                    }
                 }
                 if (keyValue !in keys) continue
 
