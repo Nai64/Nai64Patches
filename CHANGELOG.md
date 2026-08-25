@@ -1,3 +1,9 @@
+## [1.27.1](https://github.com/Nai64/Nai64Patches/compare/1.27.0...1.27.1) (2026-08-25)
+
+### Bug Fixes
+
+* integrate Custom Rich Presence into Nai Patches Settings for Steam ([6b72d30](https://github.com/Nai64/Nai64Patches/commit/6b72d30edd10fbda78146028f425aece49f415eb))
+
 ## [1.27.0](https://github.com/Nai64/Nai64Patches/compare/1.26.0...1.27.0) (2026-08-24)
 
 ### Bug Fixes

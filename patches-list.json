@@ -1,6 +1,6 @@
 {
   "NOTE": "Do NOT manually edit this file. This file is automatically updated when semantic release (release.yml) runs. Manually editing this file can break your releases and break third party tools that use this file.",
-  "version": "1.27.0",
+  "version": "1.27.1",
   "patches": [
     {
       "name": "Ads Free Rewards",
@@ -1356,32 +1356,6 @@
           "values": null
         }
       ]
-    },
-    {
-      "name": "Custom Rich Presence",
-      "description": "Steam: adds editable Custom Rich Presence in Settings (via Options Menu → Custom RP dialog, stored in SharedPreferences, changeable anytime without re-patching).",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": [
-        {
-          "packageName": "com.valvesoftware.android.steam.community",
-          "name": null,
-          "description": null,
-          "apkFileType": null,
-          "appIconColor": null,
-          "signatures": null,
-          "targets": [
-            {
-              "version": null,
-              "versionCodes": null,
-              "isExperimental": false,
-              "minSdk": null,
-              "description": null
-            }
-          ]
-        }
-      ],
-      "options": []
     },
     {
       "name": "Disable Activity Transitions",
