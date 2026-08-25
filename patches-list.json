@@ -1,6 +1,6 @@
 {
   "NOTE": "Do NOT manually edit this file. This file is automatically updated when semantic release (release.yml) runs. Manually editing this file can break your releases and break third party tools that use this file.",
-  "version": "1.27.1",
+  "version": "1.29.1",
   "patches": [
     {
       "name": "Ads Free Rewards",
@@ -37,7 +37,8 @@
             "Auto (all networks)": "auto",
             "AppLovin MAX": "max",
             "Unity Ads": "unityAds",
-            "ironSource / LevelPlay": "ironSource"
+            "ironSource / LevelPlay": "ironSource",
+            "RuStore / VK MyTarget": "rustore"
           }
         },
         {
@@ -133,6 +134,14 @@
     {
       "name": "Spoof Play Store Install Source",
       "description": "Make the app believe it was installed from the Play Store",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": []
+    },
+    {
+      "name": "Spoof Amazon Appstore Availability",
+      "description": "Makes app-specific Amazon Appstore availability checks succeed without changing the system package manager.",
       "default": false,
       "dependencies": [],
       "compatiblePackages": null,
@@ -812,7 +821,125 @@
         "ResourcePatch"
       ],
       "compatiblePackages": null,
-      "options": []
+      "options": [
+        {
+          "key": "automaticStrategySelection",
+          "title": "Automatic strategy selection",
+          "description": "Apply every compatible PairIP strategy whose target is found. Turn this off to select only the strategy groups needed for testing.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": true,
+          "values": null
+        },
+        {
+          "key": "manifestCleanupStrategy",
+          "title": "XML manifest cleanup",
+          "description": "Redirect the PairIP Application wrapper when possible, then remove PairIP license activities, provider, and CHECK_LICENSE permission from AndroidManifest.xml.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "pairipVmRunnerChecks",
+          "title": "PairIP VMRunner checks",
+          "description": "Bypass Application.<clinit> and VMRunner.invoke startup paths that can execute the PairIP VM.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "startupLauncherChecks",
+          "title": "StartupLauncher checks",
+          "description": "Bypass both PairIP StartupLauncher.launch and StartupLauncher.pairip entry points.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "licenseClientV3Activity",
+          "title": "LicenseClient V3 activity",
+          "description": "Disable the PairIP V3 LicenseClient.onActivityCreate path.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "localInstallerChecks",
+          "title": "Local installer checks",
+          "description": "Spoof checks that verify which installer installed the app.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "signatureChecks",
+          "title": "Signature checks",
+          "description": "Bypass APK integrity and signature-match checks.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "licenseUiSuppression",
+          "title": "License error and paywall UI",
+          "description": "Suppress PairIP error dialogs, paywalls, and close-app screens.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "applicationStartupHooks",
+          "title": "Application startup hooks",
+          "description": "Bypass PairIP Application attachBaseContext and onCreate hooks. These run early and may be less compatible with some apps.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "licenseClientChecks",
+          "title": "License client checks",
+          "description": "Disable the legacy LicenseClient license-check and root-termination path.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "contentProviderChecks",
+          "title": "Content provider checks",
+          "description": "Bypass PairIP content-provider initialization and query checks.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "responseValidationChecks",
+          "title": "Response validation checks",
+          "description": "Bypass license-response validation, metadata, and signature checks across legacy validator variants.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "pairipV2Checks",
+          "title": "PairIP V2 checks",
+          "description": "Bypass PairIP V2 license flow, response signature verification, and repeated background checks.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        }
+      ]
     },
     {
       "name": "Unlock RevenueCat Entitlements",
@@ -1175,7 +1302,7 @@
     },
     {
       "name": "Bypass Emulator Detection",
-      "description": "Spoofs android.os.Build identity (model, device, manufacturer, hardware, fingerprint, serial, user, host, radio, bootloader) and Build.getRadioVersion(), TelephonyManager.getPhoneType(), and telltale system properties (ro.kernel.qemu, ro.hardware, ro.product.model/device, ro.bootloader, ro.radio) so apps and games that refuse to run, crash or match you with emulator lobbies cannot tell they are on an emulator. Does not hide root or a debugger connection.",
+      "description": "Spoofs android.os.Build identity (model, device, manufacturer, hardware, fingerprint, serial, user, host, radio, bootloader) and Build.getRadioVersion(), TelephonyManager.getPhoneType(), and telltale system properties (ro.kernel.qemu, ro.hardware, ro.product.model/device, ro.bootloader, ro.radio) so apps and games that refuse to run, crash or match you with emulator lobbies cannot tell they are on an emulator. Optional Hide Emulator Radio and Spoof Build Extras settings also cover TelephonyManager radio type and additional Build/Build.VERSION identity fields. Does not hide root or a debugger connection.",
       "default": false,
       "dependencies": [],
       "compatiblePackages": null,
@@ -1192,6 +1319,24 @@
             "Samsung Galaxy S23": "samsungS23",
             "Xiaomi 13": "xiaomi13"
           }
+        },
+        {
+          "key": "hideEmulatorRadio",
+          "title": "Hide Emulator Radio",
+          "description": "Make TelephonyManager report a normal GSM radio type.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "spoofBuildExtras",
+          "title": "Spoof Build Extras",
+          "description": "Spoof additional Build and Build.VERSION fields used by emulator checks.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
         }
       ]
     },
@@ -1334,6 +1479,14 @@
     {
       "name": "Classic Back Gesture",
       "description": "Sets android:enableOnBackInvokedCallback to false so apps that break under the Android 13+ predictive back system keep the classic back behavior",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": []
+    },
+    {
+      "name": "Clearing Split Metadata",
+      "description": "Removes split-install manifest attributes and Play Store split metadata from the app manifest.",
       "default": false,
       "dependencies": [],
       "compatiblePackages": null,
@@ -2380,14 +2533,6 @@
       "options": []
     },
     {
-      "name": "Hide Emulator Radio",
-      "description": "Makes TelephonyManager.getPhoneType always report GSM so emulator detection based on a missing radio reports a normal device",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
       "name": "Hide Installed Apps",
       "description": "Redirects PackageManager.getInstalledPackages/getInstalledApplications to Collections.emptyList() so the app sees no other installed apps.",
       "default": false,
@@ -2763,14 +2908,6 @@
     {
       "name": "Spoof Bluetooth Name",
       "description": "Reports a constant name from BluetoothAdapter.getName() so apps cannot read the real local Bluetooth adapter name.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Spoof Build Extras",
-      "description": "Spoofs the remaining android.os.Build identity fields not covered by Bypass Emulator Detection (BOOTLOADER, RADIO, USER, HOST, getRadioVersion, and Build.VERSION RELEASE/INCREMENTAL/SECURITY_PATCH/CODENAME) with values from a real Pixel 6, so apps cannot fingerprint the device through these fields.",
       "default": false,
       "dependencies": [],
       "compatiblePackages": null,

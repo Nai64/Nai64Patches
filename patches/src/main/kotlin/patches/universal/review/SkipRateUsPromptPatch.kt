@@ -6,7 +6,7 @@ import app.morphe.patcher.patch.bytecodePatch
 import java.util.logging.Logger
 
 internal object ReviewManagerRequestReviewFlowFingerprint : Fingerprint(
-    name = "requestReviewFlow",
+    name = "launchReviewFlow",
     returnType = "Lcom/google/android/play/core/tasks/Task;",
     custom = { method, classDef ->
         classDef.interfaces.contains("Lcom/google/android/play/core/review/ReviewManager;")

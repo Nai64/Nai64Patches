@@ -10,7 +10,7 @@ import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 import java.util.logging.Logger
 
 internal object SplashOnCreateFingerprint : Fingerprint(
-    name = "onCreate",
+    name = "Skip Splash Screen (Experimental)",
     returnType = "V",
     custom = { method, classDef ->
         classDef.type.contains("splash", ignoreCase = true) &&

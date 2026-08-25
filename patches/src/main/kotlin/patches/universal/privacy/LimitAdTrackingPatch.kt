@@ -7,7 +7,7 @@ import java.util.logging.Logger
 
 internal object AdvertisingIdClientInfoGetIdFingerprint : Fingerprint(
     definingClass = "Lcom/google/android/gms/ads/identifier/AdvertisingIdClient\$Info;",
-    name = "getId",
+    name = "isLimitAdTrackingEnabled",
     returnType = "Ljava/lang/String;",
     parameters = emptyList(),
 )

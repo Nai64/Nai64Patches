@@ -112,6 +112,34 @@ internal object FallbackStringInstallerCheckFingerprint : Fingerprint(
     strings = listOf("com.android.vending"),
 )
 
+// -- Amazon Appstore availability fingerprints --
+// These target app-specific checks that directly reference an Amazon
+// Appstore package name. They do not modify PackageManager globally.
+
+internal object AmazonVeneziaBooleanAvailabilityFingerprint : Fingerprint(
+    returnType = "Z",
+    parameters = emptyList(),
+    strings = listOf("com.amazon.venezia"),
+)
+
+internal object AmazonVeneziaStringAvailabilityFingerprint : Fingerprint(
+    returnType = "Ljava/lang/String;",
+    parameters = emptyList(),
+    strings = listOf("com.amazon.venezia"),
+)
+
+internal object AmazonMarketplaceBooleanAvailabilityFingerprint : Fingerprint(
+    returnType = "Z",
+    parameters = emptyList(),
+    strings = listOf("com.amazon.device.marketplace"),
+)
+
+internal object AmazonMarketplaceStringAvailabilityFingerprint : Fingerprint(
+    returnType = "Ljava/lang/String;",
+    parameters = emptyList(),
+    strings = listOf("com.amazon.device.marketplace"),
+)
+
 internal object PairipSignatureCheckVerifyIntegrityFingerprint : Fingerprint(
     definingClass = "Lcom/pairip/SignatureCheck;",
     name = "verifyIntegrity",
@@ -152,6 +180,48 @@ internal object PairipLicenseActivityShowPaywallFingerprint : Fingerprint(
     parameters = emptyList(),
 )
 
+internal object PairipLicenseActivityNnStartFingerprint : Fingerprint(
+    definingClass = "Lcom/pairip/licensecheck/LicenseActivity;",
+    name = "nnStart",
+    returnType = "V",
+    parameters = emptyList(),
+)
+
+internal object PairipLicenseActivityOnStartFingerprint : Fingerprint(
+    definingClass = "Lcom/pairip/licensecheck/LicenseActivity;",
+    name = "onStart",
+    returnType = "V",
+    parameters = emptyList(),
+)
+
+internal object PairipLicenseActivityCloseAppFingerprint : Fingerprint(
+    definingClass = "Lcom/pairip/licensecheck/LicenseActivity;",
+    name = "closeApp",
+    returnType = "V",
+    parameters = emptyList(),
+)
+
+internal object PairipLicenseActivityExitAppFingerprint : Fingerprint(
+    definingClass = "Lcom/pairip/licensecheck/LicenseActivity;",
+    name = "exitApp",
+    returnType = "V",
+    parameters = emptyList(),
+)
+
+internal object PairipLicenseActivityCloseappFingerprint : Fingerprint(
+    definingClass = "Lcom/pairip/licensecheck/LicenseActivity;",
+    name = "closeapp",
+    returnType = "V",
+    parameters = emptyList(),
+)
+
+internal object PairipLicenseActivityExitappFingerprint : Fingerprint(
+    definingClass = "Lcom/pairip/licensecheck/LicenseActivity;",
+    name = "exitapp",
+    returnType = "V",
+    parameters = emptyList(),
+)
+
 // -- Pairip Application class bypass --
 // Prevents Pairip from loading libpairipcore.so and starting the VM
 // by neutering the Application entry point methods.
@@ -168,6 +238,40 @@ internal object PairipApplicationOnCreateFingerprint : Fingerprint(
     name = "onCreate",
     returnType = "V",
     parameters = emptyList(),
+)
+
+// -- Pairip runtime interception strategies --
+
+internal object PairipApplicationClinitFingerprint : Fingerprint(
+    definingClass = "Lcom/pairip/application/Application;",
+    name = "<clinit>",
+    accessFlags = listOf(AccessFlags.STATIC),
+    returnType = "V",
+    parameters = emptyList(),
+)
+
+internal object PairipStartupLauncherLaunchFingerprint : Fingerprint(
+    definingClass = "Lcom/pairip/StartupLauncher;",
+    name = "launch",
+    returnType = "V",
+)
+
+internal object PairipStartupLauncherPairipFingerprint : Fingerprint(
+    definingClass = "Lcom/pairip/StartupLauncher;",
+    name = "pairip",
+    returnType = "V",
+)
+
+internal object PairipVMRunnerInvokeFingerprint : Fingerprint(
+    definingClass = "Lcom/pairip/VMRunner;",
+    name = "invoke",
+    returnType = "Ljava/lang/Object;",
+)
+
+internal object PairipLicenseClientV3OnActivityCreateFingerprint : Fingerprint(
+    definingClass = "Lcom/pairip/licensecheck3/LicenseClientV3;",
+    name = "onActivityCreate",
+    returnType = "V",
 )
 
 // -- Native MAX (non-Unity) fingerprints --
@@ -274,6 +378,57 @@ internal object UnityAdsV3ShowOptionsFingerprint : Fingerprint(
         "Ljava/lang/String;",
         "Lcom/unity3d/ads/UnityAdsShowOptions;",
     ),
+)
+
+// -- VK MyTarget / RuStore distribution ad fingerprints --
+// MyTarget's InterstitialAd and RewardedAd inherit show(Context) from the
+// common BaseInterstitialAd implementation.
+internal object MyTargetBaseInterstitialShowFingerprint : Fingerprint(
+    definingClass = "Lcom/my/target/ads/BaseInterstitialAd;",
+    name = "show",
+    accessFlags = listOf(AccessFlags.PUBLIC),
+    returnType = "V",
+    parameters = listOf("Landroid/content/Context;"),
+)
+
+internal object YandexUnityRewardedWrapperShowFingerprint : Fingerprint(
+    definingClass = "Lcom/yandex/mobile/ads/unity/wrapper/rewarded/RewardedAdWrapper;",
+    name = "show",
+    accessFlags = listOf(AccessFlags.PUBLIC),
+    returnType = "V",
+    parameters = listOf("Landroid/app/Activity;"),
+)
+
+internal object YandexUnityRewardedListenerOnRewardedFingerprint : Fingerprint(
+    definingClass = "Lcom/yandex/mobile/ads/unity/wrapper/rewarded/a;",
+    name = "onRewarded",
+    accessFlags = listOf(AccessFlags.PUBLIC),
+    returnType = "V",
+    parameters = listOf("Lcom/yandex/mobile/ads/rewarded/Reward;"),
+)
+
+internal object YandexUnityInterstitialWrapperShowFingerprint : Fingerprint(
+    definingClass = "Lcom/yandex/mobile/ads/unity/wrapper/interstitial/InterstitialAdWrapper;",
+    name = "show",
+    accessFlags = listOf(AccessFlags.PUBLIC),
+    returnType = "V",
+    parameters = listOf("Landroid/app/Activity;"),
+)
+
+internal object YandexMyTargetRewardedIsLoadedFingerprint : Fingerprint(
+    definingClass = "Lcom/yandex/mobile/ads/mediation/mytarget/m;",
+    name = "isLoaded",
+    accessFlags = listOf(AccessFlags.PUBLIC),
+    returnType = "Z",
+    parameters = emptyList(),
+)
+
+internal object YandexMyTargetInterstitialIsLoadedFingerprint : Fingerprint(
+    definingClass = "Lcom/yandex/mobile/ads/mediation/mytarget/c0;",
+    name = "isLoaded",
+    accessFlags = listOf(AccessFlags.PUBLIC),
+    returnType = "Z",
+    parameters = emptyList(),
 )
 
 // -- ironSource (LevelPlay) public API --
@@ -545,6 +700,13 @@ internal object PairipLicenseClientCheckLicenseFingerprint : Fingerprint(
     name = "checkLicense",
     returnType = "V",
     parameters = listOf("Landroid/content/Context;"),
+)
+
+internal object PairipLicenseClientInitializeLicenseCheckFingerprint : Fingerprint(
+    definingClass = "Lcom/pairip/licensecheck/LicenseClient;",
+    name = "initializeLicenseCheck",
+    returnType = "V",
+    parameters = emptyList(),
 )
 
 // -- Pairip LicenseContentProvider lifecycle neuter --

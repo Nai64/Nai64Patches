@@ -10,6 +10,23 @@ import patches.universal.ads.util.fireHiddenCallbacks
 
 private val logger = Logger.getLogger("patches.universal.ads.NoAdsPatch")
 
+private fun BytecodePatchContext.injectOrSkip(
+    fingerprint: Fingerprint,
+    instructions: String,
+) {
+    val method = fingerprint.methodOrNull ?: return
+    if (method.implementation == null) {
+        logger.warning(
+            "No Ads: skipping ${fingerprint.name}: method has no implementation",
+        )
+        return
+    }
+    method.addInstructions(0, instructions)
+}
+
+private fun BytecodePatchContext.returnVoid(fingerprint: Fingerprint) =
+    injectOrSkip(fingerprint, "return-void")
+
 private fun BytecodePatchContext.patchVoid(fingerprint: Fingerprint): Int {
     val name = fingerprint.name ?: return 0
     val params = fingerprint.parameters ?: emptyList()
@@ -178,12 +195,63 @@ val noAdsPatch = bytecodePatch(
             FacebookRewardedVideoAdShowFingerprint.methodOrNull != null
         val hasPangle = PangleInterstitialShowFingerprint.methodOrNull != null ||
             PangleRewardedShowFingerprint.methodOrNull != null
+        val hasMyTarget = MyTargetBaseInterstitialShowFingerprint.methodOrNull != null
+        val hasYandexRewarded = YandexUnityRewardedWrapperShowFingerprint.methodOrNull != null
+        val hasYandexInterstitial = YandexUnityInterstitialWrapperShowFingerprint.methodOrNull != null
         val hasLevelPlay = LevelPlayRewardedAdIsReadyFingerprint.methodOrNull != null ||
             IronSourceLevelPlayFullScreenShowAdFingerprint.methodOrNull != null
 
-        if (!hasMaxUnity && !hasNativeMax && !hasAdMob && !hasUnityAdsV3 && !hasUnityAdsV4 && !hasIronSource && !hasAppLovinLegacy && !hasVungle && !hasFacebook && !hasPangle && !hasLevelPlay) {
-            detectionLogger.warning("Could not find supported ad SDK (MAX Unity, native MAX, AdMob, Unity Ads v3/v4, ironSource/LevelPlay, AppLovin, Vungle, Meta or Pangle). No changes applied.")
+        if (
+            !hasMaxUnity &&
+            !hasNativeMax &&
+            !hasAdMob &&
+            !hasUnityAdsV3 &&
+            !hasUnityAdsV4 &&
+            !hasIronSource &&
+            !hasAppLovinLegacy &&
+            !hasVungle &&
+            !hasFacebook &&
+            !hasPangle &&
+            !hasLevelPlay &&
+            !hasMyTarget &&
+            !hasYandexRewarded &&
+            !hasYandexInterstitial
+        ) {
+            detectionLogger.warning(
+                "Could not find supported ad SDK (MAX Unity, native MAX, AdMob, " +
+                    "Unity Ads v3/v4, ironSource/LevelPlay, AppLovin, Vungle, " +
+                    "Meta, Pangle, VK MyTarget or Yandex). No changes applied.",
+            )
             return@execute
+        }
+
+        // -- VK MyTarget / RuStore build --
+        // MyTarget interstitial and rewarded classes inherit show(Context)
+        // from the same base implementation. Use runtime type checks so the
+        // individual No Ads toggles remain independent.
+        if (hasMyTarget && (blockInterstitials == true || blockRewarded == true)) {
+            val myTargetChecks = buildString {
+                if (blockRewarded == true) {
+                    appendLine("instance-of v0, p0, Lcom/my/target/ads/RewardedAd;")
+                    appendLine("if-nez v0, :morphe_no_ads_mytarget_block")
+                }
+                if (blockInterstitials == true) {
+                    appendLine("instance-of v0, p0, Lcom/my/target/ads/InterstitialAd;")
+                    appendLine("if-nez v0, :morphe_no_ads_mytarget_block")
+                }
+                appendLine("goto :morphe_no_ads_mytarget_continue")
+                appendLine(":morphe_no_ads_mytarget_block")
+                appendLine("return-void")
+                appendLine(":morphe_no_ads_mytarget_continue")
+            }
+            injectOrSkip(MyTargetBaseInterstitialShowFingerprint, myTargetChecks.trim())
+        }
+
+        if (blockRewarded == true) {
+            returnVoid(YandexUnityRewardedWrapperShowFingerprint)
+        }
+        if (blockInterstitials == true) {
+            returnVoid(YandexUnityInterstitialWrapperShowFingerprint)
         }
 
         var totalPatched = 0

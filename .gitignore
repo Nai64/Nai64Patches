@@ -53,6 +53,7 @@ fabric.properties
 ### Gradle template
 .gradle
 **/build/
+**/bin/
 !src/**/build/
 gradle-app.setting
 !gradle-wrapper.jar
@@ -67,6 +68,7 @@ gradle-app.setting
 *.xapk
 *.mpp
 .vscode/
+.serena/
 node_modules/
 .idea/
 local.properties
@@ -81,3 +83,4 @@ scripts/
 com/
 build/
 tests/
+testing/

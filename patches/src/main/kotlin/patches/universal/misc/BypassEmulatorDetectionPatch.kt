@@ -2,6 +2,7 @@ package patches.universal.misc
 
 import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
 import app.morphe.patcher.patch.BytecodePatchContext
+import app.morphe.patcher.patch.booleanOption
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.patch.stringOption
 import com.android.tools.smali.dexlib2.Opcode
@@ -319,7 +320,9 @@ val bypassEmulatorDetectionPatch = bytecodePatch(
             "TelephonyManager.getPhoneType(), and telltale system properties " +
             "(ro.kernel.qemu, ro.hardware, ro.product.model/device, ro.bootloader, ro.radio) so " +
             "apps and games that refuse to run, crash or match you with emulator lobbies cannot " +
-            "tell they are on an emulator. Does not hide root or a debugger connection.",
+            "tell they are on an emulator. Optional Hide Emulator Radio and Spoof Build Extras " +
+            "settings also cover TelephonyManager radio type and additional Build/Build.VERSION " +
+            "identity fields. Does not hide root or a debugger connection.",
     default = false,
 ) {
     val profile by stringOption(
@@ -332,6 +335,18 @@ val bypassEmulatorDetectionPatch = bytecodePatch(
         ),
         key = "emulatorProfile",
         description = "Which real device identity to imitate.",
+    )
+    val hideEmulatorRadio by booleanOption(
+        title = "Hide Emulator Radio",
+        default = false,
+        key = "hideEmulatorRadio",
+        description = "Make TelephonyManager report a normal GSM radio type.",
+    )
+    val spoofBuildExtras by booleanOption(
+        title = "Spoof Build Extras",
+        default = false,
+        key = "spoofBuildExtras",
+        description = "Spoof additional Build and Build.VERSION fields used by emulator checks.",
     )
 
     execute {
@@ -358,6 +373,13 @@ val bypassEmulatorDetectionPatch = bytecodePatch(
             "qemu.hw.mainkeys" to "0",
         )
         val patchedProps = foldSystemPropertyMap(emulatorProps)
+
+        if (hideEmulatorRadio == true) {
+            hideEmulatorRadioPatch.execute(this)
+        }
+        if (spoofBuildExtras == true) {
+            spoofBuildExtrasPatch.execute(this)
+        }
 
         val total = patchedBuild + patchedSerial + patchedRadio + patchedPhone + patchedProps
         if (total > 0) {

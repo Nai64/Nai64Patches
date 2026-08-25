@@ -44,11 +44,6 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
 
-      - name: Build
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: ./gradlew :patches:buildAndroid generatePatchesList
-
       - name: Clean old build artifacts (avoids version bleed into assets)
         run: rm -f patches/build/libs/patches-*.mpp
 
