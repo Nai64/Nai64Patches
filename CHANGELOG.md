@@ -1,5 +1,11 @@
 ## [1.29.1](https://github.com/Zanuaimi/Nai64Patches/compare/1.29.0...1.29.1) (2026-08-25)
 
+### Bug Fixes
+
+* support PairIP onStart startup variant ([ecd1d09](https://github.com/Zanuaimi/Nai64Patches/commit/ecd1d09a0cd29bbaa661dbe5b0ec663b41b9d4fe))
+
+## [1.29.1](https://github.com/Zanuaimi/Nai64Patches/compare/1.29.0...1.29.1) (2026-08-25)
+
 ### Improvements
 
 - expand PairIP LicenseActivity startup suppression to support both `nnStart()` and `onStart()` variants

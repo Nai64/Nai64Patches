@@ -1,6 +1,6 @@
 {
-  "created_at": "2026-08-25T03:17:26",
-  "description": "## [1.29.1](https://github.com/Zanuaimi/Nai64Patches/compare/1.29.0...1.29.1) (2026-08-25)\\n\\n### Improvements\\n\\n* expand PairIP LicenseActivity startup suppression to support both nnStart() and onStart() variants",
+  "created_at": "2026-08-25T03:58:54",
+  "description": "## [1.29.1](https://github.com/Zanuaimi/Nai64Patches/compare/1.29.0...1.29.1) (2026-08-25)\n\n### Bug Fixes\n\n* support PairIP onStart startup variant ([ecd1d09](https://github.com/Zanuaimi/Nai64Patches/commit/ecd1d09a0cd29bbaa661dbe5b0ec663b41b9d4fe))",
   "download_url": "https://github.com/Zanuaimi/Nai64Patches/releases/download/1.29.1/patches-1.29.1.mpp",
   "signature_download_url": "",
   "version": "1.29.1"
