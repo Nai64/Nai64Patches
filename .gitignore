@@ -69,6 +69,7 @@ gradle-app.setting
 *.xapk
 *.mpp
 .vscode/
+.serena/
 node_modules/
 .idea/
 local.properties
