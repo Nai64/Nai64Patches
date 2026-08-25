@@ -1,3 +1,26 @@
+## [1.29.0](https://github.com/Nai64/Nai64Patches/compare/1.28.0...1.29.0) (2026-08-25)
+
+### New Features
+
+* add ANGLE graphics driver preference ([2bc5d9a](https://github.com/Nai64/Nai64Patches/commit/2bc5d9ababf8c8ee12a10a227aa39902f3a1db82))
+* add Huawei Ads Kit support ([f227219](https://github.com/Nai64/Nai64Patches/commit/f2272192c10d4369cdc6d120f91be2a762b86407))
+* add modern Android compatibility patches ([659a35c](https://github.com/Nai64/Nai64Patches/commit/659a35cfd8c95cba79a08ec6b4ba6df3c0fed46e))
+* add storage permission compatibility patch ([29417ff](https://github.com/Nai64/Nai64Patches/commit/29417ffa255760dc8f977e7f7f6e225a7038232a))
+
+## [1.31.0](https://github.com/Zanuaimi/Nai64Patches/compare/1.30.0...1.31.0) (2026-08-25)
+
+### New Features
+
+* add ANGLE graphics driver preference ([2bc5d9a](https://github.com/Zanuaimi/Nai64Patches/commit/2bc5d9ababf8c8ee12a10a227aa39902f3a1db82))
+* add modern Android compatibility patches ([659a35c](https://github.com/Zanuaimi/Nai64Patches/commit/659a35cfd8c95cba79a08ec6b4ba6df3c0fed46e))
+* add storage permission compatibility patch ([29417ff](https://github.com/Zanuaimi/Nai64Patches/commit/29417ffa255760dc8f977e7f7f6e225a7038232a))
+
+## [1.30.0](https://github.com/Zanuaimi/Nai64Patches/compare/1.29.1...1.30.0) (2026-08-25)
+
+### New Features
+
+* add Huawei Ads Kit support ([f227219](https://github.com/Zanuaimi/Nai64Patches/commit/f2272192c10d4369cdc6d120f91be2a762b86407))
+
 ## [1.28.0](https://github.com/Nai64/Nai64Patches/compare/1.27.1...1.28.0) (2026-08-25)
 
 ### Bug Fixes
