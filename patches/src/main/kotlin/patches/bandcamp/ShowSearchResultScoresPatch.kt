@@ -37,11 +37,23 @@ private fun BytecodePatchContext.foldShowSearchResultScore(): Int {
                 var keyVal: String? = null
                 for (j in index - 1 downTo 0) {
                     val prev = instructions[j]
-                    if (prev.opcode != Opcode.CONST_STRING && prev.opcode != Opcode.CONST_STRING_JUMBO) continue
                     val reg = (prev as? OneRegisterInstruction)?.registerA ?: continue
                     if (reg != keyReg) continue
-                    keyVal = ((prev as? ReferenceInstruction)?.reference as? StringReference)?.string
-                    break
+                    when (prev.opcode) {
+                        Opcode.CONST_STRING, Opcode.CONST_STRING_JUMBO -> {
+                            keyVal = ((prev as? ReferenceInstruction)?.reference as? StringReference)?.string
+                            break
+                        }
+                        Opcode.SGET_OBJECT -> {
+                            val field = (prev as? ReferenceInstruction)?.reference as? com.android.tools.smali.dexlib2.iface.reference.FieldReference ?: continue
+                            // Field name might be the key itself if it's a static final String field
+                            if (field.name == "show_search_result_score" || field.name.lowercase().contains("search_result_score")) {
+                                keyVal = "show_search_result_score"
+                                break
+                            }
+                        }
+                        else -> continue
+                    }
                 }
                 if (keyVal != "show_search_result_score") continue
 
