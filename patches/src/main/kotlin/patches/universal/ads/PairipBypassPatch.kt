@@ -611,6 +611,9 @@ val pairipBypassPatch = bytecodePatch(
             logger.warning(reason)
         } else {
             logger.info("Pairip Bypass (Experimental) patch succeeded (${applied.size} strategy(s) applied)")
+            logger.warning("IF THE APP CRASHES OR STILL BRINGS UP PLAY STORE, DON'T ASK ME TO FIX IT. IT IS NOT POSSIBLE")
+            logger.warning("IF THE APP CRASHES OR STILL BRINGS UP PLAY STORE, DON'T ASK ME TO FIX IT. IT IS NOT POSSIBLE")
+            logger.warning("IF THE APP CRASHES OR STILL BRINGS UP PLAY STORE, DON'T ASK ME TO FIX IT. IT IS NOT POSSIBLE")
         }
     }
 }
