@@ -6,8 +6,13 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val disableUpdateCheckPatch = bytecodePatch(
-    name = "Disable Update Checks",
-    description = "Disable in-app update prompts",
+    name = "Disable Google Update Check",
+    description =
+        "Disables the Google Play in-app update flow used by newer apps through the Play Core " +
+            "update API. This does not remove the app from Google Play's update list or disable " +
+            "custom update checks implemented by the app itself. Do not select this patch when " +
+            "using Bypass Forced Updates, because that patch already includes this Play Core " +
+            "functionality.",
     default = false,
 ) {
     execute {

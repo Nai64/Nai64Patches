@@ -1,6 +1,7 @@
 package patches.universal.ads
 
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
+import app.morphe.patcher.extensions.InstructionExtensions.removeInstructions
 import app.morphe.patcher.patch.booleanOption
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.patch.stringOption
@@ -11,8 +12,8 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val adsFreeRewardsPatch = bytecodePatch(
-    name = "Ads Free Rewards",
-    description = "Skip rewarded ads and claim rewards instantly",
+    name = "Ads Free Rewards (Experimental)",
+    description = "Claim rewards without watching rewarded ads. Use with No Ads to block other ad formats, but leave No Ads' Block Rewarded option disabled so reward-based features remain available. Currently includes AppLovin MAX, Unity Ads, ironSource/LevelPlay, Huawei Ads Kit, VK MyTarget (including RuStore), and Yandex integrations. Experimental: coverage is not guaranteed for every APK or ad SDK.",
     default = false,
 ) {
     val patchVersion by stringOption(
@@ -226,6 +227,11 @@ private fun BytecodePatchContext.applyYandexWrapperStrategy(logger: Logger) {
     """.trimIndent())
     val showClass = YandexUnityRewardedWrapperShowFingerprint.classDefOrNull ?: return
     val clonedShow = yandexRewardedShow.cloneMutableAndPreserveParameters(showClass)
+    // Replace the original method instead of prepending to it. Yandex's wrapper
+    // can contain branch targets that become invalid when instructions are
+    // inserted before its existing implementation, causing VerifyError at runtime.
+    val showImplementation = clonedShow.implementation ?: return
+    showImplementation.removeInstructions(showImplementation.instructions.size)
     clonedShow.addInstructions(0, """
         iget-object v0, p0, Lcom/yandex/mobile/ads/unity/wrapper/rewarded/RewardedAdWrapper;->b:Lcom/yandex/mobile/ads/unity/wrapper/rewarded/a;
         if-eqz v0, :morphe_rustore_yandex_show_done
