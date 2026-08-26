@@ -1,3 +1,21 @@
+## [1.32.0](https://github.com/Zanuaimi/Nai64Patches/compare/1.31.0...1.32.0) (2026-08-26)
+
+### Bug Fixes
+
+* guard Spoof Developer Options against MinSdkVersionException during signing ([f84cfb9](https://github.com/Zanuaimi/Nai64Patches/commit/f84cfb9dcad0472d23f4a74f0e0e4459c2a65637))
+
+### New Features
+
+* add bypass forced updates patch ([575ba29](https://github.com/Zanuaimi/Nai64Patches/commit/575ba29fd9d0d2eb14a049ee7b7a74dd6a4c4156))
+* add Change Package Name patch ([7ca4463](https://github.com/Zanuaimi/Nai64Patches/commit/7ca44633d531f5b2c89c61962154ad6f99fd9bb3))
+* add forced online checks patch ([f0d07cf](https://github.com/Zanuaimi/Nai64Patches/commit/f0d07cfaf577618a2575ef8213742df004088675))
+* add frame rate preference patch ([4fc2571](https://github.com/Zanuaimi/Nai64Patches/commit/4fc2571e0cf59f5dd6b207799436c8c734d14e0a))
+* add GmsCore support (MicroG) patch ([b243ad9](https://github.com/Zanuaimi/Nai64Patches/commit/b243ad9487c078cbfb22d4409c291d3290e5682e))
+* add graphics API override patch ([223bdeb](https://github.com/Zanuaimi/Nai64Patches/commit/223bdeb37e0bd18efb9d8e23ed08a1f7863aeb7e))
+* add Spoof App Signature patch ([4a854db](https://github.com/Zanuaimi/Nai64Patches/commit/4a854dbe6cb48c5cfe41c27d00b7cbceeb1c36e3))
+* improve experimental ad patch compatibility ([2923740](https://github.com/Zanuaimi/Nai64Patches/commit/2923740e5eb8bac1c79fb84936272b4bf41561e6))
+* rename Google update check patch ([7f1466e](https://github.com/Zanuaimi/Nai64Patches/commit/7f1466e636055a0c33327f526e1fb1227eacbee4))
+
 ## [1.29.0](https://github.com/Nai64/Nai64Patches/compare/1.28.0...1.29.0) (2026-08-25)
 
 ### New Features
