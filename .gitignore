@@ -64,6 +64,8 @@ gradle-app.setting
 !README.md
 !COMPATIBILITY.md
 !TROUBLESHOOTING.md
+!CONTRIBUTING.md
+!.github/pull_request_template.md
 *.apk
 *.xapk
 *.mpp
