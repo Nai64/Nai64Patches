@@ -1,3 +1,12 @@
+## [1.33.0](https://github.com/Zanuaimi/Nai64Patches/compare/1.32.0...1.33.0) (2026-08-26)
+
+### New Features
+
+* improve graphics API override description ([638495e](https://github.com/Zanuaimi/Nai64Patches/commit/638495eecd714e6f4aa2b124cdd7592f47640fbc))
+* improve PairIP bypass configuration description ([51918fb](https://github.com/Zanuaimi/Nai64Patches/commit/51918fb54c7970cb05cf23b22f6120a9243f1629))
+* update experimental patch descriptions ([fd94841](https://github.com/Zanuaimi/Nai64Patches/commit/fd94841485f54ade161ad7fec576c2223241330f))
+* update experimental patch descriptions ([b7e6bbf](https://github.com/Zanuaimi/Nai64Patches/commit/b7e6bbfaf847c17c69c6254bd594c93830ea15b6))
+
 ## [1.29.0](https://github.com/Nai64/Nai64Patches/compare/1.28.0...1.29.0) (2026-08-25)
 
 ### New Features
