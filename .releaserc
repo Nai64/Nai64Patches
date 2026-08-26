@@ -1,7 +1,7 @@
 {
   "branches": [
     "main",
-    { "name": "dev", "prerelease": true }
+    { "name": "build", "prerelease": true }
   ],
   "tagFormat": "${version}",
   "plugins": [
