@@ -63,6 +63,8 @@ private fun generatePatchList(version: String, patches: Set<Patch<*>>) {
         "Enable Large Heap",
         "Force Hardware Acceleration",
         "Prefer ANGLE Graphics Driver",
+        "Graphics API Override (Experimental)",
+        "Frame Rate Preference (Experimental)",
         "Legacy External Storage",
         "Ensure Storage Permissions",
         "Ensure Modern Media Permissions",
@@ -82,6 +84,7 @@ private fun generatePatchList(version: String, patches: Set<Patch<*>>) {
         "Ensure Notification Permission",
         "Status Bar Icons",
         "Fake Online State",
+        "Disable Forced Online Checks (Experimental)",
         "Set Profileable",
         "Force Extract Native Libs",
         "Unlock Max Aspect Ratio",
@@ -117,7 +120,8 @@ private fun generatePatchList(version: String, patches: Set<Patch<*>>) {
         "Allow Screenshots",
         "Skip Splash Screen (Experimental)",
         "Disable Root Checks",
-        "Disable Update Checks",
+        "Disable Google Update Check",
+        "Bypass Forced Updates (Experimental)",
         "Disable Telemetry",
     )
     val orderMap = patchOrder.withIndex().associate { (i, name) -> name to i }
