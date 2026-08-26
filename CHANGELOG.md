@@ -1,3 +1,11 @@
+## [1.29.1](https://github.com/Nai64/Nai64Patches/compare/1.29.0...1.29.1) (2026-08-26)
+
+### Bug Fixes
+
+* cover Genre.isSpokenWord fallback in Unlock Playback Speed for Bandcamp ([f40cf22](https://github.com/Nai64/Nai64Patches/commit/f40cf227f3c65848104dd940bc9225221e603619))
+* expand Disable Bandcamp Tracker to cover stats pipeline for Bandcamp ([cf69d3b](https://github.com/Nai64/Nai64Patches/commit/cf69d3bd3a6df3da947504f515d21c735f358f18))
+* harden Show Search Result Scores patch for Bandcamp ([3636b28](https://github.com/Nai64/Nai64Patches/commit/3636b2837d3ef424af45d5a5d4a390141db854ca))
+
 ## [1.29.0](https://github.com/Nai64/Nai64Patches/compare/1.28.0...1.29.0) (2026-08-26)
 
 ### Bug Fixes
