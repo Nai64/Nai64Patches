@@ -1,7 +1,7 @@
-<!-- One logical change per PR — one new patch OR one enhancement. See CONTRIBUTING.md -->
+<!-- One logical change per PR. Add one new patch or one enhancement. See CONTRIBUTING.md -->
 ## What does this PR do?
 
-<!-- feat: add Foo patch / fix: handle Bar edge — one line per commit -->
+<!-- feat: add Foo patch / fix: handle Bar edge. Use one line per commit -->
 
 ## Checklist
 

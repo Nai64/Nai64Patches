@@ -4,17 +4,17 @@ Thanks for wanting to contribute — keep it small and reviewable and it will me
 
 ## One patch per PR
 
-* **One logical change per PR** — one new patch *or* one enhancement to an existing patch. Do **not** bundle 5 unrelated features (e.g. Amazon spoof + ClearSplit + PairIP + NoAds) into one PR — it blocks the whole PR if one strategy has a false positive.
-* **One logical change per commit** (`feat: add Foo patch`, `fix: handle X edge`, not `move`/`update`/`hi`). Use [Conventional Commits](https://www.conventionalcommits.org/) (`feat:`, `fix:`, `chore:`, `revert:`).
+* **One logical change per PR.** Add one new patch or one enhancement to an existing patch. Please do not bundle five unrelated features (like Amazon spoof plus ClearSplit plus PairIP plus NoAds) into one PR. If one strategy has a false positive, the whole PR gets blocked.
+* **One logical change per commit.** Use `feat: add Foo patch` or `fix: handle X edge`, not `move` or `update` or `hi`. Follow [Conventional Commits](https://www.conventionalcommits.org/) with `feat:`, `fix:`, `chore:`, `revert:`.
 
 ## Branch
 
-* Fork → create a **feature branch** (`feat/amazon-spoof`, `fix/pairip-attachbasecontext`) — **never PR from `main`**. `main` must stay clean or the other agent on `main` will clash and pollute `patches-bundle.json` versions.
+* Fork the repo and create a **feature branch** like `feat/amazon-spoof` or `fix/pairip-attachbasecontext`. Never open a PR from `main`. Keeping `main` clean avoids clashes with the other agent and prevents `patches-bundle.json` version pollution.
 
 ## What not to edit
 
-* **Generated:** `patches-list.json`, `patches-bundle.json`, `CHANGELOG.md` — produced by `:patches:generatePatchesList` + `semantic-release` on `main`. Keep the committed list **stale** during dev (`git checkout -- patches-list.json` after `generatePatchesList`).
-* **Build/infra:** `gradle.properties` `version`, `.releaserc`, `gradlew` — only maintainer bumps version via `Release` workflow.
+* **Generated files:** `patches-list.json`, `patches-bundle.json`, and `CHANGELOG.md`. These are produced by `:patches:generatePatchesList` and `semantic-release` on `main`. Keep the committed list stale while you work. After you run `generatePatchesList`, restore it with `git checkout -- patches-list.json`.
+* **Build and infra:** `gradle.properties` `version`, `.releaserc`, and `gradlew`. Only the maintainer bumps the version through the `Release` workflow.
 
 ## Build & verify
 
@@ -30,8 +30,8 @@ git checkout -- patches-list.json
 
 ## Patch style
 
-* Universal patches: `patches/universal/<category>/YourPatch.kt` with `bytecodePatch` or `resourcePatch`, `compatibleWith` omitted (universal) or scoped, `default = false`, `booleanOption`/`stringOption` for configurability (see `CustomStartupDialogPatch.kt:24`).
-* Reuse helpers in `patches/universal/misc/InvokeHelpers.kt` (`noOpVoidInvoke`, `foldBooleanReturns`) and `GetterSpoofer.kt` — don’t copy-paste `forceBooleanSetter` per-file variants.
+* Universal patches live in `patches/universal/<category>/YourPatch.kt`. Use `bytecodePatch` or `resourcePatch`, leave `compatibleWith` out for universal patches or scope it when needed, set `default = false`, and add `booleanOption` or `stringOption` when you need configurability. See `CustomStartupDialogPatch.kt:24` for a good example.
+* Reuse the shared helpers in `patches/universal/misc/InvokeHelpers.kt` (`noOpVoidInvoke`, `foldBooleanReturns`) and `GetterSpoofer.kt`. Please do not copy and paste per-file `forceBooleanSetter` variants.
 
 ## PR checklist
 
@@ -41,4 +41,4 @@ git checkout -- patches-list.json
 - [ ] `BUILD SUCCESSFUL` + `generatePatchesList` literal grep shows name
 - [ ] Description lists what was added/enhanced and why
 
-PRs that bundle `chore: Release` commits or `gradle.properties` bumps will be asked to rebase and drop them — releases are done only by maintainer via `Release` workflow dispatch.
+If your PR bundles `chore: Release` commits or `gradle.properties` bumps, we will ask you to rebase and drop them. Releases are handled only by the maintainer through the `Release` workflow dispatch.
