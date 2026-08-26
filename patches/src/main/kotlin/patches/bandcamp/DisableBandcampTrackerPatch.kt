@@ -14,9 +14,15 @@ val disableBandcampTrackerPatch = bytecodePatch(
 
     execute {
         val logger = Logger.getLogger(this::class.java.name)
-        val patched = noOpVoidInvoke(
+        var patched = 0
+        patched += noOpVoidInvoke(
             "Lcom/bandcamp/shared/network/TrackerAPI;",
             setOf("f", "g"),
+        )
+        // StatsController ua.d is the main analytics pipeline (recordEvent etc.) — also void
+        patched += noOpVoidInvoke(
+            "Lua/d;",
+            setOf("l", "m", "n", "o", "p", "q", "r", "s"),
         )
         if (patched > 0) logger.info("Disabled $patched tracker call(s)")
         else logger.warning("No tracker calls found. No changes applied.")
