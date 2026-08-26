@@ -128,8 +128,8 @@ private fun BytecodePatchContext.patchWith(fingerprint: Fingerprint, smali: Stri
 
 @Suppress("unused")
 val noAdsPatch = bytecodePatch(
-    name = "No Ads",
-    description = "Remove ads",
+    name = "No Ads (Experimental)",
+    description = "Block supported ads. All available ad-format options are enabled by default, including interstitial, banner, app-open, MREC, and rewarded ads. Disable Block Rewarded when using Ads Free Rewards. Currently includes AppLovin MAX, AdMob, Unity Ads, ironSource/LevelPlay, Huawei Ads Kit, VK MyTarget (including RuStore), Yandex, Vungle, Meta Audience Network, and Pangle. Experimental: coverage is not guaranteed for every APK or ad SDK.",
     default = false,
 ) {
     val blockInterstitials by booleanOption(
@@ -335,9 +335,15 @@ val noAdsPatch = bytecodePatch(
             totalPatched += patchVoid(UnityAdsV3Show2ArgFingerprint)
             totalPatched += patchVoid(UnityAdsV3ShowOptionsFingerprint)
         }
-        if (blockInterstitials == true || blockRewarded == true) {
+        // Unity Ads v4 exposes one shared show(...) method for multiple ad
+        // formats. Blocking it for interstitials alone also breaks rewarded
+        // flows. Preserve the shared method whenever rewarded ads are allowed
+        // so Ads Free Rewards can still reach its completion callbacks.
+        if (blockInterstitials == true && blockRewarded == true) {
             totalPatched += patchVoid(UnityAdsV4Show3ArgFingerprint)
             totalPatched += patchVoid(UnityAdsV4Show4ArgFingerprint)
+        }
+        if (blockRewarded == true) {
             totalPatched += patchVoid(UnityRewardedAdShowFingerprint)
         }
 

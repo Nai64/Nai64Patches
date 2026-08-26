@@ -11,8 +11,8 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val adsFreeRewardsPatch = bytecodePatch(
-    name = "Ads Free Rewards",
-    description = "Skip rewarded ads and claim rewards instantly",
+    name = "Ads Free Rewards (Experimental)",
+    description = "Claim rewards without watching rewarded ads. Use with No Ads to block other ad formats, but leave No Ads' Block Rewarded option disabled so reward-based features remain available. Currently includes AppLovin MAX, Unity Ads, ironSource/LevelPlay, Huawei Ads Kit, VK MyTarget (including RuStore), and Yandex integrations. Experimental: coverage is not guaranteed for every APK or ad SDK.",
     default = false,
 ) {
     val patchVersion by stringOption(
