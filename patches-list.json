@@ -3,120 +3,6 @@
   "version": "1.29.0",
   "patches": [
     {
-      "name": "Ads Free Rewards",
-      "description": "Skip rewarded ads and claim rewards instantly",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": [
-        {
-          "key": "patchVersion",
-          "title": "Patch version",
-          "description": "Which implementation of the patch to use",
-          "required": false,
-          "type": "kotlin.String",
-          "default": "1.19.0",
-          "values": {
-            "1.1.0 (Original)": "1.1.0",
-            "1.15.0": "1.15.0",
-            "1.16.0": "1.16.0",
-            "1.17.0": "1.17.0",
-            "1.18.0": "1.18.0",
-            "1.18.1": "1.18.1",
-            "1.19.0 (Current)": "1.19.0"
-          }
-        },
-        {
-          "key": "rewardStrategy",
-          "title": "Reward Strategy",
-          "description": "Which ad-network integration to patch. 'Auto' covers every supported network",
-          "required": false,
-          "type": "kotlin.String",
-          "default": "auto",
-          "values": {
-            "Auto (all networks)": "auto",
-            "AppLovin MAX": "max",
-            "Unity Ads": "unityAds",
-            "ironSource / LevelPlay": "ironSource",
-            "RuStore / VK MyTarget": "rustore",
-            "Huawei Ads Kit / Petal Ads": "huawei"
-          }
-        },
-        {
-          "key": "instantReward",
-          "title": "Instant reward",
-          "description": "Claim the reward immediately without showing an ad (applies to the current patch version)",
-          "required": false,
-          "type": "kotlin.Boolean",
-          "default": true,
-          "values": null
-        },
-        {
-          "key": "fakeAdAvailability",
-          "title": "Fake ad availability",
-          "description": "Force ad SDKs to report ads as available so the reward flow triggers (needed when no real ad can fill)",
-          "required": false,
-          "type": "kotlin.Boolean",
-          "default": true,
-          "values": null
-        }
-      ]
-    },
-    {
-      "name": "No Ads",
-      "description": "Remove ads",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": [
-        {
-          "key": "blockInterstitials",
-          "title": "Block Interstitials",
-          "description": "Block full-screen ads shown between app content",
-          "required": false,
-          "type": "kotlin.Boolean",
-          "default": true,
-          "values": null
-        },
-        {
-          "key": "blockBanners",
-          "title": "Block Banners",
-          "description": "Block banner ads shown at the top or bottom of the screen",
-          "required": false,
-          "type": "kotlin.Boolean",
-          "default": true,
-          "values": null
-        },
-        {
-          "key": "blockAppOpen",
-          "title": "Block App Open",
-          "description": "Block ads shown when the app starts",
-          "required": false,
-          "type": "kotlin.Boolean",
-          "default": true,
-          "values": null
-        },
-        {
-          "key": "blockMRec",
-          "title": "Block MREC",
-          "description": "Block medium rectangle (MREC) banner ads",
-          "required": false,
-          "type": "kotlin.Boolean",
-          "default": true,
-          "values": null
-        },
-        {
-          "key": "blockRewarded",
-          "title": "Block Rewarded",
-          "description": "Block rewarded ads; may disable features that require watching them",
-          "required": false,
-          "type": "kotlin.Boolean",
-          "default": true,
-          "values": null
-        }
-      ]
-    },
-    {
       "name": "Skip Consent Popup",
       "description": "Skip the Google consent (GDPR) popup",
       "default": false,
@@ -872,7 +758,7 @@
     },
     {
       "name": "Pairip Bypass (Experimental)",
-      "description": "Pairip is anti-tamper / license protection used by some games. This bypasses its checks so patched or modified builds run instead of being blocked.",
+      "description": "PairIP is anti-tamper and license protection used by some apps and games. This experimental patch provides configurable strategies to bypass PairIP checks so patched or modified builds can run instead of being blocked. Automatic strategy selection is enabled by default and applies compatible strategies found in the APK; disable it to manually select individual strategies for testing. Not every PairIP-protected app is guaranteed to work, and aggressive strategies may cause crashes, startup failures, missing license features, or other app-specific problems.",
       "default": false,
       "dependencies": [
         "ResourcePatch"
@@ -1069,14 +955,6 @@
       "options": []
     },
     {
-      "name": "Disable Update Checks",
-      "description": "Disable in-app update prompts",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
       "name": "Disable Telemetry",
       "description": "Block analytics and tracking",
       "default": false,
@@ -1216,6 +1094,66 @@
           "required": false,
           "type": "kotlin.Boolean",
           "default": false,
+          "values": null
+        }
+      ]
+    },
+    {
+      "name": "Ads Free Rewards (Experimental)",
+      "description": "Claim rewards without watching rewarded ads. Use with No Ads to block other ad formats, but leave No Ads' Block Rewarded option disabled so reward-based features remain available. Currently includes AppLovin MAX, Unity Ads, ironSource/LevelPlay, Huawei Ads Kit, VK MyTarget (including RuStore), and Yandex integrations. Experimental: coverage is not guaranteed for every APK or ad SDK.",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": [
+        {
+          "key": "patchVersion",
+          "title": "Patch version",
+          "description": "Which implementation of the patch to use",
+          "required": false,
+          "type": "kotlin.String",
+          "default": "1.19.0",
+          "values": {
+            "1.1.0 (Original)": "1.1.0",
+            "1.15.0": "1.15.0",
+            "1.16.0": "1.16.0",
+            "1.17.0": "1.17.0",
+            "1.18.0": "1.18.0",
+            "1.18.1": "1.18.1",
+            "1.19.0 (Current)": "1.19.0"
+          }
+        },
+        {
+          "key": "rewardStrategy",
+          "title": "Reward Strategy",
+          "description": "Which ad-network integration to patch. 'Auto' covers every supported network",
+          "required": false,
+          "type": "kotlin.String",
+          "default": "auto",
+          "values": {
+            "Auto (all networks)": "auto",
+            "AppLovin MAX": "max",
+            "Unity Ads": "unityAds",
+            "ironSource / LevelPlay": "ironSource",
+            "RuStore / VK MyTarget": "rustore",
+            "Huawei Ads Kit / Petal Ads": "huawei"
+          }
+        },
+        {
+          "key": "instantReward",
+          "title": "Instant reward",
+          "description": "Claim the reward immediately without showing an ad (applies to the current patch version)",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": true,
+          "values": null
+        },
+        {
+          "key": "fakeAdAvailability",
+          "title": "Fake ad availability",
+          "description": "Force ad SDKs to report ads as available so the reward flow triggers (needed when no real ad can fill)",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": true,
           "values": null
         }
       ]
@@ -1393,6 +1331,60 @@
           "required": false,
           "type": "kotlin.Boolean",
           "default": false,
+          "values": null
+        }
+      ]
+    },
+    {
+      "name": "Bypass Forced Updates (Experimental)",
+      "description": "Attempts to bypass blocking in-app update prompts in older apps and games. Settings enabled by default: Bypass update gate ignores high-confidence update-required boolean checks; Make dialogs dismissible changes detected non-cancelable update dialogs; Block update redirects prevents detected Play Store/browser updater launches; Prevent forced exit removes detected update-related activity exits; Patch Play Core disables Google Play in-app update flow, including the functionality of Disable Google Update Check. Do not select Disable Google Update Check separately when using this patch. Experimental: results are not guaranteed because apps may implement updates differently or enforce them on their own servers.",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": [
+        {
+          "key": "bypassUpdateGate",
+          "title": "Bypass update gate",
+          "description": "Ignore high-confidence client-side checks that report an update is required",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": true,
+          "values": null
+        },
+        {
+          "key": "makeDialogsDismissible",
+          "title": "Make dialogs dismissible",
+          "description": "Allow detected update dialogs to be canceled instead of forcing the user to update",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": true,
+          "values": null
+        },
+        {
+          "key": "blockUpdateRedirects",
+          "title": "Block update redirects",
+          "description": "Block detected redirects to the Play Store, browser, or updater activity",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": true,
+          "values": null
+        },
+        {
+          "key": "preventForcedExit",
+          "title": "Prevent forced exit",
+          "description": "Remove detected finish or exit calls from update-related methods",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": true,
+          "values": null
+        },
+        {
+          "key": "patchPlayCore",
+          "title": "Patch Play Core updates",
+          "description": "Disable Google Play's in-app update flow when it is present",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": true,
           "values": null
         }
       ]
@@ -1745,6 +1737,77 @@
     {
       "name": "Disable Fixed Volume",
       "description": "Makes AudioManager.isVolumeFixed() report false so volume keys and stream changes work even when an app pins the volume.",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": []
+    },
+    {
+      "name": "Disable Forced Online Checks (Experimental)",
+      "description": "Attempts to bypass client-side online gates that prevent an app or game from starting. Auto mode is enabled by default and runs the common Android/network, detected Unity, detected Unreal, detected Godot, and generic bytecode strategies. Disable auto mode to choose the strategies individually. Experimental: this does not restore unavailable servers, bypass authentication, repair changed APIs, or guarantee that a game can work offline. Potential problems include broken login or matchmaking, unavailable cloud saves, stale or inconsistent game state, repeated connection errors, crashes, startup loops, or false-positive changes to unrelated connectivity logic. Blindly bypassing server checks may break login, cloud saves, matchmaking, or game state, so the patch only changes high-confidence client-side gates. Its common Android/network strategy overlaps Fake Online State, so do not select both patches together.",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": [
+        {
+          "key": "autoMode",
+          "title": "Auto mode",
+          "description": "Automatically run all strategies supported by the detected APK",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": true,
+          "values": null
+        },
+        {
+          "key": "commonAndroidNetwork",
+          "title": "Common Android/network API",
+          "description": "Make common Android connectivity checks report an active connection",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": true,
+          "values": null
+        },
+        {
+          "key": "unityStrategy",
+          "title": "Unity strategy",
+          "description": "Apply generic high-confidence online-gate detection when Unity is detected",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": true,
+          "values": null
+        },
+        {
+          "key": "unrealStrategy",
+          "title": "Unreal strategy",
+          "description": "Apply generic high-confidence online-gate detection when Unreal is detected",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": true,
+          "values": null
+        },
+        {
+          "key": "godotStrategy",
+          "title": "Godot strategy",
+          "description": "Apply generic high-confidence online-gate detection when Godot is detected",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": true,
+          "values": null
+        },
+        {
+          "key": "genericBytecodeStrategy",
+          "title": "Generic bytecode strategy",
+          "description": "Scan app bytecode for high-confidence online gate methods without engine detection",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": true,
+          "values": null
+        }
+      ]
+    },
+    {
+      "name": "Disable Google Update Check",
+      "description": "Disables the Google Play in-app update flow used by newer apps through the Play Core update API. This does not remove the app from Google Play's update list or disable custom update checks implemented by the app itself. Do not select this patch when using Bypass Forced Updates, because that patch already includes this Play Core functionality.",
       "default": false,
       "dependencies": [],
       "compatiblePackages": null,
@@ -2397,6 +2460,40 @@
       "options": []
     },
     {
+      "name": "Frame Rate Preference (Experimental)",
+      "description": "Requests a preferred display refresh rate for app and game windows using Android's window frame-rate API. Supports common 24, 30, 40, 45, 48, 50, 60, 72, 90, 96, 120, 144, 165, 180, and 185 FPS values. This is not an engine-level FPS override and does not change the target FPS configured by Unity, Unreal, Godot, or other game engines. Experimental: this requests a display rate and may not cap the engine's actual FPS; it does not patch, disable, or override VSync. Android, the device, thermal state, native code, or the game engine may ignore the request. Higher rates increase power use and heat, while unsupported rates may be rounded to the nearest available display mode.",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": [
+        {
+          "key": "frameRate",
+          "title": "Frame rate",
+          "description": "Preferred display refresh rate for supported app windows",
+          "required": false,
+          "type": "kotlin.String",
+          "default": "60",
+          "values": {
+            "24 FPS": "24",
+            "30 FPS": "30",
+            "40 FPS": "40",
+            "45 FPS": "45",
+            "48 FPS": "48",
+            "50 FPS": "50",
+            "60 FPS": "60",
+            "72 FPS": "72",
+            "90 FPS": "90",
+            "96 FPS": "96",
+            "120 FPS": "120",
+            "144 FPS": "144",
+            "165 FPS": "165",
+            "180 FPS": "180",
+            "185 FPS": "185"
+          }
+        }
+      ]
+    },
+    {
       "name": "GmsCore support (MicroG)",
       "description": "Routes Google Play Services API calls through MicroG (enables Google Sign-In on non-root/no-GMS) with selectable MicroG package and optional main activity / package name overrides",
       "default": false,
@@ -2447,6 +2544,27 @@
       "dependencies": [],
       "compatiblePackages": null,
       "options": []
+    },
+    {
+      "name": "Graphics API Override (Experimental)",
+      "description": "Attempts to override the graphics API of supported Unity Android games by injecting the engine's launch argument. Unity is the only supported engine at this time. Choose OpenGL ES or Vulkan; OpenGL ES is selected by default because it is supported by Android devices more broadly than Vulkan. This is separate from Prefer ANGLE Graphics Driver, which only requests ANGLE for OpenGL ES. Experimental: not guaranteed to work on every APK, engine version, or device, and an incompatible renderer may cause crashes, a black screen, missing graphics, or failure to launch. Games that select their renderer in native code or enforce settings from their own servers may ignore this patch.",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": [
+        {
+          "key": "graphicsApi",
+          "title": "Graphics API",
+          "description": "Renderer to request from supported Unity Android games",
+          "required": false,
+          "type": "kotlin.String",
+          "default": "opengl",
+          "values": {
+            "Vulkan": "vulkan",
+            "OpenGL ES": "opengl"
+          }
+        }
+      ]
     },
     {
       "name": "Hide Accessibility Usage",
@@ -2527,6 +2645,60 @@
       "dependencies": [],
       "compatiblePackages": null,
       "options": []
+    },
+    {
+      "name": "No Ads (Experimental)",
+      "description": "Block supported ads. All available ad-format options are enabled by default, including interstitial, banner, app-open, MREC, and rewarded ads. Disable Block Rewarded when using Ads Free Rewards. Currently includes AppLovin MAX, AdMob, Unity Ads, ironSource/LevelPlay, Huawei Ads Kit, VK MyTarget (including RuStore), Yandex, Vungle, Meta Audience Network, and Pangle. Experimental: coverage is not guaranteed for every APK or ad SDK.",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": [
+        {
+          "key": "blockInterstitials",
+          "title": "Block Interstitials",
+          "description": "Block full-screen ads shown between app content",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": true,
+          "values": null
+        },
+        {
+          "key": "blockBanners",
+          "title": "Block Banners",
+          "description": "Block banner ads shown at the top or bottom of the screen",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": true,
+          "values": null
+        },
+        {
+          "key": "blockAppOpen",
+          "title": "Block App Open",
+          "description": "Block ads shown when the app starts",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": true,
+          "values": null
+        },
+        {
+          "key": "blockMRec",
+          "title": "Block MREC",
+          "description": "Block medium rectangle (MREC) banner ads",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": true,
+          "values": null
+        },
+        {
+          "key": "blockRewarded",
+          "title": "Block Rewarded",
+          "description": "Block rewarded ads; may disable features that require watching them",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": true,
+          "values": null
+        }
+      ]
     },
     {
       "name": "Preserve App Data",
