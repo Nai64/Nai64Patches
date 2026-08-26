@@ -41,6 +41,9 @@ Nai's Patches is a set of ready made patches built for the [Morphe](https://gith
 
 The project is open source and community driven. New patches and fixes land through standard pull requests, and releases are produced automatically.
 
+> [!IMPORTANT]
+> **Want to contribute?** Please read [`CONTRIBUTING.md`](CONTRIBUTING.md) first. It shows how to open a proper PR with one patch at a time, the right commit style, and how to avoid common mistakes that block merges.
+
 ---
 
 <a name="install"></a>
