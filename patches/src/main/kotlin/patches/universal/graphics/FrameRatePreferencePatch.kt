@@ -30,9 +30,9 @@ val frameRatePreferencePatch = bytecodePatch(
     description =
         "Requests a preferred display refresh rate for app and game windows using Android's " +
             "window frame-rate API. Supports common 24, 30, 40, 45, 48, 50, 60, 72, 90, " +
-            "96, 120, 144, 165, 180, and 185 FPS " +
-            "targets and is engine-agnostic, including Unity, Unreal, Godot, and custom engines. " +
-            "Experimental: this requests a display rate and may not cap the engine's actual FPS; " +
+            "96, 120, 144, 165, 180, and 185 FPS values. This is not an engine-level FPS " +
+            "override and does not change the target FPS configured by Unity, Unreal, Godot, or " +
+            "other game engines. Experimental: this requests a display rate and may not cap the engine's actual FPS; " +
             "it does not patch, disable, or override VSync. Android, the device, thermal state, " +
             "native code, or the game engine may ignore the request. Higher rates increase power " +
             "use and heat, while unsupported rates may be rounded to the nearest available display " +
