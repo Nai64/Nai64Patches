@@ -18,6 +18,7 @@ jobs:
       - name: Send Discord notification
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          DISCORD_UPDATES_ROLE_ID: ${{ secrets.DISCORD_UPDATES_ROLE_ID }}
           TAG: ${{ github.event.release.tag_name || inputs.test_tag || github.ref_name }}
           URL: ${{ github.event.release.html_url || format('https://github.com/{0}/releases', github.repository) }}
           BODY: ${{ github.event.release.body }}
@@ -30,13 +31,21 @@ jobs:
           # Truncate changelog to 3500 chars for Discord embed limits (4096)
           CHANGELOG=$(echo "$BODY" | head -c 3500)
           if [ -z "$CHANGELOG" ]; then CHANGELOG="Patcher source ${{ github.repository }} just published $TAG — update in Morphe via pull-to-refresh."; fi
+          if [ -n "$DISCORD_UPDATES_ROLE_ID" ]; then
+            CONTENT="<@&$DISCORD_UPDATES_ROLE_ID>"
+          else
+            CONTENT=""
+          fi
           payload=$(jq -n \
             --arg tag "$TAG" \
             --arg url "$URL" \
             --arg repo "${{ github.repository }}" \
             --arg changelog "$CHANGELOG" \
+            --arg content "$CONTENT" \
             '{
               username: "Nai64Patches",
+              content: $content,
+              allowed_mentions: { parse: ["roles"] },
               embeds: [{
                 title: ("New version \($tag) available"),
                 url: $url,
