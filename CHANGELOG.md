@@ -1,3 +1,9 @@
+## [1.31.2](https://github.com/Nai64/Nai64Patches/compare/1.31.1...1.31.2) (2026-08-27)
+
+### Bug Fixes
+
+* make Custom App Icon work on Android ([5c25ed3](https://github.com/Nai64/Nai64Patches/commit/5c25ed39d943669cad1951752e72380640ce48bf))
+
 ## [1.31.1](https://github.com/Nai64/Nai64Patches/compare/1.31.0...1.31.1) (2026-08-27)
 
 ### Bug Fixes
