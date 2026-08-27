@@ -1,3 +1,10 @@
+## [1.30.0](https://github.com/Nai64/Nai64Patches/compare/1.29.1...1.30.0) (2026-08-27)
+
+### New Features
+
+* add Spoof Fixed Location patch ([73fa7a0](https://github.com/Nai64/Nai64Patches/commit/73fa7a0773d607ad36a8fe11de9cb6d69c0ce55b))
+* enhance Spoof Time Zone to be selectable ([2c8b608](https://github.com/Nai64/Nai64Patches/commit/2c8b6089da10a9b88af3061c0569c79594473829))
+
 ## [1.29.1](https://github.com/Nai64/Nai64Patches/compare/1.29.0...1.29.1) (2026-08-26)
 
 ### Bug Fixes

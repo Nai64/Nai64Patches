@@ -1,7 +1,7 @@
 {
-  "created_at": "2026-08-26T19:55:11",
-  "description": "## [1.29.1](https://github.com/Nai64/Nai64Patches/compare/1.29.0...1.29.1) (2026-08-26)\n\n### Bug Fixes\n\n* cover Genre.isSpokenWord fallback in Unlock Playback Speed for Bandcamp ([f40cf22](https://github.com/Nai64/Nai64Patches/commit/f40cf227f3c65848104dd940bc9225221e603619))\n* expand Disable Bandcamp Tracker to cover stats pipeline for Bandcamp ([cf69d3b](https://github.com/Nai64/Nai64Patches/commit/cf69d3bd3a6df3da947504f515d21c735f358f18))\n* harden Show Search Result Scores patch for Bandcamp ([3636b28](https://github.com/Nai64/Nai64Patches/commit/3636b2837d3ef424af45d5a5d4a390141db854ca))",
-  "download_url": "https://github.com/Nai64/Nai64Patches/releases/download/1.29.1/patches-1.29.1.mpp",
+  "created_at": "2026-08-27T11:42:25",
+  "description": "## [1.30.0](https://github.com/Nai64/Nai64Patches/compare/1.29.1...1.30.0) (2026-08-27)\n\n### New Features\n\n* add Spoof Fixed Location patch ([73fa7a0](https://github.com/Nai64/Nai64Patches/commit/73fa7a0773d607ad36a8fe11de9cb6d69c0ce55b))\n* enhance Spoof Time Zone to be selectable ([2c8b608](https://github.com/Nai64/Nai64Patches/commit/2c8b6089da10a9b88af3061c0569c79594473829))",
+  "download_url": "https://github.com/Nai64/Nai64Patches/releases/download/1.30.0/patches-1.30.0.mpp",
   "signature_download_url": "",
-  "version": "1.29.1"
+  "version": "1.30.0"
 }

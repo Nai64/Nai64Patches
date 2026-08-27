@@ -1,6 +1,6 @@
 {
   "NOTE": "Do NOT manually edit this file. This file is automatically updated when semantic release (release.yml) runs. Manually editing this file can break your releases and break third party tools that use this file.",
-  "version": "1.29.1",
+  "version": "1.30.0",
   "patches": [
     {
       "name": "Skip Consent Popup",
@@ -2979,6 +2979,33 @@
       "options": []
     },
     {
+      "name": "Spoof Fixed Location",
+      "description": "Returns fixed GPS coordinates for all location requests instead of the real device location. Useful for region-locked apps like rajiko that require a specific location.",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": [
+        {
+          "key": "latitude",
+          "title": "Latitude",
+          "description": "Fixed latitude to return (e.g. 35.681236 for Tokyo, Japan).",
+          "required": false,
+          "type": "kotlin.String",
+          "default": "35.681236",
+          "values": null
+        },
+        {
+          "key": "longitude",
+          "title": "Longitude",
+          "description": "Fixed longitude to return (e.g. 139.767125 for Tokyo, Japan).",
+          "required": false,
+          "type": "kotlin.String",
+          "default": "139.767125",
+          "values": null
+        }
+      ]
+    },
+    {
       "name": "Spoof Group ID Level 1",
       "description": "Reports a constant value from TelephonyManager.getGroupIdLevel1() so apps cannot read the real SIM GID1.",
       "default": false,
@@ -3200,11 +3227,21 @@
     },
     {
       "name": "Spoof Time Zone",
-      "description": "Forces TimeZone.getDefault().getID() to return UTC so region- or time-zone-locked apps see a constant zone.",
+      "description": "Forces TimeZone.getDefault() to return a fixed timezone so region-locked apps see a constant zone (e.g. Europe/London for All4).",
       "default": false,
       "dependencies": [],
       "compatiblePackages": null,
-      "options": []
+      "options": [
+        {
+          "key": "timeZoneId",
+          "title": "Time zone ID",
+          "description": "IANA time zone ID to spoof (e.g. UTC, Europe/London, America/New_York, Asia/Tokyo).",
+          "required": false,
+          "type": "kotlin.String",
+          "default": "UTC",
+          "values": null
+        }
+      ]
     },
     {
       "name": "Spoof Voice Mail",
