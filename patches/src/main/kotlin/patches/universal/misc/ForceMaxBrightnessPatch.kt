@@ -2,27 +2,33 @@ package patches.universal.misc
 
 import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
 import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.intOption
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction35c
 import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction3rc
+import com.android.tools.smali.dexlib2.iface.instruction.Instruction
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 import com.android.tools.smali.dexlib2.iface.reference.StringReference
 import java.util.logging.Logger
 
-/**
- * Forces the system screen brightness setting to maximum (255) by folding
- * Settings.System.getInt(..., "screen_brightness", ...) into a constant.
- */
 @Suppress("unused")
 val forceMaxBrightnessPatch = bytecodePatch(
     name = "Force Max Brightness",
-    description = "Forces the system screen brightness setting to maximum (255) so apps that read it cannot dim or restrict the screen.",
+    description = "Forces the system screen brightness setting to a chosen value (default 255) so apps that read it cannot dim or restrict the screen.",
     default = false,
 ) {
+    val brightness by intOption(
+        title = "Brightness (0-255)",
+        default = 255,
+        key = "screenBrightness",
+        description = "Brightness value 0-255.",
+    )
+
     execute {
         val logger = Logger.getLogger(this::class.java.name)
+        val target = (brightness ?: 255).coerceIn(0, 255)
         var patched = 0
         classDefForEach { classDef ->
             val mutableClass = mutableClassDefBy(classDef)
@@ -65,10 +71,10 @@ val forceMaxBrightnessPatch = bytecodePatch(
                     val next = instructions.getOrNull(index + 1)
                     if (next != null && next.opcode == Opcode.MOVE_RESULT) {
                         val resultRegister = (next as OneRegisterInstruction).registerA
-                        val const = if (resultRegister <= 0xf) {
-                            "const/4 v$resultRegister, 0xff"
+                        val const = if (resultRegister <= 0xff) {
+                            "const/16 v$resultRegister, $target"
                         } else {
-                            "const/16 v$resultRegister, 0xff"
+                            "const v$resultRegister, $target"
                         }
                         method.replaceInstruction(index, const)
                         method.replaceInstruction(index + 1, "nop")

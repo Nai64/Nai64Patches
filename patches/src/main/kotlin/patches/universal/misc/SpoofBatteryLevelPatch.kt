@@ -2,6 +2,7 @@ package patches.universal.misc
 
 import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
 import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.intOption
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction35c
 import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction3rc
@@ -12,19 +13,22 @@ import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 import java.util.logging.Logger
 
-/**
- * Reports a full battery (100%) through BatteryManager.getIntProperty for the
- * capacity property (BATTERY_PROPERTY_CAPACITY = 4), so apps that restrict
- * features behind a low battery no longer do so.
- */
 @Suppress("unused")
 val spoofBatteryLevelPatch = bytecodePatch(
     name = "Spoof Battery Level",
-    description = "Reports a full battery (100%) through BatteryManager.getIntProperty for the capacity property, so apps that restrict features on low battery stop doing so.",
+    description = "Reports a chosen battery level through BatteryManager.getIntProperty for the capacity property, so apps that restrict features on low battery stop doing so.",
     default = false,
 ) {
+    val level by intOption(
+        title = "Battery level (%)",
+        default = 100,
+        key = "batteryLevel",
+        description = "Battery level 0-100.",
+    )
+
     execute {
         val logger = Logger.getLogger(this::class.java.name)
+        val target = (level ?: 100).coerceIn(0, 100)
         var patched = 0
         classDefForEach { classDef ->
             val mutableClass = mutableClassDefBy(classDef)
@@ -67,11 +71,13 @@ val spoofBatteryLevelPatch = bytecodePatch(
                     if (next != null && next.opcode == Opcode.MOVE_RESULT) {
                         val resultRegister = (next as OneRegisterInstruction).registerA
                         val const = if (resultRegister <= 0xf) {
-                            "const/4 v$resultRegister, 0x64"
+                            "const/4 v$resultRegister, $target"
                         } else {
-                            "const/16 v$resultRegister, 0x64"
+                            "const/16 v$resultRegister, $target"
                         }
-                        method.replaceInstruction(index, const)
+                        // For values > 7 const/4 insufficient; use const/16 path above
+                        val insn = if (target in -8..7) const else "const/16 v$resultRegister, $target"
+                        method.replaceInstruction(index, insn)
                         method.replaceInstruction(index + 1, "nop")
                         patched++
                     }
