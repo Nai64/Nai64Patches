@@ -1,3 +1,9 @@
+## [1.31.1](https://github.com/Nai64/Nai64Patches/compare/1.31.0...1.31.1) (2026-08-27)
+
+### Bug Fixes
+
+* improve No Ads patch UX and tighten ad detection [skip ci] ([24ae8f1](https://github.com/Nai64/Nai64Patches/commit/24ae8f16dbe72e29af4ccff8b53a7a2c8fadc87c))
+
 ## [1.31.0](https://github.com/Nai64/Nai64Patches/compare/1.30.0...1.31.0) (2026-08-27)
 
 ### Bug Fixes

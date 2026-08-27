@@ -1,6 +1,6 @@
 {
   "NOTE": "Do NOT manually edit this file. This file is automatically updated when semantic release (release.yml) runs. Manually editing this file can break your releases and break third party tools that use this file.",
-  "version": "1.31.0",
+  "version": "1.31.1",
   "patches": [
     {
       "name": "Skip Consent Popup",
@@ -2712,15 +2712,28 @@
     },
     {
       "name": "No Ads (Experimental)",
-      "description": "Block supported ads. All available ad-format options are enabled by default, including interstitial, banner, app-open, MREC, and rewarded ads. Disable Block Rewarded when using Ads Free Rewards. Currently includes AppLovin MAX, AdMob, Unity Ads, ironSource/LevelPlay, Huawei Ads Kit, VK MyTarget (including RuStore), Yandex, Vungle, Meta Audience Network, and Pangle. Experimental: coverage is not guaranteed for every APK or ad SDK.",
+      "description": "Block supported ads. Choose which formats to block below. For rewarded ads that gate progress, use Ads Free Rewards instead — it grants the reward without showing the ad. Covers AppLovin MAX, AdMob, Unity Ads, ironSource/LevelPlay, Huawei Ads Kit, VK MyTarget (RuStore), Yandex, Vungle, Meta Audience Network, Pangle, StartApp, MoPub and InMobi where detected. Experimental: some apps use custom mediation or obfuscated ad wrappers not yet fingerprinted — try enabling more categories or report the APK.",
       "default": false,
       "dependencies": [],
       "compatiblePackages": null,
       "options": [
         {
+          "key": "preset",
+          "title": "Preset",
+          "description": "Quick setup: Recommended blocks most ads but keeps rewarded ads for Ads Free Rewards compatibility. Aggressive blocks everything including rewarded. Custom lets you pick below.",
+          "required": false,
+          "type": "kotlin.String",
+          "default": "recommended",
+          "values": {
+            "Recommended (keep rewarded)": "recommended",
+            "Aggressive (block all)": "aggressive",
+            "Custom": "custom"
+          }
+        },
+        {
           "key": "blockInterstitials",
           "title": "Block Interstitials",
-          "description": "Block full-screen ads shown between app content",
+          "description": "Full-screen ads between levels or menus. Safe to block in most apps.",
           "required": false,
           "type": "kotlin.Boolean",
           "default": true,
@@ -2729,7 +2742,7 @@
         {
           "key": "blockBanners",
           "title": "Block Banners",
-          "description": "Block banner ads shown at the top or bottom of the screen",
+          "description": "Thin banners at top/bottom. Safe to block; rarely breaks layout.",
           "required": false,
           "type": "kotlin.Boolean",
           "default": true,
@@ -2738,7 +2751,7 @@
         {
           "key": "blockAppOpen",
           "title": "Block App Open",
-          "description": "Block ads shown when the app starts",
+          "description": "Ads on cold start. Block to skip the launch ad.",
           "required": false,
           "type": "kotlin.Boolean",
           "default": true,
@@ -2747,7 +2760,7 @@
         {
           "key": "blockMRec",
           "title": "Block MREC",
-          "description": "Block medium rectangle (MREC) banner ads",
+          "description": "Medium rectangles (300x250) inside feeds. Safe to block.",
           "required": false,
           "type": "kotlin.Boolean",
           "default": true,
@@ -2756,7 +2769,16 @@
         {
           "key": "blockRewarded",
           "title": "Block Rewarded",
-          "description": "Block rewarded ads; may disable features that require watching them",
+          "description": "Rewarded video — disable if you use Ads Free Rewards, otherwise progress gates may break. Enable only to fully remove rewarded ads.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "blockNative",
+          "title": "Block Native",
+          "description": "Native ads blended into feeds/lists. Enable for cleaner feeds (may leave empty placeholders).",
           "required": false,
           "type": "kotlin.Boolean",
           "default": true,

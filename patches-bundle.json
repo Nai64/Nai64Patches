@@ -1,7 +1,7 @@
 {
-  "created_at": "2026-08-27T12:19:17",
-  "description": "## [1.31.0](https://github.com/Nai64/Nai64Patches/compare/1.30.0...1.31.0) (2026-08-27)\n\n### Bug Fixes\n\n* remove secrets check from job if for Discord notify ([54420c4](https://github.com/Nai64/Nai64Patches/commit/54420c441fa03c22ae5ee111d524e6a53e1886c4))\n\n### New Features\n\n* add Bypass Permission Check patch ([2bc41ac](https://github.com/Nai64/Nai64Patches/commit/2bc41ac56279a3c71f690b78a6de85266325ac18))\n* add Force Has System Feature patch ([14bfacb](https://github.com/Nai64/Nai64Patches/commit/14bfacbb6cb29b6c6fc33abb5a998ff8363b7851))\n* add Hide Accessibility Services patch ([8cd6008](https://github.com/Nai64/Nai64Patches/commit/8cd6008814c8cbc0a7f0e593972e6953cff8170c))\n* add Hide Clipboard Description patch ([6713924](https://github.com/Nai64/Nai64Patches/commit/6713924f96871e204b90cb7f3daef8788f5b9d42))\n* add Hide Default Sensor patch ([a99dfa7](https://github.com/Nai64/Nai64Patches/commit/a99dfa79f57e8183bb6f09ce2a121994552d4218))\n* add Hide Nfc Adapter patch ([6cb1027](https://github.com/Nai64/Nai64Patches/commit/6cb1027d641440dd1d6aee75dc771ca6c909bf8f))\n* add Hide Storage Volumes patch ([7284f9e](https://github.com/Nai64/Nai64Patches/commit/7284f9e34f7490bca69679e772675e1e709b6bbc))\n* add Hide Usage Stats patch ([75428eb](https://github.com/Nai64/Nai64Patches/commit/75428eb4a8e2d8629ac3eabce5121c400c3ed622))\n* add Spoof Bluetooth Profile State patch ([adf66de](https://github.com/Nai64/Nai64Patches/commit/adf66deb9f2987cb5bd55b5e3dfa09b673e535cf))\n* add Spoof UiMode Night State patch ([54c7ba3](https://github.com/Nai64/Nai64Patches/commit/54c7ba3897cb8958bf46a258e74f11582df14816))",
-  "download_url": "https://github.com/Nai64/Nai64Patches/releases/download/1.31.0/patches-1.31.0.mpp",
+  "created_at": "2026-08-27T13:26:10",
+  "description": "## [1.31.1](https://github.com/Nai64/Nai64Patches/compare/1.31.0...1.31.1) (2026-08-27)\n\n### Bug Fixes\n\n* improve No Ads patch UX and tighten ad detection [skip ci] ([24ae8f1](https://github.com/Nai64/Nai64Patches/commit/24ae8f16dbe72e29af4ccff8b53a7a2c8fadc87c))",
+  "download_url": "https://github.com/Nai64/Nai64Patches/releases/download/1.31.1/patches-1.31.1.mpp",
   "signature_download_url": "",
-  "version": "1.31.0"
+  "version": "1.31.1"
 }
