@@ -14,16 +14,16 @@ import com.android.tools.smali.dexlib2.iface.reference.StringReference
 import java.util.logging.Logger
 
 @Suppress("unused")
-val fakeAutoRotatePatch = bytecodePatch(
-    name = "Fake Auto Rotate On",
-    description = "Reports a chosen auto-rotation state through Settings.System so apps that restrict features based on rotation lock stop doing so.",
+val fakeDozeAlwaysOnPatch = bytecodePatch(
+    name = "Fake Doze Always On",
+    description = "Reports a chosen always-on display state through Settings.Secure so apps that restrict features based on doze settings stop doing so.",
     default = false,
 ) {
     val enabled by booleanOption(
-        title = "Enable auto-rotate",
+        title = "Enable always-on",
         default = true,
-        key = "autoRotate",
-        description = "Report auto-rotation as enabled (true) or disabled (false).",
+        key = "dozeAlwaysOn",
+        description = "Report always-on display as enabled (true) or disabled (false).",
     )
 
     execute {
@@ -40,7 +40,7 @@ val fakeAutoRotatePatch = bytecodePatch(
                     val reference =
                         (instruction as? ReferenceInstruction)?.reference as? MethodReference
                             ?: continue
-                    if (reference.definingClass != "Landroid/provider/Settings\$System;") continue
+                    if (reference.definingClass != "Landroid/provider/Settings\$Secure;") continue
                     if (reference.name != "getInt") continue
                     if (reference.returnType != "I") continue
                     val params = reference.parameterTypes
@@ -66,7 +66,7 @@ val fakeAutoRotatePatch = bytecodePatch(
                         keyValue = ((prev as? ReferenceInstruction)?.reference as? StringReference)?.string
                         break
                     }
-                    if (keyValue != "accelerometer_rotation") continue
+                    if (keyValue != "doze_always_on") continue
 
                     val next = instructions.getOrNull(index + 1)
                     if (next != null && next.opcode == Opcode.MOVE_RESULT) {
@@ -79,9 +79,9 @@ val fakeAutoRotatePatch = bytecodePatch(
             }
         }
         if (patched > 0) {
-            logger.info("Faked auto-rotate at $patched call site(s)")
+            logger.info("Faked doze always on at $patched call site(s)")
         } else {
-            logger.warning("No Settings.System accelerometer_rotation reads found. No changes applied.")
+            logger.warning("No Settings.Secure doze_always_on reads found. No changes applied.")
         }
     }
 }

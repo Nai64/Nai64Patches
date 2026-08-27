@@ -2,6 +2,7 @@ package patches.universal.misc
 
 import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
 import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.booleanOption
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction35c
 import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction3rc
@@ -12,18 +13,23 @@ import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 import com.android.tools.smali.dexlib2.iface.reference.StringReference
 import java.util.logging.Logger
 
-/**
- * Folds Settings.Global.getInt("adb_enabled") into 1 (enabled)
- * so apps that check whether USB debugging is on see it as enabled.
- */
 @Suppress("unused")
 val fakeAdbEnabledPatch = bytecodePatch(
     name = "Fake ADB Enabled",
-    description = "Reports ADB debugging as enabled through Settings.Global so apps that restrict features based on developer options stop doing so.",
+    description = "Reports a chosen ADB state through Settings.Global so apps that restrict features based on developer options stop doing so.",
     default = false,
 ) {
+    val enabled by booleanOption(
+        title = "Enable ADB",
+        default = true,
+        key = "adbEnabled",
+        description = "Report ADB debugging as enabled (true) or disabled (false).",
+    )
+
     execute {
         val logger = Logger.getLogger(this::class.java.name)
+        val target = if (enabled == true) 1 else 0
+
         var patched = 0
         classDefForEach { classDef ->
             val mutableClass = mutableClassDefBy(classDef)
@@ -65,7 +71,7 @@ val fakeAdbEnabledPatch = bytecodePatch(
                     val next = instructions.getOrNull(index + 1)
                     if (next != null && next.opcode == Opcode.MOVE_RESULT) {
                         val resultRegister = (next as OneRegisterInstruction).registerA
-                        method.replaceInstruction(index, "const/4 v$resultRegister, 0x1")
+                        method.replaceInstruction(index, "const/4 v$resultRegister, $target")
                         method.replaceInstruction(index + 1, "nop")
                         patched++
                     }

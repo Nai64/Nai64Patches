@@ -2,6 +2,7 @@ package patches.universal.misc
 
 import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
 import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.intOption
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction35c
 import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction3rc
@@ -12,18 +13,23 @@ import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 import com.android.tools.smali.dexlib2.iface.reference.StringReference
 import java.util.logging.Logger
 
-/**
- * Folds Settings.System.getInt("screen_off_timeout") into 600000 (10 minutes)
- * so apps that read the system screen timeout see a normal value.
- */
 @Suppress("unused")
 val fakeScreenTimeoutPatch = bytecodePatch(
     name = "Fake Screen Timeout",
-    description = "Reports a normal screen timeout (10 minutes) through Settings.System so apps that restrict features based on screen timeout stop doing so.",
+    description = "Reports a chosen screen timeout through Settings.System so apps that restrict features based on screen timeout stop doing so.",
     default = false,
 ) {
+    val screenTimeout by intOption(
+        title = "Screen timeout (ms)",
+        default = 600000,
+        key = "screenTimeout",
+        description = "Screen timeout in milliseconds: 15000 (15s), 30000 (30s), 60000 (1 min), 120000 (2 min), 300000 (5 min), 600000 (10 min), 1800000 (30 min).",
+    )
+
     execute {
         val logger = Logger.getLogger(this::class.java.name)
+        val timeout = screenTimeout ?: 600000
+
         var patched = 0
         classDefForEach { classDef ->
             val mutableClass = mutableClassDefBy(classDef)
@@ -65,8 +71,7 @@ val fakeScreenTimeoutPatch = bytecodePatch(
                     val next = instructions.getOrNull(index + 1)
                     if (next != null && next.opcode == Opcode.MOVE_RESULT) {
                         val resultRegister = (next as OneRegisterInstruction).registerA
-                        // 600000 = 0x927C0; fits const-wide/32 but not const/16.
-                        method.replaceInstruction(index, "const v$resultRegister, 0x927c0")
+                        method.replaceInstruction(index, "const v$resultRegister, $timeout")
                         method.replaceInstruction(index + 1, "nop")
                         patched++
                     }

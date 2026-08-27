@@ -2,6 +2,7 @@ package patches.universal.misc
 
 import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
 import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.stringOption
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction35c
 import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction3rc
@@ -10,20 +11,34 @@ import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 import com.android.tools.smali.dexlib2.iface.reference.StringReference
+import java.util.LinkedHashMap
 import java.util.logging.Logger
 
-/**
- * Folds Settings.Global.getInt("stay_on_while_plugged_in") into 3 (USB+AC)
- * so apps that read this setting see it as always staying on while plugged in.
- */
 @Suppress("unused")
 val fakeStayOnWhilePluggedPatch = bytecodePatch(
     name = "Fake Stay On While Plugged",
-    description = "Reports stay-on-while-plugged as enabled (USB+AC) through Settings.Global so apps that restrict features based on this setting stop doing so.",
+    description = "Reports a chosen stay-on-while-plugged state through Settings.Global so apps that restrict features based on this setting stop doing so.",
     default = false,
 ) {
+    val plugType by stringOption(
+        title = "Plug type",
+        default = "USB + AC",
+        key = "stayOnPlugged",
+        description = "Which plug types to report as connected.",
+        values = linkedMapOf(
+            "None" to "0",
+            "USB" to "1",
+            "AC" to "2",
+            "USB + AC" to "3",
+            "Wireless" to "4",
+            "All" to "7",
+        ),
+    )
+
     execute {
         val logger = Logger.getLogger(this::class.java.name)
+        val target = plugType?.toIntOrNull() ?: 3
+
         var patched = 0
         classDefForEach { classDef ->
             val mutableClass = mutableClassDefBy(classDef)
@@ -65,8 +80,7 @@ val fakeStayOnWhilePluggedPatch = bytecodePatch(
                     val next = instructions.getOrNull(index + 1)
                     if (next != null && next.opcode == Opcode.MOVE_RESULT) {
                         val resultRegister = (next as OneRegisterInstruction).registerA
-                        // 3 = USB (1) + AC (2) flag bits
-                        method.replaceInstruction(index, "const/4 v$resultRegister, 0x3")
+                        method.replaceInstruction(index, "const/4 v$resultRegister, $target")
                         method.replaceInstruction(index + 1, "nop")
                         patched++
                     }

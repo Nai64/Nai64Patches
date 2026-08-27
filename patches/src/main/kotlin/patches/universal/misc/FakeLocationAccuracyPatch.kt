@@ -2,24 +2,33 @@ package patches.universal.misc
 
 import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
 import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.intOption
+import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.Instruction
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 import java.util.logging.Logger
 
-/**
- * Folds Location.getAccuracy() into 1.0 so apps that check location accuracy
- * see a very precise value.
- */
 @Suppress("unused")
 val fakeLocationAccuracyPatch = bytecodePatch(
     name = "Fake Location Accuracy",
-    description = "Reports location accuracy as 1.0 meter through Location.getAccuracy() so apps that restrict features based on low accuracy stop doing so.",
+    description = "Reports a chosen location accuracy through Location.getAccuracy() so apps that restrict features based on low accuracy stop doing so.",
     default = false,
 ) {
+    val accuracy by intOption(
+        title = "Accuracy (meters)",
+        default = 1,
+        key = "locationAccuracy",
+        description = "Reported location accuracy in meters (1 = very accurate, 10 = moderate, 100 = inaccurate).",
+    )
+
     execute {
         val logger = Logger.getLogger(this::class.java.name)
+        val meters = (accuracy ?: 1).toFloat()
+        val floatBits = java.lang.Float.floatToRawIntBits(meters)
+        val hex = "0x" + Integer.toHexString(floatBits)
+
         var patched = 0
         classDefForEach { classDef ->
             val mutableClass = mutableClassDefBy(classDef)
@@ -36,10 +45,9 @@ val fakeLocationAccuracyPatch = bytecodePatch(
                     if (reference.parameterTypes.isNotEmpty()) continue
 
                     val next = instructions.getOrNull(index + 1)
-                    if (next != null && next.opcode == com.android.tools.smali.dexlib2.Opcode.MOVE_RESULT) {
+                    if (next != null && next.opcode == Opcode.MOVE_RESULT) {
                         val resultRegister = (next as OneRegisterInstruction).registerA
-                        // 1.0f in IEEE 754 = 0x3f800000
-                        method.replaceInstruction(index, "const/high16 v$resultRegister, 0x3f800000")
+                        method.replaceInstruction(index, "const/high16 v$resultRegister, $hex")
                         method.replaceInstruction(index + 1, "nop")
                         patched++
                     }

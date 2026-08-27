@@ -2,6 +2,7 @@ package patches.universal.misc
 
 import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
 import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.intOption
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction35c
 import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction3rc
@@ -12,18 +13,28 @@ import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 import com.android.tools.smali.dexlib2.iface.reference.StringReference
 import java.util.logging.Logger
 
-/**
- * Folds Settings.System.getFloat("font_scale") into 1.0 so apps that read the
- * system font scale see a normal value regardless of the device setting.
- */
 @Suppress("unused")
 val fakeFontScalePatch = bytecodePatch(
     name = "Fake Font Scale",
-    description = "Reports a normal font scale (1.0) through Settings.System so apps that restrict features based on font size stop doing so.",
+    description = "Reports a chosen font scale through Settings.System so apps that restrict features based on font size stop doing so.",
     default = false,
 ) {
+    val fontScale by intOption(
+        title = "Font scale (×100)",
+        default = 100,
+        key = "fontScale",
+        description = "Font scale as percentage: 100 = normal (1.0×), 85 = small (0.85×), 115 = large (1.15×), 130 = largest (1.3×), 150 = extra large (1.5×).",
+    )
+
     execute {
         val logger = Logger.getLogger(this::class.java.name)
+        val scale = (fontScale ?: 100) / 100.0f
+        // Compute IEEE 754 bits; const/high16 uses only the top 16 bits,
+        // bottom 16 are zeroed — acceptable precision loss for font scaling.
+        val floatBits = java.lang.Float.floatToRawIntBits(scale)
+        val hex = "0x" + Integer.toHexString(floatBits)
+        logger.info("Using font scale $scale ($hex)")
+
         var patched = 0
         classDefForEach { classDef ->
             val mutableClass = mutableClassDefBy(classDef)
@@ -65,8 +76,7 @@ val fakeFontScalePatch = bytecodePatch(
                     val next = instructions.getOrNull(index + 1)
                     if (next != null && next.opcode == Opcode.MOVE_RESULT) {
                         val resultRegister = (next as OneRegisterInstruction).registerA
-                        // 1.0f in IEEE 754 = 0x3f800000
-                        method.replaceInstruction(index, "const/high16 v$resultRegister, 0x3f800000")
+                        method.replaceInstruction(index, "const/high16 v$resultRegister, $hex")
                         method.replaceInstruction(index + 1, "nop")
                         patched++
                     }
