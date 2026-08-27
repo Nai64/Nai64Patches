@@ -13,7 +13,6 @@ on:
 jobs:
   notify:
     runs-on: ubuntu-latest
-    if: ${{ secrets.DISCORD_WEBHOOK_URL != '' }}
     steps:
       - name: Send Discord notification
         env:
