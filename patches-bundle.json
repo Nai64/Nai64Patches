@@ -1,7 +1,7 @@
 {
-  "created_at": "2026-08-27T13:26:10",
-  "description": "## [1.31.1](https://github.com/Nai64/Nai64Patches/compare/1.31.0...1.31.1) (2026-08-27)\n\n### Bug Fixes\n\n* improve No Ads patch UX and tighten ad detection [skip ci] ([24ae8f1](https://github.com/Nai64/Nai64Patches/commit/24ae8f16dbe72e29af4ccff8b53a7a2c8fadc87c))",
-  "download_url": "https://github.com/Nai64/Nai64Patches/releases/download/1.31.1/patches-1.31.1.mpp",
+  "created_at": "2026-08-27T19:02:18",
+  "description": "## [1.31.2](https://github.com/Nai64/Nai64Patches/compare/1.31.1...1.31.2) (2026-08-27)\n\n### Bug Fixes\n\n* make Custom App Icon work on Android ([5c25ed3](https://github.com/Nai64/Nai64Patches/commit/5c25ed39d943669cad1951752e72380640ce48bf))",
+  "download_url": "https://github.com/Nai64/Nai64Patches/releases/download/1.31.2/patches-1.31.2.mpp",
   "signature_download_url": "",
-  "version": "1.31.1"
+  "version": "1.31.2"
 }
