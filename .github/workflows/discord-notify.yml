@@ -1,0 +1,40 @@
+name: Discord Notify
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      test_tag:
+        description: "Test tag to send (e.g. 1.30.0)"
+        required: false
+        default: ""
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    if: ${{ secrets.DISCORD_WEBHOOK_URL != '' }}
+    steps:
+      - name: Send Discord notification
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          TAG: ${{ github.event.release.tag_name || inputs.test_tag || github.ref_name }}
+          URL: ${{ github.event.release.html_url || format('https://github.com/{0}/releases', github.repository) }}
+        run: |
+          if [ -z "$DISCORD_WEBHOOK_URL" ]; then
+            echo "DISCORD_WEBHOOK_URL not set — skipping"
+            exit 0
+          fi
+          if [ -z "$TAG" ] || [ "$TAG" = "" ]; then TAG="${GITHUB_REF_NAME:-unknown}"; fi
+          # Minimal embed — private webhook never logged
+          payload=$(jq -n --arg tag "$TAG" --arg url "$URL" --arg repo "${{ github.repository }}" '{
+            username: "Nai64Patches",
+            embeds: [{
+              title: ("New version \($tag) available"),
+              url: $url,
+              description: ("Patcher source \($repo) just published \($tag) — update in Morphe via pull-to-refresh."),
+              color: 10181046,
+              timestamp: now | todate
+            }]
+          }')
+          curl -sS -H "Content-Type: application/json" -d "$payload" "$DISCORD_WEBHOOK_URL" > /dev/null && echo "Discord notified for $TAG" || (echo "Discord webhook failed" && exit 1)
