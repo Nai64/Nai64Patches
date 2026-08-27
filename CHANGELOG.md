@@ -1,3 +1,22 @@
+## [1.31.0](https://github.com/Nai64/Nai64Patches/compare/1.30.0...1.31.0) (2026-08-27)
+
+### Bug Fixes
+
+* remove secrets check from job if for Discord notify ([54420c4](https://github.com/Nai64/Nai64Patches/commit/54420c441fa03c22ae5ee111d524e6a53e1886c4))
+
+### New Features
+
+* add Bypass Permission Check patch ([2bc41ac](https://github.com/Nai64/Nai64Patches/commit/2bc41ac56279a3c71f690b78a6de85266325ac18))
+* add Force Has System Feature patch ([14bfacb](https://github.com/Nai64/Nai64Patches/commit/14bfacbb6cb29b6c6fc33abb5a998ff8363b7851))
+* add Hide Accessibility Services patch ([8cd6008](https://github.com/Nai64/Nai64Patches/commit/8cd6008814c8cbc0a7f0e593972e6953cff8170c))
+* add Hide Clipboard Description patch ([6713924](https://github.com/Nai64/Nai64Patches/commit/6713924f96871e204b90cb7f3daef8788f5b9d42))
+* add Hide Default Sensor patch ([a99dfa7](https://github.com/Nai64/Nai64Patches/commit/a99dfa79f57e8183bb6f09ce2a121994552d4218))
+* add Hide Nfc Adapter patch ([6cb1027](https://github.com/Nai64/Nai64Patches/commit/6cb1027d641440dd1d6aee75dc771ca6c909bf8f))
+* add Hide Storage Volumes patch ([7284f9e](https://github.com/Nai64/Nai64Patches/commit/7284f9e34f7490bca69679e772675e1e709b6bbc))
+* add Hide Usage Stats patch ([75428eb](https://github.com/Nai64/Nai64Patches/commit/75428eb4a8e2d8629ac3eabce5121c400c3ed622))
+* add Spoof Bluetooth Profile State patch ([adf66de](https://github.com/Nai64/Nai64Patches/commit/adf66deb9f2987cb5bd55b5e3dfa09b673e535cf))
+* add Spoof UiMode Night State patch ([54c7ba3](https://github.com/Nai64/Nai64Patches/commit/54c7ba3897cb8958bf46a258e74f11582df14816))
+
 ## [1.30.0](https://github.com/Nai64/Nai64Patches/compare/1.29.1...1.30.0) (2026-08-27)
 
 ### New Features

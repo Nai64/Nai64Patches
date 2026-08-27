@@ -1,6 +1,6 @@
 {
   "NOTE": "Do NOT manually edit this file. This file is automatically updated when semantic release (release.yml) runs. Manually editing this file can break your releases and break third party tools that use this file.",
-  "version": "1.30.0",
+  "version": "1.31.0",
   "patches": [
     {
       "name": "Skip Consent Popup",
@@ -1470,6 +1470,14 @@
       "options": []
     },
     {
+      "name": "Bypass Permission Check",
+      "description": "Forces permission checks to report granted so permission-gated features skip dialogs",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": []
+    },
+    {
       "name": "Bypass Picture-in-Picture Mode",
       "description": "Makes Activity.isInPictureInPictureMode() report false so apps that change behavior in PiP keep their full UI.",
       "default": false,
@@ -2308,6 +2316,14 @@
       "options": []
     },
     {
+      "name": "Force Has System Feature",
+      "description": "Makes PackageManager.hasSystemFeature always return true so feature-gated installs pass runtime checks",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": []
+    },
+    {
       "name": "Force Idle Call State",
       "description": "Makes TelephonyManager.getCallState() report CALL_STATE_IDLE (0) so apps that react to active calls behave as if none are in progress.",
       "default": false,
@@ -2567,6 +2583,14 @@
       ]
     },
     {
+      "name": "Hide Accessibility Services",
+      "description": "Makes AccessibilityManager return empty lists so apps cannot detect TalkBack or automation services",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": []
+    },
+    {
       "name": "Hide Accessibility Usage",
       "description": "Makes AccessibilityManager.isEnabled() report false so apps cannot tell an accessibility service is running.",
       "default": false,
@@ -2591,8 +2615,24 @@
       "options": []
     },
     {
+      "name": "Hide Clipboard Description",
+      "description": "Makes ClipboardManager.getPrimaryClipDescription return null to block MIME and type harvesting",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": []
+    },
+    {
       "name": "Hide Debugger Connection",
       "description": "Makes Debug.isDebuggerConnected and waitingForDebugger always return false so apps that refuse to run under a debugger keep working",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": []
+    },
+    {
+      "name": "Hide Default Sensor",
+      "description": "Makes SensorManager.getDefaultSensor return null so sensor fingerprint and VR gates see no hardware",
       "default": false,
       "dependencies": [],
       "compatiblePackages": null,
@@ -2617,6 +2657,30 @@
     {
       "name": "Hide Installed Apps",
       "description": "Redirects PackageManager.getInstalledPackages/getInstalledApplications to Collections.emptyList() so the app sees no other installed apps.",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": []
+    },
+    {
+      "name": "Hide Nfc Adapter",
+      "description": "Makes NfcAdapter.getDefaultAdapter return null so NFC probes fail uniformly",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": []
+    },
+    {
+      "name": "Hide Storage Volumes",
+      "description": "Makes StorageManager return empty lists so volume enumeration for fingerprint sees nothing",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": []
+    },
+    {
+      "name": "Hide Usage Stats",
+      "description": "Makes UsageStatsManager return empty lists so app usage fingerprinting sees nothing",
       "default": false,
       "dependencies": [],
       "compatiblePackages": null,
@@ -2915,6 +2979,14 @@
     {
       "name": "Spoof Bluetooth Name",
       "description": "Reports a constant name from BluetoothAdapter.getName() so apps cannot read the real local Bluetooth adapter name.",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": []
+    },
+    {
+      "name": "Spoof Bluetooth Profile State",
+      "description": "Forces BluetoothAdapter.getProfileConnectionState to report connected so headset and A2DP gates proceed",
       "default": false,
       "dependencies": [],
       "compatiblePackages": null,
@@ -3242,6 +3314,14 @@
           "values": null
         }
       ]
+    },
+    {
+      "name": "Spoof UiMode Night State",
+      "description": "Forces UiModeManager to report TYPE_NORMAL and night mode off so car/TV/night gates never trigger",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": []
     },
     {
       "name": "Spoof Voice Mail",
