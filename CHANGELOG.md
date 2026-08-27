@@ -1,3 +1,33 @@
+## [1.32.0](https://github.com/Nai64/Nai64Patches/compare/1.31.2...1.32.0) (2026-08-27)
+
+### New Features
+
+* add Fake ADB Enabled patch ([3212ecc](https://github.com/Nai64/Nai64Patches/commit/3212ecc0a27c1a5d7afb0108d297e4b16b108f28))
+* add Fake Auto Rotate On patch ([0be784f](https://github.com/Nai64/Nai64Patches/commit/0be784f4ad655ec28640b15439b05e73abfb1f01))
+* add Fake Auto Time patch ([e7c870c](https://github.com/Nai64/Nai64Patches/commit/e7c870c4fd4574bee12871cbf39b53be638b160f))
+* add Fake Auto Time Zone patch ([a80fdd6](https://github.com/Nai64/Nai64Patches/commit/a80fdd6b49d85bd7f70a67b979f76abaf0d2c867))
+* add Fake Available Processors patch ([23f2e3b](https://github.com/Nai64/Nai64Patches/commit/23f2e3b4eeb4ecb87fbb32a6a8af547425d7f5f2))
+* add Fake Bluetooth Bonded Devices Empty patch ([d5e5e42](https://github.com/Nai64/Nai64Patches/commit/d5e5e4212577b56b97bc594e5f0a3166218ebd19))
+* add Fake Brightness Auto Mode patch ([7ec1879](https://github.com/Nai64/Nai64Patches/commit/7ec1879a3a0928e4b4385c66293f9cbbd36ab5c1))
+* add Fake Cell Info Empty patch ([05a46ae](https://github.com/Nai64/Nai64Patches/commit/05a46aeabbc2faa20c93ad14ec9368911347ab2b))
+* add Fake Device Idle Mode patch ([e7af18a](https://github.com/Nai64/Nai64Patches/commit/e7af18a242a6d42dcb473c1632f4f74bd60f8db5))
+* add Fake Doze Always On patch ([d034ed9](https://github.com/Nai64/Nai64Patches/commit/d034ed94425be28f53f91fb29fa72d26a694cf8e))
+* add Fake DTMF Tone Enabled patch ([67bda31](https://github.com/Nai64/Nai64Patches/commit/67bda3179103ceceecdf693a235bafa9954fbd98))
+* add Fake Font Scale patch ([ccd03fb](https://github.com/Nai64/Nai64Patches/commit/ccd03fb5d82c167da6b0bd325f52a55061a1ace9))
+* add Fake Location Accuracy patch ([d195573](https://github.com/Nai64/Nai64Patches/commit/d1955737e55a05af216333e9f9c4abd92b1d7deb))
+* add Fake Memory Class patch ([a79c3ef](https://github.com/Nai64/Nai64Patches/commit/a79c3ef18f2aaf82add938273bcdd3f4d67a853c))
+* add Fake Notification Policy Access patch ([339aa5f](https://github.com/Nai64/Nai64Patches/commit/339aa5f7e180656b0bc62461d34e061551a3d190))
+* add Fake Play Store Install Source patch ([d15b213](https://github.com/Nai64/Nai64Patches/commit/d15b213e5651a927082bb95d988650f6177d604b))
+* add Fake Screen Timeout patch ([9153e11](https://github.com/Nai64/Nai64Patches/commit/9153e1102a1c73fc092fb12eb84c767441f922e3))
+* add Fake Stay On While Plugged patch ([d953297](https://github.com/Nai64/Nai64Patches/commit/d9532971fe63e17fa5ed47b8378c026775e2e29e))
+* add Fake Storage Available patch ([1e811df](https://github.com/Nai64/Nai64Patches/commit/1e811df28d7917d97af501af96514648ef2f6744))
+* add Fake Vibrate When Ringing patch ([cc63d42](https://github.com/Nai64/Nai64Patches/commit/cc63d42b3f8bdfdac202ae5114943a719c29d9f3))
+* add Fake WiFi Scan Results Empty patch ([893a316](https://github.com/Nai64/Nai64Patches/commit/893a3166dea29aefabad735a8f9a5a0563d6bab9))
+* add Force Battery Temperature patch ([fde2586](https://github.com/Nai64/Nai64Patches/commit/fde25868b0b73f299c2c67fe1d773be7240921a2))
+* add Force Charging Status patch ([f7f1526](https://github.com/Nai64/Nai64Patches/commit/f7f15264a1778f48e48ee178553c8e73881255e1))
+* add Spoof Network Operator Name patch ([cd4b88c](https://github.com/Nai64/Nai64Patches/commit/cd4b88cab346b2cab979b2dc4eaa616617ab640f))
+* make older spoof patches customizable ([76ef72f](https://github.com/Nai64/Nai64Patches/commit/76ef72f04fde22e11776074c030e75a21848a705))
+
 ## [1.31.2](https://github.com/Nai64/Nai64Patches/compare/1.31.1...1.31.2) (2026-08-27)
 
 ### Bug Fixes

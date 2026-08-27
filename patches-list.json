@@ -1,6 +1,6 @@
 {
   "NOTE": "Do NOT manually edit this file. This file is automatically updated when semantic release (release.yml) runs. Manually editing this file can break your releases and break third party tools that use this file.",
-  "version": "1.31.2",
+  "version": "1.32.0",
   "patches": [
     {
       "name": "Skip Consent Popup",
@@ -2228,12 +2228,190 @@
       "options": []
     },
     {
+      "name": "Fake ADB Enabled",
+      "description": "Reports a chosen ADB state through Settings.Global so apps that restrict features based on developer options stop doing so.",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": [
+        {
+          "key": "adbEnabled",
+          "title": "Enable ADB",
+          "description": "Report ADB debugging as enabled (true) or disabled (false).",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": true,
+          "values": null
+        }
+      ]
+    },
+    {
+      "name": "Fake Auto Rotate On",
+      "description": "Reports a chosen auto-rotation state through Settings.System so apps that restrict features based on rotation lock stop doing so.",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": [
+        {
+          "key": "autoRotate",
+          "title": "Enable auto-rotate",
+          "description": "Report auto-rotation as enabled (true) or disabled (false).",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": true,
+          "values": null
+        }
+      ]
+    },
+    {
+      "name": "Fake Auto Time",
+      "description": "Reports automatic date & time as enabled through Settings.Global so apps that flag manual time as suspicious stop doing so.",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": [
+        {
+          "key": "autoTime",
+          "title": "Enable auto time",
+          "description": "Report automatic time as enabled (true) or disabled (false).",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": true,
+          "values": null
+        }
+      ]
+    },
+    {
+      "name": "Fake Auto Time Zone",
+      "description": "Reports automatic time zone as enabled through Settings.Global so apps that flag manual time zone as suspicious stop doing so.",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": [
+        {
+          "key": "autoTimeZone",
+          "title": "Enable auto time zone",
+          "description": "Report automatic time zone as enabled (true) or disabled (false).",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": true,
+          "values": null
+        }
+      ]
+    },
+    {
+      "name": "Fake Available Processors",
+      "description": "Reports a chosen CPU count through Runtime.availableProcessors() so apps that check core count see a high-end device.",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": [
+        {
+          "key": "availableProcessors",
+          "title": "Processor count",
+          "description": "Number of processors to report (2-16): 4 (mid), 8 (high), 12 (very high).",
+          "required": false,
+          "type": "kotlin.Int",
+          "default": 8,
+          "values": null
+        }
+      ]
+    },
+    {
+      "name": "Fake Bluetooth Bonded Devices Empty",
+      "description": "Makes BluetoothAdapter.getBondedDevices() return an empty set so apps cannot fingerprint paired Bluetooth devices.",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": []
+    },
+    {
       "name": "Fake Bluetooth Enabled",
       "description": "Makes BluetoothAdapter.isEnabled always return true so apps that require Bluetooth stop nagging about it being turned off",
       "default": false,
       "dependencies": [],
       "compatiblePackages": null,
       "options": []
+    },
+    {
+      "name": "Fake Brightness Auto Mode",
+      "description": "Reports a chosen brightness mode through Settings.System so apps that restrict features based on brightness mode stop doing so.",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": [
+        {
+          "key": "autoBrightness",
+          "title": "Enable auto-brightness",
+          "description": "Report auto-brightness as enabled (true) or manual (false).",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": true,
+          "values": null
+        }
+      ]
+    },
+    {
+      "name": "Fake Cell Info Empty",
+      "description": "Makes TelephonyManager.getAllCellInfo() return an empty list so apps cannot fingerprint nearby cell towers.",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": []
+    },
+    {
+      "name": "Fake DTMF Tone Enabled",
+      "description": "Reports a chosen DTMF tone state through Settings.System so apps that check dialer tone settings stop doing so.",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": [
+        {
+          "key": "dtmfTone",
+          "title": "Enable DTMF tone",
+          "description": "Report DTMF tone as enabled (true) or disabled (false).",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        }
+      ]
+    },
+    {
+      "name": "Fake Device Idle Mode",
+      "description": "Makes PowerManager.isDeviceIdleMode() report a chosen state so apps that gate features behind device idle checks stop doing so.",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": [
+        {
+          "key": "deviceIdle",
+          "title": "Report idle",
+          "description": "Report device as idle (true) or not idle (false). Recommended: false.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        }
+      ]
+    },
+    {
+      "name": "Fake Doze Always On",
+      "description": "Reports a chosen always-on display state through Settings.Secure so apps that restrict features based on doze settings stop doing so.",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": [
+        {
+          "key": "dozeAlwaysOn",
+          "title": "Enable always-on",
+          "description": "Report always-on display as enabled (true) or disabled (false).",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": true,
+          "values": null
+        }
+      ]
     },
     {
       "name": "Fake Fingerprint Hardware",
@@ -2244,8 +2422,191 @@
       "options": []
     },
     {
+      "name": "Fake Font Scale",
+      "description": "Reports a chosen font scale through Settings.System so apps that restrict features based on font size stop doing so.",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": [
+        {
+          "key": "fontScale",
+          "title": "Font scale (×100)",
+          "description": "Font scale as percentage: 100 = normal (1.0×), 85 = small (0.85×), 115 = large (1.15×), 130 = largest (1.3×), 150 = extra large (1.5×).",
+          "required": false,
+          "type": "kotlin.Int",
+          "default": 100,
+          "values": null
+        }
+      ]
+    },
+    {
+      "name": "Fake Location Accuracy",
+      "description": "Reports a chosen location accuracy through Location.getAccuracy() so apps that restrict features based on low accuracy stop doing so.",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": [
+        {
+          "key": "locationAccuracy",
+          "title": "Accuracy (meters)",
+          "description": "Reported location accuracy in meters (1 = very accurate, 10 = moderate, 100 = inaccurate).",
+          "required": false,
+          "type": "kotlin.Int",
+          "default": 1,
+          "values": null
+        }
+      ]
+    },
+    {
+      "name": "Fake Memory Class",
+      "description": "Reports a chosen memory class through ActivityManager.getMemoryClass() so apps that check available heap see a high value.",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": [
+        {
+          "key": "memoryClass",
+          "title": "Memory class (MB)",
+          "description": "Memory class in MB (128-1024): 256 (low), 512 (high), 1024 (very high).",
+          "required": false,
+          "type": "kotlin.Int",
+          "default": 512,
+          "values": null
+        }
+      ]
+    },
+    {
       "name": "Fake NFC Enabled",
       "description": "Makes NfcAdapter.isEnabled always return true so apps that require NFC stop blocking features on devices without it",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": []
+    },
+    {
+      "name": "Fake Notification Policy Access",
+      "description": "Makes NotificationManager.isNotificationPolicyAccessGranted() report a chosen state so apps that gate features behind DND policy access stop doing so.",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": [
+        {
+          "key": "notificationPolicyAccess",
+          "title": "Grant access",
+          "description": "Report DND policy access as granted (true) or denied (false).",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": true,
+          "values": null
+        }
+      ]
+    },
+    {
+      "name": "Fake Play Store Install Source",
+      "description": "Makes PackageManager.getInstallerPackageName() report a chosen store so apps that warn about sideloading or gate Play-only features stop doing so.",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": [
+        {
+          "key": "installerPackage",
+          "title": "Installer package",
+          "description": "Package name to report as installer.",
+          "required": false,
+          "type": "kotlin.String",
+          "default": "com.android.vending",
+          "values": {
+            "Play Store": "com.android.vending",
+            "Galaxy Store": "com.sec.android.app.samsungapps",
+            "Amazon Appstore": "com.amazon.venezia",
+            "Huawei AppGallery": "com.huawei.appmarket",
+            "Custom (use text)": "com.android.vending"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Fake Screen Timeout",
+      "description": "Reports a chosen screen timeout through Settings.System so apps that restrict features based on screen timeout stop doing so.",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": [
+        {
+          "key": "screenTimeout",
+          "title": "Screen timeout (ms)",
+          "description": "Screen timeout in milliseconds: 15000 (15s), 30000 (30s), 60000 (1 min), 120000 (2 min), 300000 (5 min), 600000 (10 min), 1800000 (30 min).",
+          "required": false,
+          "type": "kotlin.Int",
+          "default": 600000,
+          "values": null
+        }
+      ]
+    },
+    {
+      "name": "Fake Stay On While Plugged",
+      "description": "Reports a chosen stay-on-while-plugged state through Settings.Global so apps that restrict features based on this setting stop doing so.",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": [
+        {
+          "key": "stayOnPlugged",
+          "title": "Plug type",
+          "description": "Which plug types to report as connected.",
+          "required": false,
+          "type": "kotlin.String",
+          "default": "USB + AC",
+          "values": {
+            "None": "0",
+            "USB": "1",
+            "AC": "2",
+            "USB + AC": "3",
+            "Wireless": "4",
+            "All": "7"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Fake Storage Available",
+      "description": "Reports a chosen amount of free storage through StatFs so apps that refuse to run or nag when storage is low stop doing so.",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": [
+        {
+          "key": "storageGb",
+          "title": "Storage (GB)",
+          "description": "Amount of free storage in GB (16-1024): 64, 128, 256, 512.",
+          "required": false,
+          "type": "kotlin.Int",
+          "default": 128,
+          "values": null
+        }
+      ]
+    },
+    {
+      "name": "Fake Vibrate When Ringing",
+      "description": "Reports a chosen vibrate-when-ringing state through Settings.System so apps that check ringer vibration behavior stop doing so.",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": [
+        {
+          "key": "vibrateWhenRinging",
+          "title": "Enable vibrate when ringing",
+          "description": "Report vibrate-when-ringing as enabled (true) or disabled (false).",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        }
+      ]
+    },
+    {
+      "name": "Fake WiFi Scan Results Empty",
+      "description": "Makes WifiManager.getScanResults() return an empty list so apps cannot fingerprint nearby WiFi networks.",
       "default": false,
       "dependencies": [],
       "compatiblePackages": null,
@@ -2284,12 +2645,53 @@
       "options": []
     },
     {
+      "name": "Force Battery Temperature",
+      "description": "Reports a chosen battery temperature through BatteryManager.getIntProperty for the temperature property, so apps that throttle or warn on a hot device stop doing so.",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": [
+        {
+          "key": "batteryTemperature",
+          "title": "Temperature (0.1C)",
+          "description": "Temperature in tenths of a degree Celsius: 200 (20C), 250 (25C), 300 (30C), 350 (35C).",
+          "required": false,
+          "type": "kotlin.Int",
+          "default": 250,
+          "values": null
+        }
+      ]
+    },
+    {
       "name": "Force Can Install Packages",
       "description": "Makes PackageManager.canRequestPackageInstalls() report true so sideload/unknown-source install prompts are treated as already granted.",
       "default": false,
       "dependencies": [],
       "compatiblePackages": null,
       "options": []
+    },
+    {
+      "name": "Force Charging Status",
+      "description": "Reports a chosen charging status through BatteryManager.getIntProperty for the status property, so apps that gate features behind a charging state stop doing so.",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": [
+        {
+          "key": "chargingStatus",
+          "title": "Battery status",
+          "description": "Status to report: Charging, Discharging, Full, Not Charging.",
+          "required": false,
+          "type": "kotlin.String",
+          "default": "Charging",
+          "values": {
+            "Charging": "2",
+            "Discharging": "3",
+            "Not Charging": "4",
+            "Full": "5"
+          }
+        }
+      ]
     },
     {
       "name": "Force Data Capable",
@@ -2341,11 +2743,21 @@
     },
     {
       "name": "Force Max Brightness",
-      "description": "Forces the system screen brightness setting to maximum (255) so apps that read it cannot dim or restrict the screen.",
+      "description": "Forces the system screen brightness setting to a chosen value (default 255) so apps that read it cannot dim or restrict the screen.",
       "default": false,
       "dependencies": [],
       "compatiblePackages": null,
-      "options": []
+      "options": [
+        {
+          "key": "screenBrightness",
+          "title": "Brightness (0-255)",
+          "description": "Brightness value 0-255.",
+          "required": false,
+          "type": "kotlin.Int",
+          "default": 255,
+          "values": null
+        }
+      ]
     },
     {
       "name": "Force Microphone Unmuted",
@@ -2941,11 +3353,21 @@
     },
     {
       "name": "Spoof BSSID",
-      "description": "Reports a constant value from WifiInfo.getBSSID() so apps cannot read the real access point MAC address.",
+      "description": "Reports a chosen value from WifiInfo.getBSSID() so apps cannot read the real access point MAC address.",
       "default": false,
       "dependencies": [],
       "compatiblePackages": null,
-      "options": []
+      "options": [
+        {
+          "key": "bssid",
+          "title": "BSSID",
+          "description": "BSSID to report (e.g. 02:00:00:00:00:00).",
+          "required": false,
+          "type": "kotlin.String",
+          "default": "02:00:00:00:00:00",
+          "values": null
+        }
+      ]
     },
     {
       "name": "Spoof Battery Charging State",
@@ -2957,11 +3379,21 @@
     },
     {
       "name": "Spoof Battery Level",
-      "description": "Reports a full battery (100%) through BatteryManager.getIntProperty for the capacity property, so apps that restrict features on low battery stop doing so.",
+      "description": "Reports a chosen battery level through BatteryManager.getIntProperty for the capacity property, so apps that restrict features on low battery stop doing so.",
       "default": false,
       "dependencies": [],
       "compatiblePackages": null,
-      "options": []
+      "options": [
+        {
+          "key": "batteryLevel",
+          "title": "Battery level (%)",
+          "description": "Battery level 0-100.",
+          "required": false,
+          "type": "kotlin.Int",
+          "default": 100,
+          "values": null
+        }
+      ]
     },
     {
       "name": "Spoof Bluetooth Enabled",
@@ -3109,11 +3541,21 @@
     },
     {
       "name": "Spoof IMEI",
-      "description": "Reports a fake IMEI through TelephonyManager.getDeviceId()/getImei() so apps that fingerprint the device by IMEI see a constant value.",
+      "description": "Reports a chosen IMEI through TelephonyManager.getDeviceId()/getImei() so apps that fingerprint the device by IMEI see a constant value.",
       "default": false,
       "dependencies": [],
       "compatiblePackages": null,
-      "options": []
+      "options": [
+        {
+          "key": "imei",
+          "title": "IMEI",
+          "description": "IMEI to report (15 digits).",
+          "required": false,
+          "type": "kotlin.String",
+          "default": "000000000000000",
+          "values": null
+        }
+      ]
     },
     {
       "name": "Spoof ISIM IMPI",
@@ -3159,11 +3601,21 @@
     },
     {
       "name": "Spoof MAC Address",
-      "description": "Reports a constant MAC address through WifiInfo.getMacAddress() so apps cannot fingerprint the device by its Wi-Fi MAC.",
+      "description": "Reports a chosen MAC address through WifiInfo.getMacAddress() so apps cannot fingerprint the device by its Wi-Fi MAC.",
       "default": false,
       "dependencies": [],
       "compatiblePackages": null,
-      "options": []
+      "options": [
+        {
+          "key": "macAddress",
+          "title": "MAC address",
+          "description": "MAC address to report (e.g. 02:00:00:00:00:00).",
+          "required": false,
+          "type": "kotlin.String",
+          "default": "02:00:00:00:00:00",
+          "values": null
+        }
+      ]
     },
     {
       "name": "Spoof NAI",
@@ -3172,6 +3624,24 @@
       "dependencies": [],
       "compatiblePackages": null,
       "options": []
+    },
+    {
+      "name": "Spoof Network Operator Name",
+      "description": "Reports a chosen operator name through TelephonyManager.getNetworkOperatorName() so apps that check the carrier name see a generic value.",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": [
+        {
+          "key": "networkOperatorName",
+          "title": "Operator name",
+          "description": "Operator name to report (e.g. Android, Verzion, T-Mobile).",
+          "required": false,
+          "type": "kotlin.String",
+          "default": "Android",
+          "values": null
+        }
+      ]
     },
     {
       "name": "Spoof Network Type LTE",
@@ -3183,11 +3653,21 @@
     },
     {
       "name": "Spoof Phone Number",
-      "description": "Reports an empty string from TelephonyManager.getLine1Number() and getLine2Number() so apps cannot read the device's phone number.",
+      "description": "Reports a chosen phone number from TelephonyManager.getLine1Number() and getLine2Number() so apps cannot read the device's phone number.",
       "default": false,
       "dependencies": [],
       "compatiblePackages": null,
-      "options": []
+      "options": [
+        {
+          "key": "phoneNumber",
+          "title": "Phone number",
+          "description": "Phone number to report (empty hides it).",
+          "required": false,
+          "type": "kotlin.String",
+          "default": "",
+          "values": null
+        }
+      ]
     },
     {
       "name": "Spoof Ringer Mode",
@@ -3271,11 +3751,21 @@
     },
     {
       "name": "Spoof SIM Serial Number",
-      "description": "Reports a fake SIM serial number through TelephonyManager.getSimSerialNumber() so apps that fingerprint by ICCID see a constant value.",
+      "description": "Reports a chosen SIM serial number (ICCID) through TelephonyManager.getSimSerialNumber() so apps that fingerprint by ICCID see a constant value.",
       "default": false,
       "dependencies": [],
       "compatiblePackages": null,
-      "options": []
+      "options": [
+        {
+          "key": "simSerial",
+          "title": "ICCID",
+          "description": "ICCID to report.",
+          "required": false,
+          "type": "kotlin.String",
+          "default": "000000000000000",
+          "values": null
+        }
+      ]
     },
     {
       "name": "Spoof Sensor List",
@@ -3295,11 +3785,21 @@
     },
     {
       "name": "Spoof Subscriber ID",
-      "description": "Reports a fake subscriber id (IMSI) through TelephonyManager.getSubscriberId() so apps that fingerprint by IMSI see a constant value.",
+      "description": "Reports a chosen subscriber id (IMSI) through TelephonyManager.getSubscriberId() so apps that fingerprint by IMSI see a constant value.",
       "default": false,
       "dependencies": [],
       "compatiblePackages": null,
-      "options": []
+      "options": [
+        {
+          "key": "subscriberId",
+          "title": "IMSI",
+          "description": "IMSI to report.",
+          "required": false,
+          "type": "kotlin.String",
+          "default": "000000000000000",
+          "values": null
+        }
+      ]
     },
     {
       "name": "Spoof Target SDK",
@@ -3371,19 +3871,39 @@
     },
     {
       "name": "Spoof WiFi RSSI",
-      "description": "Reports a fixed signal strength (-50 dBm) from WifiInfo.getRssi() so apps cannot read the real Wi-Fi signal level.",
+      "description": "Reports a chosen signal strength from WifiInfo.getRssi() so apps cannot read the real Wi-Fi signal level.",
       "default": false,
       "dependencies": [],
       "compatiblePackages": null,
-      "options": []
+      "options": [
+        {
+          "key": "wifiRssi",
+          "title": "RSSI (dBm)",
+          "description": "RSSI in dBm (-30 strong, -50 moderate, -80 weak).",
+          "required": false,
+          "type": "kotlin.Int",
+          "default": -50,
+          "values": null
+        }
+      ]
     },
     {
       "name": "Spoof WiFi SSID",
-      "description": "Reports a constant value from WifiInfo.getSSID() so apps cannot read the real connected network name.",
+      "description": "Reports a chosen value from WifiInfo.getSSID() so apps cannot read the real connected network name.",
       "default": false,
       "dependencies": [],
       "compatiblePackages": null,
-      "options": []
+      "options": [
+        {
+          "key": "wifiSsid",
+          "title": "WiFi SSID",
+          "description": "SSID to report.",
+          "required": false,
+          "type": "kotlin.String",
+          "default": "unknown",
+          "values": null
+        }
+      ]
     },
     {
       "name": "Spoof Wired Headset",
