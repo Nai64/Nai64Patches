@@ -24,16 +24,28 @@ private val currencySubstrings = listOf(
     "diamondcard", "energycard", "goldreward", "heartreward", "ads_free_gem", "gemprice"
 )
 
+// Exact Time Evolve currency keys from global-metadata.dat (only currency, no level/era/timeline)
+private val timeEvolveCurrencyKeys = setOf(
+    "currentgem", "totalcollectedgem", "diamond", "cash", "goldkey", "chestgoldkey", "trophy",
+    "currentenergy", "maxenergy", "energycapacity", "energyrecharge", "energyjarcount",
+    "piggygembankcurrentgem", "piggygembankdata", "pendingdiamondcardgems", "pendingevolutioncardgems",
+    "goldreward", "heartreward", "freegemamount", "adsgemamount", "gemprice", "priceingems",
+    "ads_free_gem", "ads_free_energy", "ads_gold_chest", "diamondexpiryseconds", "energycardexpiryseconds",
+    "ticketcapacity", "ticketsavedata", "diamondcard", "energycard", "piggygembank"
+)
+
 private val il2cppCurrencyMethods = setOf(
-    "get_CurrentGem", "GetCurrentGem", "ChangeGem", "get_TotalCollectedGem",
-    "get_CurrentEnergy", "GetCurrentEnergy", "ChangeEnergy", "GetEnergyJarCount", "GetPiggyGemBankCurrentGem",
-    "GetDiamond", "ChangeDiamond", "GetCash", "ChangeCash", "GetGoldKey", "ChangeGoldKey",
-    "GetTrophy", "ChangeTrophy", "GetTicketCapacity", "GetGemPrice", "IsGemPaymentEnabled"
+    "get_CurrentGem", "GetCurrentGem", "ChangeGem", "get_TotalCollectedGem", "GetTotalCollectedGem",
+    "get_CurrentEnergy", "GetCurrentEnergy", "ChangeEnergy", "GetEnergyJarCount", "GetPiggyGemBankCurrentGem", "get_PiggyGemBankCurrentGem",
+    "GetDiamond", "ChangeDiamond", "get_Diamond", "GetDiamondCard", "GetCash", "ChangeCash", "get_Cash",
+    "GetGoldKey", "ChangeGoldKey", "get_GoldKey", "GetTrophy", "ChangeTrophy", "get_Trophy",
+    "GetTicketCapacity", "GetGemPrice", "IsGemPaymentEnabled", "GetEnergyCard", "GetGoldReward", "GetHeartReward"
 )
 
 private fun String.isCurrencyKey(customKeys: Set<String>): Boolean {
     val lower = lowercase()
     if (customKeys.any { it.isNotEmpty() && lower.contains(it) }) return true
+    if (timeEvolveCurrencyKeys.contains(lower)) return true
     return currencySubstrings.any { lower.contains(it) }
 }
 
