@@ -5,16 +5,16 @@ import app.morphe.patcher.patch.stringOption
 import java.util.logging.Logger
 
 @Suppress("unused")
-val spoofNaiPatch = bytecodePatch(
-    name = "Spoof NAI",
-    description = "Reports a chosen string from TelephonyManager.getNai() so apps cannot read the Network Access Identifier.",
+val spoofNetworkAccessIdentifierPatch = bytecodePatch(
+    name = "Spoof Network Access Identifier",
+    description = "Reports a chosen string from TelephonyManager.getNai() so apps cannot read the network access identifier.",
     default = false,
 ) {
     val nai by stringOption(
-        title = "NAI",
+        title = "Network Access Identifier",
         default = "",
         key = "nai",
-        description = "NAI to report.",
+        description = "Identifier to report.",
     )
 
     execute {
@@ -24,7 +24,7 @@ val spoofNaiPatch = bytecodePatch(
             setOf("getNai"),
             nai ?: "",
         )
-        if (patched > 0) logger.info("Spoofed NAI at $patched call site(s)")
+        if (patched > 0) logger.info("Spoofed network access identifier at $patched call site(s)")
         else logger.warning("No getNai call sites found. No changes applied.")
     }
 }
