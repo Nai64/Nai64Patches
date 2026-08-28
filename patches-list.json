@@ -1,6 +1,6 @@
 {
   "NOTE": "Do NOT manually edit this file. This file is automatically updated when semantic release (release.yml) runs. Manually editing this file can break your releases and break third party tools that use this file.",
-  "version": "1.32.0",
+  "version": "1.33.0",
   "patches": [
     {
       "name": "Skip Consent Popup",
@@ -1073,15 +1073,28 @@
     },
     {
       "name": "AMOLED Theme",
-      "description": "Forces pure-black (#FF000000) backgrounds and surfaces on every dark theme so apps that support dark mode render true AMOLED-black instead of dark grey. Light themes are left untouched, so text stays readable. Optional toggles can also blacken the system bars",
+      "description": "Forces pure-black backgrounds and surfaces on every dark theme so apps that support dark mode render true AMOLED-black instead of dark grey. Light themes are left untouched, so text stays readable. Optional toggles cover status/nav bars and Material3 surfaces.",
       "default": false,
       "dependencies": [],
       "compatiblePackages": null,
       "options": [
         {
+          "key": "amoledColor",
+          "title": "AMOLED color",
+          "description": "Hex color to use for AMOLED (e.g. #FF000000 pure black, #FF0A0A0A near-black).",
+          "required": false,
+          "type": "kotlin.String",
+          "default": "#FF000000",
+          "values": {
+            "Pure Black": "#FF000000",
+            "Near Black": "#FF0A0A0A",
+            "Dark Charcoal": "#FF121212"
+          }
+        },
+        {
           "key": "amoledBlackenStatusBar",
           "title": "Blacken Status Bar",
-          "description": "Also force the status bar background to pure black on dark themes.",
+          "description": "Also force the status bar background to AMOLED on dark themes.",
           "required": false,
           "type": "kotlin.Boolean",
           "default": false,
@@ -1090,10 +1103,19 @@
         {
           "key": "amoledBlackenNavigationBar",
           "title": "Blacken Navigation Bar",
-          "description": "Also force the navigation bar background to pure black on dark themes.",
+          "description": "Also force the navigation bar background to AMOLED on dark themes.",
           "required": false,
           "type": "kotlin.Boolean",
           "default": false,
+          "values": null
+        },
+        {
+          "key": "amoledBlackenSurfaces",
+          "title": "Blacken Surfaces",
+          "description": "Also blacken Material3 surface container colors (recommended for full AMOLED).",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": true,
           "values": null
         }
       ]
@@ -1596,7 +1618,7 @@
     },
     {
       "name": "Custom App Icon",
-      "description": "Replaces the launcher icon with a custom image you supply (image URL, file path, or base64).",
+      "description": "Replaces the launcher icon with a custom image you supply (image URL, file path, or base64). Optionally apply hue shift, negative, sepia, or flip to the icon (works on original icon even without custom source).",
       "default": false,
       "dependencies": [],
       "compatiblePackages": null,
@@ -1604,10 +1626,55 @@
         {
           "key": "customAppIconSource",
           "title": "Icon source",
-          "description": "Image source: an http(s) URL, a local file path, or base64 (optionally prefixed with 'data:image/png;base64,'). Leave empty to skip.",
+          "description": "Image source: an http(s) URL, a local file path, or base64 (optionally prefixed with 'data:image/png;base64,'). Leave empty to use original icon with effects.",
           "required": false,
           "type": "kotlin.String",
           "default": "",
+          "values": null
+        },
+        {
+          "key": "iconHue",
+          "title": "Hue shift (0-360)",
+          "description": "Hue rotation in degrees (0 = none, 180 = complementary). Applied after other effects.",
+          "required": false,
+          "type": "kotlin.Int",
+          "default": 0,
+          "values": null
+        },
+        {
+          "key": "iconNegative",
+          "title": "Negative (Invert)",
+          "description": "Invert colors (negative).",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "iconSepia",
+          "title": "Sepia",
+          "description": "Apply sepia tone.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "iconFlipH",
+          "title": "Flip Horizontal",
+          "description": "Mirror icon horizontally.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "iconFlipV",
+          "title": "Flip Vertical",
+          "description": "Mirror icon vertically.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
           "values": null
         }
       ]
@@ -3924,6 +3991,14 @@
     {
       "name": "Trust User CAs (Config)",
       "description": "Injects a network security config that trusts user-installed CA certificates, enabling MITM/proxy interception for the app.",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": []
+    },
+    {
+      "name": "Unlock Notification Channels",
+      "description": "Makes all notification channels blockable and their importance unlocked so greyed-out toggles become interactable.",
       "default": false,
       "dependencies": [],
       "compatiblePackages": null,
