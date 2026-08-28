@@ -20,15 +20,15 @@ val adsFreeRewardsPatch = bytecodePatch(
         key = "patchVersion",
         default = "1.19.0",
         title = "Patch version",
-        description = "Which implementation of the patch to use",
+        description = "Which implementation to use. Current (1.19.0) includes MAX, Unity Ads (incl. v4), LevelPlay/ironSource, Huawei, RuStore/MyTarget and Yandex. Older entries are kept for fallback when current fails.",
         values = linkedMapOf(
-            "1.1.0 (Original)" to "1.1.0",
-            "1.15.0" to "1.15.0",
-            "1.16.0" to "1.16.0",
-            "1.17.0" to "1.17.0",
-            "1.18.0" to "1.18.0",
-            "1.18.1" to "1.18.1",
             "1.19.0 (Current)" to "1.19.0",
+            "1.18.1" to "1.18.1",
+            "1.18.0" to "1.18.0",
+            "1.17.0" to "1.17.0",
+            "1.16.0" to "1.16.0",
+            "1.15.0" to "1.15.0",
+            "1.1.0 (Original)" to "1.1.0",
         ),
     )
     val rewardStrategy by stringOption(
