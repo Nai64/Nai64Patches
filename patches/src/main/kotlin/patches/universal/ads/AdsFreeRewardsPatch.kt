@@ -13,16 +13,16 @@ import java.util.logging.Logger
 @Suppress("unused")
 val adsFreeRewardsPatch = bytecodePatch(
     name = "Ads Free Rewards (Experimental)",
-    description = "Claim rewards without watching rewarded ads. Use with No Ads to block other ad formats, but leave No Ads' Block Rewarded option disabled so reward-based features remain available. Currently includes AppLovin MAX, Unity Ads, ironSource/LevelPlay, Huawei Ads Kit, VK MyTarget (including RuStore), and Yandex integrations. Experimental: coverage is not guaranteed for every APK or ad SDK.",
+    description = "Get rewards without watching ads. Combine with No Ads for other formats, but keep No Ads' rewarded block off.",
     default = false,
 ) {
     val patchVersion by stringOption(
         key = "patchVersion",
         default = "1.32.0",
         title = "Patch version",
-        description = "Which implementation to use. Like Proton, each version is a snapshot; Current (1.32.0) includes MAX, Unity Ads (incl. v4), LevelPlay/ironSource, Huawei, RuStore/MyTarget and Yandex. Older entries kept for fallback when current fails.",
+        description = "Choose the implementation to use. Each version is a snapshot — newer ones support more networks. If the latest does not work for your app, try an older version.",
         values = linkedMapOf(
-            "1.32.0 (Current)" to "1.32.0",
+            "1.32.0" to "1.32.0",
             "1.31.0" to "1.31.0",
             "1.30.0" to "1.30.0",
             "1.22.0" to "1.22.0",
@@ -430,7 +430,7 @@ private fun BytecodePatchContext.applyUnityAdsV4Strategy(logger: Logger, useUnit
     }
 }
 
-// Proton-style historical snapshots — each version is a frozen copy.
+// Historical snapshots - each version is a frozen copy.
 // Newer entries delegate to the current implementation for now; future
 // bundle releases can diverge them with version-specific fixes.
 private fun BytecodePatchContext.applyAdsFreeRewardsV1200(logger: Logger, rewardStrategy: String?, instantReward: Boolean?) {

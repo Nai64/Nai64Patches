@@ -9,16 +9,7 @@ import patches.universal.ads.util.cloneMutableAndPreserveParameters
 @Suppress("unused")
 val graphicsApiOverridePatch = bytecodePatch(
     name = "Graphics API Override (Experimental)",
-    description =
-        "Attempts to override the graphics API of supported Unity Android games by injecting " +
-            "the engine's launch argument. Unity is the only supported engine at this time. " +
-            "Choose OpenGL ES or Vulkan; OpenGL ES is selected by default because it is supported " +
-            "by Android devices more broadly than Vulkan. This is separate from " +
-            "Prefer ANGLE Graphics Driver, which only requests ANGLE for OpenGL ES. Experimental: " +
-            "not guaranteed to work on every APK, engine version, or device, and an incompatible " +
-            "renderer may cause crashes, a black screen, missing graphics, or failure to launch. " +
-            "Games that select their renderer in native code or enforce settings from their own " +
-            "servers may ignore this patch.",
+    description = "Forces a Unity game to use Vulkan or OpenGL via launch argument. Only for supported Unity games.",
     default = false,
 ) {
     val graphicsApi by stringOption(

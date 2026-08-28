@@ -9,12 +9,7 @@ private const val INTERNET_PERMISSION = "android.permission.INTERNET"
 @Suppress("unused")
 val removeInternetPermissionPatch = resourcePatch(
     name = "Remove Internet Permission",
-    description =
-        "Removes the INTERNET permission from the manifest for offline use. Apps that require " +
-            "internet for core features will crash or fail to load after this - use only on apps " +
-            "that work offline. Unlike the generic Remove Permissions patch this is a one-tap " +
-            "dedicated toggle with no jargon. No extra patches are required for the removal itself; " +
-            "if the app crashes it means it does not handle missing internet gracefully.",
+    description = "Removes internet permission for offline use. Apps needing internet will crash.",
     default = false,
 ) {
     execute {

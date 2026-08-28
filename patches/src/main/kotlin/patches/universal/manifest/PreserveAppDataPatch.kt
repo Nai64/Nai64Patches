@@ -12,14 +12,7 @@ private val restrictedBackupAttributes = listOf(
 @Suppress("unused")
 val preserveAppDataPatch = resourcePatch(
     name = "Preserve App Data",
-    description =
-        "Helps keep saves and app data when a patched build replaces an installed app. Sets " +
-            "android:hasFragileUserData (Android offers to keep data on uninstall and restores it " +
-            "when the same package is reinstalled), enables android:allowBackup, sets " +
-            "android:restoreAnyVersion so a backup can be restored across versions, and removes " +
-            "backup-exclusion rules that hide app data from device/cloud backups. Note: the patched " +
-            "APK is re-signed, so it must replace the original via uninstall-then-install; keep the " +
-            "package name unchanged (these patches never rename it) and the data returns",
+    description = "Keeps app data when reinstalling by setting hasFragileUserData so Android offers to keep data.",
     default = false,
 ) {
     execute {

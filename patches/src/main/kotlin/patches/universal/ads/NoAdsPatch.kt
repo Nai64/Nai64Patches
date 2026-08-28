@@ -136,7 +136,7 @@ private fun BytecodePatchContext.patchWith(fingerprint: Fingerprint, smali: Stri
 @Suppress("unused")
 val noAdsPatch = bytecodePatch(
     name = "No Ads (Experimental)",
-    description = "Block supported ads. Choose which formats to block below. For rewarded ads that gate progress, use Ads Free Rewards instead — it grants the reward without showing the ad. Covers AppLovin MAX, AdMob, Unity Ads, ironSource/LevelPlay, Huawei Ads Kit, VK MyTarget (RuStore), Yandex, Vungle, Meta Audience Network, Pangle, StartApp, MoPub and InMobi where detected. Experimental: some apps use custom mediation or obfuscated ad wrappers not yet fingerprinted — try enabling more categories or report the APK.",
+    description = "Blocks ads by type. Pick what to block. For rewarded ads use Ads Free Rewards instead.",
     default = false,
 ) {
     val preset by stringOption(

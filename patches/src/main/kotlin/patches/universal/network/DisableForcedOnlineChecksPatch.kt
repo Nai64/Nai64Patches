@@ -67,18 +67,7 @@ private fun engineFlags(types: List<String>): EngineFlags = EngineFlags(
 @Suppress("unused")
 val disableForcedOnlineChecksPatch = bytecodePatch(
     name = "Disable Forced Online Checks (Experimental)",
-    description =
-        "Attempts to bypass client-side online gates that prevent an app or game from starting. " +
-            "Auto mode is enabled by default and runs the common Android/network, detected Unity, " +
-            "detected Unreal, detected Godot, and generic bytecode strategies. Disable auto mode " +
-            "to choose the strategies individually. Experimental: this does not restore unavailable " +
-            "servers, bypass authentication, repair changed APIs, or guarantee that a game can work " +
-            "offline. Potential problems include broken login or matchmaking, unavailable cloud saves, " +
-            "stale or inconsistent game state, repeated connection errors, crashes, startup loops, " +
-            "or false-positive changes to unrelated connectivity logic. Blindly bypassing server checks " +
-            "may break login, cloud saves, matchmaking, or game state, so the patch only changes " +
-            "high-confidence client-side gates. Its common Android/network strategy overlaps Fake " +
-            "Online State, so do not select both patches together.",
+    description = "Tries to skip online checks that prevent the app from starting. Auto mode handles most apps; turn it off to pick strategies manually. Experimental and may break online features.",
     default = false,
 ) {
     val autoMode by booleanOption(

@@ -314,15 +314,7 @@ private val DEVICE_PRESETS = mapOf(
 @Suppress("unused")
 val bypassEmulatorDetectionPatch = bytecodePatch(
     name = "Bypass Emulator Detection",
-    description =
-        "Spoofs android.os.Build identity (model, device, manufacturer, hardware, " +
-            "fingerprint, serial, user, host, radio, bootloader) and Build.getRadioVersion(), " +
-            "TelephonyManager.getPhoneType(), and telltale system properties " +
-            "(ro.kernel.qemu, ro.hardware, ro.product.model/device, ro.bootloader, ro.radio) so " +
-            "apps and games that refuse to run, crash or match you with emulator lobbies cannot " +
-            "tell they are on an emulator. Optional Hide Emulator Radio and Spoof Build Extras " +
-            "settings also cover TelephonyManager radio type and additional Build/Build.VERSION " +
-            "identity fields. Does not hide root or a debugger connection.",
+    description = "Hides emulator traces by spoofing Build info and related checks so apps cannot detect an emulator.",
     default = false,
 ) {
     val profile by stringOption(

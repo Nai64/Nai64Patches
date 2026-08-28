@@ -124,16 +124,7 @@ private fun isFalseConstant(instruction: Any?, register: Int): Boolean =
 @Suppress("unused")
 val bypassForcedUpdatesPatch = bytecodePatch(
     name = "Bypass Forced Updates (Experimental)",
-    description =
-        "Attempts to bypass blocking in-app update prompts in older apps and games. " +
-            "Settings enabled by default: Bypass update gate ignores high-confidence update-required " +
-            "boolean checks; Make dialogs dismissible changes detected non-cancelable update dialogs; " +
-            "Block update redirects prevents detected Play Store/browser updater launches; Prevent forced " +
-            "exit removes detected update-related activity exits; Patch Play Core disables Google Play " +
-            "in-app update flow, including the functionality of Disable Google Update Check. " +
-            "Do not select Disable Google Update Check separately when using this patch. Experimental: " +
-            "results are not guaranteed because apps may implement " +
-            "updates differently or enforce them on their own servers.",
+    description = "Tries to skip forced update screens. Enable the toggles to ignore version checks, make dialogs closable, block store redirects, or disable Play Core updates. Experimental.",
     default = false,
 ) {
     val bypassUpdateGate by booleanOption(

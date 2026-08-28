@@ -38,7 +38,7 @@ private fun ResourcePatchContext.discoverPairipAppClass(logger: Logger): String?
 @Suppress("unused")
 val pairipBypassPatch = bytecodePatch(
     name = "Pairip Bypass (Experimental)",
-    description = "PairIP is anti-tamper and license protection used by some apps and games. This experimental patch provides configurable strategies to bypass PairIP checks so patched or modified builds can run instead of being blocked. Automatic strategy selection is enabled by default and applies compatible strategies found in the APK; disable it to manually select individual strategies for testing. Not every PairIP-protected app is guaranteed to work, and aggressive strategies may cause crashes, startup failures, missing license features, or other app-specific problems.",
+    description = "Tries to bypass PairIP protection so patched apps can run. Experimental.",
     default = false,
 ) {
     val automaticStrategySelection by booleanOption(

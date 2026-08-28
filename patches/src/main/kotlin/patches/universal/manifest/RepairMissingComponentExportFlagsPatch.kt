@@ -31,12 +31,7 @@ private fun Element.hasLauncherFilter(): Boolean {
 @Suppress("unused")
 val repairMissingComponentExportFlagsPatch = resourcePatch(
     name = "Repair Missing Component Export Flags",
-    description =
-        "Adds missing android:exported values only to activities, aliases, services, and " +
-            "receivers that declare intent filters. Launcher components become exported=true and " +
-            "other filtered components become exported=false. Unlike Export All Activities, this " +
-            "does not export every activity or alter components without filters; verify apps that " +
-            "expect external service or receiver access after patching.",
+    description = "Adds missing android:exported to components with intent filters so the app installs on newer Android.",
     default = false,
 ) {
     execute {
