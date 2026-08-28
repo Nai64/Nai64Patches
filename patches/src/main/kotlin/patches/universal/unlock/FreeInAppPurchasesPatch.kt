@@ -156,7 +156,7 @@ val freeInAppPurchasesPatch = bytecodePatch(
             }
         }
 
-        // Strategy 7: Xsolla BillingClient reflector (Time Evolve uses Xsolla)
+        // Strategy 7: Xsolla BillingClient reflector
         run {
             classDefForEach { classDef ->
                 if (!classDef.type.contains("Xsolla") && !classDef.type.lowercase().contains("xsolla")) return@classDefForEach

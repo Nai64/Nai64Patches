@@ -45,7 +45,7 @@ private fun isPriceMethod(name: String): Boolean {
 @Suppress("unused")
 val unlimitedCurrenciesPatch = bytecodePatch(
     name = "Unlimited Currencies",
-    description = "Makes currency checks return a huge amount so you never run out. Covers PlayerPrefs, SharedPreferences and common Unity fields for Time Evolve and other games.",
+    description = "Makes currency checks return a huge amount so you never run out. Covers PlayerPrefs, SharedPreferences and common Unity fields.",
     default = false,
 ) {
     val amount by intOption(
@@ -193,7 +193,7 @@ val unlimitedCurrenciesPatch = bytecodePatch(
             }
         }
 
-        // 2) IL2CPP fields: Change* / Get* for currency (Time Evolve specific)
+        // 2) IL2CPP fields: Change* / Get* for currency
         classDefForEach { classDef ->
             val mutableClass = mutableClassDefBy(classDef)
             for (m in mutableClass.methods) {
