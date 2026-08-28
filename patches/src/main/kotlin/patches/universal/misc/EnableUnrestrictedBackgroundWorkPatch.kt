@@ -59,7 +59,8 @@ val enableUnrestrictedBackgroundWorkPatch = bytecodePatch(
                         if (opcode != Opcode.CONST_4 && opcode != Opcode.CONST && opcode != Opcode.CONST_16) continue
                         val reg = (prev as? OneRegisterInstruction)?.registerA ?: continue
                         if (reg != argRegister) continue
-                        method.replaceInstruction(j, "const/4 v$reg, 0x0")
+                        val constInstr = if (reg <= 0xf) "const/4 v$reg, 0x0" else "const/16 v$reg, 0x0"
+                        method.replaceInstruction(j, constInstr)
                         patched++
                         break
                     }
