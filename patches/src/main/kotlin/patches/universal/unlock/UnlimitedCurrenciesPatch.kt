@@ -135,38 +135,17 @@ val unlimitedCurrenciesPatch = bytecodePatch(
                     if (keyValue == null || !keyValue.isCurrencyKey(customSet)) continue
 
                     val next = instructions.getOrNull(index + 1)
-                    // Handle putInt -> make it keep large value (nop put, keep chain)
-                    if (isPutInt) {
-                        // Editor.putInt returns Editor, we can just nop the put and keep builder
-                        // Instead of nopping, we could force the int arg to large value
-                        // Find int arg register (third reg)
-                        val intReg = when (insn) {
-                            is BuilderInstruction35c -> if (insn.registerCount >= 3) insn.registerE else null
-                            is BuilderInstruction3rc -> insn.startRegister + 2
-                            else -> null
-                        } ?: continue
-                        // Walk back to const that loads int value and set to target
-                        for (j in index - 1 downTo maxOf(0, index - 6)) {
-                            val prev = instructions[j]
-                            val reg = (prev as? OneRegisterInstruction)?.registerA ?: continue
-                            if (reg != intReg) continue
-                            if (prev.opcode == Opcode.CONST_4 || prev.opcode == Opcode.CONST_16 || prev.opcode == Opcode.CONST) {
-                                val constInstr = if (intReg <= 0xf) "const/4 v$intReg, 0x${target.toString(16)}" else "const/16 v$intReg, $target"
-                                // Actually need proper const for int: use const
-                                val instr = if (target in -8..7 && intReg <= 0xf) "const/4 v$intReg, $target" else if (intReg <= 0xff) "const/16 v$intReg, $target" else "const v$intReg, $target"
-                                method.replaceInstruction(j, instr)
-                                patched++
-                                break
-                            }
-                        }
-                        continue
-                    }
+                    if (isPutInt) continue
 
                     if (next == null) continue
                     when {
                         isGetInt && next.opcode == Opcode.MOVE_RESULT -> {
                             val r = (next as OneRegisterInstruction).registerA
-                            val instr = if (r <= 0xf && target in -8..7) "const/4 v$r, $target" else if (r <= 0xff) "const/16 v$r, $target" else "const v$r, $target"
+                            val instr = when {
+                                target in -8..7 && r <= 0xf -> "const/4 v$r, $target"
+                                target in -32768..32767 && r <= 0xff -> "const/16 v$r, $target"
+                                else -> "const v$r, $target"
+                            }
                             method.replaceInstruction(index, instr)
                             method.replaceInstruction(index + 1, "nop")
                             patched++
@@ -230,7 +209,8 @@ val unlimitedCurrenciesPatch = bytecodePatch(
                 if (name.startsWith("get_") || name.startsWith("Get") || name.startsWith("get")) {
                     if (m.returnType == "I") {
                         try {
-                            m.addInstructions(0, if (target in -8..7) "const/4 v0, $target\nreturn v0" else "const/16 v0, $target\nreturn v0")
+                            val instr = if (target in -32768..32767) "const/16 v0, $target\nreturn v0" else "const v0, $target\nreturn v0"
+                            m.addInstructions(0, instr)
                             patched++
                         } catch (_: Exception) {}
                     } else if (m.returnType == "J") {
@@ -261,7 +241,8 @@ val unlimitedCurrenciesPatch = bytecodePatch(
                         } catch (_: Exception) {}
                     } else if (m.returnType == "I" || m.returnType == "Z") {
                         try {
-                            m.addInstructions(0, "const/16 v0, $target\nreturn v0")
+                            val instr = if (target in -32768..32767) "const/16 v0, $target\nreturn v0" else "const v0, $target\nreturn v0"
+                            m.addInstructions(0, instr)
                             patched++
                         } catch (_: Exception) {}
                     }
