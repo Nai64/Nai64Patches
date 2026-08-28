@@ -1,9 +1,27 @@
 package patches.universal.telemetry
 
 import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
+import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.patch.booleanOption
 import app.morphe.patcher.patch.bytecodePatch
 import java.util.logging.Logger
+
+private fun app.morphe.patcher.patch.BytecodePatchContext.safeEarlyReturn(fingerprint: app.morphe.patcher.Fingerprint): Boolean {
+    val method = fingerprint.methodOrNull ?: return false
+    val impl = method.implementation ?: return false
+    if (impl.registerCount < 1) return false
+    val ret = method.returnType
+    when {
+        ret == "V" -> method.addInstruction(0, "return-void")
+        ret.startsWith("L") || ret.startsWith("[") -> method.addInstructions(0, "const/4 v0, 0x0\nreturn-object v0")
+        ret == "Z" || ret == "I" || ret == "B" || ret == "S" || ret == "C" -> method.addInstructions(0, "const/4 v0, 0x0\nreturn v0")
+        ret == "J" -> method.addInstructions(0, "const-wide v0, 0x0\nreturn-wide v0")
+        ret == "F" -> method.addInstructions(0, "const/4 v0, 0x0\nreturn v0")
+        ret == "D" -> method.addInstructions(0, "const-wide v0, 0x0\nreturn-wide v0")
+        else -> method.addInstruction(0, "return-void")
+    }
+    return true
+}
 
 @Suppress("unused")
 val disableTelemetryPatch = bytecodePatch(
@@ -113,50 +131,50 @@ val disableTelemetryPatch = bytecodePatch(
         detected.forEach { logger.info("Detected telemetry SDK: $it") }
 
         if (blockFirebase == true) {
-            FirebaseInitializeFingerprint.methodOrNull?.let { it.addInstruction(0, "return-void") }
-            FirebaseAnalyticsLogEventFingerprint.methodOrNull?.let { it.addInstruction(0, "return-void") }
-            FirebaseCrashlyticsInitFingerprint.methodOrNull?.let { it.addInstruction(0, "return-void") }
+            safeEarlyReturn(FirebaseInitializeFingerprint)
+            safeEarlyReturn(FirebaseAnalyticsLogEventFingerprint)
+            safeEarlyReturn(FirebaseCrashlyticsInitFingerprint)
         }
 
         if (blockAppsFlyer == true) {
-            AppsFlyerStartFingerprint.methodOrNull?.let { it.addInstruction(0, "return-void") }
-            AppsFlyerLogEventFingerprint.methodOrNull?.let { it.addInstruction(0, "return-void") }
+            safeEarlyReturn(AppsFlyerStartFingerprint)
+            safeEarlyReturn(AppsFlyerLogEventFingerprint)
         }
 
         if (blockAdjust == true) {
-            AdjustOnCreateFingerprint.methodOrNull?.let { it.addInstruction(0, "return-void") }
-            AdjustTrackEventFingerprint.methodOrNull?.let { it.addInstruction(0, "return-void") }
+            safeEarlyReturn(AdjustOnCreateFingerprint)
+            safeEarlyReturn(AdjustTrackEventFingerprint)
         }
 
         if (blockBranch == true) {
-            BranchInitFingerprint.methodOrNull?.let { it.addInstruction(0, "return-void") }
+            safeEarlyReturn(BranchInitFingerprint)
         }
 
         if (blockAmplitude == true) {
-            AmplitudeLogEventFingerprint.methodOrNull?.let { it.addInstruction(0, "return-void") }
+            safeEarlyReturn(AmplitudeLogEventFingerprint)
         }
         if (blockMixpanel == true) {
-            MixpanelTrackFingerprint.methodOrNull?.let { it.addInstruction(0, "return-void") }
+            safeEarlyReturn(MixpanelTrackFingerprint)
         }
         if (blockCleverTap == true) {
-            CleverTapPushEventFingerprint.methodOrNull?.let { it.addInstruction(0, "return-void") }
+            safeEarlyReturn(CleverTapPushEventFingerprint)
         }
         if (blockSegment == true) {
-            SegmentTrackFingerprint.methodOrNull?.let { it.addInstruction(0, "return-void") }
+            safeEarlyReturn(SegmentTrackFingerprint)
         }
         if (blockFacebook == true) {
-            FacebookLogEventFingerprint.methodOrNull?.let { it.addInstruction(0, "return-void") }
+            safeEarlyReturn(FacebookLogEventFingerprint)
         }
         if (blockUnity == true) {
-            UnityAnalyticsTransactionFingerprint.methodOrNull?.let { it.addInstruction(0, "return-void") }
+            safeEarlyReturn(UnityAnalyticsTransactionFingerprint)
         }
         if (blockFlurry == true) {
-            FlurryLogEventFingerprint.methodOrNull?.let { it.addInstruction(0, "return-void") }
+            safeEarlyReturn(FlurryLogEventFingerprint)
         }
         if (blockGameAnalytics == true) {
-            GameAnalyticsInitializeFingerprint.methodOrNull?.let { it.addInstruction(0, "return-void") }
-            GameAnalyticsInitializeNoArgFingerprint.methodOrNull?.let { it.addInstruction(0, "return-void") }
-            GameAnalyticsDesignEventFingerprint.methodOrNull?.let { it.addInstruction(0, "return-void") }
+            safeEarlyReturn(GameAnalyticsInitializeFingerprint)
+            safeEarlyReturn(GameAnalyticsInitializeNoArgFingerprint)
+            safeEarlyReturn(GameAnalyticsDesignEventFingerprint)
         }
 
         val blocked = buildList {
