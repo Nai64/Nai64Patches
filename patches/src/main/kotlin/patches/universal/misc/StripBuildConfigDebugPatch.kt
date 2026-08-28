@@ -32,13 +32,14 @@ val stripBuildConfigDebugPatch = bytecodePatch(
                 val impl = method.implementation ?: continue
                 val instructions = impl.instructions.toList()
                 for ((index, insn) in instructions.withIndex()) {
-                    if (insn.opcode != Opcode.SGET && insn.opcode != Opcode.SGET_BOOLEAN && insn.opcode != Opcode.SGET_OBJECT) continue
+                    if (insn.opcode != Opcode.SGET && insn.opcode != Opcode.SGET_BOOLEAN) continue
                     val ref = (insn as? ReferenceInstruction)?.reference as? FieldReference ?: continue
                     if (ref.name != "DEBUG") continue
                     if (ref.type != "Z") continue
-                    if (!ref.definingClass.contains("BuildConfig")) continue
+                    if (!ref.definingClass.endsWith("BuildConfig;")) continue
                     val reg = (insn as? OneRegisterInstruction)?.registerA ?: continue
-                    method.replaceInstruction(index, "const/4 v$reg, $target")
+                    val constInstr = if (reg <= 0xf) "const/4 v$reg, $target" else "const/16 v$reg, $target"
+                    method.replaceInstruction(index, constInstr)
                     patched++
                 }
             }
