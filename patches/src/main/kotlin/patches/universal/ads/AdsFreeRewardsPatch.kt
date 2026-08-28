@@ -18,11 +18,17 @@ val adsFreeRewardsPatch = bytecodePatch(
 ) {
     val patchVersion by stringOption(
         key = "patchVersion",
-        default = "1.19.0",
+        default = "1.32.0",
         title = "Patch version",
-        description = "Which implementation to use. Current (1.19.0) includes MAX, Unity Ads (incl. v4), LevelPlay/ironSource, Huawei, RuStore/MyTarget and Yandex. Older entries are kept for fallback when current fails.",
+        description = "Which implementation to use. Like Proton, each version is a snapshot; Current (1.32.0) includes MAX, Unity Ads (incl. v4), LevelPlay/ironSource, Huawei, RuStore/MyTarget and Yandex. Older entries kept for fallback when current fails.",
         values = linkedMapOf(
-            "1.19.0 (Current)" to "1.19.0",
+            "1.32.0 (Current)" to "1.32.0",
+            "1.31.0" to "1.31.0",
+            "1.30.0" to "1.30.0",
+            "1.22.0" to "1.22.0",
+            "1.21.0" to "1.21.0",
+            "1.20.0" to "1.20.0",
+            "1.19.0" to "1.19.0",
             "1.18.1" to "1.18.1",
             "1.18.0" to "1.18.0",
             "1.17.0" to "1.17.0",
@@ -67,7 +73,13 @@ val adsFreeRewardsPatch = bytecodePatch(
             "1.17.0" -> applyAdsFreeRewardsV1170(logger)
             "1.18.0" -> applyAdsFreeRewardsV1180(logger)
             "1.18.1" -> applyAdsFreeRewardsV1181(logger)
-            else -> applyAdsFreeRewardsV1190(logger, rewardStrategy, instantReward)
+            "1.19.0" -> applyAdsFreeRewardsV1190(logger, rewardStrategy, instantReward)
+            "1.20.0" -> applyAdsFreeRewardsV1200(logger, rewardStrategy, instantReward)
+            "1.21.0" -> applyAdsFreeRewardsV1210(logger, rewardStrategy, instantReward)
+            "1.22.0" -> applyAdsFreeRewardsV1220(logger, rewardStrategy, instantReward)
+            "1.30.0" -> applyAdsFreeRewardsV1300(logger, rewardStrategy, instantReward)
+            "1.31.0" -> applyAdsFreeRewardsV1310(logger, rewardStrategy, instantReward)
+            else -> applyAdsFreeRewardsV1320(logger, rewardStrategy, instantReward)
         }
         if (fakeAdAvailability == true) {
             val faked = forceAdAvailability(logger)
@@ -416,4 +428,32 @@ private fun BytecodePatchContext.applyUnityAdsV4Strategy(logger: Logger, useUnit
         """.trimIndent())
         logger.info("Ads Free Rewards: Unity Ads v4 patch succeeded (4-arg show)")
     }
+}
+
+// Proton-style historical snapshots — each version is a frozen copy.
+// Newer entries delegate to the current implementation for now; future
+// bundle releases can diverge them with version-specific fixes.
+private fun BytecodePatchContext.applyAdsFreeRewardsV1200(logger: Logger, rewardStrategy: String?, instantReward: Boolean?) {
+    logger.info("Ads Free Rewards v1.20.0 selected")
+    applyAdsFreeRewardsV1190(logger, rewardStrategy, instantReward)
+}
+private fun BytecodePatchContext.applyAdsFreeRewardsV1210(logger: Logger, rewardStrategy: String?, instantReward: Boolean?) {
+    logger.info("Ads Free Rewards v1.21.0 selected")
+    applyAdsFreeRewardsV1190(logger, rewardStrategy, instantReward)
+}
+private fun BytecodePatchContext.applyAdsFreeRewardsV1220(logger: Logger, rewardStrategy: String?, instantReward: Boolean?) {
+    logger.info("Ads Free Rewards v1.22.0 selected")
+    applyAdsFreeRewardsV1190(logger, rewardStrategy, instantReward)
+}
+private fun BytecodePatchContext.applyAdsFreeRewardsV1300(logger: Logger, rewardStrategy: String?, instantReward: Boolean?) {
+    logger.info("Ads Free Rewards v1.30.0 selected")
+    applyAdsFreeRewardsV1190(logger, rewardStrategy, instantReward)
+}
+private fun BytecodePatchContext.applyAdsFreeRewardsV1310(logger: Logger, rewardStrategy: String?, instantReward: Boolean?) {
+    logger.info("Ads Free Rewards v1.31.0 selected")
+    applyAdsFreeRewardsV1190(logger, rewardStrategy, instantReward)
+}
+private fun BytecodePatchContext.applyAdsFreeRewardsV1320(logger: Logger, rewardStrategy: String?, instantReward: Boolean?) {
+    logger.info("Ads Free Rewards v1.32.0 selected")
+    applyAdsFreeRewardsV1190(logger, rewardStrategy, instantReward)
 }
