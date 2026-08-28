@@ -1,3 +1,10 @@
+## [1.35.1](https://github.com/Nai64/Nai64Patches/compare/1.35.0...1.35.1) (2026-08-28)
+
+### Bug Fixes
+
+* reduce free iap heap usage ([32e82f6](https://github.com/Nai64/Nai64Patches/commit/32e82f6ac4967afb4d4d11d45a8b37596b1fce0d))
+* unlimited currency hotfix ([b4fcd56](https://github.com/Nai64/Nai64Patches/commit/b4fcd56b6c1328e89356c2892ca227e32808124a))
+
 ## [1.35.0](https://github.com/Nai64/Nai64Patches/compare/1.34.1...1.35.0) (2026-08-28)
 
 ### Bug Fixes
