@@ -9,7 +9,7 @@ import java.util.logging.Logger
 val spoofPlayIntegrityPatch = bytecodePatch(
     name = "Spoof Play Integrity",
     description = "Forces Google Play Integrity attestation to pass, so the app runs on modified or unsupported devices instead of being blocked.",
-    default = false,
+    default = true,
 ) {
     execute {
         val logger = Logger.getLogger(this::class.java.name)
