@@ -1,5 +1,6 @@
 package patches.universal.manifest
 
+import app.morphe.patcher.patch.booleanOption
 import app.morphe.patcher.patch.resourcePatch
 import java.util.logging.Logger
 import org.w3c.dom.Element
@@ -8,10 +9,17 @@ import org.w3c.dom.Element
 val forceResizableActivityPatch = resourcePatch(
     name = "Force Resizable Activity",
     description =
-        "Sets android:resizeableActivity and drops the required touchscreen feature so the " +
+        "Sets android:resizeableActivity and supportsFreeformWindowManagement so the " +
             "app can run in split-screen, free-form windows, DeX, and Chromebooks",
     default = false,
 ) {
+    val freeform by booleanOption(
+        title = "Enable freeform",
+        default = true,
+        key = "freeform",
+        description = "Also set supportsFreeformWindowManagement for true free-form.",
+    )
+
     execute {
         val logger = Logger.getLogger(this::class.java.name)
 
@@ -23,6 +31,15 @@ val forceResizableActivityPatch = resourcePatch(
             val root = manifest.documentElement
 
             application.setAttributeNS(NS_ANDROID, "android:resizeableActivity", "true")
+            if (freeform == true) {
+                application.setAttributeNS(NS_ANDROID, "android:supportsFreeformWindowManagement", "true")
+                // Also apply to all activities for completeness
+                val activities = manifest.getElementsByTagName("activity")
+                for (i in 0 until activities.length) {
+                    (activities.item(i) as? Element)?.setAttributeNS(NS_ANDROID, "android:resizeableActivity", "true")
+                    (activities.item(i) as? Element)?.setAttributeNS(NS_ANDROID, "android:supportsFreeformWindowManagement", "true")
+                }
+            }
             applied = true
 
             val features = manifest.getElementsByTagName("uses-feature")
