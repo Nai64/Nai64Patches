@@ -7,11 +7,7 @@ import java.util.logging.Logger
 @Suppress("unused")
 val exportAllActivitiesPatch = resourcePatch(
     name = "Export All Activities",
-    description =
-        "Marks every activity and activity-alias as android:exported=true so other apps and " +
-            "ADB can launch them. Unlike Repair Missing Component Export Flags, this intentionally " +
-            "exports every activity even when it has no intent filter; use the repair patch when " +
-            "you only need explicit exported values for filtered legacy components.",
+    description = "Makes all activities launchable by other apps and ADB.",
     default = false,
 ) {
     execute {

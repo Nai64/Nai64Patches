@@ -6,11 +6,7 @@ import java.util.logging.Logger
 @Suppress("unused")
 val ensureExactAlarmAvailabilityPatch = bytecodePatch(
     name = "Ensure Exact Alarm Availability",
-    description =
-        "Makes AlarmManager.canScheduleExactAlarms return true so older alarm, reminder, and " +
-            "scheduler apps do not disable their exact-alarm features on modern Android. Warning: " +
-            "this only changes the app's availability check; it does not grant Android's special " +
-            "exact-alarm access, and scheduling may still fail or throw SecurityException.",
+    description = "Makes exact alarms appear available so old alarm apps keep working.",
     default = false,
 ) {
     execute {

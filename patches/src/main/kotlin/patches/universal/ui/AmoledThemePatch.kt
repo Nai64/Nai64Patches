@@ -10,10 +10,7 @@ import patches.universal.manifest.ensureThemeItem
 @Suppress("unused")
 val amoledThemePatch = resourcePatch(
     name = "AMOLED Theme",
-    description =
-        "Forces pure-black backgrounds and surfaces on every dark theme so apps that " +
-            "support dark mode render true AMOLED-black instead of dark grey. Light themes are left " +
-            "untouched, so text stays readable. Optional toggles cover status/nav bars and Material3 surfaces.",
+    description = "Makes dark mode pure black for AMOLED screens. Light mode stays normal.",
     default = false,
 ) {
     val amoledColor by stringOption(

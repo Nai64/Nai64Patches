@@ -6,11 +6,7 @@ import java.util.logging.Logger
 @Suppress("unused")
 val spoofNotificationsEnabledPatch = bytecodePatch(
     name = "Spoof Notifications as Enabled",
-    description =
-        "Makes NotificationManager.areNotificationsEnabled always return true so apps that " +
-            "refuse to run when notifications are blocked keep working. This only changes the " +
-            "app's internal check; it does not grant POST_NOTIFICATIONS or enable notifications " +
-            "in Android system settings. Use Ensure Notification Permission for the manifest entry.",
+    description = "Makes the app think notifications are enabled so it keeps working even if blocked.",
     default = false,
 ) {
     execute {

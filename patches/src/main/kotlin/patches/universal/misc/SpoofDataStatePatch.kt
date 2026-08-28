@@ -6,10 +6,7 @@ import java.util.logging.Logger
 @Suppress("unused")
 val spoofDataStatePatch = bytecodePatch(
     name = "Spoof Data State",
-    description =
-        "Reports an active data connection from TelephonyManager.getDataState() " +
-            "(DATA_CONNECTED) and getDataActivity() (DATA_ACTIVITY_INOUT) so apps that " +
-            "change behavior based on mobile data state see a live connection.",
+    description = "Makes the app think mobile data is connected.",
     default = false,
 ) {
     execute {

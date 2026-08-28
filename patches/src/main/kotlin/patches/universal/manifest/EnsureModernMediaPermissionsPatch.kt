@@ -13,11 +13,7 @@ private val modernMediaPermissions = listOf(
 @Suppress("unused")
 val ensureModernMediaPermissionsPatch = resourcePatch(
     name = "Ensure Modern Media Permissions",
-    description =
-        "Adds Android 13+ media permissions so older apps that can see some media but cannot " +
-            "properly access photos, videos, or music can request the modern permissions. " +
-            "Android still requires runtime approval, and this does not grant unrestricted access " +
-            "to arbitrary files.",
+    description = "Adds media permissions so old apps can access photos and videos on Android 13+.",
     default = false,
 ) {
     execute {

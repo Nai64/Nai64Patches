@@ -14,11 +14,7 @@ private const val WRITE_EXTERNAL_STORAGE = "android.permission.WRITE_EXTERNAL_ST
 @Suppress("unused")
 val ensureStoragePermissionsPatch = resourcePatch(
     name = "Ensure Storage Permissions",
-    description =
-        "Adds READ_EXTERNAL_STORAGE and WRITE_EXTERNAL_STORAGE for older apps that can see " +
-            "photos, videos, or music but cannot access ordinary files on modern Android ROMs. " +
-            "The permissions still require Android to grant them at runtime and have limited " +
-            "effect for apps targeting Android 13+.",
+    description = "Adds storage permissions so old apps can access files on newer Android.",
     default = false,
 ) {
     execute {

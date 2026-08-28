@@ -7,11 +7,7 @@ import java.util.logging.Logger
 @Suppress("unused")
 val apkJunkCleanupPatch = resourcePatch(
     name = "Apk Junk Cleanup",
-    description =
-        "Reduces APK size by stripping unused native libraries. Keeps only the selected CPU " +
-            "architecture under lib/ (e.g. arm64-v8a) and deletes the others. Use only if you " +
-            "know the target device ABI - the APK will not run on devices needing a stripped ABI. " +
-            "For translations use Strip Translations instead.",
+    description = "Removes unused CPU libraries to shrink the APK. Keep only your device's architecture.",
     default = false,
 ) {
     val keepArch by stringOption(

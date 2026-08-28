@@ -9,11 +9,7 @@ private const val POST_NOTIFICATIONS = "android.permission.POST_NOTIFICATIONS"
 @Suppress("unused")
 val ensureNotificationPermissionPatch = resourcePatch(
     name = "Ensure Notification Permission",
-    description =
-        "Adds POST_NOTIFICATIONS to the manifest so older apps can request notification access " +
-            "on Android 13+. This only declares the permission; Android may still require a " +
-            "runtime approval. Unlike Spoof Notifications as Enabled, it does not change the " +
-            "app's NotificationManager.areNotificationsEnabled check.",
+    description = "Adds notification permission for old apps on Android 13+.",
     default = false,
 ) {
     execute {

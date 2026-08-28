@@ -9,11 +9,7 @@ private const val ANGLE_DRIVER_METADATA = "com.android.graphics.driver.prefer_an
 @Suppress("unused")
 val preferAngleGraphicsDriverPatch = resourcePatch(
     name = "Prefer ANGLE Graphics Driver",
-    description =
-        "Requests ANGLE as the OpenGL ES driver so compatible modern Android devices may run " +
-            "OpenGL ES through ANGLE for improved graphics compatibility. This is only a driver " +
-            "preference, is not guaranteed, does not convert Vulkan apps to OpenGL, and may cause " +
-            "rendering issues on unsupported devices.",
+    description = "Asks the system to use ANGLE for better graphics on supported devices.",
     default = false,
 ) {
     execute {

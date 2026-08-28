@@ -14,10 +14,7 @@ private const val VERSION_CLASS = "Landroid/os/Build\$VERSION;"
 @Suppress("unused")
 val spoofSdkLevelPatch = bytecodePatch(
     name = "Spoof SDK Level",
-    description =
-        "Replaces every read of Build.VERSION.SDK_INT with a custom value. WARNING: setting " +
-            "a level lower than the device's real API level makes apps call missing APIs and " +
-            "crash; only use when you know the app checks it",
+    description = "Reports a chosen Android version. Lower values can crash the app.",
     default = false,
 ) {
     val sdkInt by intOption(

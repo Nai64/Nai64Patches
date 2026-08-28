@@ -163,10 +163,7 @@ private val minSdkGuardPatch = app.morphe.patcher.patch.resourcePatch(
 @Suppress("unused")
 val spoofDeveloperOptionsPatch = bytecodePatch(
     name = "Spoof Developer Options",
-    description =
-        "Forces Settings.Global/Settings.Secure getters for developer options, USB " +
-            "debugging and wireless debugging to report disabled (0), so apps that refuse " +
-            "to run or crash when they detect debugging cannot tell it is on.",
+    description = "Hides developer options and USB debugging so blocking apps keep working.",
     default = false,
 ) {
     dependsOn(minSdkGuardPatch)

@@ -27,9 +27,7 @@ private val entryPointNames = setOf(
 @Suppress("unused")
 val disableCrashReportersPatch = bytecodePatch(
     name = "Disable Crash Reporters",
-    description =
-        "No-ops the static init/start/register methods of bundled crash-reporting SDKs " +
-            "(Crashlytics, Fabric, Sentry, Bugsnag, ACRA, HockeyApp, AppCenter, Instabug, Countly)",
+    description = "Blocks crash reporting so the app doesn't send crash logs.",
     default = false,
 ) {
     execute {

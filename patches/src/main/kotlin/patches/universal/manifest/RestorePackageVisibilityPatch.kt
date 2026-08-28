@@ -8,11 +8,7 @@ private const val QUERY_ALL_PACKAGES = "android.permission.QUERY_ALL_PACKAGES"
 @Suppress("unused")
 val restorePackageVisibilityPatch = resourcePatch(
     name = "Restore Package Visibility",
-    description =
-        "Adds QUERY_ALL_PACKAGES so older apps can detect installed stores, file managers, and " +
-            "other companion apps hidden by Android 11+ package-visibility filtering. This is a " +
-            "broad visibility override, may be restricted by Google Play policy, and does not " +
-            "install or grant access to the packages being detected.",
+    description = "Lets old apps see all installed apps on Android 11+.",
     default = false,
 ) {
     execute {
