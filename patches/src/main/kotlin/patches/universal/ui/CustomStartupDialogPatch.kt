@@ -144,7 +144,8 @@ private fun injectStartupDialog(
     message: String,
     cancelable: Boolean,
 ) {
-    val tempBase = onCreate.implementation!!.registerCount
+    val impl = onCreate.implementation ?: return
+    val tempBase = impl.registerCount
 
     // NOTE: cloneMutable shifts parameters to the top of the new register
     // window (it prepends moves that refresh the OLD parameter slots for the
@@ -175,7 +176,7 @@ private fun injectStartupDialog(
             appendLine("invoke-virtual/range {v${b + 1} .. v${b + 2}}, Landroid/app/AlertDialog\$Builder;->setCancelable(Z)Landroid/app/AlertDialog\$Builder;")
         }
         appendLine("const-string v${b + 2}, \"OK\"")
-        appendLine("const/4 v${b + 3}, 0x0")
+        appendLine("const/16 v${b + 3}, 0x0")
         appendLine("invoke-virtual/range {v${b + 1} .. v${b + 3}}, Landroid/app/AlertDialog\$Builder;->setPositiveButton(Ljava/lang/CharSequence;Landroid/content/DialogInterface\$OnClickListener;)Landroid/app/AlertDialog\$Builder;")
         appendLine("invoke-virtual/range {v${b + 1}}, Landroid/app/AlertDialog\$Builder;->show()Landroid/app/AlertDialog;")
         appendLine(":nai64_skip")
