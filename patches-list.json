@@ -1,6 +1,6 @@
 {
   "NOTE": "Do NOT manually edit this file. This file is automatically updated when semantic release (release.yml) runs. Manually editing this file can break your releases and break third party tools that use this file.",
-  "version": "1.33.0",
+  "version": "1.34.0",
   "patches": [
     {
       "name": "Skip Consent Popup",
@@ -215,7 +215,7 @@
     },
     {
       "name": "Repair Missing Component Export Flags",
-      "description": "Adds missing android:exported values only to activities, aliases, services, and receivers that declare intent filters. Launcher components become exported=true and other filtered components become exported=false. Unlike Export All Activities, this does not export every activity or alter components without filters; verify apps that expect external service or receiver access after patching.",
+      "description": "Adds missing android:exported to components with intent filters so the app installs on newer Android.",
       "default": false,
       "dependencies": [],
       "compatiblePackages": null,
@@ -325,11 +325,21 @@
     },
     {
       "name": "Force Resizable Activity",
-      "description": "Sets android:resizeableActivity and drops the required touchscreen feature so the app can run in split-screen, free-form windows, DeX, and Chromebooks",
+      "description": "Sets android:resizeableActivity and supportsFreeformWindowManagement so the app can run in split-screen, free-form windows, DeX, and Chromebooks",
       "default": false,
       "dependencies": [],
       "compatiblePackages": null,
-      "options": []
+      "options": [
+        {
+          "key": "freeform",
+          "title": "Enable freeform",
+          "description": "Also set supportsFreeformWindowManagement for true free-form.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": true,
+          "values": null
+        }
+      ]
     },
     {
       "name": "Immersive Fullscreen",
@@ -646,11 +656,21 @@
     },
     {
       "name": "Fake Battery Whitelist",
-      "description": "Makes PowerManager.isIgnoringBatteryOptimizations always return true so apps stop nagging about battery optimization exemptions",
+      "description": "Makes PowerManager.isIgnoringBatteryOptimizations report a chosen state so apps stop nagging about battery optimization exemptions",
       "default": false,
       "dependencies": [],
       "compatiblePackages": null,
-      "options": []
+      "options": [
+        {
+          "key": "batteryWhitelisted",
+          "title": "Whitelisted",
+          "description": "Report as whitelisted (true) or not (false).",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": true,
+          "values": null
+        }
+      ]
     },
     {
       "name": "Spoof Signature Match",
@@ -758,7 +778,7 @@
     },
     {
       "name": "Pairip Bypass (Experimental)",
-      "description": "PairIP is anti-tamper and license protection used by some apps and games. This experimental patch provides configurable strategies to bypass PairIP checks so patched or modified builds can run instead of being blocked. Automatic strategy selection is enabled by default and applies compatible strategies found in the APK; disable it to manually select individual strategies for testing. Not every PairIP-protected app is guaranteed to work, and aggressive strategies may cause crashes, startup failures, missing license features, or other app-specific problems.",
+      "description": "Tries to bypass PairIP protection so patched apps can run. Experimental.",
       "default": false,
       "dependencies": [
         "ResourcePatch"
@@ -1122,7 +1142,7 @@
     },
     {
       "name": "Ads Free Rewards (Experimental)",
-      "description": "Claim rewards without watching rewarded ads. Use with No Ads to block other ad formats, but leave No Ads' Block Rewarded option disabled so reward-based features remain available. Currently includes AppLovin MAX, Unity Ads, ironSource/LevelPlay, Huawei Ads Kit, VK MyTarget (including RuStore), and Yandex integrations. Experimental: coverage is not guaranteed for every APK or ad SDK.",
+      "description": "Get rewards without watching ads. Combine with No Ads for other formats, but keep No Ads' rewarded block off.",
       "default": false,
       "dependencies": [],
       "compatiblePackages": null,
@@ -1130,18 +1150,24 @@
         {
           "key": "patchVersion",
           "title": "Patch version",
-          "description": "Which implementation of the patch to use",
+          "description": "Choose the implementation to use. Each version is a snapshot — newer ones support more networks. If the latest does not work for your app, try an older version.",
           "required": false,
           "type": "kotlin.String",
-          "default": "1.19.0",
+          "default": "1.32.0",
           "values": {
-            "1.1.0 (Original)": "1.1.0",
-            "1.15.0": "1.15.0",
-            "1.16.0": "1.16.0",
-            "1.17.0": "1.17.0",
-            "1.18.0": "1.18.0",
+            "1.32.0": "1.32.0",
+            "1.31.0": "1.31.0",
+            "1.30.0": "1.30.0",
+            "1.22.0": "1.22.0",
+            "1.21.0": "1.21.0",
+            "1.20.0": "1.20.0",
+            "1.19.0": "1.19.0",
             "1.18.1": "1.18.1",
-            "1.19.0 (Current)": "1.19.0"
+            "1.18.0": "1.18.0",
+            "1.17.0": "1.17.0",
+            "1.16.0": "1.16.0",
+            "1.15.0": "1.15.0",
+            "1.1.0 (Original)": "1.1.0"
           }
         },
         {
@@ -1319,7 +1345,7 @@
     },
     {
       "name": "Bypass Emulator Detection",
-      "description": "Spoofs android.os.Build identity (model, device, manufacturer, hardware, fingerprint, serial, user, host, radio, bootloader) and Build.getRadioVersion(), TelephonyManager.getPhoneType(), and telltale system properties (ro.kernel.qemu, ro.hardware, ro.product.model/device, ro.bootloader, ro.radio) so apps and games that refuse to run, crash or match you with emulator lobbies cannot tell they are on an emulator. Optional Hide Emulator Radio and Spoof Build Extras settings also cover TelephonyManager radio type and additional Build/Build.VERSION identity fields. Does not hide root or a debugger connection.",
+      "description": "Hides emulator traces by spoofing Build info and related checks so apps cannot detect an emulator.",
       "default": false,
       "dependencies": [],
       "compatiblePackages": null,
@@ -1359,7 +1385,7 @@
     },
     {
       "name": "Bypass Forced Updates (Experimental)",
-      "description": "Attempts to bypass blocking in-app update prompts in older apps and games. Settings enabled by default: Bypass update gate ignores high-confidence update-required boolean checks; Make dialogs dismissible changes detected non-cancelable update dialogs; Block update redirects prevents detected Play Store/browser updater launches; Prevent forced exit removes detected update-related activity exits; Patch Play Core disables Google Play in-app update flow, including the functionality of Disable Google Update Check. Do not select Disable Google Update Check separately when using this patch. Experimental: results are not guaranteed because apps may implement updates differently or enforce them on their own servers.",
+      "description": "Tries to skip forced update screens. Enable the toggles to ignore version checks, make dialogs closable, block store redirects, or disable Play Core updates. Experimental.",
       "default": false,
       "dependencies": [],
       "compatiblePackages": null,
@@ -1712,6 +1738,24 @@
       "options": []
     },
     {
+      "name": "Disable Autofill",
+      "description": "Makes AutofillManager report as disabled so apps stop showing autofill prompts.",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": [
+        {
+          "key": "disableAutofill",
+          "title": "Disable",
+          "description": "Report autofill as disabled (true) or enabled (false).",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": true,
+          "values": null
+        }
+      ]
+    },
+    {
       "name": "Disable Background Sync",
       "description": "No-ops ContentResolver.setSyncAutomatically/requestSync(...) so the app stops auto-uploading data (contacts, photos, files) to cloud accounts in the background.",
       "default": false,
@@ -1794,6 +1838,24 @@
       "options": []
     },
     {
+      "name": "Disable Edge-To-Edge Enforcement",
+      "description": "Opts out of Android 15 mandatory edge-to-edge so apps that break with enforced edge-to-edge render normally.",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": [
+        {
+          "key": "optOutEdgeToEdge",
+          "title": "Opt out",
+          "description": "If true, sets windowOptOutEdgeToEdgeEnforcement to true.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": true,
+          "values": null
+        }
+      ]
+    },
+    {
       "name": "Disable Facebook SDK Auto-Init",
       "description": "Adds Facebook SDK manifest switches that stop auto-initialization, automatic app event logging and advertiser ID collection at startup",
       "default": false,
@@ -1819,7 +1881,7 @@
     },
     {
       "name": "Disable Forced Online Checks (Experimental)",
-      "description": "Attempts to bypass client-side online gates that prevent an app or game from starting. Auto mode is enabled by default and runs the common Android/network, detected Unity, detected Unreal, detected Godot, and generic bytecode strategies. Disable auto mode to choose the strategies individually. Experimental: this does not restore unavailable servers, bypass authentication, repair changed APIs, or guarantee that a game can work offline. Potential problems include broken login or matchmaking, unavailable cloud saves, stale or inconsistent game state, repeated connection errors, crashes, startup loops, or false-positive changes to unrelated connectivity logic. Blindly bypassing server checks may break login, cloud saves, matchmaking, or game state, so the patch only changes high-confidence client-side gates. Its common Android/network strategy overlaps Fake Online State, so do not select both patches together.",
+      "description": "Tries to skip online checks that prevent the app from starting. Auto mode handles most apps; turn it off to pick strategies manually. Experimental and may break online features.",
       "default": false,
       "dependencies": [],
       "compatiblePackages": null,
@@ -1882,7 +1944,7 @@
     },
     {
       "name": "Disable Google Update Check",
-      "description": "Disables the Google Play in-app update flow used by newer apps through the Play Core update API. This does not remove the app from Google Play's update list or disable custom update checks implemented by the app itself. Do not select this patch when using Bypass Forced Updates, because that patch already includes this Play Core functionality.",
+      "description": "Disables Play Core in-app update flow. Don't use with Bypass Forced Updates which already includes this.",
       "default": false,
       "dependencies": [],
       "compatiblePackages": null,
@@ -1891,6 +1953,14 @@
     {
       "name": "Disable Haptic Feedback",
       "description": "Makes View.performHapticFeedback(...) report false (and do nothing) so the app's haptic/vibration feedback is suppressed.",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": []
+    },
+    {
+      "name": "Disable Haptic On Scroll",
+      "description": "Prevents haptic feedback triggered by scrolling.",
       "default": false,
       "dependencies": [],
       "compatiblePackages": null,
@@ -1943,6 +2013,28 @@
       "dependencies": [],
       "compatiblePackages": null,
       "options": []
+    },
+    {
+      "name": "Disable Logcat Logging",
+      "description": "No-ops android.util.Log calls so the app stops spamming logcat.",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": [
+        {
+          "key": "logLevel",
+          "title": "Log level",
+          "description": "Which levels to disable.",
+          "required": false,
+          "type": "kotlin.String",
+          "default": "All",
+          "values": {
+            "All": "All",
+            "Debug/Verbose": "Debug",
+            "All except errors": "NoError"
+          }
+        }
+      ]
     },
     {
       "name": "Disable Music Detection",
@@ -2167,6 +2259,42 @@
       "options": []
     },
     {
+      "name": "Enable Unrestricted Background Work",
+      "description": "Makes JobScheduler/WorkManager jobs ignore idle and not require charging so background work runs even in Doze.",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": [
+        {
+          "key": "unrestrictedBackgroundWork",
+          "title": "Unrestrict",
+          "description": "If true, clears idle/charging constraints.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": true,
+          "values": null
+        }
+      ]
+    },
+    {
+      "name": "Enable Unrestricted Clipboard Access",
+      "description": "Makes clipboard appear to have content so apps that require clipboard access keep working.",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": [
+        {
+          "key": "clipboardHasContent",
+          "title": "Has content",
+          "description": "Report clipboard as having content.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": true,
+          "values": null
+        }
+      ]
+    },
+    {
       "name": "Enable WebView App Cache",
       "description": "Enables the WebView HTML5 application cache so offline-capable web apps work.",
       "default": false,
@@ -2309,6 +2437,28 @@
           "type": "kotlin.Boolean",
           "default": true,
           "values": null
+        }
+      ]
+    },
+    {
+      "name": "Fake Animation Scales",
+      "description": "Reports animation scales via Settings so apps that check them see a chosen value.",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": [
+        {
+          "key": "animationScale",
+          "title": "Scale",
+          "description": "Scale to report.",
+          "required": false,
+          "type": "kotlin.String",
+          "default": "Off",
+          "values": {
+            "Off": "0.0",
+            "Normal": "1.0",
+            "Fast": "0.5"
+          }
         }
       ]
     },
@@ -2593,6 +2743,24 @@
       ]
     },
     {
+      "name": "Fake Pointer Location",
+      "description": "Reports pointer location as disabled via Settings so apps that check it stop doing so.",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": [
+        {
+          "key": "pointerLocation",
+          "title": "Pointer location",
+          "description": "Report pointer location as enabled or disabled.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        }
+      ]
+    },
+    {
       "name": "Fake Screen Timeout",
       "description": "Reports a chosen screen timeout through Settings.System so apps that restrict features based on screen timeout stop doing so.",
       "default": false,
@@ -2606,6 +2774,42 @@
           "required": false,
           "type": "kotlin.Int",
           "default": 600000,
+          "values": null
+        }
+      ]
+    },
+    {
+      "name": "Fake Show Touches",
+      "description": "Reports show touches as disabled via Settings so apps that check developer touch visualization stop doing so.",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": [
+        {
+          "key": "showTouches",
+          "title": "Show touches",
+          "description": "Report show touches as enabled or disabled.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        }
+      ]
+    },
+    {
+      "name": "Fake Sound Effects Enabled",
+      "description": "Reports sound effects as disabled via Settings so apps that check it stop playing touch sounds.",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": [
+        {
+          "key": "soundEffectsEnabled",
+          "title": "Sound effects",
+          "description": "Report sound effects as enabled or disabled.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
           "values": null
         }
       ]
@@ -2704,6 +2908,30 @@
       "options": []
     },
     {
+      "name": "Force Battery Health Good",
+      "description": "Reports battery health as good via BatteryManager so apps that check health stop warning.",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": [
+        {
+          "key": "batteryHealth",
+          "title": "Health",
+          "description": "Health to report.",
+          "required": false,
+          "type": "kotlin.String",
+          "default": "Good",
+          "values": {
+            "Good": "2",
+            "Overheat": "3",
+            "Dead": "4",
+            "Over voltage": "5",
+            "Failure": "6"
+          }
+        }
+      ]
+    },
+    {
       "name": "Force Battery Present",
       "description": "Makes BatteryManager.isBatteryPresent() report true so apps that refuse to run without a battery work on batteryless devices.",
       "default": false,
@@ -2799,6 +3027,24 @@
       "dependencies": [],
       "compatiblePackages": null,
       "options": []
+    },
+    {
+      "name": "Force Ignore Audio Focus",
+      "description": "Makes AudioManager.requestAudioFocus always return granted so apps never duck or pause for other audio.",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": [
+        {
+          "key": "ignoreAudioFocus",
+          "title": "Always grant",
+          "description": "If true, focus is always granted; if false, always denied.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": true,
+          "values": null
+        }
+      ]
     },
     {
       "name": "Force Left-to-Right Layout",
@@ -2956,7 +3202,7 @@
     },
     {
       "name": "Frame Rate Preference (Experimental)",
-      "description": "Requests a preferred display refresh rate for app and game windows using Android's window frame-rate API. Supports common 24, 30, 40, 45, 48, 50, 60, 72, 90, 96, 120, 144, 165, 180, and 185 FPS values. This is not an engine-level FPS override and does not change the target FPS configured by Unity, Unreal, Godot, or other game engines. Experimental: this requests a display rate and may not cap the engine's actual FPS; it does not patch, disable, or override VSync. Android, the device, thermal state, native code, or the game engine may ignore the request. Higher rates increase power use and heat, while unsupported rates may be rounded to the nearest available display mode.",
+      "description": "Requests a preferred refresh rate like 60 or 90 Hz for the app window. The system may ignore it.",
       "default": false,
       "dependencies": [],
       "compatiblePackages": null,
@@ -3042,7 +3288,7 @@
     },
     {
       "name": "Graphics API Override (Experimental)",
-      "description": "Attempts to override the graphics API of supported Unity Android games by injecting the engine's launch argument. Unity is the only supported engine at this time. Choose OpenGL ES or Vulkan; OpenGL ES is selected by default because it is supported by Android devices more broadly than Vulkan. This is separate from Prefer ANGLE Graphics Driver, which only requests ANGLE for OpenGL ES. Experimental: not guaranteed to work on every APK, engine version, or device, and an incompatible renderer may cause crashes, a black screen, missing graphics, or failure to launch. Games that select their renderer in native code or enforce settings from their own servers may ignore this patch.",
+      "description": "Forces a Unity game to use Vulkan or OpenGL via launch argument. Only for supported Unity games.",
       "default": false,
       "dependencies": [],
       "compatiblePackages": null,
@@ -3158,6 +3404,24 @@
       "options": []
     },
     {
+      "name": "Hide Stylus Handwriting",
+      "description": "Makes stylus handwriting appear unavailable so apps hide handwriting UI.",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": [
+        {
+          "key": "stylusHandwriting",
+          "title": "Available",
+          "description": "Report stylus handwriting as available or not.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        }
+      ]
+    },
+    {
       "name": "Hide Usage Stats",
       "description": "Makes UsageStatsManager return empty lists so app usage fingerprinting sees nothing",
       "default": false,
@@ -3191,7 +3455,7 @@
     },
     {
       "name": "No Ads (Experimental)",
-      "description": "Block supported ads. Choose which formats to block below. For rewarded ads that gate progress, use Ads Free Rewards instead — it grants the reward without showing the ad. Covers AppLovin MAX, AdMob, Unity Ads, ironSource/LevelPlay, Huawei Ads Kit, VK MyTarget (RuStore), Yandex, Vungle, Meta Audience Network, Pangle, StartApp, MoPub and InMobi where detected. Experimental: some apps use custom mediation or obfuscated ad wrappers not yet fingerprinted — try enabling more categories or report the APK.",
+      "description": "Blocks ads by type. Pick what to block. For rewarded ads use Ads Free Rewards instead.",
       "default": false,
       "dependencies": [],
       "compatiblePackages": null,
@@ -3267,7 +3531,7 @@
     },
     {
       "name": "Preserve App Data",
-      "description": "Helps keep saves and app data when a patched build replaces an installed app. Sets android:hasFragileUserData (Android offers to keep data on uninstall and restores it when the same package is reinstalled), enables android:allowBackup, sets android:restoreAnyVersion so a backup can be restored across versions, and removes backup-exclusion rules that hide app data from device/cloud backups. Note: the patched APK is re-signed, so it must replace the original via uninstall-then-install; keep the package name unchanged (these patches never rename it) and the data returns",
+      "description": "Keeps app data when reinstalling by setting hasFragileUserData so Android offers to keep data.",
       "default": false,
       "dependencies": [],
       "compatiblePackages": null,
@@ -3299,7 +3563,7 @@
     },
     {
       "name": "Remove Internet Permission",
-      "description": "Removes the INTERNET permission from the manifest for offline use. Apps that require internet for core features will crash or fail to load after this - use only on apps that work offline. Unlike the generic Remove Permissions patch this is a one-tap dedicated toggle with no jargon. No extra patches are required for the removal itself; if the app crashes it means it does not handle missing internet gracefully.",
+      "description": "Removes internet permission for offline use. Apps needing internet will crash.",
       "default": false,
       "dependencies": [],
       "compatiblePackages": null,
@@ -3515,11 +3779,21 @@
     },
     {
       "name": "Spoof Build Serial",
-      "description": "Reports a fake device serial through Build.getSerial() so apps that fingerprint by serial number see a constant value.",
+      "description": "Reports a chosen device serial through Build.getSerial() so apps that fingerprint by serial number see a constant value.",
       "default": false,
       "dependencies": [],
       "compatiblePackages": null,
-      "options": []
+      "options": [
+        {
+          "key": "buildSerial",
+          "title": "Serial",
+          "description": "Serial to report.",
+          "required": false,
+          "type": "kotlin.String",
+          "default": "unknown",
+          "values": null
+        }
+      ]
     },
     {
       "name": "Spoof CPU Architecture",
@@ -3565,11 +3839,21 @@
     },
     {
       "name": "Spoof Device Software Version",
-      "description": "Reports a constant value from TelephonyManager.getDeviceSoftwareVersion() so apps cannot read the real radio/software version.",
+      "description": "Reports a chosen value from TelephonyManager.getDeviceSoftwareVersion() so apps cannot read the real radio/software version.",
       "default": false,
       "dependencies": [],
       "compatiblePackages": null,
-      "options": []
+      "options": [
+        {
+          "key": "deviceSoftwareVersion",
+          "title": "Software version",
+          "description": "Version to report.",
+          "required": false,
+          "type": "kotlin.String",
+          "default": "0",
+          "values": null
+        }
+      ]
     },
     {
       "name": "Spoof Fixed Location",
@@ -3600,11 +3884,21 @@
     },
     {
       "name": "Spoof Group ID Level 1",
-      "description": "Reports a constant value from TelephonyManager.getGroupIdLevel1() so apps cannot read the real SIM GID1.",
+      "description": "Reports a chosen value from TelephonyManager.getGroupIdLevel1() so apps cannot read the real SIM GID1.",
       "default": false,
       "dependencies": [],
       "compatiblePackages": null,
-      "options": []
+      "options": [
+        {
+          "key": "groupIdLevel1",
+          "title": "GID1",
+          "description": "GID1 to report.",
+          "required": false,
+          "type": "kotlin.String",
+          "default": "",
+          "values": null
+        }
+      ]
     },
     {
       "name": "Spoof IMEI",
@@ -3626,11 +3920,21 @@
     },
     {
       "name": "Spoof ISIM IMPI",
-      "description": "Reports an empty string from TelephonyManager.getIsimImpi() so apps cannot read the ISIM private identity.",
+      "description": "Reports a chosen string from TelephonyManager.getIsimImpi() so apps cannot read the ISIM private identity.",
       "default": false,
       "dependencies": [],
       "compatiblePackages": null,
-      "options": []
+      "options": [
+        {
+          "key": "isimImpi",
+          "title": "IMPI",
+          "description": "IMPI to report.",
+          "required": false,
+          "type": "kotlin.String",
+          "default": "",
+          "values": null
+        }
+      ]
     },
     {
       "name": "Spoof Last Known Location",
@@ -3685,12 +3989,22 @@
       ]
     },
     {
-      "name": "Spoof NAI",
-      "description": "Reports an empty string from TelephonyManager.getNai() so apps cannot read the Network Access Identifier.",
+      "name": "Spoof Network Access Identifier",
+      "description": "Reports a chosen string from TelephonyManager.getNai() so apps cannot read the network access identifier.",
       "default": false,
       "dependencies": [],
       "compatiblePackages": null,
-      "options": []
+      "options": [
+        {
+          "key": "nai",
+          "title": "Network Access Identifier",
+          "description": "Identifier to report.",
+          "required": false,
+          "type": "kotlin.String",
+          "default": "",
+          "values": null
+        }
+      ]
     },
     {
       "name": "Spoof Network Operator Name",
@@ -3979,6 +4293,60 @@
       "dependencies": [],
       "compatiblePackages": null,
       "options": []
+    },
+    {
+      "name": "Strip BuildConfig DEBUG",
+      "description": "Forces BuildConfig.DEBUG to false so apps hide debug banners and verbose checks.",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": [
+        {
+          "key": "forceBuildConfigDebug",
+          "title": "Force debug",
+          "description": "If true, forces DEBUG to true instead of false.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        }
+      ]
+    },
+    {
+      "name": "Strip Exif Location",
+      "description": "Makes ExifInterface.getLatLong return null so apps cannot read GPS from photos.",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": [
+        {
+          "key": "stripExifLocation",
+          "title": "Strip location",
+          "description": "If true, location is stripped; if false, no change.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": true,
+          "values": null
+        }
+      ]
+    },
+    {
+      "name": "Strip Package Verifier",
+      "description": "Makes package verifier appear disabled via Settings so apps skip verification checks.",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": [
+        {
+          "key": "packageVerifierDisabled",
+          "title": "Disabled",
+          "description": "Report verifier as disabled or enabled.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": true,
+          "values": null
+        }
+      ]
     },
     {
       "name": "Treat Screen as On",
