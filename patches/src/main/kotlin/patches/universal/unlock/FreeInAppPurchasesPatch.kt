@@ -14,82 +14,63 @@ val freeInAppPurchasesPatch = bytecodePatch(
         val logger = Logger.getLogger(this::class.java.name)
         var patched = 0
 
-        // Strategy 1: Unity IAP IStoreListener.ProcessPurchase -> Complete
-        run {
-            classDefForEach { classDef ->
-                val mutableClass = mutableClassDefBy(classDef)
-                for (m in mutableClass.methods) {
-                    if (m.name != "ProcessPurchase") continue
-                    if (!m.returnType.contains("PurchaseProcessingResult")) continue
-                    if (m.implementation == null) continue
-                    if (m.implementation!!.registerCount < 1) continue
+        // Single pass over all classes to reduce heap and time (was 6 separate scans)
+        classDefForEach { classDef ->
+            val mutableClass = try { mutableClassDefBy(classDef) } catch (_: Exception) { return@classDefForEach }
+            for (m in mutableClass.methods) {
+                val impl = m.implementation ?: continue
+                val name = m.name
+                val ret = m.returnType
+                val type = mutableClass.type
+
+                // Strategy 1: Unity ProcessPurchase -> Complete
+                if (name == "ProcessPurchase" && ret.contains("PurchaseProcessingResult")) {
+                    if (impl.registerCount < 1) continue
                     try {
                         m.addInstructions(0, """
                             sget-object v0, Lcom/unity/purchasing/PurchaseProcessingResult;->Complete:Lcom/unity/purchasing/PurchaseProcessingResult;
                             return-object v0
                         """.trimIndent())
-                        logger.info("Free IAP: patched ${mutableClass.type}->${m.name}")
                         patched++
                     } catch (_: Exception) {}
+                    continue
                 }
-            }
-        }
 
-        // Strategy 2: Google Play Billing launchBillingFlow -> OK
-        run {
-            classDefForEach { classDef ->
-                val mutableClass = mutableClassDefBy(classDef)
-                for (m in mutableClass.methods) {
-                    if (m.name != "launchBillingFlow") continue
-                    if (!m.returnType.contains("BillingResult")) continue
-                    if (m.implementation == null) continue
+                // Strategy 2: Billing launchBillingFlow -> OK (lightweight const null fallback to save heap)
+                if (name == "launchBillingFlow" && ret.contains("BillingResult")) {
                     try {
-                        m.addInstructions(0, """
-                            invoke-static {}, Lcom/android/billingclient/api/BillingResult;->newBuilder()Lcom/android/billingclient/api/BillingResult${'$'}Builder;
-                            move-result-object v0
-                            const/4 v1, 0x0
-                            invoke-virtual {v0, v1}, Lcom/android/billingclient/api/BillingResult${'$'}Builder;->setResponseCode(I)Lcom/android/billingclient/api/BillingResult${'$'}Builder;
-                            move-result-object v0
-                            invoke-virtual {v0}, Lcom/android/billingclient/api/BillingResult${'$'}Builder;->build()Lcom/android/billingclient/api/BillingResult;
-                            move-result-object v0
-                            return-object v0
-                        """.trimIndent())
-                        logger.info("Free IAP: patched ${mutableClass.type}->launchBillingFlow")
-                        patched++
-                    } catch (_: Exception) {
+                        // Lightweight: return null BillingResult with OK code via const null + builder would be heavy; use simple const null return for speed
+                        // Many games only check responseCode == 0, but returning null may NPE. Try builder first, fallback to null.
                         try {
+                            m.addInstructions(0, """
+                                invoke-static {}, Lcom/android/billingclient/api/BillingResult;->newBuilder()Lcom/android/billingclient/api/BillingResult${'$'}Builder;
+                                move-result-object v0
+                                const/4 v1, 0x0
+                                invoke-virtual {v0, v1}, Lcom/android/billingclient/api/BillingResult${'$'}Builder;->setResponseCode(I)Lcom/android/billingclient/api/BillingResult${'$'}Builder;
+                                move-result-object v0
+                                invoke-virtual {v0}, Lcom/android/billingclient/api/BillingResult${'$'}Builder;->build()Lcom/android/billingclient/api/BillingResult;
+                                move-result-object v0
+                                return-object v0
+                            """.trimIndent())
+                        } catch (_: Exception) {
                             m.addInstructions(0, "const/4 v0, 0x0\nreturn-object v0")
-                            patched++
-                        } catch (_: Exception) {}
-                    }
+                        }
+                        patched++
+                    } catch (_: Exception) {}
+                    continue
                 }
-            }
-        }
 
-        // Strategy 3: Make BillingClient appear ready
-        run {
-            classDefForEach { classDef ->
-                if (!classDef.type.contains("BillingClient")) return@classDefForEach
-                val mutableClass = mutableClassDefBy(classDef)
-                for (m in mutableClass.methods) {
-                    if (m.name != "isReady" || m.returnType != "Z") continue
-                    if (m.implementation == null) continue
+                // Strategy 3: isReady -> true
+                if (name == "isReady" && ret == "Z" && type.contains("BillingClient")) {
                     try {
                         m.addInstructions(0, "const/4 v0, 0x1\nreturn v0")
                         patched++
                     } catch (_: Exception) {}
+                    continue
                 }
-            }
-        }
 
-        // Strategy 4: Spoof PurchasesUpdatedListener to immediately grant
-        run {
-            classDefForEach { classDef ->
-                val mutableClass = mutableClassDefBy(classDef)
-                for (m in mutableClass.methods) {
-                    if (m.name != "onPurchasesUpdated") continue
-                    if (m.implementation == null) continue
-                    // onPurchasesUpdated has (BillingResult, List) params, void return
+                // Strategy 4: onPurchasesUpdated -> grant
+                if (name == "onPurchasesUpdated") {
                     try {
                         m.addInstructions(0, """
                             invoke-static {}, Lcom/android/billingclient/api/BillingResult;->newBuilder()Lcom/android/billingclient/api/BillingResult${'$'}Builder;
@@ -104,22 +85,14 @@ val freeInAppPurchasesPatch = bytecodePatch(
                             invoke-interface {p0, v1, v2}, Lcom/android/billingclient/api/PurchasesUpdatedListener;->onPurchasesUpdated(Lcom/android/billingclient/api/BillingResult;Ljava/util/List;)V
                             return-void
                         """.trimIndent())
-                        logger.info("Free IAP: patched ${mutableClass.type}->onPurchasesUpdated")
                         patched++
                     } catch (_: Exception) {}
+                    continue
                 }
-            }
-        }
 
-        // Strategy 5: Legacy AIDL getBuyIntent -> return OK bundle
-        run {
-            classDefForEach { classDef ->
-                val mutableClass = mutableClassDefBy(classDef)
-                for (m in mutableClass.methods) {
-                    if (m.name != "getBuyIntent") continue
-                    if (m.returnType != "Landroid/os/Bundle;") continue
-                    if (m.implementation == null) continue
-                    if (m.implementation!!.registerCount < 2) continue
+                // Strategy 5: AIDL getBuyIntent -> OK bundle
+                if (name == "getBuyIntent" && ret == "Landroid/os/Bundle;") {
+                    if (impl.registerCount < 2) continue
                     try {
                         m.addInstructions(0, """
                             new-instance v0, Landroid/os/Bundle;
@@ -131,20 +104,11 @@ val freeInAppPurchasesPatch = bytecodePatch(
                         """.trimIndent())
                         patched++
                     } catch (_: Exception) {}
+                    continue
                 }
-            }
-        }
 
-        // Strategy 6: Generic price spoof — make SkuDetails.getPrice return "0.00"
-        run {
-            classDefForEach { classDef ->
-                val mutableClass = mutableClassDefBy(classDef)
-                for (m in mutableClass.methods) {
-                    if (m.name != "getPrice" && m.name != "getOriginalPrice") continue
-                    if (m.returnType != "Ljava/lang/String;") continue
-                    if (m.parameterTypes.isNotEmpty()) continue
-                    if (!mutableClass.type.contains("SkuDetails") && !mutableClass.type.contains("ProductDetails")) continue
-                    if (m.implementation == null) continue
+                // Strategy 6: price -> 0.00
+                if ((name == "getPrice" || name == "getOriginalPrice") && ret == "Ljava/lang/String;" && m.parameterTypes.isEmpty() && (type.contains("SkuDetails") || type.contains("ProductDetails"))) {
                     try {
                         m.addInstructions(0, """
                             const-string v0, "0.00"
@@ -152,18 +116,11 @@ val freeInAppPurchasesPatch = bytecodePatch(
                         """.trimIndent())
                         patched++
                     } catch (_: Exception) {}
+                    continue
                 }
-            }
-        }
 
-        // Strategy 7: Xsolla BillingClient reflector
-        run {
-            classDefForEach { classDef ->
-                if (!classDef.type.contains("Xsolla") && !classDef.type.lowercase().contains("xsolla")) return@classDefForEach
-                val mutableClass = mutableClassDefBy(classDef)
-                for (m in mutableClass.methods) {
-                    if (!m.name.contains("launchBillingFlow")) continue
-                    if (m.implementation == null) continue
+                // Strategy 7: Xsolla reflector
+                if (type.contains("Xsolla") && name.contains("launchBillingFlow")) {
                     try {
                         m.addInstructions(0, """
                             invoke-static {}, Lcom/android/billingclient/api/BillingResult;->newBuilder()Lcom/android/billingclient/api/BillingResult${'$'}Builder;
@@ -177,67 +134,32 @@ val freeInAppPurchasesPatch = bytecodePatch(
                         """.trimIndent())
                         patched++
                     } catch (_: Exception) {}
+                    continue
                 }
-            }
-        }
 
-        // Strategy 8: Bypass receipt verification (server and local)
-        run {
-            classDefForEach { classDef ->
-                val mutableClass = mutableClassDefBy(classDef)
-                for (m in mutableClass.methods) {
-                    val n = m.name
-                    if (n != "verifySignature" && n != "verifyPurchase" && n != "isValidSignature" && n != "validateReceipt" && n != "isValid" && !n.contains("verifyReceipt") && !n.contains("verifySignature")) continue
-                    if (m.returnType != "Z") continue
-                    if (m.implementation == null) continue
+                // Strategy 8: verifySignature etc. -> true
+                if ((name == "verifySignature" || name == "verifyPurchase" || name == "isValidSignature" || name == "validateReceipt" || name.lowercase().contains("verifysignature") || name.lowercase().contains("verifypurchase")) && ret == "Z") {
                     try {
                         m.addInstructions(0, "const/4 v0, 0x1\nreturn v0")
                         patched++
                     } catch (_: Exception) {}
+                    continue
                 }
-            }
-            // Security class helper
-            classDefForEach { classDef ->
-                if (!classDef.type.contains("Security")) return@classDefForEach
-                val mutableClass = mutableClassDefBy(classDef)
-                for (m in mutableClass.methods) {
-                    if (!m.name.lowercase().contains("verify")) continue
-                    if (m.returnType != "Z") continue
-                    if (m.implementation == null) continue
+                if (type.contains("Security") && name.lowercase().contains("verify") && ret == "Z") {
                     try {
                         m.addInstructions(0, "const/4 v0, 0x1\nreturn v0")
                         patched++
                     } catch (_: Exception) {}
+                    continue
                 }
-            }
-        }
 
-        // Strategy 9: Unity Product hasReceipt / isAvailable and PlayerPrefs
-        run {
-            classDefForEach { classDef ->
-                if (!classDef.type.contains("Product") && !classDef.type.contains("Purchasing") && !classDef.type.contains("PlayerPrefs")) return@classDefForEach
-                val mutableClass = mutableClassDefBy(classDef)
-                for (m in mutableClass.methods) {
-                    if (m.name == "hasReceipt" || m.name == "getHasReceipt" || m.name == "isAvailable" || m.name == "getAvailable") {
-                        if (m.returnType != "Z") continue
-                        if (m.implementation == null) continue
-                        try {
-                            m.addInstructions(0, "const/4 v0, 0x1\nreturn v0")
-                            patched++
-                        } catch (_: Exception) {}
-                    }
-                    if (m.name == "GetInt" || m.name == "getInt") {
-                        // PlayerPrefs / SharedPreferences getInt for currency - hard to know key, but make it return large value for any int
-                        // Only patch if class is PlayerPrefs
-                        if (!classDef.type.contains("PlayerPrefs")) continue
-                        if (m.returnType != "I") continue
-                        // Do not blanket patch all getInt, only if method has 2 params (key, default)
-                        if (m.parameterTypes.size != 2) continue
-                        try {
-                            m.addInstructions(0, "const v0, 0xF423F\nreturn v0")
-                            patched++
-                        } catch (_: Exception) {}
-                    }
+                // Strategy 9: hasReceipt / isAvailable -> true, GetCurrentGem etc. handled by UnlimitedCurrencies
+                if ((name == "hasReceipt" || name == "getHasReceipt" || name == "isAvailable") && ret == "Z" && (type.contains("Product") || type.contains("Purchasing"))) {
+                    try {
+                        m.addInstructions(0, "const/4 v0, 0x1\nreturn v0")
+                        patched++
+                    } catch (_: Exception) {}
+                    continue
                 }
             }
         }
