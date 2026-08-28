@@ -1,6 +1,7 @@
 package patches.universal.misc
 
 import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.stringOption
 import java.util.logging.Logger
 
 /**
@@ -10,15 +11,22 @@ import java.util.logging.Logger
 @Suppress("unused")
 val spoofBuildSerialPatch = bytecodePatch(
     name = "Spoof Build Serial",
-    description = "Reports a fake device serial through Build.getSerial() so apps that fingerprint by serial number see a constant value.",
+    description = "Reports a chosen device serial through Build.getSerial() so apps that fingerprint by serial number see a constant value.",
     default = false,
 ) {
+    val serial by stringOption(
+        title = "Serial",
+        default = "unknown",
+        key = "buildSerial",
+        description = "Serial to report.",
+    )
+
     execute {
         val logger = Logger.getLogger(this::class.java.name)
         val patched = foldStringGetterConst(
             "Landroid/os/Build;",
             setOf("getSerial"),
-            "unknown",
+            serial ?: "unknown",
         )
         if (patched > 0) {
             logger.info("Spoofed build serial at $patched call site(s)")
