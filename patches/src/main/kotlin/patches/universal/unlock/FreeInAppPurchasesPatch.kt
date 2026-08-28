@@ -156,6 +156,92 @@ val freeInAppPurchasesPatch = bytecodePatch(
             }
         }
 
+        // Strategy 7: Xsolla BillingClient reflector (Time Evolve uses Xsolla)
+        run {
+            classDefForEach { classDef ->
+                if (!classDef.type.contains("Xsolla") && !classDef.type.lowercase().contains("xsolla")) return@classDefForEach
+                val mutableClass = mutableClassDefBy(classDef)
+                for (m in mutableClass.methods) {
+                    if (!m.name.contains("launchBillingFlow")) continue
+                    if (m.implementation == null) continue
+                    try {
+                        m.addInstructions(0, """
+                            invoke-static {}, Lcom/android/billingclient/api/BillingResult;->newBuilder()Lcom/android/billingclient/api/BillingResult${'$'}Builder;
+                            move-result-object v0
+                            const/4 v1, 0x0
+                            invoke-virtual {v0, v1}, Lcom/android/billingclient/api/BillingResult${'$'}Builder;->setResponseCode(I)Lcom/android/billingclient/api/BillingResult${'$'}Builder;
+                            move-result-object v0
+                            invoke-virtual {v0}, Lcom/android/billingclient/api/BillingResult${'$'}Builder;->build()Lcom/android/billingclient/api/BillingResult;
+                            move-result-object v0
+                            return-object v0
+                        """.trimIndent())
+                        patched++
+                    } catch (_: Exception) {}
+                }
+            }
+        }
+
+        // Strategy 8: Bypass receipt verification (server and local)
+        run {
+            classDefForEach { classDef ->
+                val mutableClass = mutableClassDefBy(classDef)
+                for (m in mutableClass.methods) {
+                    val n = m.name
+                    if (n != "verifySignature" && n != "verifyPurchase" && n != "isValidSignature" && n != "validateReceipt" && n != "isValid" && !n.contains("verifyReceipt") && !n.contains("verifySignature")) continue
+                    if (m.returnType != "Z") continue
+                    if (m.implementation == null) continue
+                    try {
+                        m.addInstructions(0, "const/4 v0, 0x1\nreturn v0")
+                        patched++
+                    } catch (_: Exception) {}
+                }
+            }
+            // Security class helper
+            classDefForEach { classDef ->
+                if (!classDef.type.contains("Security")) return@classDefForEach
+                val mutableClass = mutableClassDefBy(classDef)
+                for (m in mutableClass.methods) {
+                    if (!m.name.lowercase().contains("verify")) continue
+                    if (m.returnType != "Z") continue
+                    if (m.implementation == null) continue
+                    try {
+                        m.addInstructions(0, "const/4 v0, 0x1\nreturn v0")
+                        patched++
+                    } catch (_: Exception) {}
+                }
+            }
+        }
+
+        // Strategy 9: Unity Product hasReceipt / isAvailable and PlayerPrefs
+        run {
+            classDefForEach { classDef ->
+                if (!classDef.type.contains("Product") && !classDef.type.contains("Purchasing") && !classDef.type.contains("PlayerPrefs")) return@classDefForEach
+                val mutableClass = mutableClassDefBy(classDef)
+                for (m in mutableClass.methods) {
+                    if (m.name == "hasReceipt" || m.name == "getHasReceipt" || m.name == "isAvailable" || m.name == "getAvailable") {
+                        if (m.returnType != "Z") continue
+                        if (m.implementation == null) continue
+                        try {
+                            m.addInstructions(0, "const/4 v0, 0x1\nreturn v0")
+                            patched++
+                        } catch (_: Exception) {}
+                    }
+                    if (m.name == "GetInt" || m.name == "getInt") {
+                        // PlayerPrefs / SharedPreferences getInt for currency - hard to know key, but make it return large value for any int
+                        // Only patch if class is PlayerPrefs
+                        if (!classDef.type.contains("PlayerPrefs")) continue
+                        if (m.returnType != "I") continue
+                        // Do not blanket patch all getInt, only if method has 2 params (key, default)
+                        if (m.parameterTypes.size != 2) continue
+                        try {
+                            m.addInstructions(0, "const v0, 0xF423F\nreturn v0")
+                            patched++
+                        } catch (_: Exception) {}
+                    }
+                }
+            }
+        }
+
         if (patched > 0) {
             logger.info("Free In-app Purchases: patched $patched purchase check(s)")
         } else {
