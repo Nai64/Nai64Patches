@@ -1,6 +1,6 @@
 {
   "NOTE": "Do NOT manually edit this file. This file is automatically updated when semantic release (release.yml) runs. Manually editing this file can break your releases and break third party tools that use this file.",
-  "version": "1.34.1",
+  "version": "1.35.0",
   "patches": [
     {
       "name": "Skip Consent Popup",
@@ -207,7 +207,7 @@
     },
     {
       "name": "Export All Activities",
-      "description": "Marks every activity and activity-alias as android:exported=true so other apps and ADB can launch them. Unlike Repair Missing Component Export Flags, this intentionally exports every activity even when it has no intent filter; use the repair patch when you only need explicit exported values for filtered legacy components.",
+      "description": "Makes all activities launchable by other apps and ADB.",
       "default": false,
       "dependencies": [],
       "compatiblePackages": null,
@@ -255,7 +255,7 @@
     },
     {
       "name": "Prefer ANGLE Graphics Driver",
-      "description": "Requests ANGLE as the OpenGL ES driver so compatible modern Android devices may run OpenGL ES through ANGLE for improved graphics compatibility. This is only a driver preference, is not guaranteed, does not convert Vulkan apps to OpenGL, and may cause rendering issues on unsupported devices.",
+      "description": "Asks the system to use ANGLE for better graphics on supported devices.",
       "default": false,
       "dependencies": [],
       "compatiblePackages": null,
@@ -271,7 +271,7 @@
     },
     {
       "name": "Ensure Storage Permissions",
-      "description": "Adds READ_EXTERNAL_STORAGE and WRITE_EXTERNAL_STORAGE for older apps that can see photos, videos, or music but cannot access ordinary files on modern Android ROMs. The permissions still require Android to grant them at runtime and have limited effect for apps targeting Android 13+.",
+      "description": "Adds storage permissions so old apps can access files on newer Android.",
       "default": false,
       "dependencies": [],
       "compatiblePackages": null,
@@ -279,7 +279,7 @@
     },
     {
       "name": "Ensure Modern Media Permissions",
-      "description": "Adds Android 13+ media permissions so older apps that can see some media but cannot properly access photos, videos, or music can request the modern permissions. Android still requires runtime approval, and this does not grant unrestricted access to arbitrary files.",
+      "description": "Adds media permissions so old apps can access photos and videos on Android 13+.",
       "default": false,
       "dependencies": [],
       "compatiblePackages": null,
@@ -287,7 +287,7 @@
     },
     {
       "name": "Restore Package Visibility",
-      "description": "Adds QUERY_ALL_PACKAGES so older apps can detect installed stores, file managers, and other companion apps hidden by Android 11+ package-visibility filtering. This is a broad visibility override, may be restricted by Google Play policy, and does not install or grant access to the packages being detected.",
+      "description": "Lets old apps see all installed apps on Android 11+.",
       "default": false,
       "dependencies": [],
       "compatiblePackages": null,
@@ -367,7 +367,7 @@
     },
     {
       "name": "Disable Crash Reporters",
-      "description": "No-ops the static init/start/register methods of bundled crash-reporting SDKs (Crashlytics, Fabric, Sentry, Bugsnag, ACRA, HockeyApp, AppCenter, Instabug, Countly)",
+      "description": "Blocks crash reporting so the app doesn't send crash logs.",
       "default": false,
       "dependencies": [],
       "compatiblePackages": null,
@@ -415,7 +415,7 @@
     },
     {
       "name": "Ensure Notification Permission",
-      "description": "Adds POST_NOTIFICATIONS to the manifest so older apps can request notification access on Android 13+. This only declares the permission; Android may still require a runtime approval. Unlike Spoof Notifications as Enabled, it does not change the app's NotificationManager.areNotificationsEnabled check.",
+      "description": "Adds notification permission for old apps on Android 13+.",
       "default": false,
       "dependencies": [],
       "compatiblePackages": null,
@@ -698,7 +698,7 @@
     },
     {
       "name": "Ensure Exact Alarm Availability",
-      "description": "Makes AlarmManager.canScheduleExactAlarms return true so older alarm, reminder, and scheduler apps do not disable their exact-alarm features on modern Android. Warning: this only changes the app's availability check; it does not grant Android's special exact-alarm access, and scheduling may still fail or throw SecurityException.",
+      "description": "Makes exact alarms appear available so old alarm apps keep working.",
       "default": false,
       "dependencies": [],
       "compatiblePackages": null,
@@ -722,7 +722,7 @@
     },
     {
       "name": "Spoof Notifications as Enabled",
-      "description": "Makes NotificationManager.areNotificationsEnabled always return true so apps that refuse to run when notifications are blocked keep working. This only changes the app's internal check; it does not grant POST_NOTIFICATIONS or enable notifications in Android system settings. Use Ensure Notification Permission for the manifest entry.",
+      "description": "Makes the app think notifications are enabled so it keeps working even if blocked.",
       "default": false,
       "dependencies": [],
       "compatiblePackages": null,
@@ -1093,7 +1093,7 @@
     },
     {
       "name": "AMOLED Theme",
-      "description": "Forces pure-black backgrounds and surfaces on every dark theme so apps that support dark mode render true AMOLED-black instead of dark grey. Light themes are left untouched, so text stays readable. Optional toggles cover status/nav bars and Material3 surfaces.",
+      "description": "Makes dark mode pure black for AMOLED screens. Light mode stays normal.",
       "default": false,
       "dependencies": [],
       "compatiblePackages": null,
@@ -1290,7 +1290,7 @@
     },
     {
       "name": "Apk Junk Cleanup",
-      "description": "Reduces APK size by stripping unused native libraries. Keeps only the selected CPU architecture under lib/ (e.g. arm64-v8a) and deletes the others. Use only if you know the target device ABI - the APK will not run on devices needing a stripped ABI. For translations use Strip Translations instead.",
+      "description": "Removes unused CPU libraries to shrink the APK. Keep only your device's architecture.",
       "default": false,
       "dependencies": [],
       "compatiblePackages": null,
@@ -2144,7 +2144,7 @@
     },
     {
       "name": "Disable Sensors",
-      "description": "Makes SensorManager.registerListener(...) report false (and register nothing) so the app cannot read motion, orientation, or other sensor data.",
+      "description": "Stops the app from reading motion and orientation sensors.",
       "default": false,
       "dependencies": [],
       "compatiblePackages": null,
@@ -3235,6 +3235,14 @@
       ]
     },
     {
+      "name": "Free In-app Purchases (Experimental)",
+      "description": "Makes Unity in-app purchases appear successful without paying. Supports Unity IAP and Google Play Billing. Use for offline games only — online verification may still block.",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": []
+    },
+    {
       "name": "GmsCore support (MicroG)",
       "description": "Routes Google Play Services API calls through MicroG (enables Google Sign-In on non-root/no-GMS) with selectable MicroG package and optional main activity / package name overrides",
       "default": false,
@@ -3332,6 +3340,30 @@
       "options": []
     },
     {
+      "name": "Hide App Ops",
+      "description": "Makes app ops checks appear allowed so apps cannot probe permissions.",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": []
+    },
+    {
+      "name": "Hide App Tasks",
+      "description": "Makes the app see no recent tasks so it cannot read your recent apps.",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": []
+    },
+    {
+      "name": "Hide Cell Location",
+      "description": "Makes cell location appear unavailable so apps cannot read your tower location.",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": []
+    },
+    {
       "name": "Hide Clipboard",
       "description": "Forces ClipboardManager.getPrimaryClip() to return null so the app cannot read the system clipboard.",
       "default": false,
@@ -3342,6 +3374,14 @@
     {
       "name": "Hide Clipboard Description",
       "description": "Makes ClipboardManager.getPrimaryClipDescription return null to block MIME and type harvesting",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": []
+    },
+    {
+      "name": "Hide Current Location",
+      "description": "Prevents the app from requesting your current location.",
       "default": false,
       "dependencies": [],
       "compatiblePackages": null,
@@ -3380,6 +3420,14 @@
       "options": []
     },
     {
+      "name": "Hide Input Methods",
+      "description": "Makes input methods appear empty so apps cannot fingerprint keyboards.",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": []
+    },
+    {
       "name": "Hide Installed Apps",
       "description": "Redirects PackageManager.getInstalledPackages/getInstalledApplications to Collections.emptyList() so the app sees no other installed apps.",
       "default": false,
@@ -3388,8 +3436,40 @@
       "options": []
     },
     {
+      "name": "Hide Neighboring Cells",
+      "description": "Makes neighboring cell info appear empty so apps cannot read nearby towers.",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": []
+    },
+    {
       "name": "Hide Nfc Adapter",
       "description": "Makes NfcAdapter.getDefaultAdapter return null so NFC probes fail uniformly",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": []
+    },
+    {
+      "name": "Hide Query Intents",
+      "description": "Makes intent queries appear empty so apps cannot discover other installed apps via intents.",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": []
+    },
+    {
+      "name": "Hide Running Processes",
+      "description": "Makes the app see no running processes so it cannot fingerprint other apps.",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": []
+    },
+    {
+      "name": "Hide Running Services",
+      "description": "Makes the app see no running services so it cannot detect other services.",
       "default": false,
       "dependencies": [],
       "compatiblePackages": null,
@@ -3420,6 +3500,14 @@
           "values": null
         }
       ]
+    },
+    {
+      "name": "Hide Usage Events",
+      "description": "Makes usage events appear empty so apps cannot read your app launch history.",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": []
     },
     {
       "name": "Hide Usage Stats",
@@ -3821,7 +3909,7 @@
     },
     {
       "name": "Spoof Data State",
-      "description": "Reports an active data connection from TelephonyManager.getDataState() (DATA_CONNECTED) and getDataActivity() (DATA_ACTIVITY_INOUT) so apps that change behavior based on mobile data state see a live connection.",
+      "description": "Makes the app think mobile data is connected.",
       "default": false,
       "dependencies": [],
       "compatiblePackages": null,
@@ -3829,7 +3917,7 @@
     },
     {
       "name": "Spoof Developer Options",
-      "description": "Forces Settings.Global/Settings.Secure getters for developer options, USB debugging and wireless debugging to report disabled (0), so apps that refuse to run or crash when they detect debugging cannot tell it is on.",
+      "description": "Hides developer options and USB debugging so blocking apps keep working.",
       "default": false,
       "dependencies": [
         "ResourcePatch"
@@ -4060,7 +4148,7 @@
     },
     {
       "name": "Spoof SDK Level",
-      "description": "Replaces every read of Build.VERSION.SDK_INT with a custom value. WARNING: setting a level lower than the device's real API level makes apps call missing APIs and crash; only use when you know the app checks it",
+      "description": "Reports a chosen Android version. Lower values can crash the app.",
       "default": false,
       "dependencies": [],
       "compatiblePackages": null,
@@ -4363,6 +4451,33 @@
       "dependencies": [],
       "compatiblePackages": null,
       "options": []
+    },
+    {
+      "name": "Unlimited Currencies",
+      "description": "Makes currency checks return a huge amount so you never run out. Covers PlayerPrefs, SharedPreferences and common Unity fields.",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": [
+        {
+          "key": "currencyAmount",
+          "title": "Amount",
+          "description": "Amount to report for currency. Price fields will be 0.",
+          "required": false,
+          "type": "kotlin.Int",
+          "default": 999999,
+          "values": null
+        },
+        {
+          "key": "currencyCustomKeys",
+          "title": "Extra keys",
+          "description": "Comma-separated extra keys to spoof (e.g. my_gem,my_coin). Leave empty for default list.",
+          "required": false,
+          "type": "kotlin.String",
+          "default": "",
+          "values": null
+        }
+      ]
     },
     {
       "name": "Unlock Notification Channels",

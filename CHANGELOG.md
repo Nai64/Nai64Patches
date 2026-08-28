@@ -1,3 +1,27 @@
+## [1.35.0](https://github.com/Nai64/Nai64Patches/compare/1.34.1...1.35.0) (2026-08-28)
+
+### Bug Fixes
+
+* improve free in-app purchases patch ([0643afe](https://github.com/Nai64/Nai64Patches/commit/0643afe57b552816b38a436c6409b4277c4967ff))
+* populate time evolve currency variables in unlimited currencies patch ([e9f59e1](https://github.com/Nai64/Nai64Patches/commit/e9f59e1fda204c1f6d11835bb66b4dd677abd029))
+* remove time evolve references ([1c520a5](https://github.com/Nai64/Nai64Patches/commit/1c520a571321787026d3836e07732cfe1477c473))
+
+### New Features
+
+* add free in-app purchases patch ([c3bd264](https://github.com/Nai64/Nai64Patches/commit/c3bd264e6eb9f6d945ad2a78091cba6744981982))
+* add hide app ops patch ([a25ffcd](https://github.com/Nai64/Nai64Patches/commit/a25ffcda82f94018f7c4d9e06afcdbdf767b877f))
+* add hide app tasks patch ([e23386a](https://github.com/Nai64/Nai64Patches/commit/e23386aebf1a4bb2968834d08af53f292f4602fc))
+* add hide cell location patch ([d6a2e3e](https://github.com/Nai64/Nai64Patches/commit/d6a2e3ed8cf5e5b11042ef985ec088da13da29c9))
+* add hide current location patch ([cf4bb54](https://github.com/Nai64/Nai64Patches/commit/cf4bb545cb3a8aedce148b5a5ce7cffe0b511305))
+* add hide input methods patch ([3ddbee5](https://github.com/Nai64/Nai64Patches/commit/3ddbee55e7cf39bf7860e9700b3a242eb5ad5683))
+* add hide neighboring cells patch ([aa66cd0](https://github.com/Nai64/Nai64Patches/commit/aa66cd09aa491c85dd381d72f8f9666c4f129379))
+* add hide query intents patch ([b26b3a1](https://github.com/Nai64/Nai64Patches/commit/b26b3a1b025c685d49e8002dc2a1c3ae9d5de3dd))
+* add hide running processes patch ([96dab09](https://github.com/Nai64/Nai64Patches/commit/96dab09bb92f33fabc57183dbc851ca27555ba88))
+* add hide running services patch ([260f6af](https://github.com/Nai64/Nai64Patches/commit/260f6af519a07bfc8bb547085ab15597801107e5))
+* add hide usage events patch ([33ad738](https://github.com/Nai64/Nai64Patches/commit/33ad738d24ce1ff1445fad775650ec8bd900d8ca))
+* add unlimited currencies patch ([30ed870](https://github.com/Nai64/Nai64Patches/commit/30ed8705556db24baa9d715ccbcbda5123903af1))
+* make recommended patches default enabled ([23185a4](https://github.com/Nai64/Nai64Patches/commit/23185a4485e9b103f9753c4ac2a481665d5eafbc))
+
 ## [1.34.1](https://github.com/Nai64/Nai64Patches/compare/1.34.0...1.34.1) (2026-08-28)
 
 ### Bug Fixes
