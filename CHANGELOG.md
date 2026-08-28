@@ -1,3 +1,13 @@
+## [1.34.1](https://github.com/Nai64/Nai64Patches/compare/1.34.0...1.34.1) (2026-08-28)
+
+### Bug Fixes
+
+* fixed the issue when custom startup dialog crashed and showed black screen ([e6447e4](https://github.com/Nai64/Nai64Patches/commit/e6447e4b0dc8143d55b83d82764c3886a9d204fc))
+* fixed the issue when disable logcat logging patch didnt handle high registers ([b297e2d](https://github.com/Nai64/Nai64Patches/commit/b297e2dc0405622995bf8b5ec8875f36618888b9))
+* fixed the issue when disable telemetry patch crashed on some apps ([bf1f73b](https://github.com/Nai64/Nai64Patches/commit/bf1f73be5c6e4ef1191c997215ce2cac65256d65))
+* fixed the issue when enable unrestricted background work patch didnt work on some apps ([d17c8d4](https://github.com/Nai64/Nai64Patches/commit/d17c8d40fbfcc882f91450e2f18c60de16fea57e))
+* fixed the issue when strip buildconfig debug patch didnt work ([ddf79f5](https://github.com/Nai64/Nai64Patches/commit/ddf79f55ed6f6ff533d0aa25c58cccd40bd5a839))
+
 ## [1.34.0](https://github.com/Nai64/Nai64Patches/compare/1.33.0...1.34.0) (2026-08-28)
 
 ### Bug Fixes
