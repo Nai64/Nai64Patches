@@ -1,3 +1,11 @@
+## [1.33.0](https://github.com/Nai64/Nai64Patches/compare/1.32.0...1.33.0) (2026-08-28)
+
+### New Features
+
+* add icon effects to Custom App Icon patch ([4babf1a](https://github.com/Nai64/Nai64Patches/commit/4babf1abfbd9dccfb7229bc2a628e78a85b9ee6b))
+* add Unlock Notification Channels patch ([58e18f2](https://github.com/Nai64/Nai64Patches/commit/58e18f23689102de3e2d4e3273bb4f7f6fd3f863)), closes [#45](https://github.com/Nai64/Nai64Patches/issues/45)
+* improve AMOLED Theme patch ([20ceecf](https://github.com/Nai64/Nai64Patches/commit/20ceecfe9e64dd47a9a08d06565aad19eefeebde))
+
 ## [1.32.0](https://github.com/Nai64/Nai64Patches/compare/1.31.2...1.32.0) (2026-08-27)
 
 ### New Features
