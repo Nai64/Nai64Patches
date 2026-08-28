@@ -49,7 +49,17 @@ val disableLogcatLoggingPatch = bytecodePatch(
                     val next = instructions.getOrNull(index + 1)
                     if (ref.returnType == "I" && next != null && next.opcode == Opcode.MOVE_RESULT) {
                         val resultRegister = (next as OneRegisterInstruction).registerA
-                        method.replaceInstruction(index, "const/4 v$resultRegister, 0x0")
+                        val constInstr = if (resultRegister <= 0xf) "const/4 v$resultRegister, 0x0" else "const/16 v$resultRegister, 0x0"
+                        method.replaceInstruction(index, constInstr)
+                        method.replaceInstruction(index + 1, "nop")
+                    } else if (next != null && (next.opcode == Opcode.MOVE_RESULT_OBJECT || next.opcode == Opcode.MOVE_RESULT_WIDE)) {
+                        val resultRegister = (next as OneRegisterInstruction).registerA
+                        val constInstr = if (next.opcode == Opcode.MOVE_RESULT_WIDE) {
+                            if (resultRegister <= 0xff) "const-wide v$resultRegister, 0x0" else "const-wide v$resultRegister, 0x0"
+                        } else {
+                            if (resultRegister <= 0xff) "const/4 v$resultRegister, 0x0" else "const/16 v$resultRegister, 0x0"
+                        }
+                        method.replaceInstruction(index, constInstr)
                         method.replaceInstruction(index + 1, "nop")
                     } else {
                         method.replaceInstruction(index, "nop")
