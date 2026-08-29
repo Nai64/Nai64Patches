@@ -460,28 +460,34 @@ private fun injectOverlay(
     includeScreenshots: Boolean,
 ) {
     val base = onCreate.implementation!!.registerCount
-    val cloned = onCreate.cloneMutable(additionalRegisters = 11)
-    val context = cloned.p0Register
-    val initialState = buildInitialState(base, activity.type, includeKeepScreenAwake, includeFullscreen, includeScreenshots)
+    val cloned = onCreate.cloneMutable(additionalRegisters = 13)
+    val initialState = buildInitialState(
+        base,
+        activity.type,
+        includeKeepScreenAwake,
+        includeFullscreen,
+        includeScreenshots,
+    )
     cloned.addInstructionsWithLabels(0, compactSmali("""
-        invoke-virtual {p0}, Landroid/app/Activity;->getWindow()Landroid/view/Window;
+        invoke-virtual/range {p0 .. p0}, Landroid/app/Activity;->getWindow()Landroid/view/Window;
         move-result-object v${base + 6}
-        invoke-virtual {v${base + 6}}, Landroid/view/Window;->getAttributes()Landroid/view/WindowManager${'$'}LayoutParams;
+        invoke-virtual/range {v${base + 6} .. v${base + 6}}, Landroid/view/Window;->getAttributes()Landroid/view/WindowManager${'$'}LayoutParams;
         move-result-object v${base + 7}
         iget v${base + 8}, v${base + 7}, Landroid/view/WindowManager${'$'}LayoutParams;->flags:I
         iput v${base + 8}, p0, ${activity.type}->${ORIGINAL_WINDOW_FLAGS}:I
-        invoke-virtual {v${base + 6}}, Landroid/view/Window;->getDecorView()Landroid/view/View;
+        invoke-virtual/range {v${base + 6} .. v${base + 6}}, Landroid/view/Window;->getDecorView()Landroid/view/View;
         move-result-object v${base + 9}
-        invoke-virtual {v${base + 9}}, Landroid/view/View;->getSystemUiVisibility()I
+        invoke-virtual/range {v${base + 9} .. v${base + 9}}, Landroid/view/View;->getSystemUiVisibility()I
         move-result v${base + 10}
         iput v${base + 10}, p0, ${activity.type}->${ORIGINAL_SYSTEM_UI}:I
         $initialState
         new-instance v$base, Landroid/widget/TextView;
-        invoke-direct {v$base, v$context}, Landroid/widget/TextView;-><init>(Landroid/content/Context;)V
+        move-object/from16 v${base + 1}, p0
+        invoke-direct/range {v$base .. v${base + 1}}, Landroid/widget/TextView;-><init>(Landroid/content/Context;)V
         const-string v${base + 1}, "N"
-        invoke-virtual {v$base, v${base + 1}}, Landroid/widget/TextView;->setText(Ljava/lang/CharSequence;)V
+        invoke-virtual/range {v$base .. v${base + 1}}, Landroid/widget/TextView;->setText(Ljava/lang/CharSequence;)V
         const v${base + 1}, -0x1000000
-        invoke-virtual {v$base, v${base + 1}}, Landroid/widget/TextView;->setTextColor(I)V
+        invoke-virtual/range {v$base .. v${base + 1}}, Landroid/widget/TextView;->setTextColor(I)V
         sget-object v${base + 1}, Landroid/graphics/Typeface;->DEFAULT:Landroid/graphics/Typeface;
         const/4 v${base + 2}, 0x1
         invoke-virtual/range {v$base .. v${base + 2}}, Landroid/widget/TextView;->setTypeface(Landroid/graphics/Typeface;I)V
@@ -491,29 +497,35 @@ private fun injectOverlay(
         const v${base + 4}, -0x1000000
         invoke-virtual/range {v$base .. v${base + 4}}, Landroid/widget/TextView;->setShadowLayer(FFFI)V
         const/high16 v${base + 1}, 0x3e800000
-        invoke-virtual {v$base, v${base + 1}}, Landroid/view/View;->setAlpha(F)V
+        invoke-virtual/range {v$base .. v${base + 1}}, Landroid/view/View;->setAlpha(F)V
         const/16 v${base + 1}, 0x38
-        invoke-virtual {v$base, v${base + 1}}, Landroid/widget/TextView;->setWidth(I)V
+        invoke-virtual/range {v$base .. v${base + 1}}, Landroid/widget/TextView;->setWidth(I)V
         const/16 v${base + 1}, 0x38
-        invoke-virtual {v$base, v${base + 1}}, Landroid/widget/TextView;->setHeight(I)V
+        invoke-virtual/range {v$base .. v${base + 1}}, Landroid/widget/TextView;->setHeight(I)V
         const/16 v${base + 1}, 0x11
-        invoke-virtual {v$base, v${base + 1}}, Landroid/widget/TextView;->setGravity(I)V
+        invoke-virtual/range {v$base .. v${base + 1}}, Landroid/widget/TextView;->setGravity(I)V
         new-instance v${base + 3}, Landroid/graphics/drawable/GradientDrawable;
         invoke-direct {v${base + 3}}, Landroid/graphics/drawable/GradientDrawable;-><init>()V
         const/4 v${base + 4}, 0x1
-        invoke-virtual {v${base + 3}, v${base + 4}}, Landroid/graphics/drawable/GradientDrawable;->setShape(I)V
+        invoke-virtual/range {v${base + 3} .. v${base + 4}}, Landroid/graphics/drawable/GradientDrawable;->setShape(I)V
         const v${base + 4}, -0x1
-        invoke-virtual {v${base + 3}, v${base + 4}}, Landroid/graphics/drawable/GradientDrawable;->setColor(I)V
+        invoke-virtual/range {v${base + 3} .. v${base + 4}}, Landroid/graphics/drawable/GradientDrawable;->setColor(I)V
         const/4 v${base + 4}, 0x1
         const v${base + 5}, $outlineColor
         invoke-virtual/range {v${base + 3} .. v${base + 5}}, Landroid/graphics/drawable/GradientDrawable;->setStroke(II)V
-        invoke-virtual {v$base, v${base + 3}}, Landroid/view/View;->setBackground(Landroid/graphics/drawable/Drawable;)V
-        invoke-virtual {v$base, p0}, Landroid/view/View;->setOnClickListener(Landroid/view/View${'$'}OnClickListener;)V
+        move-object/from16 v${base + 1}, v${base + 3}
+        invoke-virtual/range {v$base .. v${base + 1}}, Landroid/view/View;->setBackground(Landroid/graphics/drawable/Drawable;)V
+        move-object/from16 v${base + 1}, p0
+        invoke-virtual/range {v$base .. v${base + 1}}, Landroid/view/View;->setOnClickListener(Landroid/view/View${'$'}OnClickListener;)V
         iput-object v$base, p0, ${activity.type}->${OVERLAY_BUTTON}:$OVERLAY_BUTTON_FIELD
-        const/16 v${base + 1}, 0x38
-        new-instance v${base + 2}, Landroid/view/ViewGroup${'$'}LayoutParams;
-        invoke-direct {v${base + 2}, v${base + 1}, v${base + 1}}, Landroid/view/ViewGroup${'$'}LayoutParams;-><init>(II)V
-        invoke-virtual {p0, v$base, v${base + 2}}, Landroid/app/Activity;->addContentView(Landroid/view/View;Landroid/view/ViewGroup${'$'}LayoutParams;)V
+        const/16 v${base + 4}, 0x38
+        const/16 v${base + 5}, 0x38
+        new-instance v${base + 3}, Landroid/view/ViewGroup${'$'}LayoutParams;
+        invoke-direct/range {v${base + 3} .. v${base + 5}}, Landroid/view/ViewGroup${'$'}LayoutParams;-><init>(II)V
+        move-object/from16 v${base + 1}, p0
+        move-object/from16 v${base + 2}, v$base
+        invoke-virtual/range {v${base + 1} .. v${base + 3}}, Landroid/app/Activity;->addContentView(Landroid/view/View;Landroid/view/ViewGroup${'$'}LayoutParams;)V
+        nop
     """))
     activity.methods.remove(onCreate)
     activity.methods.add(cloned)
