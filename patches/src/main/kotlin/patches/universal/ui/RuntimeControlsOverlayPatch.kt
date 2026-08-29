@@ -262,10 +262,10 @@ private fun addOverlayListeners(
         if-eqz v4, :nai64_overlay_menu_done
         new-instance v5, Landroid/graphics/drawable/GradientDrawable;
         invoke-direct {v5}, Landroid/graphics/drawable/GradientDrawable;-><init>()V
-        const v6, $backgroundColor
+        const v6, 0x${Integer.toHexString(backgroundColor)}
         invoke-virtual {v5, v6}, Landroid/graphics/drawable/GradientDrawable;->setColor(I)V
         const/4 v6, 0x1
-        const v7, $outlineColor
+        const v7, 0x${Integer.toHexString(outlineColor)}
         invoke-virtual/range {v5 .. v7}, Landroid/graphics/drawable/GradientDrawable;->setStroke(II)V
         invoke-virtual {v4, v5}, Landroid/view/Window;->setBackgroundDrawable(Landroid/graphics/drawable/Drawable;)V
         :nai64_overlay_menu_done
