@@ -241,7 +241,7 @@ private fun addOverlayListeners(
         includeFullscreen,
         includeScreenshots,
     )
-    viewClick.addInstructionsWithLabels(0, """
+    viewClick.addInstructionsWithLabels(0, compactSmali("""
         new-instance v2, Landroid/app/AlertDialog${'$'}Builder;
         invoke-direct {v2, p0}, Landroid/app/AlertDialog${'$'}Builder;-><init>(Landroid/content/Context;)V
         const-string v3, "${StartupHooks.escapeSmali(title)}"
@@ -270,14 +270,14 @@ private fun addOverlayListeners(
         invoke-virtual {v4, v5}, Landroid/view/Window;->setBackgroundDrawable(Landroid/graphics/drawable/Drawable;)V
         :nai64_overlay_menu_done
         return-void
-    """.trimIndent())
+    """))
     activity.methods.add(viewClick)
 
     val dialogClick = newMethod(activity, "onClick", listOf(
         "Landroid/content/DialogInterface;",
         "I",
     ), "V")
-    dialogClick.addInstructionsWithLabels(0, """
+    dialogClick.addInstructionsWithLabels(0, compactSmali("""
         const/16 v2, -0x3
         if-eq p1, v2, :nai64_overlay_repository
         iget-object v0, p0, ${activity.type}->${OVERLAY_BUTTON}:$OVERLAY_BUTTON_FIELD
@@ -311,7 +311,7 @@ private fun addOverlayListeners(
         invoke-virtual {p0, v0}, Landroid/app/Activity;->startActivity(Landroid/content/Intent;)V
         :nai64_overlay_done
         return-void
-    """.trimIndent())
+    """))
     activity.methods.add(dialogClick)
 
     val multiChoiceClick = newMethod(activity, "onClick", listOf(
@@ -319,12 +319,12 @@ private fun addOverlayListeners(
         "I",
         "Z",
     ), "V", registers = 12)
-    multiChoiceClick.addInstructionsWithLabels(0, buildControlHandler(
+    multiChoiceClick.addInstructionsWithLabels(0, compactSmali(buildControlHandler(
         activity.type,
         includeKeepScreenAwake,
         includeFullscreen,
         includeScreenshots,
-    ))
+    )))
     activity.methods.add(multiChoiceClick)
 }
 
@@ -463,7 +463,7 @@ private fun injectOverlay(
     val cloned = onCreate.cloneMutable(additionalRegisters = 11)
     val context = cloned.p0Register
     val initialState = buildInitialState(base, activity.type, includeKeepScreenAwake, includeFullscreen, includeScreenshots)
-    cloned.addInstructionsWithLabels(0, """
+    cloned.addInstructionsWithLabels(0, compactSmali("""
         invoke-virtual {p0}, Landroid/app/Activity;->getWindow()Landroid/view/Window;
         move-result-object v${base + 6}
         invoke-virtual {v${base + 6}}, Landroid/view/Window;->getAttributes()Landroid/view/WindowManager${'$'}LayoutParams;
@@ -514,10 +514,13 @@ private fun injectOverlay(
         new-instance v${base + 2}, Landroid/view/ViewGroup${'$'}LayoutParams;
         invoke-direct {v${base + 2}, v${base + 1}, v${base + 1}}, Landroid/view/ViewGroup${'$'}LayoutParams;-><init>(II)V
         invoke-virtual {p0, v$base, v${base + 2}}, Landroid/app/Activity;->addContentView(Landroid/view/View;Landroid/view/ViewGroup${'$'}LayoutParams;)V
-    """.trimIndent())
+    """))
     activity.methods.remove(onCreate)
     activity.methods.add(cloned)
 }
+
+private fun compactSmali(smali: String): String =
+    smali.lines().filter(String::isNotBlank).joinToString("\n")
 
 private fun buildInitialState(
     base: Int,
