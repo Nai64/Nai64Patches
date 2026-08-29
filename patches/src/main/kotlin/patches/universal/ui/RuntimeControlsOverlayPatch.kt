@@ -376,7 +376,7 @@ private fun addOverlayListeners(
         "Landroid/view/MotionEvent;",
     ), "Z", registers = 6)
     touch.addInstructionsWithLabels(0, compactSmali("""
-        invoke-virtual {p1}, Landroid/view/MotionEvent;->getActionMasked()I
+        invoke-virtual {p2}, Landroid/view/MotionEvent;->getActionMasked()I
         move-result v0
         const/4 v1, 0x0
         if-eq v0, v1, :nai64_overlay_touch_down
@@ -387,34 +387,34 @@ private fun addOverlayListeners(
         const/4 v0, 0x0
         return v0
         :nai64_overlay_touch_down
-        invoke-virtual {p1}, Landroid/view/MotionEvent;->getRawX()F
+        invoke-virtual {p2}, Landroid/view/MotionEvent;->getRawX()F
         move-result v2
         iput v2, p0, ${activity.type}->${TOUCH_START_X}:F
-        invoke-virtual {p1}, Landroid/view/MotionEvent;->getRawY()F
+        invoke-virtual {p2}, Landroid/view/MotionEvent;->getRawY()F
         move-result v3
         iput v3, p0, ${activity.type}->${TOUCH_START_Y}:F
-        invoke-virtual {p1}, Landroid/view/MotionEvent;->getX()F
+        invoke-virtual {p2}, Landroid/view/MotionEvent;->getX()F
         move-result v4
-        invoke-virtual {p1}, Landroid/view/MotionEvent;->getY()F
+        invoke-virtual {p2}, Landroid/view/MotionEvent;->getY()F
         move-result v5
-        invoke-virtual {p1}, Landroid/view/MotionEvent;->getRawX()F
+        invoke-virtual {p2}, Landroid/view/MotionEvent;->getRawX()F
         move-result v2
         sub-float/2addr v2, v4
         iput v2, p0, ${activity.type}->${BUTTON_START_X}:F
-        invoke-virtual {p1}, Landroid/view/MotionEvent;->getRawY()F
+        invoke-virtual {p2}, Landroid/view/MotionEvent;->getRawY()F
         move-result v3
         sub-float/2addr v3, v5
         iput v3, p0, ${activity.type}->${BUTTON_START_Y}:F
         const/4 v0, 0x1
         return v0
         :nai64_overlay_touch_move
-        invoke-virtual {p1}, Landroid/view/MotionEvent;->getRawX()F
+        invoke-virtual {p2}, Landroid/view/MotionEvent;->getRawX()F
         move-result v2
         iget v3, p0, ${activity.type}->${TOUCH_START_X}:F
         sub-float/2addr v2, v3
         iget v3, p0, ${activity.type}->${BUTTON_START_X}:F
         add-float/2addr v2, v3
-        invoke-virtual {p1}, Landroid/view/MotionEvent;->getRawY()F
+        invoke-virtual {p2}, Landroid/view/MotionEvent;->getRawY()F
         move-result v3
         iget v4, p0, ${activity.type}->${TOUCH_START_Y}:F
         sub-float/2addr v3, v4
