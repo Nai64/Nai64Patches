@@ -4,6 +4,7 @@ import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.patch.booleanOption
+import app.morphe.patcher.patch.intOption
 import app.morphe.patcher.patch.stringOption
 import app.morphe.patcher.util.proxy.mutableTypes.MutableClass
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
@@ -86,6 +87,28 @@ val runtimeControlsOverlayPatch = bytecodePatch(
         key = "runtimeOverlayOutlineColor",
         description = "Overlay outline color as #RRGGBB or #AARRGGBB.",
     )
+    val buttonSizeDp by intOption(
+        title = "Overlay button size (dp)",
+        default = 64,
+        key = "runtimeOverlayButtonSizeDp",
+        description = "Button width and height in density-independent pixels. Recommended: 56-80.",
+    )
+    val buttonPosition by stringOption(
+        title = "Overlay button position",
+        default = "topRight",
+        key = "runtimeOverlayButtonPosition",
+        description = "Initial position relative to the phone display.",
+        values = linkedMapOf(
+            "Top left" to "topLeft",
+            "Top middle" to "topMiddle",
+            "Top right" to "topRight",
+            "Center left" to "centerLeft",
+            "Center right" to "centerRight",
+            "Bottom left" to "bottomLeft",
+            "Bottom middle" to "bottomMiddle",
+            "Bottom right" to "bottomRight",
+        ),
+    )
     val includeKeepScreenAwake by booleanOption(
         title = "Include keep screen awake control",
         default = false,
@@ -118,6 +141,8 @@ val runtimeControlsOverlayPatch = bytecodePatch(
         val repository = repositoryUrl.orEmpty().ifBlank { "https://github.com/Nai64/Nai64Patches" }
         val background = parseColor(backgroundColor.orEmpty(), 0xCC101820.toInt())
         val outline = parseColor(outlineColor.orEmpty(), 0xFF55D6BE.toInt())
+        val buttonSize = (buttonSizeDp ?: 64).coerceIn(32, 128)
+        val buttonGravity = parseButtonGravity(buttonPosition.orEmpty())
         val selectedControls = listOfNotNull(
             "keep screen awake".takeIf { includeKeepScreenAwake == true },
             "fullscreen".takeIf { includeFullscreen == true },
@@ -169,6 +194,8 @@ val runtimeControlsOverlayPatch = bytecodePatch(
                 onCreate,
                 activity,
                 outline,
+                buttonSize,
+                buttonGravity,
                 includeKeepScreenAwake == true,
                 includeFullscreen == true,
                 includeScreenshots == true,
@@ -440,12 +467,13 @@ private fun newMethod(
     parameterTypes: List<String>,
     returnType: String,
     registers: Int = 8,
+    accessFlags: Int = AccessFlags.PUBLIC.value,
 ): MutableMethod = ImmutableMethod(
     activity.type,
     name,
     parameterTypes.map { com.android.tools.smali.dexlib2.immutable.ImmutableMethodParameter(it, emptySet(), null) },
     returnType,
-    AccessFlags.PUBLIC.value,
+    accessFlags,
     emptySet(),
     emptySet(),
     ImmutableMethodImplementation(registers, emptyList(), emptyList(), emptyList()),
@@ -455,84 +483,101 @@ private fun injectOverlay(
     onCreate: MutableMethod,
     activity: MutableClass,
     outlineColor: Int,
+    buttonSizeDp: Int,
+    buttonGravity: Int,
     includeKeepScreenAwake: Boolean,
     includeFullscreen: Boolean,
     includeScreenshots: Boolean,
 ) {
-    val base = onCreate.implementation!!.registerCount
-    val cloned = onCreate.cloneMutable(additionalRegisters = 13)
-    val initialState = buildInitialState(
-        base,
-        activity.type,
-        includeKeepScreenAwake,
-        includeFullscreen,
-        includeScreenshots,
+    val helperName = "nai64CreateRuntimeOverlay"
+    val helper = newMethod(
+        activity = activity,
+        name = helperName,
+        parameterTypes = listOf(activity.type),
+        returnType = "V",
+        registers = 15,
+        accessFlags = AccessFlags.PRIVATE.value or AccessFlags.STATIC.value,
     )
-    cloned.addInstructionsWithLabels(0, compactSmali("""
-        invoke-virtual/range {p0 .. p0}, Landroid/app/Activity;->getWindow()Landroid/view/Window;
-        move-result-object v${base + 6}
-        invoke-virtual/range {v${base + 6} .. v${base + 6}}, Landroid/view/Window;->getAttributes()Landroid/view/WindowManager${'$'}LayoutParams;
-        move-result-object v${base + 7}
-        iget v${base + 8}, v${base + 7}, Landroid/view/WindowManager${'$'}LayoutParams;->flags:I
-        iput v${base + 8}, p0, ${activity.type}->${ORIGINAL_WINDOW_FLAGS}:I
-        invoke-virtual/range {v${base + 6} .. v${base + 6}}, Landroid/view/Window;->getDecorView()Landroid/view/View;
-        move-result-object v${base + 9}
-        invoke-virtual/range {v${base + 9} .. v${base + 9}}, Landroid/view/View;->getSystemUiVisibility()I
-        move-result v${base + 10}
-        iput v${base + 10}, p0, ${activity.type}->${ORIGINAL_SYSTEM_UI}:I
+    val initialState = buildInitialState(0, activity.type, includeKeepScreenAwake, includeFullscreen, includeScreenshots)
+    helper.addInstructionsWithLabels(0, compactSmali("""
+        invoke-virtual {p0}, Landroid/app/Activity;->getWindow()Landroid/view/Window;
+        move-result-object v6
+        invoke-virtual {v6}, Landroid/view/Window;->getAttributes()Landroid/view/WindowManager${'$'}LayoutParams;
+        move-result-object v7
+        iget v8, v7, Landroid/view/WindowManager${'$'}LayoutParams;->flags:I
+        iput v8, p0, ${activity.type}->${ORIGINAL_WINDOW_FLAGS}:I
+        invoke-virtual {v6}, Landroid/view/Window;->getDecorView()Landroid/view/View;
+        move-result-object v9
+        invoke-virtual {v9}, Landroid/view/View;->getSystemUiVisibility()I
+        move-result v10
+        iput v10, p0, ${activity.type}->${ORIGINAL_SYSTEM_UI}:I
         $initialState
-        new-instance v$base, Landroid/widget/TextView;
-        move-object/from16 v${base + 1}, p0
-        invoke-direct/range {v$base .. v${base + 1}}, Landroid/widget/TextView;-><init>(Landroid/content/Context;)V
-        const-string v${base + 1}, "N"
-        invoke-virtual/range {v$base .. v${base + 1}}, Landroid/widget/TextView;->setText(Ljava/lang/CharSequence;)V
-        const v${base + 1}, -0x1000000
-        invoke-virtual/range {v$base .. v${base + 1}}, Landroid/widget/TextView;->setTextColor(I)V
-        sget-object v${base + 1}, Landroid/graphics/Typeface;->DEFAULT:Landroid/graphics/Typeface;
-        const/4 v${base + 2}, 0x1
-        invoke-virtual/range {v$base .. v${base + 2}}, Landroid/widget/TextView;->setTypeface(Landroid/graphics/Typeface;I)V
-        const/high16 v${base + 1}, 0x40000000
-        const/high16 v${base + 2}, 0x3f800000
-        const/high16 v${base + 3}, 0x3f800000
-        const v${base + 4}, -0x1000000
-        invoke-virtual/range {v$base .. v${base + 4}}, Landroid/widget/TextView;->setShadowLayer(FFFI)V
-        const/high16 v${base + 1}, 0x3e800000
-        invoke-virtual/range {v$base .. v${base + 1}}, Landroid/view/View;->setAlpha(F)V
-        const/16 v${base + 1}, 0x38
-        invoke-virtual/range {v$base .. v${base + 1}}, Landroid/widget/TextView;->setWidth(I)V
-        const/16 v${base + 1}, 0x38
-        invoke-virtual/range {v$base .. v${base + 1}}, Landroid/widget/TextView;->setHeight(I)V
-        const/16 v${base + 1}, 0x11
-        invoke-virtual/range {v$base .. v${base + 1}}, Landroid/widget/TextView;->setGravity(I)V
-        new-instance v${base + 3}, Landroid/graphics/drawable/GradientDrawable;
-        invoke-direct {v${base + 3}}, Landroid/graphics/drawable/GradientDrawable;-><init>()V
-        const/4 v${base + 4}, 0x1
-        invoke-virtual/range {v${base + 3} .. v${base + 4}}, Landroid/graphics/drawable/GradientDrawable;->setShape(I)V
-        const v${base + 4}, -0x1
-        invoke-virtual/range {v${base + 3} .. v${base + 4}}, Landroid/graphics/drawable/GradientDrawable;->setColor(I)V
-        const/4 v${base + 4}, 0x1
-        const v${base + 5}, $outlineColor
-        invoke-virtual/range {v${base + 3} .. v${base + 5}}, Landroid/graphics/drawable/GradientDrawable;->setStroke(II)V
-        move-object/from16 v${base + 1}, v${base + 3}
-        invoke-virtual/range {v$base .. v${base + 1}}, Landroid/view/View;->setBackground(Landroid/graphics/drawable/Drawable;)V
-        move-object/from16 v${base + 1}, p0
-        invoke-virtual/range {v$base .. v${base + 1}}, Landroid/view/View;->setOnClickListener(Landroid/view/View${'$'}OnClickListener;)V
-        iput-object v$base, p0, ${activity.type}->${OVERLAY_BUTTON}:$OVERLAY_BUTTON_FIELD
-        const/16 v${base + 4}, 0x38
-        const/16 v${base + 5}, 0x38
-        new-instance v${base + 3}, Landroid/view/ViewGroup${'$'}LayoutParams;
-        invoke-direct/range {v${base + 3} .. v${base + 5}}, Landroid/view/ViewGroup${'$'}LayoutParams;-><init>(II)V
-        move-object/from16 v${base + 1}, p0
-        move-object/from16 v${base + 2}, v$base
-        invoke-virtual/range {v${base + 1} .. v${base + 3}}, Landroid/app/Activity;->addContentView(Landroid/view/View;Landroid/view/ViewGroup${'$'}LayoutParams;)V
-        nop
+        new-instance v0, Landroid/widget/TextView;
+        invoke-direct {v0, p0}, Landroid/widget/TextView;-><init>(Landroid/content/Context;)V
+        const-string v1, "N"
+        invoke-virtual {v0, v1}, Landroid/widget/TextView;->setText(Ljava/lang/CharSequence;)V
+        const v1, -0x1000000
+        invoke-virtual {v0, v1}, Landroid/widget/TextView;->setTextColor(I)V
+        sget-object v1, Landroid/graphics/Typeface;->DEFAULT:Landroid/graphics/Typeface;
+        const/4 v2, 0x1
+        invoke-virtual/range {v0 .. v2}, Landroid/widget/TextView;->setTypeface(Landroid/graphics/Typeface;I)V
+        const/high16 v1, 0x40000000
+        const/high16 v2, 0x3f800000
+        const/high16 v3, 0x3f800000
+        const v4, -0x1000000
+        invoke-virtual/range {v0 .. v4}, Landroid/widget/TextView;->setShadowLayer(FFFI)V
+        const/high16 v1, 0x3e800000
+        invoke-virtual {v0, v1}, Landroid/view/View;->setAlpha(F)V
+        invoke-virtual {p0}, Landroid/content/Context;->getResources()Landroid/content/res/Resources;
+        move-result-object v11
+        invoke-virtual {v11}, Landroid/content/res/Resources;->getDisplayMetrics()Landroid/util/DisplayMetrics;
+        move-result-object v11
+        iget v1, v11, Landroid/util/DisplayMetrics;->density:F
+        const v2, $buttonSizeDp
+        int-to-float v2, v2
+        mul-float/2addr v2, v1
+        float-to-int v2, v2
+        invoke-virtual {v0, v2}, Landroid/widget/TextView;->setWidth(I)V
+        invoke-virtual {v0, v2}, Landroid/widget/TextView;->setHeight(I)V
+        const/16 v1, 0x11
+        invoke-virtual {v0, v1}, Landroid/widget/TextView;->setGravity(I)V
+        new-instance v3, Landroid/graphics/drawable/GradientDrawable;
+        invoke-direct {v3}, Landroid/graphics/drawable/GradientDrawable;-><init>()V
+        const/4 v4, 0x1
+        invoke-virtual {v3, v4}, Landroid/graphics/drawable/GradientDrawable;->setShape(I)V
+        const v4, -0x1
+        invoke-virtual {v3, v4}, Landroid/graphics/drawable/GradientDrawable;->setColor(I)V
+        const/4 v4, 0x1
+        const v5, $outlineColor
+        invoke-virtual/range {v3 .. v5}, Landroid/graphics/drawable/GradientDrawable;->setStroke(II)V
+        invoke-virtual {v0, v3}, Landroid/view/View;->setBackground(Landroid/graphics/drawable/Drawable;)V
+        invoke-virtual {v0, p0}, Landroid/view/View;->setOnClickListener(Landroid/view/View${'$'}OnClickListener;)V
+        iput-object v0, p0, ${activity.type}->${OVERLAY_BUTTON}:$OVERLAY_BUTTON_FIELD
+        new-instance v3, Landroid/widget/FrameLayout${'$'}LayoutParams;
+        invoke-direct {v3, v2, v2}, Landroid/widget/FrameLayout${'$'}LayoutParams;-><init>(II)V
+        const v1, $buttonGravity
+        iput v1, v3, Landroid/widget/FrameLayout${'$'}LayoutParams;->gravity:I
+        invoke-virtual {p0, v0, v3}, Landroid/app/Activity;->addContentView(Landroid/view/View;Landroid/view/ViewGroup${'$'}LayoutParams;)V
+        return-void
     """))
-    activity.methods.remove(onCreate)
-    activity.methods.add(cloned)
+    activity.methods.add(helper)
+    onCreate.addInstructionsWithLabels(0, "invoke-static {p0}, ${activity.type}->$helperName(${activity.type})V")
 }
 
 private fun compactSmali(smali: String): String =
     smali.lines().filter(String::isNotBlank).joinToString("\n")
+
+private fun parseButtonGravity(position: String): Int = when (position) {
+    "topLeft" -> 0x33
+    "topMiddle" -> 0x31
+    "topRight" -> 0x35
+    "centerLeft" -> 0x13
+    "centerRight" -> 0x15
+    "bottomLeft" -> 0x53
+    "bottomMiddle" -> 0x51
+    "bottomRight" -> 0x55
+    else -> 0x35
+}
 
 private fun buildInitialState(
     base: Int,
