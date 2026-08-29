@@ -99,7 +99,7 @@ private fun isPriceMethod(name: String): Boolean {
 @Suppress("unused")
 val unlimitedCurrenciesPatch = bytecodePatch(
     name = "Unlimited Currencies",
-    description = "Makes currency checks return a huge amount so you never run out. Covers PlayerPrefs, SharedPreferences and common Unity fields.",
+    description = "Spoofs currency checks so you never run out. Covers PlayerPrefs, SharedPreferences and common Unity fields. WARNING: Only works on Mono-based Unity games and traditional Java/Android games. IL2CPP games (check for libil2cpp.so in the APK) store currencies in native memory — this patch cannot reach them.",
     default = false,
 ) {
     val amount by intOption(
@@ -347,31 +347,6 @@ val unlimitedCurrenciesPatch = bytecodePatch(
                     }
                 }
             }
-        }
-
-        // 3) Xsolla: Fingerprint per method name
-        for (xsollaMethod in listOf("getAmount", "getBalance")) {
-            val fp = object : Fingerprint(
-                name = xsollaMethod,
-                custom = { _, classDef ->
-                    classDef.type.lowercase().let { it.contains("virtualcurrency") || it.contains("xsolla") }
-                },
-            ) {}
-            val method = fp.methodOrNull ?: continue
-            if (method.implementation == null) continue
-            if (method.returnType != "I" && method.returnType != "J" && method.returnType != "F") continue
-            try {
-                when (method.returnType) {
-                    "I" -> method.addInstructions(0, "const v0, $target\nreturn v0")
-                    "J" -> method.addInstructions(0, "const-wide v0, 0x${target.toString(16)}\nreturn-wide v0")
-                    "F" -> {
-                        val bits = java.lang.Float.floatToRawIntBits(target.toFloat())
-                        method.addInstructions(0, "const v0, 0x${Integer.toHexString(bits)}\nreturn v0")
-                    }
-                }
-                affectedCurrencies.add(xsollaMethod)
-                patched++
-            } catch (_: Exception) {}
         }
 
         if (patched > 0) {
