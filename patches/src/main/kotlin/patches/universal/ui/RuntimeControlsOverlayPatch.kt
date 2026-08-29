@@ -181,7 +181,7 @@ val runtimeControlsOverlayPatch = bytecodePatch(
             ).also { method ->
                 val superclass = activity.superclass
                     ?: error("Activity ${activity.type} has no superclass")
-                method.addInstructionsWithLabels(
+                method.addInstructions(
                     0,
                     compactSmali("""
                         invoke-super {p0, p1}, $superclass->onWindowFocusChanged(Z)V
@@ -527,6 +527,9 @@ private fun injectOverlay(
     )
     val initialState = buildInitialState(0, activity.type, includeKeepScreenAwake, includeFullscreen, includeScreenshots)
     helper.addInstructionsWithLabels(0, compactSmali("""
+        invoke-virtual {p0}, Landroid/app/Activity;->hasWindowFocus()Z
+        move-result v1
+        if-eqz v1, :nai64_overlay_done
         iget-object v0, p0, ${activity.type}->$OVERLAY_BUTTON:$OVERLAY_BUTTON_FIELD
         if-nez v0, :nai64_overlay_done
         invoke-virtual {p0}, Landroid/app/Activity;->getWindow()Landroid/view/Window;
@@ -594,12 +597,10 @@ private fun injectOverlay(
     val insertionIndex = onWindowFocusChanged.implementation!!.instructions
         .indexOfLast { it.opcode.name.startsWith("RETURN") }
         .coerceAtLeast(0)
-    onWindowFocusChanged.addInstructionsWithLabels(
+    onWindowFocusChanged.addInstructions(
         insertionIndex,
         compactSmali("""
-            if-eqz p1, :nai64_overlay_focus_done
             invoke-static {p0}, ${activity.type}->$helperName(${activity.type})V
-            :nai64_overlay_focus_done
         """),
     )
 }
