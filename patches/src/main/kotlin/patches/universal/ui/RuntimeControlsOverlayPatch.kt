@@ -279,13 +279,13 @@ private fun addOverlayListeners(
     ), "V")
     dialogClick.addInstructionsWithLabels(0, compactSmali("""
         const/16 v2, -0x3
-        if-eq p1, v2, :nai64_overlay_repository
+        if-eq p2, v2, :nai64_overlay_repository
         iget-object v0, p0, ${activity.type}->${OVERLAY_BUTTON}:$OVERLAY_BUTTON_FIELD
         if-eqz v0, :nai64_overlay_done
         const/16 v1, 0x4
         invoke-virtual {v0, v1}, Landroid/view/View;->setVisibility(I)V
         const/16 v2, -0x1
-        if-ne p1, v2, :nai64_overlay_toast
+        if-ne p2, v2, :nai64_overlay_toast
         invoke-virtual {v0}, Landroid/view/View;->getParent()Landroid/view/ViewParent;
         move-result-object v1
         instance-of v2, v1, Landroid/view/ViewGroup;
@@ -394,11 +394,11 @@ private fun buildControlHandler(
 private fun controlBranch(activityType: String, index: Int, mask: String, kind: String): String = when (kind) {
     "keep", "screenshots" -> """
         const/16 v3, $index
-        if-ne p1, v3, :nai64_next_control_$index
-        iput-boolean p2, p0, $activityType->${if (kind == "keep") KEEP_SCREEN_AWAKE_STATE else ALLOW_SCREENSHOTS_STATE}:Z
+        if-ne p2, v3, :nai64_next_control_$index
+        iput-boolean p3, p0, $activityType->${if (kind == "keep") KEEP_SCREEN_AWAKE_STATE else ALLOW_SCREENSHOTS_STATE}:Z
         invoke-virtual {p0}, Landroid/app/Activity;->getWindow()Landroid/view/Window;
         move-result-object v4
-        if-eqz p2, :nai64_restore_$index
+        if-eqz p3, :nai64_restore_$index
         ${if (kind == "screenshots") "const v5, $mask\n        invoke-virtual {v4, v5}, Landroid/view/Window;->clearFlags(I)V" else "const v5, $mask\n        invoke-virtual {v4, v5}, Landroid/view/Window;->addFlags(I)V"}
         goto :nai64_control_done_$index
         :nai64_restore_$index
@@ -415,13 +415,13 @@ private fun controlBranch(activityType: String, index: Int, mask: String, kind: 
     """.trimIndent()
     "fullscreen" -> """
         const/16 v3, $index
-        if-ne p1, v3, :nai64_next_control_$index
-        iput-boolean p2, p0, $activityType->${FULLSCREEN_STATE}:Z
+        if-ne p2, v3, :nai64_next_control_$index
+        iput-boolean p3, p0, $activityType->${FULLSCREEN_STATE}:Z
         invoke-virtual {p0}, Landroid/app/Activity;->getWindow()Landroid/view/Window;
         move-result-object v4
         invoke-virtual {v4}, Landroid/view/Window;->getDecorView()Landroid/view/View;
         move-result-object v5
-        if-eqz p2, :nai64_restore_$index
+        if-eqz p3, :nai64_restore_$index
         const v6, 0x1706
         invoke-virtual {v5, v6}, Landroid/view/View;->setSystemUiVisibility(I)V
         goto :nai64_control_done_$index
