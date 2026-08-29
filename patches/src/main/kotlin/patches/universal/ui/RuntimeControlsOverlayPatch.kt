@@ -25,6 +25,11 @@ private const val ORIGINAL_SYSTEM_UI = "nai64OriginalSystemUi"
 private const val KEEP_SCREEN_AWAKE_STATE = "nai64KeepScreenAwakeState"
 private const val FULLSCREEN_STATE = "nai64FullscreenState"
 private const val ALLOW_SCREENSHOTS_STATE = "nai64AllowScreenshotsState"
+private const val TOUCH_START_X = "nai64OverlayTouchStartX"
+private const val TOUCH_START_Y = "nai64OverlayTouchStartY"
+private const val BUTTON_START_X = "nai64OverlayButtonStartX"
+private const val BUTTON_START_Y = "nai64OverlayButtonStartY"
+private const val CLOSE_CONFIRMATION = "nai64OverlayCloseConfirmation"
 private const val DEFAULT_DESCRIPTION =
     "Welcome to Nai64Patches Runtime Controls Overlay. This experimental in-app overlay " +
         "contains controls that may change parts of the app or game at runtime. More may be " +
@@ -91,9 +96,9 @@ val runtimeControlsOverlayPatch = bytecodePatch(
     )
     val buttonSizeDp by intOption(
         title = "Overlay button size (dp)",
-        default = 64,
+        default = 56,
         key = "runtimeOverlayButtonSizeDp",
-        description = "Button width and height in density-independent pixels. Recommended: 56-80.",
+        description = "Button width and height in density-independent pixels. Recommended: 48-72.",
     )
     val buttonPosition by stringOption(
         title = "Overlay button position",
@@ -143,7 +148,7 @@ val runtimeControlsOverlayPatch = bytecodePatch(
         val repository = repositoryUrl.orEmpty().ifBlank { "https://github.com/Nai64/Nai64Patches" }
         val background = parseColor(backgroundColor.orEmpty(), 0xCC101820.toInt())
         val outline = parseColor(outlineColor.orEmpty(), 0xFF55D6BE.toInt())
-        val buttonSize = (buttonSizeDp ?: 64).coerceIn(32, 128)
+        val buttonSize = (buttonSizeDp ?: 56).coerceIn(32, 128)
         val buttonGravity = parseButtonGravity(buttonPosition.orEmpty())
         val selectedControls = listOfNotNull(
             "keep screen awake".takeIf { includeKeepScreenAwake == true },
@@ -199,6 +204,11 @@ val runtimeControlsOverlayPatch = bytecodePatch(
                         "Landroid/content/DialogInterface;",
                         "I",
                     )
+                } || activity.methods.any {
+                    it.name == "onTouch" && it.returnType == "Z" && it.parameterTypes == listOf(
+                        "Landroid/view/View;",
+                        "Landroid/view/MotionEvent;",
+                    )
                 }) {
                 logger.warning("Overlay target already has a conflicting onClick method. No changes applied.")
                 return@execute
@@ -249,6 +259,11 @@ private fun addOverlayField(activity: MutableClass) {
         KEEP_SCREEN_AWAKE_STATE to "Z",
         FULLSCREEN_STATE to "Z",
         ALLOW_SCREENSHOTS_STATE to "Z",
+        TOUCH_START_X to "F",
+        TOUCH_START_Y to "F",
+        BUTTON_START_X to "F",
+        BUTTON_START_Y to "F",
+        CLOSE_CONFIRMATION to "Z",
     )
     for ((name, type) in fields) {
         if (activity.fields.any { it.name == name }) continue
@@ -279,6 +294,7 @@ private fun addOverlayListeners(
     includeScreenshots: Boolean,
 ) {
     activity.interfaces.add("Landroid/view/View\$OnClickListener;")
+    activity.interfaces.add("Landroid/view/View\$OnTouchListener;")
     activity.interfaces.add("Landroid/content/DialogInterface\$OnClickListener;")
     activity.interfaces.add("Landroid/content/DialogInterface\$OnMultiChoiceClickListener;")
 
@@ -305,9 +321,9 @@ private fun addOverlayListeners(
         const-string v3, "${StartupHooks.escapeSmali(repositoryLabel)}"
         invoke-virtual {v2, v3, p0}, Landroid/app/AlertDialog${'$'}Builder;->setNeutralButton(Ljava/lang/CharSequence;Landroid/content/DialogInterface${'$'}OnClickListener;)Landroid/app/AlertDialog${'$'}Builder;
         $menuSetup
-        const-string v3, "Hide overlay"
+        const-string v3, "Close menu"
         invoke-virtual {v2, v3, p0}, Landroid/app/AlertDialog${'$'}Builder;->setNegativeButton(Ljava/lang/CharSequence;Landroid/content/DialogInterface${'$'}OnClickListener;)Landroid/app/AlertDialog${'$'}Builder;
-        const-string v3, "Close overlay"
+        const-string v3, "Fully close"
         invoke-virtual {v2, v3, p0}, Landroid/app/AlertDialog${'$'}Builder;->setPositiveButton(Ljava/lang/CharSequence;Landroid/content/DialogInterface${'$'}OnClickListener;)Landroid/app/AlertDialog${'$'}Builder;
         invoke-virtual {v2}, Landroid/app/AlertDialog${'$'}Builder;->show()Landroid/app/AlertDialog;
         move-result-object v2
@@ -321,34 +337,145 @@ private fun addOverlayListeners(
         const/4 v6, 0x1
         const v7, 0x${Integer.toHexString(outlineColor)}
         invoke-virtual/range {v5 .. v7}, Landroid/graphics/drawable/GradientDrawable;->setStroke(II)V
+        const/high16 v6, 0x41000000
+        invoke-virtual {v5, v6}, Landroid/graphics/drawable/GradientDrawable;->setCornerRadius(F)V
         invoke-virtual {v4, v5}, Landroid/view/Window;->setBackgroundDrawable(Landroid/graphics/drawable/Drawable;)V
+        const/high16 v5, 0x3e800000
+        invoke-virtual {v4, v5}, Landroid/view/Window;->setDimAmount(F)V
+        const/4 v5, -0x1
+        invoke-virtual {v2, v5}, Landroid/app/AlertDialog;->getButton(I)Landroid/widget/Button;
+        move-result-object v5
+        const v6, 0x${Integer.toHexString(outlineColor)}
+        invoke-virtual {v5, v6}, Landroid/widget/TextView;->setTextColor(I)V
+        const/4 v6, 0x0
+        invoke-virtual {v5, v6}, Landroid/widget/TextView;->setAllCaps(Z)V
+        invoke-virtual {v5, v6}, Landroid/view/View;->setBackgroundColor(I)V
+        const/16 v5, -0x2
+        invoke-virtual {v2, v5}, Landroid/app/AlertDialog;->getButton(I)Landroid/widget/Button;
+        move-result-object v5
+        const v6, 0x${Integer.toHexString(outlineColor)}
+        invoke-virtual {v5, v6}, Landroid/widget/TextView;->setTextColor(I)V
+        const/4 v6, 0x0
+        invoke-virtual {v5, v6}, Landroid/widget/TextView;->setAllCaps(Z)V
+        invoke-virtual {v5, v6}, Landroid/view/View;->setBackgroundColor(I)V
+        const/16 v5, -0x3
+        invoke-virtual {v2, v5}, Landroid/app/AlertDialog;->getButton(I)Landroid/widget/Button;
+        move-result-object v5
+        const v6, 0x${Integer.toHexString(outlineColor)}
+        invoke-virtual {v5, v6}, Landroid/widget/TextView;->setTextColor(I)V
+        const/4 v6, 0x0
+        invoke-virtual {v5, v6}, Landroid/widget/TextView;->setAllCaps(Z)V
+        invoke-virtual {v5, v6}, Landroid/view/View;->setBackgroundColor(I)V
         :nai64_overlay_menu_done
         return-void
     """))
     activity.methods.add(viewClick)
+
+    val touch = newMethod(activity, "onTouch", listOf(
+        "Landroid/view/View;",
+        "Landroid/view/MotionEvent;",
+    ), "Z", registers = 6)
+    touch.addInstructionsWithLabels(0, compactSmali("""
+        invoke-virtual {p1}, Landroid/view/MotionEvent;->getActionMasked()I
+        move-result v0
+        const/4 v1, 0x0
+        if-eq v0, v1, :nai64_overlay_touch_down
+        const/4 v1, 0x2
+        if-eq v0, v1, :nai64_overlay_touch_move
+        const/4 v1, 0x1
+        if-eq v0, v1, :nai64_overlay_touch_up
+        const/4 v0, 0x0
+        return v0
+        :nai64_overlay_touch_down
+        invoke-virtual {p1}, Landroid/view/MotionEvent;->getRawX()F
+        move-result v2
+        iput v2, p0, ${activity.type}->${TOUCH_START_X}:F
+        invoke-virtual {p1}, Landroid/view/MotionEvent;->getRawY()F
+        move-result v3
+        iput v3, p0, ${activity.type}->${TOUCH_START_Y}:F
+        invoke-virtual {p1}, Landroid/view/MotionEvent;->getX()F
+        move-result v4
+        invoke-virtual {p1}, Landroid/view/MotionEvent;->getY()F
+        move-result v5
+        invoke-virtual {p1}, Landroid/view/MotionEvent;->getRawX()F
+        move-result v2
+        sub-float/2addr v2, v4
+        iput v2, p0, ${activity.type}->${BUTTON_START_X}:F
+        invoke-virtual {p1}, Landroid/view/MotionEvent;->getRawY()F
+        move-result v3
+        sub-float/2addr v3, v5
+        iput v3, p0, ${activity.type}->${BUTTON_START_Y}:F
+        const/4 v0, 0x1
+        return v0
+        :nai64_overlay_touch_move
+        invoke-virtual {p1}, Landroid/view/MotionEvent;->getRawX()F
+        move-result v2
+        iget v3, p0, ${activity.type}->${TOUCH_START_X}:F
+        sub-float/2addr v2, v3
+        iget v3, p0, ${activity.type}->${BUTTON_START_X}:F
+        add-float/2addr v2, v3
+        invoke-virtual {p1}, Landroid/view/MotionEvent;->getRawY()F
+        move-result v3
+        iget v4, p0, ${activity.type}->${TOUCH_START_Y}:F
+        sub-float/2addr v3, v4
+        iget v4, p0, ${activity.type}->${BUTTON_START_Y}:F
+        add-float/2addr v3, v4
+        invoke-virtual {p1, v2}, Landroid/view/View;->setX(F)V
+        invoke-virtual {p1, v3}, Landroid/view/View;->setY(F)V
+        const/4 v0, 0x1
+        return v0
+        :nai64_overlay_touch_up
+        invoke-virtual {p1}, Landroid/view/View;->performClick()Z
+        const/4 v0, 0x1
+        return v0
+    """))
+    activity.methods.add(touch)
 
     val dialogClick = newMethod(activity, "onClick", listOf(
         "Landroid/content/DialogInterface;",
         "I",
     ), "V")
     dialogClick.addInstructionsWithLabels(0, compactSmali("""
+        iget-boolean v3, p0, ${activity.type}->${CLOSE_CONFIRMATION}:Z
+        if-eqz v3, :nai64_overlay_main_dialog
+        const/4 v3, 0x0
+        iput-boolean v3, p0, ${activity.type}->${CLOSE_CONFIRMATION}:Z
+        const/16 v2, -0x1
+        if-eq p2, v2, :nai64_overlay_remove
+        goto :nai64_overlay_done
+        :nai64_overlay_main_dialog
         const/16 v2, -0x3
         if-eq p2, v2, :nai64_overlay_repository
         iget-object v0, p0, ${activity.type}->${OVERLAY_BUTTON}:$OVERLAY_BUTTON_FIELD
         if-eqz v0, :nai64_overlay_done
-        const/16 v1, 0x4
-        invoke-virtual {v0, v1}, Landroid/view/View;->setVisibility(I)V
         const/16 v2, -0x1
         if-ne p2, v2, :nai64_overlay_toast
+        new-instance v0, Landroid/app/AlertDialog${'$'}Builder;
+        invoke-direct {v0, p0}, Landroid/app/AlertDialog${'$'}Builder;-><init>(Landroid/content/Context;)V
+        const-string v1, "Fully close overlay?"
+        invoke-virtual {v0, v1}, Landroid/app/AlertDialog${'$'}Builder;->setTitle(Ljava/lang/CharSequence;)Landroid/app/AlertDialog${'$'}Builder;
+        const-string v1, "The overlay will no longer be available until you reopen the app. Continue?"
+        invoke-virtual {v0, v1}, Landroid/app/AlertDialog${'$'}Builder;->setMessage(Ljava/lang/CharSequence;)Landroid/app/AlertDialog${'$'}Builder;
+        const-string v1, "No"
+        invoke-virtual {v0, v1, p0}, Landroid/app/AlertDialog${'$'}Builder;->setNegativeButton(Ljava/lang/CharSequence;Landroid/content/DialogInterface${'$'}OnClickListener;)Landroid/app/AlertDialog${'$'}Builder;
+        const-string v1, "Yes"
+        invoke-virtual {v0, v1, p0}, Landroid/app/AlertDialog${'$'}Builder;->setPositiveButton(Ljava/lang/CharSequence;Landroid/content/DialogInterface${'$'}OnClickListener;)Landroid/app/AlertDialog${'$'}Builder;
+        const/4 v1, 0x1
+        iput-boolean v1, p0, ${activity.type}->${CLOSE_CONFIRMATION}:Z
+        invoke-virtual {v0}, Landroid/app/AlertDialog${'$'}Builder;->show()Landroid/app/AlertDialog;
+        goto :nai64_overlay_done
+        :nai64_overlay_remove
+        iget-object v0, p0, ${activity.type}->${OVERLAY_BUTTON}:$OVERLAY_BUTTON_FIELD
+        if-eqz v0, :nai64_overlay_done
         invoke-virtual {v0}, Landroid/view/View;->getParent()Landroid/view/ViewParent;
         move-result-object v1
         instance-of v2, v1, Landroid/view/ViewGroup;
-        if-eqz v2, :nai64_overlay_toast
+        if-eqz v2, :nai64_overlay_done
         check-cast v1, Landroid/view/ViewGroup;
         invoke-virtual {v1, v0}, Landroid/view/ViewGroup;->removeView(Landroid/view/View;)V
         goto :nai64_overlay_done
         :nai64_overlay_toast
-        const-string v1, "Overlay hidden. Remember its position before hiding it."
+        const-string v1, "Overlay menu hidden. Tap the N button to open it again."
         const/4 v2, 0x0
         invoke-static {p0, v1, v2}, Landroid/widget/Toast;->makeText(Landroid/content/Context;Ljava/lang/CharSequence;I)Landroid/widget/Toast;
         move-result-object v1
@@ -584,9 +711,18 @@ private fun injectOverlay(
         invoke-virtual/range {v3 .. v5}, Landroid/graphics/drawable/GradientDrawable;->setStroke(II)V
         invoke-virtual {v0, v3}, Landroid/view/View;->setBackground(Landroid/graphics/drawable/Drawable;)V
         invoke-virtual {v0, p0}, Landroid/view/View;->setOnClickListener(Landroid/view/View${'$'}OnClickListener;)V
+        invoke-virtual {v0, p0}, Landroid/view/View;->setOnTouchListener(Landroid/view/View${'$'}OnTouchListener;)V
         iput-object v0, p0, ${activity.type}->${OVERLAY_BUTTON}:$OVERLAY_BUTTON_FIELD
         new-instance v3, Landroid/widget/FrameLayout${'$'}LayoutParams;
         invoke-direct {v3, v2, v2}, Landroid/widget/FrameLayout${'$'}LayoutParams;-><init>(II)V
+        const/16 v4, 0xc
+        int-to-float v4, v4
+        mul-float/2addr v4, v1
+        float-to-int v4, v4
+        move v5, v4
+        move v6, v4
+        move v7, v4
+        invoke-virtual/range {v3 .. v7}, Landroid/view/ViewGroup${'$'}MarginLayoutParams;->setMargins(IIII)V
         const v1, $buttonGravity
         iput v1, v3, Landroid/widget/FrameLayout${'$'}LayoutParams;->gravity:I
         invoke-virtual {p0, v0, v3}, Landroid/app/Activity;->addContentView(Landroid/view/View;Landroid/view/ViewGroup${'$'}LayoutParams;)V
