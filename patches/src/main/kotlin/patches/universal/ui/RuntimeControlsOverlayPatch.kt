@@ -30,6 +30,7 @@ private const val TOUCH_START_Y = "nai64OverlayTouchStartY"
 private const val BUTTON_START_X = "nai64OverlayButtonStartX"
 private const val BUTTON_START_Y = "nai64OverlayButtonStartY"
 private const val CLOSE_CONFIRMATION = "nai64OverlayCloseConfirmation"
+private const val TOUCH_DRAGGED = "nai64OverlayTouchDragged"
 private const val DEFAULT_DESCRIPTION =
     "Welcome to Nai64Patches Runtime Controls Overlay. This experimental in-app overlay " +
         "contains controls that may change parts of the app or game at runtime. More may be " +
@@ -43,6 +44,23 @@ private fun parseColor(value: String, fallback: Int): Int {
         else -> return fallback
     }
     return hex.toLongOrNull(16)?.toInt() ?: fallback
+}
+
+private fun validateOverlayTemplateInputs(
+    title: String,
+    description: String,
+    repositoryLabel: String,
+    repositoryUrl: String,
+    buttonSizeDp: Int,
+    buttonGravity: Int,
+) {
+    check(title.isNotBlank())
+    check(description.isNotBlank())
+    check(repositoryLabel.isNotBlank())
+    check(repositoryUrl.startsWith("http://") || repositoryUrl.startsWith("https://"))
+    check(buttonSizeDp in 32..128)
+    check(buttonGravity in setOf(0x33, 0x31, 0x35, 0x13, 0x15, 0x53, 0x51, 0x55))
+    check(listOf(title, description, repositoryLabel, repositoryUrl).none { it.contains('\n') })
 }
 
 @Suppress("unused")
@@ -155,6 +173,14 @@ val runtimeControlsOverlayPatch = bytecodePatch(
             "fullscreen".takeIf { includeFullscreen == true },
             "allow screenshots".takeIf { includeScreenshots == true },
         )
+        validateOverlayTemplateInputs(
+            titleText,
+            descriptionValue,
+            repositoryLabel,
+            repository,
+            buttonSize,
+            buttonGravity,
+        )
         var patched = 0
         val superMap = mutableMapOf<String, String>()
         classDefForEach { classDef -> classDef.superclass?.let { superMap[classDef.type] = it } }
@@ -210,10 +236,9 @@ val runtimeControlsOverlayPatch = bytecodePatch(
                         "Landroid/view/MotionEvent;",
                     )
                 }) {
-                logger.warning("Overlay target already has a conflicting onClick method. No changes applied.")
+                logger.warning("Overlay target already uses a required listener callback. No changes applied.")
                 return@execute
             }
-
             addOverlayField(activity)
             addOverlayListeners(
                 activity,
@@ -264,6 +289,7 @@ private fun addOverlayField(activity: MutableClass) {
         BUTTON_START_X to "F",
         BUTTON_START_Y to "F",
         CLOSE_CONFIRMATION to "Z",
+        TOUCH_DRAGGED to "Z",
     )
     for ((name, type) in fields) {
         if (activity.fields.any { it.name == name }) continue
@@ -296,7 +322,6 @@ private fun addOverlayListeners(
     activity.interfaces.add("Landroid/view/View\$OnClickListener;")
     activity.interfaces.add("Landroid/view/View\$OnTouchListener;")
     activity.interfaces.add("Landroid/content/DialogInterface\$OnClickListener;")
-    activity.interfaces.add("Landroid/content/DialogInterface\$OnMultiChoiceClickListener;")
 
     val viewClick = newMethod(activity, "onClick", listOf("Landroid/view/View;"), "V", registers = 10)
     val menuItems = listOfNotNull(
@@ -304,23 +329,26 @@ private fun addOverlayListeners(
         "Fullscreen".takeIf { includeFullscreen },
         "Allow screenshots".takeIf { includeScreenshots },
     )
-    val menuSetup = buildMenuSetup(
-        activity.type,
-        menuItems,
-        includeKeepScreenAwake,
-        includeFullscreen,
-        includeScreenshots,
-    )
     viewClick.addInstructionsWithLabels(0, compactSmali("""
+        instance-of v0, p1, Landroid/widget/CheckBox;
+        if-eqz v0, :nai64_overlay_open_menu
+        invoke-virtual {p1}, Landroid/view/View;->getId()I
+        move-result v1
+        add-int/lit8 v1, v1, -0x1
+        invoke-virtual {p1}, Landroid/widget/CheckBox;->isChecked()Z
+        move-result v0
+        const/4 v2, 0x0
+        invoke-virtual {p0, v2, v1, v0}, ${activity.type}->onClick(Landroid/content/DialogInterface;IZ)V
+        return-void
+        :nai64_overlay_open_menu
         new-instance v2, Landroid/app/AlertDialog${'$'}Builder;
         invoke-direct {v2, p0}, Landroid/app/AlertDialog${'$'}Builder;-><init>(Landroid/content/Context;)V
         const-string v3, "${StartupHooks.escapeSmali(title)}"
         invoke-virtual {v2, v3}, Landroid/app/AlertDialog${'$'}Builder;->setTitle(Ljava/lang/CharSequence;)Landroid/app/AlertDialog${'$'}Builder;
-        const-string v3, "${StartupHooks.escapeSmali(description)}"
-        invoke-virtual {v2, v3}, Landroid/app/AlertDialog${'$'}Builder;->setMessage(Ljava/lang/CharSequence;)Landroid/app/AlertDialog${'$'}Builder;
+        ${buildCustomMenuLayout(activity.type, description, menuItems, outlineColor)}
+        invoke-virtual {v2, v3}, Landroid/app/AlertDialog${'$'}Builder;->setView(Landroid/view/View;)Landroid/app/AlertDialog${'$'}Builder;
         const-string v3, "${StartupHooks.escapeSmali(repositoryLabel)}"
         invoke-virtual {v2, v3, p0}, Landroid/app/AlertDialog${'$'}Builder;->setNeutralButton(Ljava/lang/CharSequence;Landroid/content/DialogInterface${'$'}OnClickListener;)Landroid/app/AlertDialog${'$'}Builder;
-        $menuSetup
         const-string v3, "Close menu"
         invoke-virtual {v2, v3, p0}, Landroid/app/AlertDialog${'$'}Builder;->setNegativeButton(Ljava/lang/CharSequence;Landroid/content/DialogInterface${'$'}OnClickListener;)Landroid/app/AlertDialog${'$'}Builder;
         const-string v3, "Fully close"
@@ -330,6 +358,25 @@ private fun addOverlayListeners(
         invoke-virtual {v2}, Landroid/app/AlertDialog;->getWindow()Landroid/view/Window;
         move-result-object v4
         if-eqz v4, :nai64_overlay_menu_done
+        invoke-virtual {p0}, Landroid/content/Context;->getResources()Landroid/content/res/Resources;
+        move-result-object v8
+        invoke-virtual {v8}, Landroid/content/res/Resources;->getDisplayMetrics()Landroid/util/DisplayMetrics;
+        move-result-object v8
+        iget v9, v8, Landroid/util/DisplayMetrics;->density:F
+        const/high16 v5, 0x41400000
+        mul-float/2addr v5, v9
+        float-to-int v5, v5
+        iget v8, v8, Landroid/util/DisplayMetrics;->widthPixels:I
+        sub-int/2addr v8, v5
+        sub-int/2addr v8, v5
+        const v7, 0x1a4
+        int-to-float v7, v7
+        mul-float/2addr v7, v9
+        float-to-int v7, v7
+        invoke-static {v8, v7}, Ljava/lang/Math;->min(II)I
+        move-result v8
+        const/4 v7, -0x2
+        invoke-virtual {v4, v8, v7}, Landroid/view/Window;->setLayout(II)V
         new-instance v5, Landroid/graphics/drawable/GradientDrawable;
         invoke-direct {v5}, Landroid/graphics/drawable/GradientDrawable;-><init>()V
         const v6, 0x${Integer.toHexString(backgroundColor)}
@@ -369,12 +416,12 @@ private fun addOverlayListeners(
         :nai64_overlay_menu_done
         return-void
     """))
-    activity.methods.add(viewClick)
+        activity.methods.add(viewClick)
 
     val touch = newMethod(activity, "onTouch", listOf(
         "Landroid/view/View;",
         "Landroid/view/MotionEvent;",
-    ), "Z", registers = 6)
+    ), "Z", registers = 8)
     touch.addInstructionsWithLabels(0, compactSmali("""
         invoke-virtual {p2}, Landroid/view/MotionEvent;->getActionMasked()I
         move-result v0
@@ -388,44 +435,117 @@ private fun addOverlayListeners(
         return v0
         :nai64_overlay_touch_down
         invoke-virtual {p2}, Landroid/view/MotionEvent;->getRawX()F
-        move-result v2
-        iput v2, p0, ${activity.type}->${TOUCH_START_X}:F
+        move-result v0
+        iput v0, p0, ${activity.type}->${TOUCH_START_X}:F
         invoke-virtual {p2}, Landroid/view/MotionEvent;->getRawY()F
-        move-result v3
-        iput v3, p0, ${activity.type}->${TOUCH_START_Y}:F
-        invoke-virtual {p2}, Landroid/view/MotionEvent;->getX()F
-        move-result v4
-        invoke-virtual {p2}, Landroid/view/MotionEvent;->getY()F
-        move-result v5
-        invoke-virtual {p2}, Landroid/view/MotionEvent;->getRawX()F
+        move-result v1
+        iput v1, p0, ${activity.type}->${TOUCH_START_Y}:F
+        invoke-virtual {p1}, Landroid/view/View;->getX()F
         move-result v2
-        sub-float/2addr v2, v4
         iput v2, p0, ${activity.type}->${BUTTON_START_X}:F
-        invoke-virtual {p2}, Landroid/view/MotionEvent;->getRawY()F
-        move-result v3
-        sub-float/2addr v3, v5
-        iput v3, p0, ${activity.type}->${BUTTON_START_Y}:F
+        invoke-virtual {p1}, Landroid/view/View;->getY()F
+        move-result v0
+        iput v0, p0, ${activity.type}->${BUTTON_START_Y}:F
+        const/4 v0, 0x0
+        iput-boolean v0, p0, ${activity.type}->${TOUCH_DRAGGED}:Z
         const/4 v0, 0x1
         return v0
         :nai64_overlay_touch_move
         invoke-virtual {p2}, Landroid/view/MotionEvent;->getRawX()F
+        move-result v0
+        iget v1, p0, ${activity.type}->${TOUCH_START_X}:F
+        sub-float/2addr v0, v1
+        invoke-static {v0}, Ljava/lang/Math;->abs(F)F
+        move-result v0
+        const/high16 v1, 0x41000000
+        cmpl-float v1, v0, v1
+        if-lez v1, :nai64_overlay_move_x_skip
+        const/4 v1, 0x1
+        iput-boolean v1, p0, ${activity.type}->${TOUCH_DRAGGED}:Z
+        invoke-virtual {p2}, Landroid/view/MotionEvent;->getRawX()F
+        move-result v0
+        iget v1, p0, ${activity.type}->${TOUCH_START_X}:F
+        sub-float/2addr v0, v1
+        iget v1, p0, ${activity.type}->${BUTTON_START_X}:F
+        add-float/2addr v0, v1
+        invoke-virtual {p1}, Landroid/view/View;->getParent()Landroid/view/ViewParent;
+        move-result-object v1
+        instance-of v2, v1, Landroid/view/ViewGroup;
+        if-eqz v2, :nai64_overlay_move_x_done
+        check-cast v1, Landroid/view/ViewGroup;
+        invoke-virtual {v1}, Landroid/view/ViewGroup;->getWidth()I
         move-result v2
-        iget v3, p0, ${activity.type}->${TOUCH_START_X}:F
-        sub-float/2addr v2, v3
-        iget v3, p0, ${activity.type}->${BUTTON_START_X}:F
-        add-float/2addr v2, v3
-        invoke-virtual {p2}, Landroid/view/MotionEvent;->getRawY()F
+        invoke-virtual {p1}, Landroid/view/View;->getWidth()I
         move-result v3
-        iget v4, p0, ${activity.type}->${TOUCH_START_Y}:F
-        sub-float/2addr v3, v4
-        iget v4, p0, ${activity.type}->${BUTTON_START_Y}:F
-        add-float/2addr v3, v4
-        invoke-virtual {p1, v2}, Landroid/view/View;->setX(F)V
-        invoke-virtual {p1, v3}, Landroid/view/View;->setY(F)V
+        sub-int/2addr v2, v3
+        int-to-float v2, v2
+        invoke-static {v0, v2}, Ljava/lang/Math;->min(FF)F
+        move-result v0
+        const/4 v2, 0x0
+        invoke-static {v0, v2}, Ljava/lang/Math;->max(FF)F
+        move-result v0
+        invoke-virtual {p1, v0}, Landroid/view/View;->setX(F)V
+        :nai64_overlay_move_x_done
+        :nai64_overlay_move_x_skip
+        invoke-virtual {p2}, Landroid/view/MotionEvent;->getRawY()F
+        move-result v0
+        iget v1, p0, ${activity.type}->${TOUCH_START_Y}:F
+        sub-float/2addr v0, v1
+        invoke-static {v0}, Ljava/lang/Math;->abs(F)F
+        move-result v0
+        const/high16 v1, 0x41000000
+        cmpl-float v1, v0, v1
+        if-lez v1, :nai64_overlay_move_y_skip
+        const/4 v1, 0x1
+        iput-boolean v1, p0, ${activity.type}->${TOUCH_DRAGGED}:Z
+        invoke-virtual {p2}, Landroid/view/MotionEvent;->getRawY()F
+        move-result v0
+        iget v1, p0, ${activity.type}->${TOUCH_START_Y}:F
+        sub-float/2addr v0, v1
+        iget v1, p0, ${activity.type}->${BUTTON_START_Y}:F
+        add-float/2addr v0, v1
+        invoke-virtual {p1}, Landroid/view/View;->getParent()Landroid/view/ViewParent;
+        move-result-object v1
+        instance-of v2, v1, Landroid/view/ViewGroup;
+        if-eqz v2, :nai64_overlay_move_y_done
+        check-cast v1, Landroid/view/ViewGroup;
+        invoke-virtual {v1}, Landroid/view/ViewGroup;->getHeight()I
+        move-result v2
+        invoke-virtual {p1}, Landroid/view/View;->getHeight()I
+        move-result v3
+        sub-int/2addr v2, v3
+        int-to-float v2, v2
+        invoke-static {v0, v2}, Ljava/lang/Math;->min(FF)F
+        move-result v0
+        const/4 v2, 0x0
+        invoke-static {v0, v2}, Ljava/lang/Math;->max(FF)F
+        move-result v0
+        invoke-virtual {p1, v0}, Landroid/view/View;->setY(F)V
+        :nai64_overlay_move_y_done
+        :nai64_overlay_move_y_skip
         const/4 v0, 0x1
         return v0
         :nai64_overlay_touch_up
+        iget-boolean v0, p0, ${activity.type}->${TOUCH_DRAGGED}:Z
+        if-nez v0, :nai64_overlay_touch_consumed
         invoke-virtual {p1}, Landroid/view/View;->performClick()Z
+        :nai64_overlay_touch_consumed
+        invoke-virtual {p1}, Landroid/view/View;->getX()F
+        move-result v0
+        invoke-virtual {p1}, Landroid/view/View;->getY()F
+        move-result v1
+        const/4 v3, 0x0
+        invoke-virtual {p0, v3}, Landroid/app/Activity;->getPreferences(I)Landroid/content/SharedPreferences;
+        move-result-object v2
+        invoke-interface {v2}, Landroid/content/SharedPreferences;->edit()Landroid/content/SharedPreferences${'$'}Editor;
+        move-result-object v2
+        const-string v3, "nai64OverlayPositionX"
+        invoke-interface {v2, v3, v0}, Landroid/content/SharedPreferences${'$'}Editor;->putFloat(Ljava/lang/String;F)Landroid/content/SharedPreferences${'$'}Editor;
+        move-result-object v2
+        const-string v3, "nai64OverlayPositionY"
+        invoke-interface {v2, v3, v1}, Landroid/content/SharedPreferences${'$'}Editor;->putFloat(Ljava/lang/String;F)Landroid/content/SharedPreferences${'$'}Editor;
+        move-result-object v2
+        invoke-interface {v2}, Landroid/content/SharedPreferences${'$'}Editor;->apply()V
         const/4 v0, 0x1
         return v0
     """))
@@ -456,6 +576,8 @@ private fun addOverlayListeners(
         invoke-virtual {v0, v1}, Landroid/app/AlertDialog${'$'}Builder;->setTitle(Ljava/lang/CharSequence;)Landroid/app/AlertDialog${'$'}Builder;
         const-string v1, "The overlay will no longer be available until you reopen the app. Continue?"
         invoke-virtual {v0, v1}, Landroid/app/AlertDialog${'$'}Builder;->setMessage(Ljava/lang/CharSequence;)Landroid/app/AlertDialog${'$'}Builder;
+        const/4 v1, 0x0
+        invoke-virtual {v0, v1}, Landroid/app/AlertDialog${'$'}Builder;->setCancelable(Z)Landroid/app/AlertDialog${'$'}Builder;
         const-string v1, "No"
         invoke-virtual {v0, v1, p0}, Landroid/app/AlertDialog${'$'}Builder;->setNegativeButton(Ljava/lang/CharSequence;Landroid/content/DialogInterface${'$'}OnClickListener;)Landroid/app/AlertDialog${'$'}Builder;
         const-string v1, "Yes"
@@ -509,48 +631,55 @@ private fun addOverlayListeners(
     activity.methods.add(multiChoiceClick)
 }
 
-private fun buildMenuSetup(
+private fun buildCustomMenuLayout(
     activityType: String,
+    description: String,
     menuItems: List<String>,
-    includeKeepScreenAwake: Boolean,
-    includeFullscreen: Boolean,
-    includeScreenshots: Boolean,
-): String {
-    if (menuItems.isEmpty()) return ""
-    val lines = mutableListOf<String>()
-    lines += "const/16 v3, ${menuItems.size}"
-    lines += "new-array v3, v3, [Ljava/lang/CharSequence;"
+    outlineColor: Int,
+): String = buildString {
+    appendLine("new-instance v3, Landroid/widget/ScrollView;")
+    appendLine("invoke-direct {v3, p0}, Landroid/widget/ScrollView;-><init>(Landroid/content/Context;)V")
+    appendLine("new-instance v4, Landroid/widget/LinearLayout;")
+    appendLine("invoke-direct {v4, p0}, Landroid/widget/LinearLayout;-><init>(Landroid/content/Context;)V")
+    appendLine("const/4 v5, 0x1")
+    appendLine("invoke-virtual {v4, v5}, Landroid/widget/LinearLayout;->setOrientation(I)V")
+    appendLine("invoke-virtual {p0}, Landroid/content/Context;->getResources()Landroid/content/res/Resources;")
+    appendLine("move-result-object v5")
+    appendLine("invoke-virtual {v5}, Landroid/content/res/Resources;->getDisplayMetrics()Landroid/util/DisplayMetrics;")
+    appendLine("move-result-object v5")
+    appendLine("iget v5, v5, Landroid/util/DisplayMetrics;->density:F")
+    appendLine("const/high16 v6, 0x41c00000")
+    appendLine("mul-float/2addr v5, v6")
+    appendLine("float-to-int v5, v5")
+    appendLine("invoke-virtual {v4, v5, v5, v5, v5}, Landroid/view/View;->setPadding(IIII)V")
+    appendLine("new-instance v5, Landroid/widget/TextView;")
+    appendLine("invoke-direct {v5, p0}, Landroid/widget/TextView;-><init>(Landroid/content/Context;)V")
+    appendLine("const-string v6, \"${StartupHooks.escapeSmali(description)}\"")
+    appendLine("invoke-virtual {v5, v6}, Landroid/widget/TextView;->setText(Ljava/lang/CharSequence;)V")
+    appendLine("const v6, 0x${Integer.toHexString(outlineColor)}")
+    appendLine("invoke-virtual {v5, v6}, Landroid/widget/TextView;->setTextColor(I)V")
+    appendLine("const/high16 v6, 0x41600000")
+    appendLine("invoke-virtual {v5, v6}, Landroid/widget/TextView;->setTextSize(F)V")
+    appendLine("invoke-virtual {v4, v5}, Landroid/view/ViewGroup;->addView(Landroid/view/View;)V")
     menuItems.forEachIndexed { index, item ->
-        lines += "const-string v5, \"$item\""
-        lines += "aput-object v5, v3, $index"
+        appendLine("new-instance v5, Landroid/widget/CheckBox;")
+        appendLine("invoke-direct {v5, p0}, Landroid/widget/CheckBox;-><init>(Landroid/content/Context;)V")
+        appendLine("const-string v6, \"${StartupHooks.escapeSmali(item)}\"")
+        appendLine("invoke-virtual {v5, v6}, Landroid/widget/TextView;->setText(Ljava/lang/CharSequence;)V")
+        appendLine("const/4 v6, ${index + 1}")
+        appendLine("invoke-virtual {v5, v6}, Landroid/view/View;->setId(I)V")
+        val field = when (item) {
+            "Keep screen awake" -> KEEP_SCREEN_AWAKE_STATE
+            "Fullscreen" -> FULLSCREEN_STATE
+            else -> ALLOW_SCREENSHOTS_STATE
+        }
+        appendLine("iget-boolean v6, p0, $activityType->$field:Z")
+        appendLine("invoke-virtual {v5, v6}, Landroid/widget/CompoundButton;->setChecked(Z)V")
+        appendLine("invoke-virtual {v5, p0}, Landroid/view/View;->setOnClickListener(Landroid/view/View\$OnClickListener;)V")
+        appendLine("invoke-virtual {v4, v5}, Landroid/view/ViewGroup;->addView(Landroid/view/View;)V")
     }
-    lines += "const/16 v4, ${menuItems.size}"
-    lines += "new-array v4, v4, [Z"
-    var index = 0
-    if (includeKeepScreenAwake) {
-        lines += readState(activityType, KEEP_SCREEN_AWAKE_STATE, index)
-        index++
-    }
-    if (includeFullscreen) {
-        lines += readState(activityType, FULLSCREEN_STATE, index)
-        index++
-    }
-    if (includeScreenshots) {
-        lines += readState(activityType, ALLOW_SCREENSHOTS_STATE, index)
-    }
-    lines += "move-object/from16 v5, p0"
-    lines += "invoke-virtual/range {v2 .. v5}, Landroid/app/AlertDialog\$Builder;->setMultiChoiceItems([Ljava/lang/CharSequence;[ZLandroid/content/DialogInterface\$OnMultiChoiceClickListener;)Landroid/app/AlertDialog\$Builder;"
-    return lines.joinToString("\n")
+    appendLine("invoke-virtual {v3, v4}, Landroid/widget/ScrollView;->addView(Landroid/view/View;)V")
 }
-
-private fun readState(
-    activityType: String,
-    stateFieldName: String,
-    index: Int,
-): String = """
-    iget-boolean v7, p0, $activityType->$stateFieldName:Z
-    aput-boolean v7, v4, $index
-""".trimIndent()
 
 private fun buildControlHandler(
     activityType: String,
@@ -726,19 +855,40 @@ private fun injectOverlay(
         const v1, $buttonGravity
         iput v1, v3, Landroid/widget/FrameLayout${'$'}LayoutParams;->gravity:I
         invoke-virtual {p0, v0, v3}, Landroid/app/Activity;->addContentView(Landroid/view/View;Landroid/view/ViewGroup${'$'}LayoutParams;)V
+        const/4 v3, 0x0
+        invoke-virtual {p0, v3}, Landroid/app/Activity;->getPreferences(I)Landroid/content/SharedPreferences;
+        move-result-object v11
+        const-string v12, "nai64OverlayPositionX"
+        const/high16 v13, -0x40800000
+        invoke-interface/range {v11 .. v13}, Landroid/content/SharedPreferences;->getFloat(Ljava/lang/String;F)F
+        move-result v12
+        const/high16 v13, -0x40800000
+        cmpl-float v13, v12, v13
+        if-eqz v13, :nai64_overlay_done
+        const/4 v1, 0x0
+        iput v1, v3, Landroid/widget/FrameLayout${'$'}LayoutParams;->gravity:I
+        invoke-virtual {v3, v1, v1, v1, v1}, Landroid/view/ViewGroup${'$'}MarginLayoutParams;->setMargins(IIII)V
+        invoke-virtual {v0, v3}, Landroid/view/View;->setLayoutParams(Landroid/view/ViewGroup${'$'}LayoutParams;)V
+        invoke-virtual {v0, v12}, Landroid/view/View;->setX(F)V
+        const-string v12, "nai64OverlayPositionY"
+        const/high16 v13, -0x40800000
+        invoke-interface/range {v11 .. v13}, Landroid/content/SharedPreferences;->getFloat(Ljava/lang/String;F)F
+        move-result v12
+        invoke-virtual {v0, v12}, Landroid/view/View;->setY(F)V
         :nai64_overlay_done
         return-void
     """))
     activity.methods.add(helper)
-    val insertionIndex = onWindowFocusChanged.implementation!!.instructions
-        .indexOfLast { it.opcode.name.startsWith("RETURN") }
-        .coerceAtLeast(0)
-    onWindowFocusChanged.addInstructions(
-        insertionIndex,
-        compactSmali("""
-            invoke-static {p0}, ${activity.type}->$helperName(${activity.type})V
-        """),
-    )
+    val returnIndexes = onWindowFocusChanged.implementation!!.instructions
+        .mapIndexedNotNull { index, instruction ->
+            index.takeIf { instruction.opcode.name.startsWith("RETURN") }
+        }
+    for (returnIndex in returnIndexes.asReversed()) {
+        onWindowFocusChanged.addInstructions(
+            returnIndex,
+            "invoke-static {p0}, ${activity.type}->$helperName(${activity.type})V",
+        )
+    }
 }
 
 private fun compactSmali(smali: String): String =
