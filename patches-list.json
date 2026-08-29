@@ -1,6 +1,6 @@
 {
   "NOTE": "Do NOT manually edit this file. This file is automatically updated when semantic release (release.yml) runs. Manually editing this file can break your releases and break third party tools that use this file.",
-  "version": "1.35.2",
+  "version": "1.35.3",
   "patches": [
     {
       "name": "Skip Consent Popup",
@@ -4475,6 +4475,33 @@
           "required": false,
           "type": "kotlin.String",
           "default": "",
+          "values": null
+        },
+        {
+          "key": "infiniteMode",
+          "title": "Infinite mode",
+          "description": "ON: all currencies set to huge amount. OFF: currencies set to the Amount value above.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": true,
+          "values": null
+        },
+        {
+          "key": "multiplyMode",
+          "title": "Multiply income",
+          "description": "When ON, every time a currency is saved it gets multiplied by the Multiplier value. Useful when infinite mode doesn't work.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "currencyMultiplier",
+          "title": "Multiplier",
+          "description": "Multiplier value used in Multiply income mode.",
+          "required": false,
+          "type": "kotlin.Int",
+          "default": 10,
           "values": null
         }
       ]
