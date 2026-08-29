@@ -1,3 +1,9 @@
+## [1.35.3](https://github.com/Nai64/Nai64Patches/compare/1.35.2...1.35.3) (2026-08-29)
+
+### Bug Fixes
+
+* some new shit for the unlimited currencies patch ([c874eaf](https://github.com/Nai64/Nai64Patches/commit/c874eafe033aa17c766c5e53162fe784aced4108))
+
 ## [1.35.2](https://github.com/Nai64/Nai64Patches/compare/1.35.1...1.35.2) (2026-08-29)
 
 ### Bug Fixes
