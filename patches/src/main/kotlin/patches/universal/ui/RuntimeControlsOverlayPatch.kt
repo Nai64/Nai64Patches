@@ -51,6 +51,8 @@ val runtimeControlsOverlayPatch = bytecodePatch(
             "repository link, hide/remove actions, and customizable colors, text, and URL.",
     default = false,
 ) {
+    dependsOn(StartupHooks.resolveRealApplicationPatch)
+
     val title by stringOption(
         title = "Overlay title",
         default = "Nai64Patches Runtime Controls Overlay",
@@ -112,7 +114,7 @@ val runtimeControlsOverlayPatch = bytecodePatch(
     val includeKeepScreenAwake by booleanOption(
         title = "Include keep screen awake control",
         default = false,
-        key = "runtimeOverlayIncludeKeepScreenAwake",
+        key = "runtimeOverlayIncludeKeepScreenAwakeV2",
         description =
             "Include the APK hook and overlay switch for keeping the screen awake. Default " +
                 "runtime state: Off, matching original app behavior.",
@@ -120,7 +122,7 @@ val runtimeControlsOverlayPatch = bytecodePatch(
     val includeFullscreen by booleanOption(
         title = "Include fullscreen control",
         default = false,
-        key = "runtimeOverlayIncludeFullscreen",
+        key = "runtimeOverlayIncludeFullscreenV2",
         description =
             "Include the APK hook and overlay switch for fullscreen mode. Default runtime state: " +
                 "Off, matching original app behavior.",
@@ -128,7 +130,7 @@ val runtimeControlsOverlayPatch = bytecodePatch(
     val includeScreenshots by booleanOption(
         title = "Include allow screenshots control",
         default = false,
-        key = "runtimeOverlayIncludeScreenshots",
+        key = "runtimeOverlayIncludeScreenshotsV2",
         description =
             "Include the APK hook and overlay switch for allowing screenshots. Default runtime " +
                 "state: Off, preserving the app's original screenshot behavior.",
@@ -158,6 +160,7 @@ val runtimeControlsOverlayPatch = bytecodePatch(
             return superMap[type]?.let { isActivity(it, seen) } == true
         }
 
+        val candidates = mutableListOf<Pair<MutableClass, MutableMethod>>()
         classDefForEach { classDef ->
             if (!isActivity(classDef.type)) return@classDefForEach
             val activity = mutableClassDefBy(classDef)
@@ -166,6 +169,13 @@ val runtimeControlsOverlayPatch = bytecodePatch(
                     it.parameterTypes == listOf("Landroid/os/Bundle;")
             } ?: return@classDefForEach
 
+            candidates.add(activity to onCreate)
+        }
+
+        val launcher = StartupHooks.resolvedLauncherActivityDescriptor
+        val target = candidates.firstOrNull { it.first.type == launcher } ?: candidates.firstOrNull()
+        if (target != null) {
+            val (activity, onCreate) = target
             if (activity.methods.any {
                     it.name == "onClick" && it.parameterTypes == listOf("Landroid/view/View;")
                 } || activity.methods.any {
@@ -174,7 +184,8 @@ val runtimeControlsOverlayPatch = bytecodePatch(
                         "I",
                     )
                 }) {
-                return@classDefForEach
+                logger.warning("Overlay target already has a conflicting onClick method. No changes applied.")
+                return@execute
             }
 
             addOverlayField(activity)
@@ -200,7 +211,7 @@ val runtimeControlsOverlayPatch = bytecodePatch(
                 includeFullscreen == true,
                 includeScreenshots == true,
             )
-            patched++
+            patched = 1
         }
 
         if (patched > 0) {
@@ -561,7 +572,7 @@ private fun injectOverlay(
         return-void
     """))
     activity.methods.add(helper)
-    onCreate.addInstructionsWithLabels(0, "invoke-static {p0}, ${activity.type}->$helperName(${activity.type})V")
+    onCreate.addInstructions(0, "invoke-static {p0}, ${activity.type}->$helperName(${activity.type})V")
 }
 
 private fun compactSmali(smali: String): String =
