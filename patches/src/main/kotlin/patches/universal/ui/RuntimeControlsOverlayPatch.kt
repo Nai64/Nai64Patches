@@ -160,22 +160,38 @@ val runtimeControlsOverlayPatch = bytecodePatch(
             return superMap[type]?.let { isActivity(it, seen) } == true
         }
 
-        val candidates = mutableListOf<Pair<MutableClass, MutableMethod>>()
+        val candidates = mutableListOf<MutableClass>()
         classDefForEach { classDef ->
             if (!isActivity(classDef.type)) return@classDefForEach
-            val activity = mutableClassDefBy(classDef)
-            val onCreate = activity.methods.firstOrNull {
-                it.name == "onCreate" && it.returnType == "V" &&
-                    it.parameterTypes == listOf("Landroid/os/Bundle;")
-            } ?: return@classDefForEach
-
-            candidates.add(activity to onCreate)
+            candidates.add(mutableClassDefBy(classDef))
         }
 
         val launcher = StartupHooks.resolvedLauncherActivityDescriptor
-        val target = candidates.firstOrNull { it.first.type == launcher } ?: candidates.firstOrNull()
-        if (target != null) {
-            val (activity, onCreate) = target
+        val activity = candidates.firstOrNull { it.type == launcher } ?: candidates.firstOrNull()
+        if (activity != null) {
+            val focusMethod = activity.methods.firstOrNull {
+                it.name == "onWindowFocusChanged" && it.returnType == "V" &&
+                    it.parameterTypes == listOf("Z")
+            } ?: newMethod(
+                activity = activity,
+                name = "onWindowFocusChanged",
+                parameterTypes = listOf("Z"),
+                returnType = "V",
+                registers = 2,
+            ).also { method ->
+                val superclass = activity.superclass
+                    ?: error("Activity ${activity.type} has no superclass")
+                method.addInstructionsWithLabels(
+                    0,
+                    compactSmali("""
+                        invoke-super {p0, p1}, $superclass->onWindowFocusChanged(Z)V
+                        return-void
+                    """),
+                )
+                activity.methods.add(method)
+            }
+
+            val onWindowFocusChanged = focusMethod
             if (activity.methods.any {
                     it.name == "onClick" && it.parameterTypes == listOf("Landroid/view/View;")
                 } || activity.methods.any {
@@ -202,7 +218,7 @@ val runtimeControlsOverlayPatch = bytecodePatch(
                 includeScreenshots == true,
             )
             injectOverlay(
-                onCreate,
+                onWindowFocusChanged,
                 activity,
                 outline,
                 buttonSize,
@@ -220,7 +236,7 @@ val runtimeControlsOverlayPatch = bytecodePatch(
                     "selected controls: ${selectedControls.joinToString().ifEmpty { "none" }}",
             )
         } else {
-            logger.warning("No compatible Activity onCreate methods found. No changes applied.")
+            logger.warning("No compatible Activity window focus methods found. No changes applied.")
         }
     }
 }
@@ -491,7 +507,7 @@ private fun newMethod(
 ).toMutable()
 
 private fun injectOverlay(
-    onCreate: MutableMethod,
+    onWindowFocusChanged: MutableMethod,
     activity: MutableClass,
     outlineColor: Int,
     buttonSizeDp: Int,
@@ -511,6 +527,8 @@ private fun injectOverlay(
     )
     val initialState = buildInitialState(0, activity.type, includeKeepScreenAwake, includeFullscreen, includeScreenshots)
     helper.addInstructionsWithLabels(0, compactSmali("""
+        iget-object v0, p0, ${activity.type}->$OVERLAY_BUTTON:$OVERLAY_BUTTON_FIELD
+        if-nez v0, :nai64_overlay_done
         invoke-virtual {p0}, Landroid/app/Activity;->getWindow()Landroid/view/Window;
         move-result-object v6
         invoke-virtual {v6}, Landroid/view/Window;->getAttributes()Landroid/view/WindowManager${'$'}LayoutParams;
@@ -569,10 +587,21 @@ private fun injectOverlay(
         const v1, $buttonGravity
         iput v1, v3, Landroid/widget/FrameLayout${'$'}LayoutParams;->gravity:I
         invoke-virtual {p0, v0, v3}, Landroid/app/Activity;->addContentView(Landroid/view/View;Landroid/view/ViewGroup${'$'}LayoutParams;)V
+        :nai64_overlay_done
         return-void
     """))
     activity.methods.add(helper)
-    onCreate.addInstructions(0, "invoke-static {p0}, ${activity.type}->$helperName(${activity.type})V")
+    val insertionIndex = onWindowFocusChanged.implementation!!.instructions
+        .indexOfLast { it.opcode.name.startsWith("RETURN") }
+        .coerceAtLeast(0)
+    onWindowFocusChanged.addInstructionsWithLabels(
+        insertionIndex,
+        compactSmali("""
+            if-eqz p1, :nai64_overlay_focus_done
+            invoke-static {p0}, ${activity.type}->$helperName(${activity.type})V
+            :nai64_overlay_focus_done
+        """),
+    )
 }
 
 private fun compactSmali(smali: String): String =
