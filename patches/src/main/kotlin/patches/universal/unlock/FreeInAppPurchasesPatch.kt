@@ -2,13 +2,7 @@ package patches.universal.unlock
 
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
-import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
 import app.morphe.patcher.patch.bytecodePatch
-import app.morphe.patcher.patch.booleanOption
-import com.android.tools.smali.dexlib2.Opcode
-import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
-import com.android.tools.smali.dexlib2.iface.reference.MethodReference
-import com.android.tools.smali.dexlib2.iface.reference.StringReference
 import java.util.logging.Logger
 
 @Suppress("unused")
@@ -17,13 +11,6 @@ val freeInAppPurchasesPatch = bytecodePatch(
     description = "Spoofs in-app purchases to appear successful. Covers Google Play Billing, Unity IAP, Xsolla, and common receipt verification. Server-side verification may still block in online games.",
     default = false,
 ) {
-    val fakeReceipt by booleanOption(
-        title = "Fake receipt data",
-        default = true,
-        key = "fakeReceipt",
-        description = "Generate fake purchase receipt data for games that validate receipts locally.",
-    )
-
     execute {
         val logger = Logger.getLogger(this::class.java.name)
         var patched = 0
@@ -86,28 +73,26 @@ val freeInAppPurchasesPatch = bytecodePatch(
         }
 
         // onPurchasesUpdated -> fire with OK result + empty list
-        for (listenerName in listOf("onPurchasesUpdated", "onPurchasesUpdated")) {
-            val onPurchasesUpdatedFp = object : Fingerprint(name = listenerName) {}
-            val onPurchasesUpdatedMethod = onPurchasesUpdatedFp.methodOrNull
-            if (onPurchasesUpdatedMethod?.implementation != null) {
-                try {
-                    onPurchasesUpdatedMethod.addInstructions(0, """
-                        invoke-static {}, Lcom/android/billingclient/api/BillingResult;->newBuilder()Lcom/android/billingclient/api/BillingResult${'$'}Builder;
-                        move-result-object v0
-                        const/4 v1, 0x0
-                        invoke-virtual {v0, v1}, Lcom/android/billingclient/api/BillingResult${'$'}Builder;->setResponseCode(I)Lcom/android/billingclient/api/BillingResult${'$'}Builder;
-                        move-result-object v0
-                        invoke-virtual {v0}, Lcom/android/billingclient/api/BillingResult${'$'}Builder;->build()Lcom/android/billingclient/api/BillingResult;
-                        move-result-object v1
-                        invoke-static {}, Ljava/util/Collections;->emptyList()Ljava/util/List;
-                        move-result-object v2
-                        invoke-interface {p0, v1, v2}, Lcom/android/billingclient/api/PurchasesUpdatedListener;->onPurchasesUpdated(Lcom/android/billingclient/api/BillingResult;Ljava/util/List;)V
-                        return-void
-                    """.trimIndent())
-                    patchedMethods.add("onPurchasesUpdated")
-                    patched++
-                } catch (_: Exception) {}
-            }
+        val onPurchasesUpdatedFp = object : Fingerprint(name = "onPurchasesUpdated") {}
+        val onPurchasesUpdatedMethod = onPurchasesUpdatedFp.methodOrNull
+        if (onPurchasesUpdatedMethod?.implementation != null) {
+            try {
+                onPurchasesUpdatedMethod.addInstructions(0, """
+                    invoke-static {}, Lcom/android/billingclient/api/BillingResult;->newBuilder()Lcom/android/billingclient/api/BillingResult${'$'}Builder;
+                    move-result-object v0
+                    const/4 v1, 0x0
+                    invoke-virtual {v0, v1}, Lcom/android/billingclient/api/BillingResult${'$'}Builder;->setResponseCode(I)Lcom/android/billingclient/api/BillingResult${'$'}Builder;
+                    move-result-object v0
+                    invoke-virtual {v0}, Lcom/android/billingclient/api/BillingResult${'$'}Builder;->build()Lcom/android/billingclient/api/BillingResult;
+                    move-result-object v1
+                    invoke-static {}, Ljava/util/Collections;->emptyList()Ljava/util/List;
+                    move-result-object v2
+                    invoke-interface {p0, v1, v2}, Lcom/android/billingclient/api/PurchasesUpdatedListener;->onPurchasesUpdated(Lcom/android/billingclient/api/BillingResult;Ljava/util/List;)V
+                    return-void
+                """.trimIndent())
+                patchedMethods.add("onPurchasesUpdated")
+                patched++
+            } catch (_: Exception) {}
         }
 
         // getBuyIntent -> OK bundle (legacy AIDL billing v5/v7)
@@ -440,6 +425,85 @@ val freeInAppPurchasesPatch = bytecodePatch(
             try {
                 securityVerifyMethod.addInstructions(0, "const/4 v0, 0x1\nreturn v0")
                 patchedMethods.add("Security.verify")
+                patched++
+            } catch (_: Exception) {}
+        }
+
+        // isFeatureSupported -> OK / true
+        val isFeatureSupportedFp = object : Fingerprint(name = "isFeatureSupported") {}
+        val isFeatureSupportedMethod = isFeatureSupportedFp.methodOrNull
+        if (isFeatureSupportedMethod?.implementation != null) {
+            try {
+                when {
+                    isFeatureSupportedMethod.returnType.contains("BillingResult") -> {
+                        isFeatureSupportedMethod.addInstructions(0, """
+                            invoke-static {}, Lcom/android/billingclient/api/BillingResult;->newBuilder()Lcom/android/billingclient/api/BillingResult${'$'}Builder;
+                            move-result-object v0
+                            const/4 v1, 0x0
+                            invoke-virtual {v0, v1}, Lcom/android/billingclient/api/BillingResult${'$'}Builder;->setResponseCode(I)Lcom/android/billingclient/api/BillingResult${'$'}Builder;
+                            move-result-object v0
+                            invoke-virtual {v0}, Lcom/android/billingclient/api/BillingResult${'$'}Builder;->build()Lcom/android/billingclient/api/BillingResult;
+                            move-result-object v0
+                            return-object v0
+                        """.trimIndent())
+                    }
+                    isFeatureSupportedMethod.returnType == "I" -> isFeatureSupportedMethod.addInstructions(0, "const/4 v0, 0x0\nreturn v0")
+                    isFeatureSupportedMethod.returnType == "Z" -> isFeatureSupportedMethod.addInstructions(0, "const/4 v0, 0x1\nreturn v0")
+                }
+                patchedMethods.add("isFeatureSupported")
+                patched++
+            } catch (_: Exception) {}
+        }
+
+        // getConnectionState -> 2 (CONNECTED)
+        val getConnectionStateFp = object : Fingerprint(name = "getConnectionState") {}
+        val getConnectionStateMethod = getConnectionStateFp.methodOrNull
+        if (getConnectionStateMethod?.implementation != null) {
+            try {
+                getConnectionStateMethod.addInstructions(0, "const/4 v0, 0x2\nreturn v0")
+                patchedMethods.add("getConnectionState")
+                patched++
+            } catch (_: Exception) {}
+        }
+
+        // onBillingSetupFinished -> fire with OK BillingResult
+        val onBillingSetupFinishedFp = object : Fingerprint(name = "onBillingSetupFinished") {}
+        val onBillingSetupFinishedMethod = onBillingSetupFinishedFp.methodOrNull
+        if (onBillingSetupFinishedMethod?.implementation != null) {
+            try {
+                onBillingSetupFinishedMethod.addInstructions(0, """
+                    invoke-static {}, Lcom/android/billingclient/api/BillingResult;->newBuilder()Lcom/android/billingclient/api/BillingResult${'$'}Builder;
+                    move-result-object v0
+                    const/4 v1, 0x0
+                    invoke-virtual {v0, v1}, Lcom/android/billingclient/api/BillingResult${'$'}Builder;->setResponseCode(I)Lcom/android/billingclient/api/BillingResult${'$'}Builder;
+                    move-result-object v0
+                    invoke-virtual {v0}, Lcom/android/billingclient/api/BillingResult${'$'}Builder;->build()Lcom/android/billingclient/api/BillingResult;
+                    move-result-object v0
+                    invoke-interface {p0, v0}, Lcom/android/billingclient/api/BillingClientStateListener;->onBillingSetupFinished(Lcom/android/billingclient/api/BillingResult;)V
+                    return-void
+                """.trimIndent())
+                patchedMethods.add("onBillingSetupFinished")
+                patched++
+            } catch (_: Exception) {}
+        }
+
+        // getSkuDetails (old AIDL) -> empty Bundle
+        val getSkuDetailsFp = object : Fingerprint(
+            name = "getSkuDetails",
+            returnType = "Landroid/os/Bundle;",
+        ) {}
+        val getSkuDetailsMethod = getSkuDetailsFp.methodOrNull
+        if (getSkuDetailsMethod?.implementation != null) {
+            try {
+                getSkuDetailsMethod.addInstructions(0, """
+                    new-instance v0, Landroid/os/Bundle;
+                    invoke-direct {v0}, Landroid/os/Bundle;-><init>()V
+                    const-string v1, "RESPONSE_CODE"
+                    const/4 v2, 0x0
+                    invoke-virtual {v0, v1, v2}, Landroid/os/Bundle;->putInt(Ljava/lang/String;I)V
+                    return-object v0
+                """.trimIndent())
+                patchedMethods.add("getSkuDetails")
                 patched++
             } catch (_: Exception) {}
         }
