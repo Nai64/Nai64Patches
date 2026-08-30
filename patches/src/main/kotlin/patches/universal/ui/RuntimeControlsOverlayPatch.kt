@@ -112,6 +112,35 @@ val runtimeControlsOverlayPatch = bytecodePatch(
         key = "runtimeOverlayOutlineColor",
         description = "Overlay outline color as #RRGGBB or #AARRGGBB.",
     )
+    val buttonText by stringOption(
+        title = "Overlay button text",
+        default = "N",
+        key = "runtimeOverlayButtonText",
+        description = "Text shown inside the overlay button. Maximum three characters.",
+    )
+    val buttonTextColor by stringOption(
+        title = "Overlay button text color",
+        default = "#FF000000",
+        key = "runtimeOverlayButtonTextColor",
+        description = "Button text color as #RRGGBB or #AARRGGBB.",
+    )
+    val buttonBackgroundColor by stringOption(
+        title = "Overlay button background color",
+        default = "#FFFFFFFF",
+        key = "runtimeOverlayButtonBackgroundColor",
+        description = "Button background color as #RRGGBB or #AARRGGBB.",
+    )
+    val buttonShape by stringOption(
+        title = "Overlay button shape",
+        default = "circle",
+        key = "runtimeOverlayButtonShape",
+        description = "Shape of the overlay button.",
+        values = linkedMapOf(
+            "Circle" to "circle",
+            "Squircle" to "squircle",
+            "Square" to "square",
+        ),
+    )
     val buttonSizeDp by intOption(
         title = "Overlay button size (dp)",
         default = 56,
@@ -166,6 +195,10 @@ val runtimeControlsOverlayPatch = bytecodePatch(
         val repository = repositoryUrl.orEmpty().ifBlank { "https://github.com/Nai64/Nai64Patches" }
         val background = parseColor(backgroundColor.orEmpty(), 0xCC101820.toInt())
         val outline = parseColor(outlineColor.orEmpty(), 0xFF55D6BE.toInt())
+        val label = buttonText.orEmpty().trim().take(3).ifBlank { "N" }
+        val labelColor = parseColor(buttonTextColor.orEmpty(), 0xFF000000.toInt())
+        val buttonBackground = parseColor(buttonBackgroundColor.orEmpty(), 0xFFFFFFFF.toInt())
+        val shape = parseButtonShape(buttonShape.orEmpty())
         val buttonSize = (buttonSizeDp ?: 56).coerceIn(32, 128)
         val buttonGravity = parseButtonGravity(buttonPosition.orEmpty())
         val selectedControls = listOfNotNull(
@@ -181,6 +214,7 @@ val runtimeControlsOverlayPatch = bytecodePatch(
             buttonSize,
             buttonGravity,
         )
+        check(label.length <= 3)
         var patched = 0
         val superMap = mutableMapOf<String, String>()
         classDefForEach { classDef -> classDef.superclass?.let { superMap[classDef.type] = it } }
@@ -248,6 +282,10 @@ val runtimeControlsOverlayPatch = bytecodePatch(
                 repository,
                 background,
                 outline,
+                label,
+                labelColor,
+                buttonBackground,
+                shape,
                 includeKeepScreenAwake == true,
                 includeFullscreen == true,
                 includeScreenshots == true,
@@ -256,6 +294,10 @@ val runtimeControlsOverlayPatch = bytecodePatch(
                 onWindowFocusChanged,
                 activity,
                 outline,
+                label,
+                labelColor,
+                buttonBackground,
+                shape,
                 buttonSize,
                 buttonGravity,
                 includeKeepScreenAwake == true,
@@ -315,6 +357,10 @@ private fun addOverlayListeners(
     repositoryUrl: String,
     backgroundColor: Int,
     outlineColor: Int,
+    buttonText: String,
+    buttonTextColor: Int,
+    buttonBackgroundColor: Int,
+    buttonShape: Int,
     includeKeepScreenAwake: Boolean,
     includeFullscreen: Boolean,
     includeScreenshots: Boolean,
@@ -762,10 +808,21 @@ private fun newMethod(
     ImmutableMethodImplementation(registers, emptyList(), emptyList(), emptyList()),
 ).toMutable()
 
+private fun parseButtonShape(shape: String): Int = when (shape) {
+    "circle" -> 1
+    "squircle" -> 2
+    "square" -> 0
+    else -> 1
+}
+
 private fun injectOverlay(
     onWindowFocusChanged: MutableMethod,
     activity: MutableClass,
     outlineColor: Int,
+    buttonText: String,
+    buttonTextColor: Int,
+    buttonBackgroundColor: Int,
+    buttonShape: Int,
     buttonSizeDp: Int,
     buttonGravity: Int,
     includeKeepScreenAwake: Boolean,
@@ -782,6 +839,11 @@ private fun injectOverlay(
         accessFlags = AccessFlags.PRIVATE.value or AccessFlags.STATIC.value,
     )
     val initialState = buildInitialState(0, activity.type, includeKeepScreenAwake, includeFullscreen, includeScreenshots)
+    val buttonCornerRadius = if (buttonShape == 2) {
+        "const/high16 v4, 0x41400000\n        invoke-virtual {v3, v4}, Landroid/graphics/drawable/GradientDrawable;->setCornerRadius(F)V"
+    } else {
+        ""
+    }
     helper.addInstructionsWithLabels(0, compactSmali("""
         invoke-virtual {p0}, Landroid/app/Activity;->hasWindowFocus()Z
         move-result v1
@@ -802,9 +864,9 @@ private fun injectOverlay(
         $initialState
         new-instance v0, Landroid/widget/TextView;
         invoke-direct {v0, p0}, Landroid/widget/TextView;-><init>(Landroid/content/Context;)V
-        const-string v1, "N"
+        const-string v1, "${StartupHooks.escapeSmali(buttonText)}"
         invoke-virtual {v0, v1}, Landroid/widget/TextView;->setText(Ljava/lang/CharSequence;)V
-        const v1, -0x1000000
+        const v1, 0x${Integer.toHexString(buttonTextColor)}
         invoke-virtual {v0, v1}, Landroid/widget/TextView;->setTextColor(I)V
         sget-object v1, Landroid/graphics/Typeface;->DEFAULT:Landroid/graphics/Typeface;
         const/4 v2, 0x1
@@ -831,13 +893,14 @@ private fun injectOverlay(
         invoke-virtual {v0, v1}, Landroid/widget/TextView;->setGravity(I)V
         new-instance v3, Landroid/graphics/drawable/GradientDrawable;
         invoke-direct {v3}, Landroid/graphics/drawable/GradientDrawable;-><init>()V
-        const/4 v4, 0x1
+        const v4, ${if (buttonShape == 1) 1 else 0}
         invoke-virtual {v3, v4}, Landroid/graphics/drawable/GradientDrawable;->setShape(I)V
-        const v4, -0x1
+        const v4, 0x${Integer.toHexString(buttonBackgroundColor)}
         invoke-virtual {v3, v4}, Landroid/graphics/drawable/GradientDrawable;->setColor(I)V
         const/4 v4, 0x1
         const v5, $outlineColor
         invoke-virtual/range {v3 .. v5}, Landroid/graphics/drawable/GradientDrawable;->setStroke(II)V
+        $buttonCornerRadius
         invoke-virtual {v0, v3}, Landroid/view/View;->setBackground(Landroid/graphics/drawable/Drawable;)V
         invoke-virtual {v0, p0}, Landroid/view/View;->setOnClickListener(Landroid/view/View${'$'}OnClickListener;)V
         invoke-virtual {v0, p0}, Landroid/view/View;->setOnTouchListener(Landroid/view/View${'$'}OnTouchListener;)V
