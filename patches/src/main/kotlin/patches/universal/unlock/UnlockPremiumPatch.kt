@@ -112,6 +112,34 @@ val unlockPremiumPatch = bytecodePatch(
             ) { it.addInstructions(0, "const/4 v0, 0x1\nreturn v0") }
         }
 
+        // Generic fallback for obfuscated/camelCase premium checks (e.g., hasPremiumAccess) — no hardcode, catches any Z method containing premium/pro/entitle in name where class is premium/billing/subscription
+        classDefForEach { classDef ->
+            val typeLower = classDef.type.lowercase()
+            // skip obvious non-premium SDKs
+            if (typeLower.contains("okhttp") || typeLower.contains("ssl") || typeLower.contains("network") || typeLower.contains("glide") || typeLower.contains("coil")) return@classDefForEach
+            val isPremiumClass = typeLower.contains("premium") || typeLower.contains("billing") || typeLower.contains("purchase") || typeLower.contains("subscription") || typeLower.contains("entitle") || typeLower.contains("pro") && !typeLower.contains("provider") && !typeLower.contains("product") && !typeLower.contains("progress")
+            // also consider method name itself
+            val mutableClass = try { mutableClassDefBy(classDef) } catch (_: Exception) { return@classDefForEach }
+            for (method in mutableClass.methods) {
+                if (method.returnType != "Z") continue
+                val n = method.name.lowercase()
+                if (n.length < 3 || n.length > 40) continue
+                val isPremiumName = n.contains("premium") || n.contains("haspremium") || n.contains("ispremium") || n.contains("entitle") || n.contains("haspro") || n.contains("ispro") || n.contains("hassubscription") || n.contains("issubscribed")
+                if (!isPremiumName && !isPremiumClass) continue
+                if (n.contains("provider") || n.contains("product") || n.contains("progress") || n.contains("proceed") || n.contains("providerenabled") || n.contains("probableprime")) continue
+                // also avoid isProviderEnabled false positive
+                if (n == "ispro" || n == "haspro" || n == "isprouser" || n == "hasprouser" || n.contains("premium")) {
+                    // patch only if not already patched via patchAll (avoid double)
+                    try {
+                        if (method.implementation == null) continue
+                        method.addInstructions(0, "const/4 v0, 0x1\nreturn v0")
+                        patched++
+                        patchedMethods.add("Generic:${method.name}")
+                    } catch (_: Exception) {}
+                }
+            }
+        }
+
         // isExpired / isCancelled -> false (scoped to premium/subscription)
         for (negName in listOf("isExpired", "isCancelled", "isTrialExpired")) {
             patchAll(Fingerprint(name = negName, returnType = "Z", custom = { _, c ->

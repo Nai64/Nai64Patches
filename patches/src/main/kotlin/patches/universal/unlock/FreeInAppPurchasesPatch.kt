@@ -223,6 +223,32 @@ val freeInAppPurchasesPatch = bytecodePatch(
             it.addInstructions(0, "return-void")
         }
 
+        // Generic fallback for obfuscated Billing wrappers (covers Smart Launcher etc. where method names are a/b/c but class contains billing/purchase)
+        classDefForEach { classDef ->
+            val tl = classDef.type.lowercase()
+            if (!tl.contains("billing") && !tl.contains("purchase") && !tl.contains("productdetails") && !tl.contains("skudetails")) return@classDefForEach
+            if (tl.contains("okhttp") || tl.contains("ssl") || tl.contains("glide")) return@classDefForEach
+            try {
+                val mutableClass = mutableClassDefBy(classDef)
+                for (method in mutableClass.methods) {
+                    if (method.implementation == null) continue
+                    // obfuscated methods are short; skip explicit named ones already handled
+                    if (method.name.length > 4) continue
+                    when {
+                        method.returnType.contains("BillingResult") -> {
+                            try { method.addInstructions(0, okBillingResult); patched++; patchedMethods.add("ObfuscatedBilling.${method.name}:BillingResult") } catch (_: Exception) {}
+                        }
+                        method.returnType.contains("List") && method.parameterTypes.isEmpty() -> {
+                            try { method.addInstructions(0, "invoke-static {}, Ljava/util/Collections;->emptyList()Ljava/util/List;\nmove-result-object v0\nreturn-object v0"); patched++; patchedMethods.add("ObfuscatedBilling.${method.name}:List") } catch (_: Exception) {}
+                        }
+                        method.returnType == "Ljava/lang/String;" && method.parameterTypes.isEmpty() -> {
+                            try { method.addInstructions(0, "const-string v0, \"0.00\"\nreturn-object v0"); patched++; patchedMethods.add("ObfuscatedBilling.${method.name}:String") } catch (_: Exception) {}
+                        }
+                    }
+                }
+            } catch (_: Exception) {}
+        }
+
         // ──────────────────────────────────────────────
         // UNITY IAP
         // ──────────────────────────────────────────────
