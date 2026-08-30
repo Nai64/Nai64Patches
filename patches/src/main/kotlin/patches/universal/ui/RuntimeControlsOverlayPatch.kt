@@ -458,6 +458,16 @@ private fun addOverlayListeners(
         const/4 v6, 0x0
         invoke-virtual {v5, v6}, Landroid/widget/TextView;->setAllCaps(Z)V
         invoke-virtual {v5, v6}, Landroid/view/View;->setBackgroundColor(I)V
+        invoke-virtual {v5}, Landroid/view/View;->getLayoutParams()Landroid/view/ViewGroup${'$'}LayoutParams;
+        move-result-object v6
+        check-cast v6, Landroid/widget/LinearLayout${'$'}LayoutParams;
+        const/4 v7, 0x0
+        iput v7, v6, Landroid/view/ViewGroup${'$'}LayoutParams;->width:I
+        const/high16 v7, 0x3f800000
+        iput v7, v6, Landroid/widget/LinearLayout${'$'}LayoutParams;->weight:F
+        const/16 v7, 0x11
+        invoke-virtual {v5, v7}, Landroid/view/View;->setGravity(I)V
+        invoke-virtual {v5}, Landroid/view/View;->requestLayout()V
         const/16 v5, -0x3
         invoke-virtual {v2, v5}, Landroid/app/AlertDialog;->getButton(I)Landroid/widget/Button;
         move-result-object v5
@@ -592,10 +602,10 @@ private fun addOverlayListeners(
         move-result-object v2
         invoke-interface {v2}, Landroid/content/SharedPreferences;->edit()Landroid/content/SharedPreferences${'$'}Editor;
         move-result-object v2
-        const-string v3, "nai64OverlayPositionX"
+        const-string v3, "nai64OverlayPositionX_v2"
         invoke-interface {v2, v3, v0}, Landroid/content/SharedPreferences${'$'}Editor;->putFloat(Ljava/lang/String;F)Landroid/content/SharedPreferences${'$'}Editor;
         move-result-object v2
-        const-string v3, "nai64OverlayPositionY"
+        const-string v3, "nai64OverlayPositionY_v2"
         invoke-interface {v2, v3, v1}, Landroid/content/SharedPreferences${'$'}Editor;->putFloat(Ljava/lang/String;F)Landroid/content/SharedPreferences${'$'}Editor;
         move-result-object v2
         invoke-interface {v2}, Landroid/content/SharedPreferences${'$'}Editor;->apply()V
@@ -660,6 +670,10 @@ private fun addOverlayListeners(
         new-instance v0, Landroid/content/Intent;
         const-string v1, "android.intent.action.VIEW"
         invoke-direct {v0, v1}, Landroid/content/Intent;-><init>(Ljava/lang/String;)V
+        const-string v1, "android.intent.category.DEFAULT"
+        invoke-virtual {v0, v1}, Landroid/content/Intent;->addCategory(Ljava/lang/String;)Landroid/content/Intent;
+        const-string v1, "android.intent.category.BROWSABLE"
+        invoke-virtual {v0, v1}, Landroid/content/Intent;->addCategory(Ljava/lang/String;)Landroid/content/Intent;
         const-string v1, "${StartupHooks.escapeSmali(repositoryUrl)}"
         invoke-static {v1}, Landroid/net/Uri;->parse(Ljava/lang/String;)Landroid/net/Uri;
         move-result-object v1
@@ -928,7 +942,7 @@ private fun injectOverlay(
         const/4 v3, 0x0
         invoke-virtual {p0, v3}, Landroid/app/Activity;->getPreferences(I)Landroid/content/SharedPreferences;
         move-result-object v11
-        const-string v12, "nai64OverlayPositionX"
+        const-string v12, "nai64OverlayPositionX_v2"
         const/high16 v13, -0x40800000
         invoke-interface/range {v11 .. v13}, Landroid/content/SharedPreferences;->getFloat(Ljava/lang/String;F)F
         move-result v12
@@ -940,7 +954,7 @@ private fun injectOverlay(
         invoke-virtual {v10, v1, v1, v1, v1}, Landroid/view/ViewGroup${'$'}MarginLayoutParams;->setMargins(IIII)V
         invoke-virtual {v0, v10}, Landroid/view/View;->setLayoutParams(Landroid/view/ViewGroup${'$'}LayoutParams;)V
         invoke-virtual {v0, v12}, Landroid/view/View;->setX(F)V
-        const-string v12, "nai64OverlayPositionY"
+        const-string v12, "nai64OverlayPositionY_v2"
         const/high16 v13, -0x40800000
         invoke-interface/range {v11 .. v13}, Landroid/content/SharedPreferences;->getFloat(Ljava/lang/String;F)F
         move-result v12
