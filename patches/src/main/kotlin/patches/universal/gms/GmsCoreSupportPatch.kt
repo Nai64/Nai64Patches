@@ -1,13 +1,9 @@
 package patches.universal.gms
 
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
+import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.patch.resourcePatch
 import app.morphe.patcher.patch.stringOption
-import app.morphe.patcher.patch.booleanOption
-import app.morphe.patcher.patch.bytecodePatch
-import com.android.tools.smali.dexlib2.Opcode
-import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
-import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 import org.w3c.dom.Element
 import java.util.logging.Logger
 
@@ -118,25 +114,8 @@ val gmsCoreSupportPatch = bytecodePatch(
             patched++
         }
 
-        // Hook PackageManager.getPackageInfo for MicroG package to spoof availability
-        // If the app queries for com.google.android.gms, return info for the selected MicroG package
-        classDefForEach { classDef ->
-            val mutableClass = mutableClassDefBy(classDef)
-            for (method in mutableClass.methods) {
-                val impl = method.implementation ?: continue
-                val instructions = impl.instructions.toList()
-                for ((index, insn) in instructions.withIndex()) {
-                    val ref = (insn as? ReferenceInstruction)?.reference as? MethodReference ?: continue
-                    if (ref.definingClass == "Landroid/content/pm/PackageManager;" && ref.name == "getPackageInfo" && ref.returnType == "Landroid/content/pm/PackageInfo;") {
-                        // This is a generic hook — we can't easily know the packageName argument without dataflow,
-                        // so we just log that we found a potential hook point. The actual spoof for MicroG
-                        // package name is handled via manifest queries and the isGooglePlayServicesAvailable bypass above,
-                        // which is sufficient for most apps. For full routing, the MicroG app itself handles the GMS calls.
-                        // We count it as a potential patch point.
-                    }
-                }
-            }
-        }
+        // NOTE: removed wasteful full-dex scan for PackageManager.getPackageInfo (was no-op, caused #59 OOM on large apps).
+        // The isGooglePlayServicesAvailable bypass above + manifest queries is sufficient for MicroG routing.
 
         // If a main activity override is provided, ensure it is exported and has MAIN/LAUNCHER
         if (mainActivity.isNotEmpty()) {
