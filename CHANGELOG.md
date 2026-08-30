@@ -1,3 +1,24 @@
+## [1.38.0](https://github.com/Nai64/Nai64Patches/compare/1.37.0...1.38.0) (2026-08-30)
+
+### New Features
+
+* generic premium/billing fallback for obfuscated apps ([2acc0ce](https://github.com/Nai64/Nai64Patches/commit/2acc0cec6f6938f7a23de00326d13b9d27d7dd85))
+* unlock premium (part 3) + minor free iap changes ([33c02e1](https://github.com/Nai64/Nai64Patches/commit/33c02e1184754703ba51c43f1d627fafa017a594))
+* wire datastore for unlock premium ([7607581](https://github.com/Nai64/Nai64Patches/commit/7607581087a2c9232c68771a77c12b0084e12734))
+
+## [1.37.0](https://github.com/Nai64/Nai64Patches/compare/1.36.0...1.37.0) (2026-08-30)
+
+### Bug Fixes
+
+* free iap fixes ([f236494](https://github.com/Nai64/Nai64Patches/commit/f236494508a0aa031599f45889e36ba8a604672e))
+* rc patches fix ([9db8341](https://github.com/Nai64/Nai64Patches/commit/9db83412e6afda0bae0de879b6e62bf7feb75dc1))
+* reduce heap for notification and gms patches ([a638c3e](https://github.com/Nai64/Nai64Patches/commit/a638c3eec527cbca29a65c86b8b1f81e9c6a4f71)), closes [#59](https://github.com/Nai64/Nai64Patches/issues/59)
+
+### New Features
+
+* added minor cool shits to te unllock premium patch ([bd5f774](https://github.com/Nai64/Nai64Patches/commit/bd5f77449fbd29920a91213842f2b5a5d6bcaf72))
+* buncha improvements for free iap (part 2) ([fa4f5e6](https://github.com/Nai64/Nai64Patches/commit/fa4f5e6b4b365f56546334c5a009a844f23a02e9))
+
 ## [1.36.0](https://github.com/Nai64/Nai64Patches/compare/1.35.3...1.36.0) (2026-08-29)
 
 ### Bug Fixes

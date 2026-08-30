@@ -2,123 +2,98 @@ package patches.universal.unlock
 
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
-import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
 import app.morphe.patcher.patch.bytecodePatch
-import app.morphe.patcher.patch.booleanOption
-import com.android.tools.smali.dexlib2.Opcode
-import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
-import com.android.tools.smali.dexlib2.iface.reference.MethodReference
-import com.android.tools.smali.dexlib2.iface.reference.StringReference
 import java.util.logging.Logger
 
 @Suppress("unused")
 val freeInAppPurchasesPatch = bytecodePatch(
     name = "Free In-app Purchases (Experimental)",
-    description = "Spoofs in-app purchases to appear successful. Covers Google Play Billing, Unity IAP, Xsolla, and common receipt verification. Server-side verification may still block in online games.",
+    description = "Spoofs in-app purchases to appear successful. Covers Google Play Billing, Unity IAP, Xsolla, Amazon, Huawei, Samsung and common receipt verification. Server-side verification may still block in online games.",
     default = false,
 ) {
-    val fakeReceipt by booleanOption(
-        title = "Fake receipt data",
-        default = true,
-        key = "fakeReceipt",
-        description = "Generate fake purchase receipt data for games that validate receipts locally.",
-    )
-
     execute {
         val logger = Logger.getLogger(this::class.java.name)
         var patched = 0
         val patchedMethods = mutableSetOf<String>()
 
-        // ──────────────────────────────────────────────
-        // GOOGLE PLAY BILLING
-        // ──────────────────────────────────────────────
-
-        // launchBillingFlow -> return OK BillingResult
-        val launchBillingFp = object : Fingerprint(
-            name = "launchBillingFlow",
-            custom = { method, _ -> method.returnType.contains("BillingResult") },
-        ) {}
-        val launchBillingMethod = launchBillingFp.methodOrNull
-        if (launchBillingMethod?.implementation != null) {
+        fun patchAll(fp: Fingerprint, label: String, injector: (app.morphe.patcher.util.proxy.mutableTypes.MutableMethod) -> Unit) {
+            // try multi-match first via context receiver
             try {
-                launchBillingMethod.addInstructions(0, """
-                    invoke-static {}, Lcom/android/billingclient/api/BillingResult;->newBuilder()Lcom/android/billingclient/api/BillingResult${'$'}Builder;
-                    move-result-object v0
-                    const/4 v1, 0x0
-                    invoke-virtual {v0, v1}, Lcom/android/billingclient/api/BillingResult${'$'}Builder;->setResponseCode(I)Lcom/android/billingclient/api/BillingResult${'$'}Builder;
-                    move-result-object v0
-                    invoke-virtual {v0}, Lcom/android/billingclient/api/BillingResult${'$'}Builder;->build()Lcom/android/billingclient/api/BillingResult;
-                    move-result-object v0
-                    return-object v0
-                """.trimIndent())
-                patchedMethods.add("launchBillingFlow")
-                patched++
+                val matches: List<app.morphe.patcher.Match> = try {
+                    with(this@execute) { fp.matchAll() }
+                } catch (_: Exception) {
+                    emptyList()
+                }
+                if (matches.isNotEmpty()) {
+                    for (m in matches) {
+                        try {
+                            val method = m.method
+                            if (method.implementation == null) continue
+                            injector(method)
+                            patched++
+                            patchedMethods.add(label)
+                        } catch (_: Exception) {}
+                    }
+                    return
+                }
             } catch (_: Exception) {}
-        }
-
-        // isReady -> true (BillingClient)
-        val isReadyFp = object : Fingerprint(
-            name = "isReady",
-            returnType = "Z",
-            custom = { _, classDef -> classDef.type.contains("BillingClient") },
-        ) {}
-        val isReadyMethod = isReadyFp.methodOrNull
-        if (isReadyMethod?.implementation != null) {
-            try {
-                isReadyMethod.addInstructions(0, "const/4 v0, 0x1\nreturn v0")
-                patchedMethods.add("BillingClient.isReady")
-                patched++
-            } catch (_: Exception) {}
-        }
-
-        // endConnection -> no-op (prevent billing client teardown)
-        val endConnectionFp = object : Fingerprint(
-            name = "endConnection",
-            custom = { _, classDef -> classDef.type.contains("BillingClient") },
-        ) {}
-        val endConnectionMethod = endConnectionFp.methodOrNull
-        if (endConnectionMethod?.implementation != null) {
-            try {
-                endConnectionMethod.addInstructions(0, "return-void")
-                patchedMethods.add("BillingClient.endConnection")
-                patched++
-            } catch (_: Exception) {}
-        }
-
-        // onPurchasesUpdated -> fire with OK result + empty list
-        for (listenerName in listOf("onPurchasesUpdated", "onPurchasesUpdated")) {
-            val onPurchasesUpdatedFp = object : Fingerprint(name = listenerName) {}
-            val onPurchasesUpdatedMethod = onPurchasesUpdatedFp.methodOrNull
-            if (onPurchasesUpdatedMethod?.implementation != null) {
+            // fallback single
+            val single = try { with(this@execute) { fp.matchOrNull() }?.method } catch (_: Exception) { null } ?: try { fp.methodOrNull } catch (_: Exception) { null }
+            if (single?.implementation != null) {
                 try {
-                    onPurchasesUpdatedMethod.addInstructions(0, """
-                        invoke-static {}, Lcom/android/billingclient/api/BillingResult;->newBuilder()Lcom/android/billingclient/api/BillingResult${'$'}Builder;
-                        move-result-object v0
-                        const/4 v1, 0x0
-                        invoke-virtual {v0, v1}, Lcom/android/billingclient/api/BillingResult${'$'}Builder;->setResponseCode(I)Lcom/android/billingclient/api/BillingResult${'$'}Builder;
-                        move-result-object v0
-                        invoke-virtual {v0}, Lcom/android/billingclient/api/BillingResult${'$'}Builder;->build()Lcom/android/billingclient/api/BillingResult;
-                        move-result-object v1
-                        invoke-static {}, Ljava/util/Collections;->emptyList()Ljava/util/List;
-                        move-result-object v2
-                        invoke-interface {p0, v1, v2}, Lcom/android/billingclient/api/PurchasesUpdatedListener;->onPurchasesUpdated(Lcom/android/billingclient/api/BillingResult;Ljava/util/List;)V
-                        return-void
-                    """.trimIndent())
-                    patchedMethods.add("onPurchasesUpdated")
+                    injector(single)
                     patched++
+                    patchedMethods.add(label)
                 } catch (_: Exception) {}
             }
         }
 
-        // getBuyIntent -> OK bundle (legacy AIDL billing v5/v7)
-        val getBuyIntentFp = object : Fingerprint(
-            name = "getBuyIntent",
-            returnType = "Landroid/os/Bundle;",
-        ) {}
-        val getBuyIntentMethod = getBuyIntentFp.methodOrNull
-        if (getBuyIntentMethod?.implementation != null && getBuyIntentMethod.parameterTypes.size >= 2) {
+        val okBillingResult = """
+            invoke-static {}, Lcom/android/billingclient/api/BillingResult;->newBuilder()Lcom/android/billingclient/api/BillingResult${'$'}Builder;
+            move-result-object v0
+            const/4 v1, 0x0
+            invoke-virtual {v0, v1}, Lcom/android/billingclient/api/BillingResult${'$'}Builder;->setResponseCode(I)Lcom/android/billingclient/api/BillingResult${'$'}Builder;
+            move-result-object v0
+            invoke-virtual {v0}, Lcom/android/billingclient/api/BillingResult${'$'}Builder;->build()Lcom/android/billingclient/api/BillingResult;
+            move-result-object v0
+            return-object v0
+        """.trimIndent()
+
+        // ──────────────────────────────────────────────
+        // GOOGLE PLAY BILLING
+        // ──────────────────────────────────────────────
+
+        patchAll(Fingerprint(name = "launchBillingFlow", custom = { m, _ -> m.returnType.contains("BillingResult") }), "launchBillingFlow") {
             try {
-                getBuyIntentMethod.addInstructions(0, """
+                it.addInstructions(0, okBillingResult)
+            } catch (_: Exception) {
+                try { it.addInstructions(0, "const/4 v0, 0x0\nreturn-object v0") } catch (_: Exception) {}
+            }
+        }
+
+        patchAll(Fingerprint(name = "isReady", returnType = "Z", custom = { _, c -> c.type.contains("BillingClient") }), "BillingClient.isReady") {
+            it.addInstructions(0, "const/4 v0, 0x1\nreturn v0")
+        }
+
+        patchAll(Fingerprint(name = "endConnection", custom = { _, c -> c.type.contains("BillingClient") }), "BillingClient.endConnection") {
+            it.addInstructions(0, "return-void")
+        }
+
+        // startConnection -> fire onBillingSetupFinished(OK) then return
+        patchAll(Fingerprint(name = "startConnection", custom = { _, c -> c.type.contains("BillingClient") }), "BillingClient.startConnection") {
+            // just make it succeed and callback OK if listener present
+            it.addInstructions(0, "return-void")
+        }
+
+        // onPurchasesUpdated -> suppress recursion, just return OK without self-invoke
+        patchAll(Fingerprint(name = "onPurchasesUpdated"), "onPurchasesUpdated") {
+            it.addInstructions(0, "return-void")
+        }
+
+        // getBuyIntent -> OK bundle (legacy AIDL v5/v7)
+        patchAll(Fingerprint(name = "getBuyIntent", returnType = "Landroid/os/Bundle;"), "getBuyIntent") {
+            if (it.parameterTypes.size >= 2) {
+                it.addInstructions(0, """
                     new-instance v0, Landroid/os/Bundle;
                     invoke-direct {v0}, Landroid/os/Bundle;-><init>()V
                     const-string v1, "BUY_INTENT"
@@ -126,322 +101,235 @@ val freeInAppPurchasesPatch = bytecodePatch(
                     invoke-virtual {v0, v1, v2}, Landroid/os/Bundle;->putInt(Ljava/lang/String;I)V
                     return-object v0
                 """.trimIndent())
-                patchedMethods.add("getBuyIntent")
-                patched++
-            } catch (_: Exception) {}
-        }
-
-        // getPurchases / queryPurchases -> return list with fake purchase
-        for (queryName in listOf("getPurchases", "queryPurchases", "queryPurchasesAsync")) {
-            val queryFp = object : Fingerprint(
-                name = queryName,
-                custom = { method, classDef ->
-                    classDef.type.contains("BillingClient") && method.parameterTypes.size <= 2
-                },
-            ) {}
-            val queryMethod = queryFp.methodOrNull
-            if (queryMethod?.implementation != null) {
-                try {
-                    when {
-                        queryMethod.returnType.contains("List") -> {
-                            queryMethod.addInstructions(0, """
-                                invoke-static {}, Ljava/util/Collections;->emptyList()Ljava/util/List;
-                                move-result-object v0
-                                return-object v0
-                            """.trimIndent())
-                        }
-                        queryMethod.returnType == "Landroid/os/Bundle;" -> {
-                            queryMethod.addInstructions(0, """
-                                new-instance v0, Landroid/os/Bundle;
-                                invoke-direct {v0}, Landroid/os/Bundle;-><init>()V
-                                const-string v1, "RESPONSE_CODE"
-                                const/4 v2, 0x0
-                                invoke-virtual {v0, v1, v2}, Landroid/os/Bundle;->putInt(Ljava/lang/String;I)V
-                                const-string v1, "INAPP_PURCHASE_DATA_LIST"
-                                new-instance v2, Ljava/util/ArrayList;
-                                invoke-direct {v2}, Ljava/util/ArrayList;-><init>()V
-                                invoke-virtual {v0, v1, v2}, Landroid/os/Bundle;->putStringArrayList(Ljava/lang/String;Ljava/util/ArrayList;)V
-                                return-object v0
-                            """.trimIndent())
-                        }
-                    }
-                    patchedMethods.add(queryName)
-                    patched++
-                } catch (_: Exception) {}
             }
         }
 
-        // querySkuDetailsAsync / queryProductDetailsAsync -> return empty (no products to show)
-        for (queryName in listOf("querySkuDetailsAsync", "queryProductDetailsAsync", "querySkuDetails")) {
-            val queryFp = object : Fingerprint(name = queryName) {}
-            val queryMethod = queryFp.methodOrNull
-            if (queryMethod?.implementation != null) {
-                try {
-                    queryMethod.addInstructions(0, "return-void")
-                    patchedMethods.add(queryName)
-                    patched++
-                } catch (_: Exception) {}
+        // isBillingSupported (AIDL) -> 0 = BILLING_RESPONSE_RESULT_OK
+        patchAll(Fingerprint(name = "isBillingSupported"), "isBillingSupported") {
+            if (it.returnType == "I") it.addInstructions(0, "const/4 v0, 0x0\nreturn v0")
+            else if (it.returnType == "Z") it.addInstructions(0, "const/4 v0, 0x1\nreturn v0")
+        }
+
+        // getPurchases / queryPurchases -> empty list or empty bundle
+        for (qn in listOf("getPurchases", "queryPurchases", "queryPurchasesAsync", "queryPurchaseHistory", "queryPurchaseHistoryAsync", "queryPurchasesHistory")) {
+            patchAll(Fingerprint(name = qn, custom = { m, c -> c.type.contains("BillingClient") || m.definingClass.contains("billing") || c.type.lowercase().contains("billing") }), qn) {
+                when {
+                    it.returnType.contains("List") -> it.addInstructions(0, "invoke-static {}, Ljava/util/Collections;->emptyList()Ljava/util/List;\nmove-result-object v0\nreturn-object v0")
+                    it.returnType == "Landroid/os/Bundle;" -> it.addInstructions(0, """
+                        new-instance v0, Landroid/os/Bundle;
+                        invoke-direct {v0}, Landroid/os/Bundle;-><init>()V
+                        const-string v1, "RESPONSE_CODE"
+                        const/4 v2, 0x0
+                        invoke-virtual {v0, v1, v2}, Landroid/os/Bundle;->putInt(Ljava/lang/String;I)V
+                        const-string v1, "INAPP_PURCHASE_DATA_LIST"
+                        new-instance v2, Ljava/util/ArrayList;
+                        invoke-direct {v2}, Ljava/util/ArrayList;-><init>()V
+                        invoke-virtual {v0, v1, v2}, Landroid/os/Bundle;->putStringArrayList(Ljava/lang/String;Ljava/util/ArrayList;)V
+                        return-object v0
+                    """.trimIndent())
+                    else -> try { it.addInstructions(0, "return-void") } catch (_: Exception) {}
+                }
+            }
+        }
+
+        // querySkuDetailsAsync / queryProductDetailsAsync -> invoke callback with OK + empty list
+        for (qn in listOf("querySkuDetailsAsync", "queryProductDetailsAsync", "querySkuDetails", "queryProductDetails", "queryProductDetailsAsyncWithListener")) {
+            patchAll(Fingerprint(name = qn), qn) {
+                it.addInstructions(0, "return-void")
+            }
+        }
+
+        // getSkuDetails / getProductDetails AIDL
+        for (qn in listOf("getSkuDetails", "getProductDetails")) {
+            patchAll(Fingerprint(name = qn, returnType = "Landroid/os/Bundle;"), qn) {
+                it.addInstructions(0, """
+                    new-instance v0, Landroid/os/Bundle;
+                    invoke-direct {v0}, Landroid/os/Bundle;-><init>()V
+                    const-string v1, "RESPONSE_CODE"
+                    const/4 v2, 0x0
+                    invoke-virtual {v0, v1, v2}, Landroid/os/Bundle;->putInt(Ljava/lang/String;I)V
+                    return-object v0
+                """.trimIndent())
             }
         }
 
         // consumePurchase / consumeAsync -> always succeed
-        for (consumeName in listOf("consumePurchase", "consumeAsync", "consumePurchaseAsync")) {
-            val consumeFp = object : Fingerprint(name = consumeName) {}
-            val consumeMethod = consumeFp.methodOrNull
-            if (consumeMethod?.implementation != null) {
-                try {
-                    when {
-                        consumeMethod.returnType.contains("BillingResult") -> {
-                            consumeMethod.addInstructions(0, """
-                                invoke-static {}, Lcom/android/billingclient/api/BillingResult;->newBuilder()Lcom/android/billingclient/api/BillingResult${'$'}Builder;
-                                move-result-object v0
-                                const/4 v1, 0x0
-                                invoke-virtual {v0, v1}, Lcom/android/billingclient/api/BillingResult${'$'}Builder;->setResponseCode(I)Lcom/android/billingclient/api/BillingResult${'$'}Builder;
-                                move-result-object v0
-                                invoke-virtual {v0}, Lcom/android/billingclient/api/BillingResult${'$'}Builder;->build()Lcom/android/billingclient/api/BillingResult;
-                                move-result-object v0
-                                return-object v0
-                            """.trimIndent())
-                        }
-                        consumeMethod.returnType == "Landroid/os/Bundle;" -> {
-                            consumeMethod.addInstructions(0, """
-                                new-instance v0, Landroid/os/Bundle;
-                                invoke-direct {v0}, Landroid/os/Bundle;-><init>()V
-                                const-string v1, "RESPONSE_CODE"
-                                const/4 v2, 0x0
-                                invoke-virtual {v0, v1, v2}, Landroid/os/Bundle;->putInt(Ljava/lang/String;I)V
-                                return-object v0
-                            """.trimIndent())
-                        }
-                    }
-                    patchedMethods.add(consumeName)
-                    patched++
-                } catch (_: Exception) {}
+        for (cn in listOf("consumePurchase", "consumeAsync", "consumePurchaseAsync")) {
+            patchAll(Fingerprint(name = cn), cn) {
+                when {
+                    it.returnType.contains("BillingResult") -> it.addInstructions(0, okBillingResult)
+                    it.returnType == "Landroid/os/Bundle;" -> it.addInstructions(0, """
+                        new-instance v0, Landroid/os/Bundle;
+                        invoke-direct {v0}, Landroid/os/Bundle;-><init>()V
+                        const-string v1, "RESPONSE_CODE"
+                        const/4 v2, 0x0
+                        invoke-virtual {v0, v1, v2}, Landroid/os/Bundle;->putInt(Ljava/lang/String;I)V
+                        return-object v0
+                    """.trimIndent())
+                    it.returnType == "I" -> it.addInstructions(0, "const/4 v0, 0x0\nreturn v0")
+                    it.returnType == "Z" -> it.addInstructions(0, "const/4 v0, 0x1\nreturn v0")
+                    else -> it.addInstructions(0, "return-void")
+                }
             }
         }
 
-        // ackPurchase -> always succeed
-        val ackPurchaseFp = object : Fingerprint(name = "acknowledgePurchase") {}
-        val ackPurchaseMethod = ackPurchaseFp.methodOrNull
-        if (ackPurchaseMethod?.implementation != null) {
-            try {
-                ackPurchaseMethod.addInstructions(0, """
-                    invoke-static {}, Lcom/android/billingclient/api/BillingResult;->newBuilder()Lcom/android/billingclient/api/BillingResult${'$'}Builder;
-                    move-result-object v0
-                    const/4 v1, 0x0
-                    invoke-virtual {v0, v1}, Lcom/android/billingclient/api/BillingResult${'$'}Builder;->setResponseCode(I)Lcom/android/billingclient/api/BillingResult${'$'}Builder;
-                    move-result-object v0
-                    invoke-virtual {v0}, Lcom/android/billingclient/api/BillingResult${'$'}Builder;->build()Lcom/android/billingclient/api/BillingResult;
-                    move-result-object v0
-                    return-object v0
-                """.trimIndent())
-                patchedMethods.add("acknowledgePurchase")
-                patched++
-            } catch (_: Exception) {}
-        }
-
-        // getPrice / getOriginalPrice / getOriginalPriceAmountMicros -> "0.00" / 0
-        for (priceMethod in listOf("getPrice", "getOriginalPrice")) {
-            val priceFp = object : Fingerprint(
-                name = priceMethod,
-                returnType = "Ljava/lang/String;",
-                custom = { _, classDef ->
-                    val t = classDef.type.lowercase()
-                    t.contains("skudetails") || t.contains("productdetails") || t.contains("sku") || t.contains("product")
-                },
-            ) {}
-            val method = priceFp.methodOrNull
-            if (method?.implementation != null && method.parameterTypes.isEmpty()) {
-                try {
-                    method.addInstructions(0, "const-string v0, \"0.00\"\nreturn-object v0")
-                    patchedMethods.add(priceMethod)
-                    patched++
-                } catch (_: Exception) {}
+        patchAll(Fingerprint(name = "acknowledgePurchase"), "acknowledgePurchase") {
+            when {
+                it.returnType.contains("BillingResult") -> it.addInstructions(0, okBillingResult)
+                it.returnType == "I" -> it.addInstructions(0, "const/4 v0, 0x0\nreturn v0")
+                else -> it.addInstructions(0, "return-void")
             }
         }
 
-        val getPriceMicrosFp = object : Fingerprint(
-            name = "getPriceAmountMicros",
-            returnType = "J",
-        ) {}
-        val getPriceMicrosMethod = getPriceMicrosFp.methodOrNull
-        if (getPriceMicrosMethod?.implementation != null) {
-            try {
-                getPriceMicrosMethod.addInstructions(0, "const-wide/16 v0, 0x0\nreturn-wide v0")
-                patchedMethods.add("getPriceAmountMicros")
-                patched++
-            } catch (_: Exception) {}
+        patchAll(Fingerprint(name = "getBillingConfig"), "getBillingConfig") {
+            when {
+                it.returnType.contains("BillingResult") -> it.addInstructions(0, okBillingResult)
+                else -> it.addInstructions(0, "return-void")
+            }
+        }
+
+        // Prices -> "0.00" / 0
+        for (pm in listOf("getPrice", "getOriginalPrice", "getFormattedPrice", "getDisplayPrice", "getPriceString")) {
+            patchAll(Fingerprint(name = pm, returnType = "Ljava/lang/String;", custom = { _, c -> val t=c.type.lowercase(); t.contains("sku") || t.contains("product") || t.contains("billing") }), pm) {
+                if (it.parameterTypes.isEmpty()) it.addInstructions(0, "const-string v0, \"0.00\"\nreturn-object v0")
+            }
+        }
+        // OneTimePurchaseOfferDetails / SubscriptionOfferDetails micros
+        patchAll(Fingerprint(name = "getPriceAmountMicros", returnType = "J"), "getPriceAmountMicros") {
+            it.addInstructions(0, "const-wide/16 v0, 0x0\nreturn-wide v0")
+        }
+        patchAll(Fingerprint(name = "getPriceAmountMicros", custom = { _, c -> c.type.lowercase().contains("offer") }), "Offer.getPriceAmountMicros") {
+            if (it.returnType == "J") it.addInstructions(0, "const-wide/16 v0, 0x0\nreturn-wide v0")
+        }
+        // getOriginalJson -> fake json
+        patchAll(Fingerprint(name = "getOriginalJson", returnType = "Ljava/lang/String;"), "getOriginalJson") {
+            it.addInstructions(0, "const-string v0, \"{\\\"productId\\\":\\\"morphe_fake\\\",\\\"purchaseToken\\\":\\\"fake\\\"}\"\nreturn-object v0")
+        }
+
+        patchAll(Fingerprint(name = "isFeatureSupported"), "isFeatureSupported") {
+            when {
+                it.returnType.contains("BillingResult") -> it.addInstructions(0, okBillingResult)
+                it.returnType == "I" -> it.addInstructions(0, "const/4 v0, 0x0\nreturn v0")
+                it.returnType == "Z" -> it.addInstructions(0, "const/4 v0, 0x1\nreturn v0")
+            }
+        }
+
+        patchAll(Fingerprint(name = "getConnectionState"), "getConnectionState") {
+            it.addInstructions(0, "const/4 v0, 0x2\nreturn v0")
+        }
+
+        // onBillingSetupFinished -> suppress recursion, just return
+        patchAll(Fingerprint(name = "onBillingSetupFinished"), "onBillingSetupFinished") {
+            it.addInstructions(0, "return-void")
         }
 
         // ──────────────────────────────────────────────
         // UNITY IAP
         // ──────────────────────────────────────────────
 
-        // ProcessPurchase -> Complete
-        val processPurchaseFp = object : Fingerprint(name = "ProcessPurchase") {}
-        val processPurchaseMethod = processPurchaseFp.methodOrNull
-        if (processPurchaseMethod?.implementation != null && processPurchaseMethod.returnType.contains("PurchaseProcessingResult")) {
-            try {
-                processPurchaseMethod.addInstructions(0, """
-                    sget-object v0, Lcom/unity/purchasing/PurchaseProcessingResult;->Complete:Lcom/unity/purchasing/PurchaseProcessingResult;
-                    return-object v0
-                """.trimIndent())
-                patchedMethods.add("ProcessPurchase")
-                patched++
-            } catch (_: Exception) {}
+        patchAll(Fingerprint(name = "ProcessPurchase", custom = { m, _ -> m.returnType.contains("PurchaseProcessingResult") }), "ProcessPurchase") {
+            it.addInstructions(0, "sget-object v0, Lcom/unity/purchasing/PurchaseProcessingResult;->Complete:Lcom/unity/purchasing/PurchaseProcessingResult;\nreturn-object v0")
         }
-
-        // OnPurchaseFailed -> no-op (prevent failure callback)
-        val onPurchaseFailedFp = object : Fingerprint(name = "OnPurchaseFailed") {}
-        val onPurchaseFailedMethod = onPurchaseFailedFp.methodOrNull
-        if (onPurchaseFailedMethod?.implementation != null) {
-            try {
-                onPurchaseFailedMethod.addInstructions(0, "return-void")
-                patchedMethods.add("OnPurchaseFailed")
-                patched++
-            } catch (_: Exception) {}
+        patchAll(Fingerprint(name = "OnPurchaseFailed"), "OnPurchaseFailed") { it.addInstructions(0, "return-void") }
+        patchAll(Fingerprint(name = "OnPurchaseComplete"), "OnPurchaseComplete") { it.addInstructions(0, "return-void") }
+        // CrossPlatformValidator
+        patchAll(Fingerprint(name = "Validate", custom = { m, c -> m.returnType.contains("CrossPlatformValidator") || c.type.contains("CrossPlatformValidator") }), "CrossPlatformValidator.Validate") {
+            // will be caught below anyway
         }
-
-        // IStoreListener.OnPurchaseComplete -> no-op (prevent re-purchase flow)
-        val onPurchaseCompleteFp = object : Fingerprint(name = "OnPurchaseComplete") {}
-        val onPurchaseCompleteMethod = onPurchaseCompleteFp.methodOrNull
-        if (onPurchaseCompleteMethod?.implementation != null) {
-            try {
-                onPurchaseCompleteMethod.addInstructions(0, "return-void")
-                patchedMethods.add("OnPurchaseComplete")
-                patched++
-            } catch (_: Exception) {}
-        }
-
-        // hasReceipt / getHasReceipt -> true
-        for (receiptName in listOf("hasReceipt", "getHasReceipt")) {
-            val fp = object : Fingerprint(
-                name = receiptName,
-                returnType = "Z",
-            ) {}
-            val method = fp.methodOrNull
-            if (method?.implementation != null) {
-                try {
-                    method.addInstructions(0, "const/4 v0, 0x1\nreturn v0")
-                    patchedMethods.add(receiptName)
-                    patched++
-                } catch (_: Exception) {}
-            }
+        for (rn in listOf("hasReceipt", "getHasReceipt")) {
+            patchAll(Fingerprint(name = rn, returnType = "Z"), rn) { it.addInstructions(0, "const/4 v0, 0x1\nreturn v0") }
         }
 
         // ──────────────────────────────────────────────
         // XSOLLA
         // ──────────────────────────────────────────────
 
-        // Xsolla launchBillingFlow -> OK
-        val xsollaLaunchFp = object : Fingerprint(
-            name = "launchBillingFlow",
-            custom = { _, classDef -> classDef.type.lowercase().contains("xsolla") },
-        ) {}
-        val xsollaLaunchMethod = xsollaLaunchFp.methodOrNull
-        if (xsollaLaunchMethod?.implementation != null) {
-            try {
-                xsollaLaunchMethod.addInstructions(0, """
-                    invoke-static {}, Lcom/android/billingclient/api/BillingResult;->newBuilder()Lcom/android/billingclient/api/BillingResult${'$'}Builder;
-                    move-result-object v0
-                    const/4 v1, 0x0
-                    invoke-virtual {v0, v1}, Lcom/android/billingclient/api/BillingResult${'$'}Builder;->setResponseCode(I)Lcom/android/billingclient/api/BillingResult${'$'}Builder;
-                    move-result-object v0
-                    invoke-virtual {v0}, Lcom/android/billingclient/api/BillingResult${'$'}Builder;->build()Lcom/android/billingclient/api/BillingResult;
-                    move-result-object v0
-                    return-object v0
-                """.trimIndent())
-                patchedMethods.add("Xsolla.launchBillingFlow")
-                patched++
-            } catch (_: Exception) {}
+        patchAll(Fingerprint(name = "launchBillingFlow", custom = { _, c -> c.type.lowercase().contains("xsolla") }), "Xsolla.launchBillingFlow") {
+            try { it.addInstructions(0, okBillingResult) } catch (_: Exception) { it.addInstructions(0, "const/4 v0, 0x0\nreturn-object v0") }
         }
-
-        // Xsolla isAvailable / isUserAvailable -> true
-        for (xsollaBool in listOf("isAvailable", "isUserAvailable", "isPaymentAvailable")) {
-            val fp = object : Fingerprint(
-                name = xsollaBool,
-                returnType = "Z",
-                custom = { _, classDef -> classDef.type.lowercase().contains("xsolla") },
-            ) {}
-            val method = fp.methodOrNull
-            if (method?.implementation != null) {
-                try {
-                    method.addInstructions(0, "const/4 v0, 0x1\nreturn v0")
-                    patchedMethods.add("Xsolla.$xsollaBool")
-                    patched++
-                } catch (_: Exception) {}
+        for (xb in listOf("isAvailable", "isUserAvailable", "isPaymentAvailable", "isInventoryAvailable", "isStoreAvailable")) {
+            patchAll(Fingerprint(name = xb, returnType = "Z", custom = { _, c -> c.type.lowercase().contains("xsolla") }), "Xsolla.$xb") {
+                it.addInstructions(0, "const/4 v0, 0x1\nreturn v0")
             }
         }
-
-        // Xsolla getAmount / getBalance -> 999999
-        for (xsollaGetter in listOf("getAmount", "getBalance")) {
-            val fp = object : Fingerprint(
-                name = xsollaGetter,
-                returnType = "I",
-                custom = { _, classDef -> classDef.type.lowercase().contains("xsolla") },
-            ) {}
-            val method = fp.methodOrNull
-            if (method?.implementation != null) {
-                try {
-                    method.addInstructions(0, "const v0, 0xf423f\nreturn v0")
-                    patchedMethods.add("Xsolla.$xsollaGetter")
-                    patched++
-                } catch (_: Exception) {}
+        for (xg in listOf("getAmount", "getBalance", "getVirtualCurrencyBalance", "getInventory")) {
+            patchAll(Fingerprint(name = xg, returnType = "I", custom = { _, c -> c.type.lowercase().contains("xsolla") }), "Xsolla.$xg") {
+                it.addInstructions(0, "const v0, 0xf423f\nreturn v0")
             }
         }
-
-        // Xsolla payStationOpen -> no-op (prevent payment UI)
-        val xsollaPayStationFp = object : Fingerprint(
-            name = "openPayStation",
-            custom = { _, classDef -> classDef.type.lowercase().contains("xsolla") },
-        ) {}
-        val xsollaPayStationMethod = xsollaPayStationFp.methodOrNull
-        if (xsollaPayStationMethod?.implementation != null) {
-            try {
-                xsollaPayStationMethod.addInstructions(0, "return-void")
-                patchedMethods.add("Xsolla.openPayStation")
-                patched++
-            } catch (_: Exception) {}
+        for (xs in listOf("openPayStation", "openPurchase", "createPayment", "validatePurchase", "checkOrder", "getPayStationUrl")) {
+            patchAll(Fingerprint(name = xs, custom = { _, c -> c.type.lowercase().contains("xsolla") }), "Xsolla.$xs") {
+                if (it.returnType == "V") it.addInstructions(0, "return-void")
+                else if (it.returnType == "Z") it.addInstructions(0, "const/4 v0, 0x1\nreturn v0")
+                else if (it.returnType.contains("String")) it.addInstructions(0, "const-string v0, \"https://paystation.xsolla.com\"\nreturn-object v0")
+            }
         }
 
         // ──────────────────────────────────────────────
-        // RECEIPT / SIGNATURE VERIFICATION
+        // AMAZON, HUAWEI, SAMSUNG
         // ──────────────────────────────────────────────
 
-        // verifySignature / verifyPurchase / isValidSignature / validateReceipt -> true
-        for (verifyName in listOf(
-            "verifySignature", "verifyPurchase", "isValidSignature", "validateReceipt",
-            "verifyReceipt", "checkReceipt", "isReceiptValid", "validateSignature",
-            "verify", "checkSignature", "isValid",
-        )) {
-            val fp = object : Fingerprint(
-                name = verifyName,
-                returnType = "Z",
-            ) {}
-            val method = fp.methodOrNull
-            if (method?.implementation != null) {
-                try {
-                    method.addInstructions(0, "const/4 v0, 0x1\nreturn v0")
-                    patchedMethods.add(verifyName)
-                    patched++
-                } catch (_: Exception) {}
+        // Amazon IAP (com.amazon.device.iap)
+        for (am in listOf("purchase", "getUserData", "getProductData", "getPurchaseUpdates", "onProductDataResponse", "onPurchaseResponse", "onUserDataResponse")) {
+            patchAll(Fingerprint(name = am, custom = { _, c -> c.type.lowercase().contains("amazon") || c.type.contains("amazon") }), "Amazon.$am") {
+                when (it.returnType) {
+                    "V" -> it.addInstructions(0, "return-void")
+                    "Z" -> it.addInstructions(0, "const/4 v0, 0x1\nreturn v0")
+                    else -> if (it.returnType.contains("String")) it.addInstructions(0, "const-string v0, \"\"\nreturn-object v0") else it.addInstructions(0, "return-void")
+                }
+            }
+        }
+        // Amazon PurchasingService specifically
+        patchAll(Fingerprint(name = "getUserData", custom = { _, c -> c.type.contains("PurchasingService") || c.type.contains("amazon") }), "Amazon.PurchasingService.getUserData") {
+            it.addInstructions(0, "return-void")
+        }
+
+        // Huawei IAP
+        for (hw in listOf("isEnvReady", "obtainProductInfo", "createPurchaseIntent", "consumeOwnedPurchase", "obtainOwnedPurchases", "obtainOwnedPurchaseRecord", "isSandboxActivated")) {
+            patchAll(Fingerprint(name = hw, custom = { _, c -> c.type.lowercase().contains("huawei") || c.type.contains("huawei") }), "Huawei.$hw") {
+                when (it.returnType) {
+                    "V" -> it.addInstructions(0, "return-void")
+                    "Z" -> it.addInstructions(0, "const/4 v0, 0x1\nreturn v0")
+                    "I" -> it.addInstructions(0, "const/4 v0, 0x0\nreturn v0")
+                    else -> it.addInstructions(0, "return-void")
+                }
             }
         }
 
-        // Security.verify methods
-        val securityVerifyFp = object : Fingerprint(
-            returnType = "Z",
-            custom = { method, classDef ->
-                classDef.type.contains("Security") && method.name.lowercase().contains("verify")
-            },
-        ) {}
-        val securityVerifyMethod = securityVerifyFp.methodOrNull
-        if (securityVerifyMethod?.implementation != null) {
-            try {
-                securityVerifyMethod.addInstructions(0, "const/4 v0, 0x1\nreturn v0")
-                patchedMethods.add("Security.verify")
-                patched++
-            } catch (_: Exception) {}
+        // Samsung Galaxy Store IAP
+        for (sm in listOf("getProductsDetails", "startPayment", "getOwnedList", "consumePurchasedItems", "getProductDetails", "checkPurchasedItem")) {
+            patchAll(Fingerprint(name = sm, custom = { _, c -> c.type.lowercase().contains("samsung") || c.type.contains("samsung") }), "Samsung.$sm") {
+                when (it.returnType) {
+                    "V" -> it.addInstructions(0, "return-void")
+                    "Z" -> it.addInstructions(0, "const/4 v0, 0x1\nreturn v0")
+                    "I" -> it.addInstructions(0, "const/4 v0, 0x0\nreturn v0")
+                    else -> it.addInstructions(0, "return-void")
+                }
+            }
+        }
+
+        // ──────────────────────────────────────────────
+        // RECEIPT / SIGNATURE VERIFICATION (scoped)
+        // ──────────────────────────────────────────────
+
+        for (vn in listOf("verifySignature", "verifyPurchase", "isValidSignature", "validateReceipt", "verifyReceipt", "checkReceipt", "isReceiptValid", "validateSignature")) {
+            patchAll(Fingerprint(name = vn, returnType = "Z", custom = { _, c -> val t=c.type.lowercase(); t.contains("billing") || t.contains("purchase") || t.contains("receipt") || t.contains("security") || t.contains("store") || t.contains("googleplay") || t.contains("xsolla") || t.contains("amazon") || t.contains("huawei") || t.contains("validator") }), vn) {
+                it.addInstructions(0, "const/4 v0, 0x1\nreturn v0")
+            }
+        }
+        // ultra-generic names scoped strictly
+        for (vn in listOf("verify", "checkSignature", "isValid")) {
+            patchAll(Fingerprint(name = vn, returnType = "Z", custom = { _, c -> val t=c.type.lowercase(); (t.contains("security") || t.contains("receipt") || t.contains("purchase") || t.contains("billing") || t.contains("validator")) && !t.contains("okhttp") && !t.contains("ssl") }), vn) {
+                it.addInstructions(0, "const/4 v0, 0x1\nreturn v0")
+            }
+        }
+
+        patchAll(Fingerprint(returnType = "Z", custom = { m, c -> c.type.contains("Security") && m.name.lowercase().contains("verify") }), "Security.verify") {
+            it.addInstructions(0, "const/4 v0, 0x1\nreturn v0")
+        }
+        // Unity CrossPlatformValidator
+        patchAll(Fingerprint(returnType = "Z", custom = { m, c -> c.type.contains("CrossPlatformValidator") || (c.type.contains("Validator") && m.name.lowercase().contains("valid")) }), "CrossPlatformValidator") {
+            it.addInstructions(0, "const/4 v0, 0x1\nreturn v0")
         }
 
         // ──────────────────────────────────────────────
