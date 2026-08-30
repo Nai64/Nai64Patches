@@ -1,3 +1,9 @@
+## [1.0.2](https://github.com/Zanuaimi/Nai64Patches/compare/1.0.1...1.0.2) (2026-08-30)
+
+### Bug Fixes
+
+* trigger release workflow ([8dd0750](https://github.com/Zanuaimi/Nai64Patches/commit/8dd07504848b40786154e84977dadd9254a51e83))
+
 ## [1.0.1](https://github.com/Zanuaimi/Nai64Patches/compare/1.0.0...1.0.1) (2026-08-30)
 
 ### Bug Fixes
