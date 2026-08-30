@@ -181,7 +181,7 @@ val unlockPremiumPatch = bytecodePatch(
                     val name = ref.name
                     val def = ref.definingClass
                     val isPrefs = def.contains("PlayerPrefs") || def == "Landroid/content/SharedPreferences;" || def == "Landroid/content/SharedPreferences\$Editor;" || def.contains("DataStore") || def.contains("MMKV") || def.contains("EncryptedSharedPreferences") || def.contains("Preferences")
-                    if (isPrefs && (name == "GetInt" || name == "getInt" || name == "GetString" || name == "getString" || name == "GetBoolean" || name == "getBoolean" || name == "GetLong" || name == "getLong" || name == "HasKey" || name == "contains" || name == "getValue" || name == "getData")) {
+                    if (isPrefs && (name == "GetInt" || name == "getInt" || name == "GetString" || name == "getString" || name == "GetBoolean" || name == "getBoolean" || name == "GetLong" || name == "getLong" || name == "HasKey" || name == "contains" || name == "getValue" || name == "getData" || name == "get")) {
                         foundPrefsCall = true; break
                     }
                 }
@@ -205,9 +205,10 @@ val unlockPremiumPatch = bytecodePatch(
                     val isGetLong = (mname == "GetLong" || mname == "getLong") && ref.returnType == "J"
                     val isGetString = (mname == "GetString" || mname == "getString" || mname == "getValue") && ref.returnType == "Ljava/lang/String;"
                     val isHasKey = (mname == "HasKey" || mname == "contains" || mname == "containsKey" || mname == "hasKey") && ref.returnType == "Z"
+                    val isDataStoreGet = (mname == "get" && isDataStore && ref.parameterTypes.isNotEmpty() && ref.parameterTypes[0].contains("Key"))
 
                     if (!isPlayerPrefs && !isSharedPrefs && !isDataStore) continue
-                    if (!isGetBoolean && !isGetInt && !isGetLong && !isGetString && !isHasKey) continue
+                    if (!isGetBoolean && !isGetInt && !isGetLong && !isGetString && !isHasKey && !isDataStoreGet) continue
 
                     // generic register extraction
                     val keyRegister = when (insn) {
@@ -243,6 +244,23 @@ val unlockPremiumPatch = bytecodePatch(
 
                     val next = instructions.getOrNull(index + 1) ?: continue
                     when {
+                        isDataStoreGet && next.opcode == Opcode.MOVE_RESULT_OBJECT -> {
+                            val r = (next as com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction).registerA
+                            // DataStore Preferences.get(Key) returns Object (boxed Boolean for premium_purchased)
+                            // Return Boolean.TRUE via valueOf
+                            if (r <= 0xff) {
+                                method.addInstructions(index, "const/4 v$r, 0x1\ninvoke-static {v$r}, Ljava/lang/Boolean;->valueOf(Z)Ljava/lang/Boolean;\nmove-result-object v$r")
+                                // original invoke now at index+3, move at index+4
+                                method.replaceInstruction(index + 3, "nop")
+                                method.replaceInstruction(index + 4, "nop")
+                            } else {
+                                method.addInstructions(index, "const/4 v0, 0x1\ninvoke-static {v0}, Ljava/lang/Boolean;->valueOf(Z)Ljava/lang/Boolean;\nmove-result-object v0\nmove-object v$r, v0")
+                                method.replaceInstruction(index + 4, "nop")
+                                method.replaceInstruction(index + 5, "nop")
+                            }
+                            patchedMethods.add("Prefs:${keyValue}:DataStore.get")
+                            patched++
+                        }
                         isGetBoolean && next.opcode == Opcode.MOVE_RESULT -> {
                             val r = (next as com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction).registerA
                             if (r <= 0xf) {
