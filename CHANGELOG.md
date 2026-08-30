@@ -1,3 +1,9 @@
+## [1.0.4](https://github.com/Zanuaimi/Nai64Patches/compare/1.0.3...1.0.4) (2026-08-30)
+
+### Bug Fixes
+
+* fix crash on pressing overlay button ([b7b17d3](https://github.com/Zanuaimi/Nai64Patches/commit/b7b17d387f7ba8f85308ac022dbcababe636b5f8))
+
 ## [1.0.3](https://github.com/Zanuaimi/Nai64Patches/compare/1.0.2...1.0.3) (2026-08-30)
 
 ### Bug Fixes

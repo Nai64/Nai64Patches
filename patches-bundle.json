@@ -1,7 +1,7 @@
 {
-  "created_at": "2026-08-30T20:34:11",
-  "description": "## [1.0.3](https://github.com/Zanuaimi/Nai64Patches/compare/1.0.2...1.0.3) (2026-08-30)\n\n### Bug Fixes\n\n* fix browser not found and positioning ([98b1a66](https://github.com/Zanuaimi/Nai64Patches/commit/98b1a66cf2bff7b16e9c6faa44a1af25d44ec182))",
-  "download_url": "https://github.com/Zanuaimi/Nai64Patches/releases/download/1.0.3/patches-1.0.3.mpp",
+  "created_at": "2026-08-30T21:23:21",
+  "description": "## [1.0.4](https://github.com/Zanuaimi/Nai64Patches/compare/1.0.3...1.0.4) (2026-08-30)\n\n### Bug Fixes\n\n* fix crash on pressing overlay button ([b7b17d3](https://github.com/Zanuaimi/Nai64Patches/commit/b7b17d387f7ba8f85308ac022dbcababe636b5f8))",
+  "download_url": "https://github.com/Zanuaimi/Nai64Patches/releases/download/1.0.4/patches-1.0.4.mpp",
   "signature_download_url": "",
-  "version": "1.0.3"
+  "version": "1.0.4"
 }
