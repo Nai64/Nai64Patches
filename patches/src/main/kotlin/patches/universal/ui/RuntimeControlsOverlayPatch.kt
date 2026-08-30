@@ -15,8 +15,6 @@ import com.android.tools.smali.dexlib2.immutable.ImmutableField
 import com.android.tools.smali.dexlib2.immutable.ImmutableMethod
 import com.android.tools.smali.dexlib2.immutable.ImmutableMethodImplementation
 import java.util.logging.Logger
-import patches.universal.ads.util.cloneMutable
-import patches.universal.ads.util.p0Register
 
 private const val OVERLAY_BUTTON = "nai64RuntimeOverlayButton"
 private const val OVERLAY_BUTTON_FIELD = "Landroid/view/View;"
@@ -466,7 +464,7 @@ private fun addOverlayListeners(
         const/high16 v7, 0x3f800000
         iput v7, v6, Landroid/widget/LinearLayout${'$'}LayoutParams;->weight:F
         const/16 v7, 0x11
-        invoke-virtual {v5, v7}, Landroid/view/View;->setGravity(I)V
+        invoke-virtual {v5, v7}, Landroid/widget/TextView;->setGravity(I)V
         invoke-virtual {v5}, Landroid/view/View;->requestLayout()V
         const/16 v5, -0x3
         invoke-virtual {v2, v5}, Landroid/app/AlertDialog;->getButton(I)Landroid/widget/Button;
@@ -593,22 +591,6 @@ private fun addOverlayListeners(
         if-nez v0, :nai64_overlay_touch_consumed
         invoke-virtual {p1}, Landroid/view/View;->performClick()Z
         :nai64_overlay_touch_consumed
-        invoke-virtual {p1}, Landroid/view/View;->getX()F
-        move-result v0
-        invoke-virtual {p1}, Landroid/view/View;->getY()F
-        move-result v1
-        const/4 v3, 0x0
-        invoke-virtual {p0, v3}, Landroid/app/Activity;->getPreferences(I)Landroid/content/SharedPreferences;
-        move-result-object v2
-        invoke-interface {v2}, Landroid/content/SharedPreferences;->edit()Landroid/content/SharedPreferences${'$'}Editor;
-        move-result-object v2
-        const-string v3, "nai64OverlayPositionX_v2"
-        invoke-interface {v2, v3, v0}, Landroid/content/SharedPreferences${'$'}Editor;->putFloat(Ljava/lang/String;F)Landroid/content/SharedPreferences${'$'}Editor;
-        move-result-object v2
-        const-string v3, "nai64OverlayPositionY_v2"
-        invoke-interface {v2, v3, v1}, Landroid/content/SharedPreferences${'$'}Editor;->putFloat(Ljava/lang/String;F)Landroid/content/SharedPreferences${'$'}Editor;
-        move-result-object v2
-        invoke-interface {v2}, Landroid/content/SharedPreferences${'$'}Editor;->apply()V
         const/4 v0, 0x1
         return v0
     """))
@@ -928,7 +910,7 @@ private fun injectOverlay(
         iput-object v0, p0, ${activity.type}->${OVERLAY_BUTTON}:$OVERLAY_BUTTON_FIELD
         new-instance v10, Landroid/widget/FrameLayout${'$'}LayoutParams;
         invoke-direct {v10, v2, v2}, Landroid/widget/FrameLayout${'$'}LayoutParams;-><init>(II)V
-        const/4 v4, 0x4
+        const/16 v4, 0x10
         int-to-float v4, v4
         mul-float/2addr v4, v1
         float-to-int v4, v4
@@ -939,26 +921,6 @@ private fun injectOverlay(
         const v1, $buttonGravity
         iput v1, v10, Landroid/widget/FrameLayout${'$'}LayoutParams;->gravity:I
         invoke-virtual {p0, v0, v10}, Landroid/app/Activity;->addContentView(Landroid/view/View;Landroid/view/ViewGroup${'$'}LayoutParams;)V
-        const/4 v3, 0x0
-        invoke-virtual {p0, v3}, Landroid/app/Activity;->getPreferences(I)Landroid/content/SharedPreferences;
-        move-result-object v11
-        const-string v12, "nai64OverlayPositionX_v2"
-        const/high16 v13, -0x40800000
-        invoke-interface/range {v11 .. v13}, Landroid/content/SharedPreferences;->getFloat(Ljava/lang/String;F)F
-        move-result v12
-        const/high16 v13, -0x40800000
-        cmpl-float v13, v12, v13
-        if-eqz v13, :nai64_overlay_done
-        const/4 v1, 0x0
-        iput v1, v10, Landroid/widget/FrameLayout${'$'}LayoutParams;->gravity:I
-        invoke-virtual {v10, v1, v1, v1, v1}, Landroid/view/ViewGroup${'$'}MarginLayoutParams;->setMargins(IIII)V
-        invoke-virtual {v0, v10}, Landroid/view/View;->setLayoutParams(Landroid/view/ViewGroup${'$'}LayoutParams;)V
-        invoke-virtual {v0, v12}, Landroid/view/View;->setX(F)V
-        const-string v12, "nai64OverlayPositionY_v2"
-        const/high16 v13, -0x40800000
-        invoke-interface/range {v11 .. v13}, Landroid/content/SharedPreferences;->getFloat(Ljava/lang/String;F)F
-        move-result v12
-        invoke-virtual {v0, v12}, Landroid/view/View;->setY(F)V
         :nai64_overlay_done
         return-void
     """))
