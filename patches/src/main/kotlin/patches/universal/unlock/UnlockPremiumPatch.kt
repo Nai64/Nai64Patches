@@ -42,7 +42,8 @@ val unlockPremiumPatch = bytecodePatch(
                 "lifetime", "is_lifetime", "annual", "monthly", "trial",
                 "entitlement", "entitlements", "is_entitled", "has_entitlement",
                 "paid", "is_paid", "member", "pro_version", "is_pro", "pro_member",
-                "subscription_expiry", "premium_expiry", "subscription_expire_date", "premium_expire_date"
+                "subscription_expiry", "premium_expiry", "subscription_expire_date", "premium_expire_date",
+                "key_subs", "key_sub", "subs", "sub", "keysubs", "keysub"
             )
             for (k in keys) {
                 if (lower == k) return true
@@ -272,23 +273,6 @@ val unlockPremiumPatch = bytecodePatch(
 
                     val next = instructions.getOrNull(index + 1) ?: continue
                     when {
-                        isDataStoreGet && next.opcode == Opcode.MOVE_RESULT_OBJECT -> {
-                            val r = (next as com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction).registerA
-                            // DataStore Preferences.get(Key) returns Object (boxed Boolean for premium_purchased)
-                            // Return Boolean.TRUE via valueOf
-                            if (r <= 0xff) {
-                                method.addInstructions(index, "const/4 v$r, 0x1\ninvoke-static {v$r}, Ljava/lang/Boolean;->valueOf(Z)Ljava/lang/Boolean;\nmove-result-object v$r")
-                                // original invoke now at index+3, move at index+4
-                                method.replaceInstruction(index + 3, "nop")
-                                method.replaceInstruction(index + 4, "nop")
-                            } else {
-                                method.addInstructions(index, "const/4 v0, 0x1\ninvoke-static {v0}, Ljava/lang/Boolean;->valueOf(Z)Ljava/lang/Boolean;\nmove-result-object v0\nmove-object v$r, v0")
-                                method.replaceInstruction(index + 4, "nop")
-                                method.replaceInstruction(index + 5, "nop")
-                            }
-                            patchedMethods.add("Prefs:${keyValue}:DataStore.get")
-                            patched++
-                        }
                         isGetBoolean && next.opcode == Opcode.MOVE_RESULT -> {
                             val r = (next as com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction).registerA
                             if (r <= 0xf) {
