@@ -3755,6 +3755,46 @@
           "values": null
         },
         {
+          "key": "runtimeOverlayButtonText",
+          "title": "Overlay button text",
+          "description": "Text shown inside the overlay button. Maximum three characters.",
+          "required": false,
+          "type": "kotlin.String",
+          "default": "N",
+          "values": null
+        },
+        {
+          "key": "runtimeOverlayButtonTextColor",
+          "title": "Overlay button text color",
+          "description": "Button text color as #RRGGBB or #AARRGGBB.",
+          "required": false,
+          "type": "kotlin.String",
+          "default": "#FF000000",
+          "values": null
+        },
+        {
+          "key": "runtimeOverlayButtonBackgroundColor",
+          "title": "Overlay button background color",
+          "description": "Button background color as #RRGGBB or #AARRGGBB.",
+          "required": false,
+          "type": "kotlin.String",
+          "default": "#FFFFFFFF",
+          "values": null
+        },
+        {
+          "key": "runtimeOverlayButtonShape",
+          "title": "Overlay button shape",
+          "description": "Shape of the overlay button.",
+          "required": false,
+          "type": "kotlin.String",
+          "default": "circle",
+          "values": {
+            "Circle": "circle",
+            "Squircle": "squircle",
+            "Square": "square"
+          }
+        },
+        {
           "key": "runtimeOverlayButtonSizeDp",
           "title": "Overlay button size (dp)",
           "description": "Button width and height in density-independent pixels. Recommended: 48-72.",
