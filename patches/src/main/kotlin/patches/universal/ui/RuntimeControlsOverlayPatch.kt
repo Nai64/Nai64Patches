@@ -879,16 +879,13 @@ private fun injectOverlay(
         return-void
     """))
     activity.methods.add(helper)
-    val returnIndexes = onWindowFocusChanged.implementation!!.instructions
-        .mapIndexedNotNull { index, instruction ->
-            index.takeIf { instruction.opcode.name.startsWith("RETURN") }
-        }
-    for (returnIndex in returnIndexes.asReversed()) {
-        onWindowFocusChanged.addInstructions(
-            returnIndex,
-            "invoke-static {p0}, ${activity.type}->$helperName(${activity.type})V",
-        )
-    }
+    val insertionIndex = onWindowFocusChanged.implementation!!.instructions
+        .indexOfLast { it.opcode.name.startsWith("RETURN") }
+        .coerceAtLeast(0)
+    onWindowFocusChanged.addInstructions(
+        insertionIndex,
+        "invoke-static {p0}, ${activity.type}->$helperName(${activity.type})V",
+    )
 }
 
 private fun compactSmali(smali: String): String =
