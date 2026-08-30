@@ -1,6 +1,6 @@
 {
   "NOTE": "Do NOT manually edit this file. This file is automatically updated when semantic release (release.yml) runs. Manually editing this file can break your releases and break third party tools that use this file.",
-  "version": "1.38.0",
+  "version": "1.0.0",
   "patches": [
     {
       "name": "Skip Consent Popup",
@@ -3690,6 +3690,125 @@
       "dependencies": [],
       "compatiblePackages": null,
       "options": []
+    },
+    {
+      "name": "Runtime Controls Overlay (Experimental)",
+      "description": "Experimental in-app floating runtime controls for Nai64Patches users. Select which controls to include in Morphe Manager. Each selected control adds APK hooks and a runtime switch to the overlay. Switches start with the original app or game behavior; changes apply to the current Activity immediately. The overlay also provides a repository link, hide/remove actions, and customizable colors, text, and URL.",
+      "default": false,
+      "dependencies": [
+        "ResourcePatch"
+      ],
+      "compatiblePackages": null,
+      "options": [
+        {
+          "key": "runtimeOverlayTitle",
+          "title": "Overlay title",
+          "description": "Title shown in the overlay menu.",
+          "required": false,
+          "type": "kotlin.String",
+          "default": "Nai64Patches Runtime Controls Overlay",
+          "values": null
+        },
+        {
+          "key": "runtimeOverlayDescription",
+          "title": "Overlay description",
+          "description": "Welcome and information shown below the overlay title.",
+          "required": false,
+          "type": "kotlin.String",
+          "default": "Welcome to Nai64Patches Runtime Controls Overlay. This experimental in-app overlay contains controls that may change parts of the app or game at runtime. More may be added in future updates.",
+          "values": null
+        },
+        {
+          "key": "runtimeOverlayRepositoryText",
+          "title": "Repository button text",
+          "description": "Text of the button that opens the configured website.",
+          "required": false,
+          "type": "kotlin.String",
+          "default": "Nai64 repository",
+          "values": null
+        },
+        {
+          "key": "runtimeOverlayRepositoryUrl",
+          "title": "Repository button URL",
+          "description": "Website opened by the repository button.",
+          "required": false,
+          "type": "kotlin.String",
+          "default": "https://github.com/Nai64/Nai64Patches",
+          "values": null
+        },
+        {
+          "key": "runtimeOverlayBackgroundColor",
+          "title": "Overlay background color",
+          "description": "Overlay background color as #RRGGBB or #AARRGGBB.",
+          "required": false,
+          "type": "kotlin.String",
+          "default": "#CC101820",
+          "values": null
+        },
+        {
+          "key": "runtimeOverlayOutlineColor",
+          "title": "Overlay outline color",
+          "description": "Overlay outline color as #RRGGBB or #AARRGGBB.",
+          "required": false,
+          "type": "kotlin.String",
+          "default": "#FF55D6BE",
+          "values": null
+        },
+        {
+          "key": "runtimeOverlayButtonSizeDp",
+          "title": "Overlay button size (dp)",
+          "description": "Button width and height in density-independent pixels. Recommended: 48-72.",
+          "required": false,
+          "type": "kotlin.Int",
+          "default": 56,
+          "values": null
+        },
+        {
+          "key": "runtimeOverlayButtonPosition",
+          "title": "Overlay button position",
+          "description": "Initial position relative to the phone display.",
+          "required": false,
+          "type": "kotlin.String",
+          "default": "topRight",
+          "values": {
+            "Top left": "topLeft",
+            "Top middle": "topMiddle",
+            "Top right": "topRight",
+            "Center left": "centerLeft",
+            "Center right": "centerRight",
+            "Bottom left": "bottomLeft",
+            "Bottom middle": "bottomMiddle",
+            "Bottom right": "bottomRight"
+          }
+        },
+        {
+          "key": "runtimeOverlayIncludeKeepScreenAwakeV2",
+          "title": "Include keep screen awake control",
+          "description": "Include the APK hook and overlay switch for keeping the screen awake. Default runtime state: Off, matching original app behavior.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "runtimeOverlayIncludeFullscreenV2",
+          "title": "Include fullscreen control",
+          "description": "Include the APK hook and overlay switch for fullscreen mode. Default runtime state: Off, matching original app behavior.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "runtimeOverlayIncludeScreenshotsV2",
+          "title": "Include allow screenshots control",
+          "description": "Include the APK hook and overlay switch for allowing screenshots. Default runtime state: Off, preserving the app's original screenshot behavior.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        }
+      ]
     },
     {
       "name": "Show Search Result Scores",
