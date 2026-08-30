@@ -383,8 +383,12 @@ private fun addOverlayListeners(
         add-int/lit8 v1, v1, -0x1
         invoke-virtual {p1}, Landroid/widget/CheckBox;->isChecked()Z
         move-result v0
-        const/4 v2, 0x0
-        invoke-virtual {p0, v2, v1, v0}, ${activity.type}->onClick(Landroid/content/DialogInterface;IZ)V
+        ${buildControlHandler(
+            activity.type,
+            includeKeepScreenAwake,
+            includeFullscreen,
+            includeScreenshots,
+        )}
         return-void
         :nai64_overlay_open_menu
         new-instance v2, Landroid/app/AlertDialog${'$'}Builder;
@@ -663,18 +667,6 @@ private fun addOverlayListeners(
     """))
     activity.methods.add(dialogClick)
 
-    val multiChoiceClick = newMethod(activity, "onClick", listOf(
-        "Landroid/content/DialogInterface;",
-        "I",
-        "Z",
-    ), "V", registers = 12)
-    multiChoiceClick.addInstructionsWithLabels(0, compactSmali(buildControlHandler(
-        activity.type,
-        includeKeepScreenAwake,
-        includeFullscreen,
-        includeScreenshots,
-    )))
-    activity.methods.add(multiChoiceClick)
 }
 
 private fun buildCustomMenuLayout(
@@ -750,11 +742,11 @@ private fun buildControlHandler(
 private fun controlBranch(activityType: String, index: Int, mask: String, kind: String): String = when (kind) {
     "keep", "screenshots" -> """
         const/16 v3, $index
-        if-ne p2, v3, :nai64_next_control_$index
-        iput-boolean p3, p0, $activityType->${if (kind == "keep") KEEP_SCREEN_AWAKE_STATE else ALLOW_SCREENSHOTS_STATE}:Z
+        if-ne v1, v3, :nai64_next_control_$index
+        iput-boolean v0, p0, $activityType->${if (kind == "keep") KEEP_SCREEN_AWAKE_STATE else ALLOW_SCREENSHOTS_STATE}:Z
         invoke-virtual {p0}, Landroid/app/Activity;->getWindow()Landroid/view/Window;
         move-result-object v4
-        if-eqz p3, :nai64_restore_$index
+        if-eqz v0, :nai64_restore_$index
         ${if (kind == "screenshots") "const v5, $mask\n        invoke-virtual {v4, v5}, Landroid/view/Window;->clearFlags(I)V" else "const v5, $mask\n        invoke-virtual {v4, v5}, Landroid/view/Window;->addFlags(I)V"}
         goto :nai64_control_done_$index
         :nai64_restore_$index
@@ -771,13 +763,13 @@ private fun controlBranch(activityType: String, index: Int, mask: String, kind: 
     """.trimIndent()
     "fullscreen" -> """
         const/16 v3, $index
-        if-ne p2, v3, :nai64_next_control_$index
-        iput-boolean p3, p0, $activityType->${FULLSCREEN_STATE}:Z
+        if-ne v1, v3, :nai64_next_control_$index
+        iput-boolean v0, p0, $activityType->$FULLSCREEN_STATE:Z
         invoke-virtual {p0}, Landroid/app/Activity;->getWindow()Landroid/view/Window;
         move-result-object v4
         invoke-virtual {v4}, Landroid/view/Window;->getDecorView()Landroid/view/View;
         move-result-object v5
-        if-eqz p3, :nai64_restore_$index
+        if-eqz v0, :nai64_restore_$index
         const v6, 0x1706
         invoke-virtual {v5, v6}, Landroid/view/View;->setSystemUiVisibility(I)V
         goto :nai64_control_done_$index
@@ -905,8 +897,8 @@ private fun injectOverlay(
         invoke-virtual {v0, p0}, Landroid/view/View;->setOnClickListener(Landroid/view/View${'$'}OnClickListener;)V
         invoke-virtual {v0, p0}, Landroid/view/View;->setOnTouchListener(Landroid/view/View${'$'}OnTouchListener;)V
         iput-object v0, p0, ${activity.type}->${OVERLAY_BUTTON}:$OVERLAY_BUTTON_FIELD
-        new-instance v3, Landroid/widget/FrameLayout${'$'}LayoutParams;
-        invoke-direct {v3, v2, v2}, Landroid/widget/FrameLayout${'$'}LayoutParams;-><init>(II)V
+        new-instance v10, Landroid/widget/FrameLayout${'$'}LayoutParams;
+        invoke-direct {v10, v2, v2}, Landroid/widget/FrameLayout${'$'}LayoutParams;-><init>(II)V
         const/16 v4, 0xc
         int-to-float v4, v4
         mul-float/2addr v4, v1
@@ -914,10 +906,10 @@ private fun injectOverlay(
         move v5, v4
         move v6, v4
         move v7, v4
-        invoke-virtual/range {v3 .. v7}, Landroid/view/ViewGroup${'$'}MarginLayoutParams;->setMargins(IIII)V
+        invoke-virtual {v10, v4, v5, v6, v7}, Landroid/view/ViewGroup${'$'}MarginLayoutParams;->setMargins(IIII)V
         const v1, $buttonGravity
-        iput v1, v3, Landroid/widget/FrameLayout${'$'}LayoutParams;->gravity:I
-        invoke-virtual {p0, v0, v3}, Landroid/app/Activity;->addContentView(Landroid/view/View;Landroid/view/ViewGroup${'$'}LayoutParams;)V
+        iput v1, v10, Landroid/widget/FrameLayout${'$'}LayoutParams;->gravity:I
+        invoke-virtual {p0, v0, v10}, Landroid/app/Activity;->addContentView(Landroid/view/View;Landroid/view/ViewGroup${'$'}LayoutParams;)V
         const/4 v3, 0x0
         invoke-virtual {p0, v3}, Landroid/app/Activity;->getPreferences(I)Landroid/content/SharedPreferences;
         move-result-object v11
@@ -929,9 +921,9 @@ private fun injectOverlay(
         cmpl-float v13, v12, v13
         if-eqz v13, :nai64_overlay_done
         const/4 v1, 0x0
-        iput v1, v3, Landroid/widget/FrameLayout${'$'}LayoutParams;->gravity:I
-        invoke-virtual {v3, v1, v1, v1, v1}, Landroid/view/ViewGroup${'$'}MarginLayoutParams;->setMargins(IIII)V
-        invoke-virtual {v0, v3}, Landroid/view/View;->setLayoutParams(Landroid/view/ViewGroup${'$'}LayoutParams;)V
+        iput v1, v10, Landroid/widget/FrameLayout${'$'}LayoutParams;->gravity:I
+        invoke-virtual {v10, v1, v1, v1, v1}, Landroid/view/ViewGroup${'$'}MarginLayoutParams;->setMargins(IIII)V
+        invoke-virtual {v0, v10}, Landroid/view/View;->setLayoutParams(Landroid/view/ViewGroup${'$'}LayoutParams;)V
         invoke-virtual {v0, v12}, Landroid/view/View;->setX(F)V
         const-string v12, "nai64OverlayPositionY"
         const/high16 v13, -0x40800000
