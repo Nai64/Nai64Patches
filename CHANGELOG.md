@@ -1,3 +1,11 @@
+## [1.38.0](https://github.com/Nai64/Nai64Patches/compare/1.37.0...1.38.0) (2026-08-30)
+
+### New Features
+
+* generic premium/billing fallback for obfuscated apps ([2acc0ce](https://github.com/Nai64/Nai64Patches/commit/2acc0cec6f6938f7a23de00326d13b9d27d7dd85))
+* unlock premium (part 3) + minor free iap changes ([33c02e1](https://github.com/Nai64/Nai64Patches/commit/33c02e1184754703ba51c43f1d627fafa017a594))
+* wire datastore for unlock premium ([7607581](https://github.com/Nai64/Nai64Patches/commit/7607581087a2c9232c68771a77c12b0084e12734))
+
 ## [1.37.0](https://github.com/Nai64/Nai64Patches/compare/1.36.0...1.37.0) (2026-08-30)
 
 ### Bug Fixes
