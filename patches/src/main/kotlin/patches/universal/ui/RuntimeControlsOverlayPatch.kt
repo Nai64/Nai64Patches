@@ -391,8 +391,11 @@ private fun addOverlayListeners(
         )}
         return-void
         :nai64_overlay_open_menu
+        new-instance v3, Landroid/view/ContextThemeWrapper;
+        const v4, 0x01030226
+        invoke-direct {v3, p0, v4}, Landroid/view/ContextThemeWrapper;-><init>(Landroid/content/Context;I)V
         new-instance v2, Landroid/app/AlertDialog${'$'}Builder;
-        invoke-direct {v2, p0}, Landroid/app/AlertDialog${'$'}Builder;-><init>(Landroid/content/Context;)V
+        invoke-direct {v2, v3}, Landroid/app/AlertDialog${'$'}Builder;-><init>(Landroid/content/Context;)V
         const-string v3, "${StartupHooks.escapeSmali(title)}"
         invoke-virtual {v2, v3}, Landroid/app/AlertDialog${'$'}Builder;->setTitle(Ljava/lang/CharSequence;)Landroid/app/AlertDialog${'$'}Builder;
         ${buildCustomMenuLayout(activity.type, description, menuItems, outlineColor)}
@@ -661,7 +664,19 @@ private fun addOverlayListeners(
         invoke-static {v1}, Landroid/net/Uri;->parse(Ljava/lang/String;)Landroid/net/Uri;
         move-result-object v1
         invoke-virtual {v0, v1}, Landroid/content/Intent;->setData(Landroid/net/Uri;)Landroid/content/Intent;
+        invoke-virtual {p0}, Landroid/content/Context;->getPackageManager()Landroid/content/pm/PackageManager;
+        move-result-object v2
+        invoke-virtual {v0, v2}, Landroid/content/Intent;->resolveActivity(Landroid/content/pm/PackageManager;)Landroid/content/ComponentName;
+        move-result-object v2
+        if-eqz v2, :nai64_overlay_repository_unavailable
         invoke-virtual {p0, v0}, Landroid/app/Activity;->startActivity(Landroid/content/Intent;)V
+        goto :nai64_overlay_done
+        :nai64_overlay_repository_unavailable
+        const-string v1, "No browser is available to open the repository."
+        const/4 v2, 0x0
+        invoke-static {p0, v1, v2}, Landroid/widget/Toast;->makeText(Landroid/content/Context;Ljava/lang/CharSequence;I)Landroid/widget/Toast;
+        move-result-object v1
+        invoke-virtual {v1}, Landroid/widget/Toast;->show()V
         :nai64_overlay_done
         return-void
     """))
@@ -899,7 +914,7 @@ private fun injectOverlay(
         iput-object v0, p0, ${activity.type}->${OVERLAY_BUTTON}:$OVERLAY_BUTTON_FIELD
         new-instance v10, Landroid/widget/FrameLayout${'$'}LayoutParams;
         invoke-direct {v10, v2, v2}, Landroid/widget/FrameLayout${'$'}LayoutParams;-><init>(II)V
-        const/16 v4, 0xc
+        const/4 v4, 0x4
         int-to-float v4, v4
         mul-float/2addr v4, v1
         float-to-int v4, v4
