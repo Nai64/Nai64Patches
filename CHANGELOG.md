@@ -1,3 +1,9 @@
+## [1.0.1](https://github.com/Zanuaimi/Nai64Patches/compare/1.0.0...1.0.1) (2026-08-30)
+
+### Bug Fixes
+
+* fix ([243a68a](https://github.com/Zanuaimi/Nai64Patches/commit/243a68a18df8b81917c4cc549bd641f72d5d7949))
+
 ## 1.0.0 (2026-08-30)
 
 ### Bug Fixes
