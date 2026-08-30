@@ -11,7 +11,7 @@ import java.util.logging.Logger
 val installSourceSpoofPatch = bytecodePatch(
     name = "Spoof Play Store Install Source",
     description = "Make the app believe it was installed from the Play Store",
-    default = true,
+    default = false,
 ) {
     execute {
         val logger = Logger.getLogger(this::class.java.name)

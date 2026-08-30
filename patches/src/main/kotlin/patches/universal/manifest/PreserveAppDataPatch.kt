@@ -13,7 +13,7 @@ private val restrictedBackupAttributes = listOf(
 val preserveAppDataPatch = resourcePatch(
     name = "Preserve App Data",
     description = "Keeps app data when reinstalling by setting hasFragileUserData so Android offers to keep data.",
-    default = true,
+    default = false,
 ) {
     execute {
         val logger = Logger.getLogger(this::class.java.name)
