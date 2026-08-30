@@ -1,3 +1,9 @@
+## [1.0.3](https://github.com/Zanuaimi/Nai64Patches/compare/1.0.2...1.0.3) (2026-08-30)
+
+### Bug Fixes
+
+* fix browser not found and positioning ([98b1a66](https://github.com/Zanuaimi/Nai64Patches/commit/98b1a66cf2bff7b16e9c6faa44a1af25d44ec182))
+
 ## [1.0.2](https://github.com/Zanuaimi/Nai64Patches/compare/1.0.1...1.0.2) (2026-08-30)
 
 ### Bug Fixes
