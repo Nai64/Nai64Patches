@@ -1,7 +1,7 @@
 {
-  "created_at": "2026-08-29T12:16:01",
-  "description": "## [1.36.0](https://github.com/Nai64/Nai64Patches/compare/1.35.3...1.36.0) (2026-08-29)\n\n### Bug Fixes\n\n* free iap polish ([a4ef888](https://github.com/Nai64/Nai64Patches/commit/a4ef888c53af7b87f5d721cbad6808f727b30547))\n* unlim currency v2 ([10cc715](https://github.com/Nai64/Nai64Patches/commit/10cc71578bde131c29308326317eb24cd8412ebe))\n\n### New Features\n\n* add unlock premium patch ([26c5f65](https://github.com/Nai64/Nai64Patches/commit/26c5f65fc19fd6c6b05d22dd6e1f1b233fa45755))",
-  "download_url": "https://github.com/Nai64/Nai64Patches/releases/download/1.36.0/patches-1.36.0.mpp",
+  "created_at": "2026-08-30T15:57:41",
+  "description": "## [1.37.0](https://github.com/Nai64/Nai64Patches/compare/1.36.0...1.37.0) (2026-08-30)\n\n### Bug Fixes\n\n* free iap fixes ([f236494](https://github.com/Nai64/Nai64Patches/commit/f236494508a0aa031599f45889e36ba8a604672e))\n* rc patches fix ([9db8341](https://github.com/Nai64/Nai64Patches/commit/9db83412e6afda0bae0de879b6e62bf7feb75dc1))\n* reduce heap for notification and gms patches ([a638c3e](https://github.com/Nai64/Nai64Patches/commit/a638c3eec527cbca29a65c86b8b1f81e9c6a4f71)), closes [#59](https://github.com/Nai64/Nai64Patches/issues/59)\n\n### New Features\n\n* added minor cool shits to te unllock premium patch ([bd5f774](https://github.com/Nai64/Nai64Patches/commit/bd5f77449fbd29920a91213842f2b5a5d6bcaf72))\n* buncha improvements for free iap (part 2) ([fa4f5e6](https://github.com/Nai64/Nai64Patches/commit/fa4f5e6b4b365f56546334c5a009a844f23a02e9))",
+  "download_url": "https://github.com/Nai64/Nai64Patches/releases/download/1.37.0/patches-1.37.0.mpp",
   "signature_download_url": "",
-  "version": "1.36.0"
+  "version": "1.37.0"
 }
