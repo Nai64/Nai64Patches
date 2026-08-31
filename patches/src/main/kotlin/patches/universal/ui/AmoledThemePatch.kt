@@ -53,7 +53,11 @@ val amoledThemePatch = resourcePatch(
         }
 
         val rawColor = (amoledColor ?: "#FF000000").trim()
-        val amoled = if (rawColor.matches(Regex("^#([0-9a-fA-F]{6}|[0-9a-fA-F]{8})$"))) rawColor else "#FF000000"
+        val hexRegex = Regex("^#([0-9a-fA-F]{3}|[0-9a-fA-F]{4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$")
+        val amoled = if (rawColor.matches(hexRegex)) {
+            // normalize #RGB -> #FFRRGGBB etc. for consistency, but keep original if valid
+            rawColor
+        } else "#FF000000"
         if (amoled != rawColor) logger.warning("Invalid AMOLED color '$rawColor', using $amoled")
 
         val baseTargets = mutableListOf(
@@ -66,30 +70,48 @@ val amoledThemePatch = resourcePatch(
         if (blackenStatusBar == true) baseTargets.add("android:statusBarColor")
         if (blackenNavigationBar == true) baseTargets.add("android:navigationBarColor")
 
-        // Material3 / Material You surface containers – the main source of dark-grey
+        // Full M3 / Material You dark tokens (v31+). Covers m3_sys_color_dark_*, md_theme_dark_*, etc.
         val surfaceTargets = listOf(
-            "colorSurface",
-            "colorSurfaceVariant",
-            "colorSurfaceContainer",
-            "colorSurfaceContainerLow",
-            "colorSurfaceContainerLowest",
-            "colorSurfaceContainerHigh",
-            "colorSurfaceContainerHighest",
-            "colorSurfaceInverse",
-            "colorOnSurface",
-            "elevationOverlayColor",
-            "surfaceColor",
-            "surfaceContainer",
+            "colorSurface", "android:colorSurface",
+            "colorSurfaceVariant", "android:colorSurfaceVariant",
+            "colorSurfaceContainer", "colorSurfaceContainerLow", "colorSurfaceContainerLowest",
+            "colorSurfaceContainerHigh", "colorSurfaceContainerHighest",
+            "colorSurfaceBright", "colorSurfaceDim",
+            "colorPrimaryContainer", "colorSecondaryContainer", "colorTertiaryContainer",
+            "colorOnPrimaryContainer", "colorOnSecondaryContainer",
+            "background", "surface", "surfaceVariant",
+            "outline", "outlineVariant", "scrim", "inverseSurface", "inverseOnSurface", "inversePrimary",
+            "elevationOverlayColor", "surfaceColor", "surfaceContainer",
+            "m3_sys_color_dark_surface", "m3_sys_color_dark_background", "m3_sys_color_dark_surfaceContainer",
+            "md_theme_dark_surface", "md_theme_dark_background", "material_dynamic_dark_surface"
         )
+        // Denylist: never blacken text/icon colors that should stay light on black
+        val denylist = setOf(
+            "colorOnSurface", "android:colorOnSurface",
+            "colorOnBackground", "android:colorOnBackground",
+            "colorOnSurfaceVariant", "colorOnPrimary", "colorOnSecondary",
+            "colorOnSurfaceInverse", "colorSurfaceInverse"
+        )
+        val filteredSurfaceTargets = surfaceTargets.filter { it !in denylist }
         val targets = buildList {
             addAll(baseTargets)
-            if (blackenSurfaces == true) addAll(surfaceTargets)
+            if (blackenSurfaces == true) addAll(filteredSurfaceTargets)
         }
 
         var updatedStyles = 0
         var updatedColors = 0
+        var updatedColorStateLists = 0
+        var updatedDrawables = 0
 
-        // 1) Style pass – values*/ night dirs
+        // Helper to check if value is a color we should replace (dark grey, not accent, not transparent)
+        fun shouldReplaceColor(value: String): Boolean {
+            val v = value.trim()
+            if (v.equals("@android:color/transparent", ignoreCase = true) || v.equals("@color/transparent", ignoreCase = true)) return false
+            if (v.startsWith("@") || v.startsWith("?")) return false // reference, handled via theme attrs
+            return v.matches(Regex("^#([0-9a-fA-F]{3}|[0-9a-fA-F]{4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$"))
+        }
+
+        // 1) Style pass – values*/ night dirs + values-night colors.xml
         resDir.walkTopDown()
             .filter { it.isFile && it.extension.equals("xml", ignoreCase = true) }
             .filter { it.parentFile?.name?.startsWith("values", ignoreCase = true) == true }
@@ -101,24 +123,24 @@ val amoledThemePatch = resourcePatch(
                 runCatching {
                     document(relativePath).use { doc ->
                         if (isColorsFile && isNightDir) {
-                            // In night colors.xml, replace common dark surface/background greys
                             val colors = doc.getElementsByTagName("color")
                             var changed = false
                             for (i in 0 until colors.length) {
                                 val c = colors.item(i) as? Element ?: continue
                                 val name = c.getAttribute("name") ?: continue
                                 val lower = name.lowercase()
-                                // Heuristic: background / surface / card / primarySurface / windowBackground
                                 val isSurfaceColor = lower.contains("background") ||
                                     lower.contains("surface") ||
                                     lower.contains("card") ||
                                     lower.contains("window_background") ||
                                     lower.contains("colorprimarysurface") ||
-                                    lower.contains("elevation")
+                                    lower.contains("elevation") ||
+                                    lower.contains("m3_sys") ||
+                                    lower.contains("md_theme")
                                 if (!isSurfaceColor) continue
                                 val value = c.textContent?.trim() ?: continue
-                                // Only replace dark greys / near-black, leave accent colors
-                                if (value.matches(Regex("^#([0-9a-fA-F]{6}|[0-9a-fA-F]{8})$"))) {
+                                if (shouldReplaceColor(value)) {
+                                    // keep transparent, replace only dark greys (heuristic: any valid hex, but we blacken all surfaces)
                                     c.textContent = amoled
                                     changed = true
                                 }
@@ -137,19 +159,16 @@ val amoledThemePatch = resourcePatch(
                             val isTheme = parent.contains("Theme", ignoreCase = true) ||
                                 name.contains("Theme", ignoreCase = true)
 
-                            // In night dirs apply to all themes (and optionally all styles that define windowBackground);
-                            // outside night dirs only apply to explicitly Dark themes
                             val isDark = isNightDir ||
                                 name.contains("Dark", ignoreCase = true) ||
                                 parent.contains("Dark", ignoreCase = true) ||
                                 name.contains("Night", ignoreCase = true) ||
-                                parent.contains("Night", ignoreCase = true)
+                                parent.contains("Night", ignoreCase = true) ||
+                                name.contains("DayNight", ignoreCase = true) ||
+                                parent.contains("DayNight", ignoreCase = true)
                             if (!isDark) continue
-                            // In night dirs: apply to Theme styles primarily, but also to any style that already
-                            // defines one of our targets (covers ThemeOverlay, Widget.Card edge cases)
                             if (!isTheme && !isNightDir) continue
                             if (!isTheme && isNightDir) {
-                                // Quick check: does this style contain any target attr already?
                                 val items = style.getElementsByTagName("item")
                                 var hasTarget = false
                                 for (k in 0 until items.length) {
@@ -162,6 +181,11 @@ val amoledThemePatch = resourcePatch(
                             for (attribute in targets) {
                                 ensureThemeItem(doc, style, attribute, amoled)
                             }
+                            // Auto-fix text contrast: ensure onSurface stays light on pure black
+                            if (blackenSurfaces == true) {
+                                ensureThemeItem(doc, style, "colorOnSurface", "#FFFFFFFF")
+                                ensureThemeItem(doc, style, "android:colorOnSurface", "#FFFFFFFF")
+                            }
                             changed = true
                         }
                         if (changed) updatedStyles++
@@ -169,8 +193,60 @@ val amoledThemePatch = resourcePatch(
                 }.onFailure { logger.warning("Could not parse $relativePath: ${it.message}") }
             }
 
-        if (updatedStyles > 0 || updatedColors > 0) {
-            logger.info("Applied AMOLED $amoled to $updatedStyles dark theme style(s) and $updatedColors night color file(s)")
+        // 2) res/color* night ColorStateLists
+        resDir.walkTopDown()
+            .filter { it.isFile && it.extension.equals("xml", ignoreCase = true) }
+            .filter { it.parentFile?.path?.contains("color", ignoreCase = true) == true }
+            .filter { it.parentFile?.name?.contains("night", ignoreCase = true) == true }
+            .forEach { file ->
+                val relativePath = "res/" + file.relativeTo(resDir).invariantSeparatorsPath
+                runCatching {
+                    document(relativePath).use { doc ->
+                        val colors = doc.getElementsByTagName("color")
+                        var changed = false
+                        for (i in 0 until colors.length) {
+                            val c = colors.item(i) as? Element ?: continue
+                            val value = c.getAttribute("android:color")?.takeIf { it.isNotEmpty() } ?: c.textContent?.trim() ?: continue
+                            if (!shouldReplaceColor(value)) continue
+                            // only blacken if it's a dark grey, not an accent; heuristic: check parent selector is for surface/background
+                            if (c.getAttribute("android:color").isNotEmpty()) {
+                                c.setAttribute("android:color", amoled)
+                                changed = true
+                            } else if (c.textContent?.trim()?.matches(Regex("^#.*")) == true) {
+                                c.textContent = amoled
+                                changed = true
+                            }
+                        }
+                        if (changed) updatedColorStateLists++
+                    }
+                }.onFailure { logger.warning("Could not parse $relativePath: ${it.message}") }
+            }
+
+        // 3) res/drawable* night solids
+        resDir.walkTopDown()
+            .filter { it.isFile && it.extension.equals("xml", ignoreCase = true) }
+            .filter { it.parentFile?.path?.contains("drawable", ignoreCase = true) == true }
+            .filter { it.parentFile?.name?.contains("night", ignoreCase = true) == true }
+            .forEach { file ->
+                val relativePath = "res/" + file.relativeTo(resDir).invariantSeparatorsPath
+                runCatching {
+                    document(relativePath).use { doc ->
+                        val solids = doc.getElementsByTagName("solid")
+                        var changed = false
+                        for (i in 0 until solids.length) {
+                            val s = solids.item(i) as? Element ?: continue
+                            val color = s.getAttribute("android:color")?.takeIf { it.isNotEmpty() } ?: continue
+                            if (!shouldReplaceColor(color)) continue
+                            s.setAttribute("android:color", amoled)
+                            changed = true
+                        }
+                        if (changed) updatedDrawables++
+                    }
+                }.onFailure { logger.warning("Could not parse $relativePath: ${it.message}") }
+            }
+
+        if (updatedStyles > 0 || updatedColors > 0 || updatedColorStateLists > 0 || updatedDrawables > 0) {
+            logger.info("Applied AMOLED $amoled to $updatedStyles dark theme style(s), $updatedColors night color file(s), $updatedColorStateLists ColorStateList(s), $updatedDrawables drawable(s)")
         } else {
             logger.warning("No dark themes found. No changes applied.")
         }
