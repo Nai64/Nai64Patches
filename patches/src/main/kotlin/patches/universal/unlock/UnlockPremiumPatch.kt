@@ -241,9 +241,12 @@ val unlockPremiumPatch = bytecodePatch(
                     val isGetString = (mname == "GetString" || mname == "getString" || mname == "getValue") && ref.returnType == "Ljava/lang/String;"
                     val isHasKey = (mname == "HasKey" || mname == "contains" || mname == "containsKey" || mname == "hasKey") && ref.returnType == "Z"
                     val isDataStoreGet = (mname == "get" && isDataStore && ref.parameterTypes.isNotEmpty() && ref.parameterTypes[0].contains("Key"))
+                    val isEditor = def == "Landroid/content/SharedPreferences\$Editor;"
+                    val isPutBoolean = isEditor && mname == "putBoolean" && ref.parameterTypes.size >= 2 && ref.parameterTypes[0] == "Ljava/lang/String;"
+                    val isPutString = isEditor && mname == "putString" && ref.parameterTypes.size >= 2 && ref.parameterTypes[0] == "Ljava/lang/String;"
 
-                    if (!isPlayerPrefs && !isSharedPrefs && !isDataStore) continue
-                    if (!isGetBoolean && !isGetInt && !isGetLong && !isGetString && !isHasKey && !isDataStoreGet) continue
+                    if (!isPlayerPrefs && !isSharedPrefs && !isDataStore && !isEditor) continue
+                    if (!isGetBoolean && !isGetInt && !isGetLong && !isGetString && !isHasKey && !isDataStoreGet && !isPutBoolean && !isPutString) continue
 
                     val keyRegister = when (insn) {
                         is com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction35c -> when (insn.registerCount) {
@@ -347,6 +350,38 @@ val unlockPremiumPatch = bytecodePatch(
                             }
                             patchedMethods.add("Prefs:${keyValue}:getString")
                             patched++
+                        }
+                        isPutBoolean -> {
+                            val valueReg: Int? = when (insn) {
+                                is com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction35c -> insn.registerE
+                                is com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction3rc -> insn.startRegister + 2
+                                else -> null
+                            }
+                            if (valueReg == null) continue
+                            try {
+                                method.addInstructions(index, "const/4 v$valueReg, 0x1")
+                                patchedMethods.add("Prefs:${keyValue}:putBoolean->true")
+                                patched++
+                            } catch (_: Exception) {}
+                        }
+                        isPutString -> {
+                            val valueReg: Int? = when (insn) {
+                                is com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction35c -> insn.registerE
+                                is com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction3rc -> insn.startRegister + 2
+                                else -> null
+                            }
+                            if (valueReg == null) continue
+                            try {
+                                // for sku_cache_price_premium, put a fake price
+                                val fakePrice = if (keyValue!!.contains("price")) "9.99" else "premium"
+                                if (valueReg <= 0xff) {
+                                    method.addInstructions(index, "const-string v$valueReg, \"$fakePrice\"")
+                                } else {
+                                    method.addInstructions(index, "const-string v0, \"$fakePrice\"\nmove-object v$valueReg, v0")
+                                }
+                                patchedMethods.add("Prefs:${keyValue}:putString")
+                                patched++
+                            } catch (_: Exception) {}
                         }
                     }
                 }
