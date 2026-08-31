@@ -40,6 +40,8 @@ private const val BUTTON_START_X = "nai64OverlayButtonStartX"
 private const val BUTTON_START_Y = "nai64OverlayButtonStartY"
 private const val CLOSE_CONFIRMATION = "nai64OverlayCloseConfirmation"
 private const val TOUCH_DRAGGED = "nai64OverlayTouchDragged"
+private const val MAX_TITLE_CHARACTERS = 80
+private const val MAX_DESCRIPTION_CHARACTERS = 500
 private const val DEFAULT_DESCRIPTION =
     "Welcome to Nai64Patches Runtime Controls Overlay. This experimental in-app overlay " +
         "contains controls that may change parts of the app or game at runtime. More may be " +
@@ -112,13 +114,13 @@ val runtimeControlsOverlayPatch = bytecodePatch(
         title = "Overlay title",
         default = "Nai64Patches Runtime Controls Overlay",
         key = "runtimeOverlayTitle",
-        description = "Title shown in the overlay menu.",
+        description = "Title shown in the overlay menu. Limited to 80 characters.",
     )
     val descriptionText by stringOption(
         title = "Overlay description",
         default = DEFAULT_DESCRIPTION,
         key = "runtimeOverlayDescription",
-        description = "Welcome and information shown below the overlay title.",
+        description = "Welcome and information shown below the overlay title. Limited to 500 characters.",
     )
     val repositoryText by stringOption(
         title = "Repository button text",
@@ -243,8 +245,12 @@ val runtimeControlsOverlayPatch = bytecodePatch(
     execute {
         // Normalize all options once so the generator below can assume valid, non-null values.
         val logger = Logger.getLogger(this::class.java.name)
+        // Clamp user-provided text before embedding it in the APK. The limits keep the title
+        // readable and leave enough room for the description and controls in the dialog.
         val titleText = title.orEmpty().ifBlank { "Nai64Patches Runtime Controls Overlay" }
+            .take(MAX_TITLE_CHARACTERS)
         val descriptionValue = descriptionText.orEmpty().ifBlank { DEFAULT_DESCRIPTION }
+            .take(MAX_DESCRIPTION_CHARACTERS)
         val repositoryLabel = repositoryText.orEmpty().ifBlank { "Nai64 repository" }
         val repository = repositoryUrl.orEmpty().ifBlank { "https://github.com/Nai64/Nai64Patches" }
         val background = parseColor(backgroundColor.orEmpty(), 0xCC101820.toInt())
@@ -516,6 +522,9 @@ private fun addOverlayListeners(
     // Explicit width and height limits keep the ScrollView usable across host themes and OEM
     // dialog implementations instead of allowing it to consume the entire display. Height uses
     // integer arithmetic so its register cannot be accidentally reused by width calculations.
+    // The minimum height belongs to the custom content, while the outer dialog remains WRAP_CONTENT
+    // so the standard action row is laid out after the menu instead of above empty space.
+    // The button-panel post-processing below also disables theme stacking for a stable action row.
     viewClick.addValidatedInstructionsWithLabels("onClick(View)", compactSmali("""
         instance-of v0, p1, Landroid/widget/CheckBox;
         if-eqz v0, :nai64_overlay_open_menu
@@ -548,7 +557,7 @@ private fun addOverlayListeners(
         invoke-direct {v2, v3}, Landroid/app/AlertDialog${'$'}Builder;-><init>(Landroid/content/Context;)V
         const-string v3, "${StartupHooks.escapeSmali(title)}"
         invoke-virtual {v2, v3}, Landroid/app/AlertDialog${'$'}Builder;->setTitle(Ljava/lang/CharSequence;)Landroid/app/AlertDialog${'$'}Builder;
-        ${buildCustomMenuLayout(activity.type, description, menuItems, outlineColor)}
+        ${buildCustomMenuLayout(activity.type, menuItems, outlineColor, description)}
         const/4 v4, 0x0
         const/4 v5, 0x0
         const/4 v6, 0x0
@@ -587,6 +596,8 @@ private fun addOverlayListeners(
         float-to-int v7, v7
         invoke-static {v8, v7}, Ljava/lang/Math;->min(II)I
         move-result v8
+        invoke-virtual {v3, v6}, Landroid/view/View;->setMinimumHeight(I)V
+        const/4 v6, -0x2
         invoke-virtual {v4, v8, v6}, Landroid/view/Window;->setLayout(II)V
         new-instance v5, Landroid/graphics/drawable/GradientDrawable;
         invoke-direct {v5}, Landroid/graphics/drawable/GradientDrawable;-><init>()V
@@ -659,6 +670,8 @@ private fun addOverlayListeners(
         instance-of v7, v6, Landroid/widget/LinearLayout;
         if-eqz v7, :nai64_overlay_menu_done
         check-cast v6, Landroid/widget/LinearLayout;
+        const/4 v7, 0x0
+        invoke-virtual {v6, v7}, Landroid/widget/LinearLayout;->setOrientation(I)V
         const/4 v7, 0x1
         invoke-virtual {v6, v7}, Landroid/widget/LinearLayout;->setGravity(I)V
         :nai64_overlay_menu_done
@@ -883,7 +896,7 @@ private fun addOverlayListeners(
         invoke-virtual {p0, v0}, Landroid/app/Activity;->startActivity(Landroid/content/Intent;)V
         goto :nai64_overlay_done
         :try_end_nai64_overlay_repository
-        .catch Landroid/content/ActivityNotFoundException; {:try_start_nai64_overlay_repository .. :try_end_nai64_overlay_repository} :nai64_overlay_repository_unavailable
+        .catch Ljava/lang/Exception; {:try_start_nai64_overlay_repository .. :try_end_nai64_overlay_repository} :nai64_overlay_repository_unavailable
         :nai64_overlay_repository_unavailable
         const-string v1, "No app is available to open the repository link."
         const/4 v2, 0x0
@@ -900,56 +913,63 @@ private fun addOverlayListeners(
 
 private fun buildCustomMenuLayout(
     activityType: String,
-    description: String,
     menuItems: List<String>,
     outlineColor: Int,
+    description: String,
 ): String = buildString {
-    // Keep the content in a ScrollView because descriptions and future controls may exceed the
-    // available height. The caller separately constrains the dialog window dimensions.
-    appendLine("new-instance v3, Landroid/widget/ScrollView;")
-    appendLine("invoke-direct {v3, p0}, Landroid/widget/ScrollView;-><init>(Landroid/content/Context;)V")
-    appendLine("new-instance v4, Landroid/widget/LinearLayout;")
-    appendLine("invoke-direct {v4, p0}, Landroid/widget/LinearLayout;-><init>(Landroid/content/Context;)V")
-    appendLine("const/4 v5, 0x1")
-    appendLine("invoke-virtual {v4, v5}, Landroid/widget/LinearLayout;->setOrientation(I)V")
+    // The root keeps the description outside the scrolling control list. This makes the visual
+    // hierarchy explicit: title (AlertDialog), description (root), then scrollable controls.
+    appendLine("new-instance v3, Landroid/widget/LinearLayout;")
+    appendLine("invoke-direct {v3, p0}, Landroid/widget/LinearLayout;-><init>(Landroid/content/Context;)V")
+    appendLine("const/4 v4, 0x1")
+    appendLine("invoke-virtual {v3, v4}, Landroid/widget/LinearLayout;->setOrientation(I)V")
     appendLine("invoke-virtual {p0}, Landroid/content/Context;->getResources()Landroid/content/res/Resources;")
-    appendLine("move-result-object v5")
-    appendLine("invoke-virtual {v5}, Landroid/content/res/Resources;->getDisplayMetrics()Landroid/util/DisplayMetrics;")
-    appendLine("move-result-object v5")
-    appendLine("iget v5, v5, Landroid/util/DisplayMetrics;->density:F")
-    appendLine("const/high16 v6, 0x41c00000")
-    appendLine("mul-float/2addr v5, v6")
-    appendLine("float-to-int v5, v5")
-    appendLine("invoke-virtual {v4, v5, v5, v5, v5}, Landroid/view/View;->setPadding(IIII)V")
-    appendLine("new-instance v5, Landroid/widget/TextView;")
-    appendLine("invoke-direct {v5, p0}, Landroid/widget/TextView;-><init>(Landroid/content/Context;)V")
-    appendLine("const-string v6, \"${StartupHooks.escapeSmali(description)}\"")
-    appendLine("invoke-virtual {v5, v6}, Landroid/widget/TextView;->setText(Ljava/lang/CharSequence;)V")
-    appendLine("const v6, 0x${Integer.toHexString(outlineColor)}")
-    appendLine("invoke-virtual {v5, v6}, Landroid/widget/TextView;->setTextColor(I)V")
-    appendLine("const/high16 v6, 0x41600000")
-    appendLine("invoke-virtual {v5, v6}, Landroid/widget/TextView;->setTextSize(F)V")
-    appendLine("invoke-virtual {v4, v5}, Landroid/view/ViewGroup;->addView(Landroid/view/View;)V")
+    appendLine("move-result-object v4")
+    appendLine("invoke-virtual {v4}, Landroid/content/res/Resources;->getDisplayMetrics()Landroid/util/DisplayMetrics;")
+    appendLine("move-result-object v4")
+    appendLine("iget v4, v4, Landroid/util/DisplayMetrics;->density:F")
+    appendLine("const/high16 v5, 0x41c00000")
+    appendLine("mul-float/2addr v4, v5")
+    appendLine("float-to-int v4, v4")
+    appendLine("invoke-virtual {v3, v4, v4, v4, v4}, Landroid/view/View;->setPadding(IIII)V")
+    appendLine("new-instance v4, Landroid/widget/TextView;")
+    appendLine("invoke-direct {v4, p0}, Landroid/widget/TextView;-><init>(Landroid/content/Context;)V")
+    appendLine("const-string v5, \"${StartupHooks.escapeSmali(description)}\"")
+    appendLine("invoke-virtual {v4, v5}, Landroid/widget/TextView;->setText(Ljava/lang/CharSequence;)V")
+    appendLine("const v5, 0x${Integer.toHexString(outlineColor)}")
+    appendLine("invoke-virtual {v4, v5}, Landroid/widget/TextView;->setTextColor(I)V")
+    appendLine("const/high16 v5, 0x41600000")
+    appendLine("invoke-virtual {v4, v5}, Landroid/widget/TextView;->setTextSize(F)V")
+    appendLine("invoke-virtual {v3, v4}, Landroid/view/ViewGroup;->addView(Landroid/view/View;)V")
+    appendLine("new-instance v5, Landroid/widget/ScrollView;")
+    appendLine("invoke-direct {v5, p0}, Landroid/widget/ScrollView;-><init>(Landroid/content/Context;)V")
+    appendLine("const/4 v4, 0x1")
+    appendLine("invoke-virtual {v5, v4}, Landroid/widget/ScrollView;->setFillViewport(Z)V")
+    appendLine("new-instance v6, Landroid/widget/LinearLayout;")
+    appendLine("invoke-direct {v6, p0}, Landroid/widget/LinearLayout;-><init>(Landroid/content/Context;)V")
+    appendLine("const/4 v4, 0x1")
+    appendLine("invoke-virtual {v6, v4}, Landroid/widget/LinearLayout;->setOrientation(I)V")
     menuItems.forEachIndexed { index, item ->
         // IDs are local to this generated menu and intentionally start at one because the click
         // handler subtracts one before matching the selected control index.
-        appendLine("new-instance v5, Landroid/widget/CheckBox;")
-        appendLine("invoke-direct {v5, p0}, Landroid/widget/CheckBox;-><init>(Landroid/content/Context;)V")
-        appendLine("const-string v6, \"${StartupHooks.escapeSmali(item)}\"")
-        appendLine("invoke-virtual {v5, v6}, Landroid/widget/TextView;->setText(Ljava/lang/CharSequence;)V")
-        appendLine("const/4 v6, ${index + 1}")
-        appendLine("invoke-virtual {v5, v6}, Landroid/view/View;->setId(I)V")
+        appendLine("new-instance v7, Landroid/widget/CheckBox;")
+        appendLine("invoke-direct {v7, p0}, Landroid/widget/CheckBox;-><init>(Landroid/content/Context;)V")
+        appendLine("const-string v8, \"${StartupHooks.escapeSmali(item)}\"")
+        appendLine("invoke-virtual {v7, v8}, Landroid/widget/TextView;->setText(Ljava/lang/CharSequence;)V")
+        appendLine("const/4 v8, ${index + 1}")
+        appendLine("invoke-virtual {v7, v8}, Landroid/view/View;->setId(I)V")
         val field = when (item) {
             "Keep screen awake" -> KEEP_SCREEN_AWAKE_STATE
             "Fullscreen" -> FULLSCREEN_STATE
             else -> ALLOW_SCREENSHOTS_STATE
         }
-        appendLine("iget-boolean v6, p0, $activityType->$field:Z")
-        appendLine("invoke-virtual {v5, v6}, Landroid/widget/CompoundButton;->setChecked(Z)V")
-        appendLine("invoke-virtual {v5, p0}, Landroid/view/View;->setOnClickListener(Landroid/view/View\$OnClickListener;)V")
-        appendLine("invoke-virtual {v4, v5}, Landroid/view/ViewGroup;->addView(Landroid/view/View;)V")
+        appendLine("iget-boolean v8, p0, $activityType->$field:Z")
+        appendLine("invoke-virtual {v7, v8}, Landroid/widget/CompoundButton;->setChecked(Z)V")
+        appendLine("invoke-virtual {v7, p0}, Landroid/view/View;->setOnClickListener(Landroid/view/View\$OnClickListener;)V")
+        appendLine("invoke-virtual {v6, v7}, Landroid/view/ViewGroup;->addView(Landroid/view/View;)V")
     }
-    appendLine("invoke-virtual {v3, v4}, Landroid/widget/ScrollView;->addView(Landroid/view/View;)V")
+    appendLine("invoke-virtual {v5, v6}, Landroid/widget/ScrollView;->addView(Landroid/view/View;)V")
+    appendLine("invoke-virtual {v3, v5}, Landroid/view/ViewGroup;->addView(Landroid/view/View;)V")
 }
 
 private fun buildControlHandler(
