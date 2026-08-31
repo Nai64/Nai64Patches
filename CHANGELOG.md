@@ -1,3 +1,9 @@
+## [1.0.11](https://github.com/Zanuaimi/Nai64Patches/compare/1.0.10...1.0.11) (2026-08-31)
+
+### Bug Fixes
+
+* accept value-returning generated methods ([35a3fab](https://github.com/Zanuaimi/Nai64Patches/commit/35a3fabe0111141821de263ab540c3973157fe11))
+
 ## [1.0.10](https://github.com/Zanuaimi/Nai64Patches/compare/1.0.9...1.0.10) (2026-08-31)
 
 ### Bug Fixes
