@@ -1,3 +1,9 @@
+## [1.0.10](https://github.com/Zanuaimi/Nai64Patches/compare/1.0.9...1.0.10) (2026-08-31)
+
+### Bug Fixes
+
+* escape closing brace explicitly ([d248c38](https://github.com/Zanuaimi/Nai64Patches/commit/d248c38039fe3a64beeec6c06fe90f42c2768e9e))
+
 ## [1.0.9](https://github.com/Zanuaimi/Nai64Patches/compare/1.0.8...1.0.9) (2026-08-31)
 
 ### Bug Fixes
