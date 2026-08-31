@@ -1188,7 +1188,9 @@ private fun MutableMethod.addValidatedInstructionsWithLabels(methodName: String,
     check(branchTargets.all { it in labels }) {
         "Generated $methodName contains an unresolved branch label."
     }
-    check(Regex("(?m)^\\s*(?:return-[^\\s]+|throw)\\b").containsMatchIn(smali)) {
+    // Smali uses `return-void` for void methods but `return v0` for value-returning methods such
+    // as onTouch(Z). Accept both forms so validation does not reject a structurally valid listener.
+    check(Regex("(?m)^\\s*(?:return(?:-[^\\s]+)?|throw)\\b").containsMatchIn(smali)) {
         "Generated $methodName has no terminal return or throw instruction."
     }
     // Escape the closing brace explicitly: Android's ICU regex engine rejects an unescaped }
