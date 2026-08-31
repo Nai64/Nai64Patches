@@ -306,6 +306,106 @@ internal object PairipLicenseClientV3OnActivityCreateFingerprint : Fingerprint(
     returnType = "V",
 )
 
+internal object HuaweiBannerAdLoadFingerprint : Fingerprint(
+    definingClass = "Lcom/huawei/hms/ads/banner/BannerView;",
+    name = "loadAd",
+    returnType = "V",
+    parameters = listOf("Lcom/huawei/hms/ads/BannerAdOptions;"),
+)
+
+internal object HuaweiNativeAdLoadFingerprint : Fingerprint(
+    definingClass = "Lcom/huawei/hms/ads/nativead/NativeAdLoader;",
+    name = "loadAd",
+    returnType = "V",
+    parameters = listOf("Lcom/huawei/hms/ads/nativead/NativeAdConfiguration;"),
+)
+
+internal object HuaweiSplashAdLoadFingerprint : Fingerprint(
+    definingClass = "Lcom/huawei/hms/ads/splash/SplashView;",
+    name = "load",
+    returnType = "V",
+    parameters = listOf("Lcom/huawei/hms/ads/splash/SplashAdDisplayListener;"),
+)
+
+// -- StartApp / MoPub / Chartboost / InMobi / Mintegral (obfuscated fallback via strings) --
+
+internal object StartAppAdShowFingerprint : Fingerprint(
+    returnType = "V",
+    strings = listOf("StartAppSDK", "com.startapp"),
+)
+
+internal object MoPubInterstitialShowFingerprint : Fingerprint(
+    returnType = "V",
+    strings = listOf("com.mopub", "MoPubInterstitial"),
+)
+
+internal object ChartboostShowInterstitialFingerprint : Fingerprint(
+    returnType = "V",
+    strings = listOf("com.chartboost", "Chartboost"),
+)
+
+internal object InMobiInterstitialShowFingerprint : Fingerprint(
+    returnType = "V",
+    strings = listOf("com.inmobi", "IMInterstitial"),
+)
+
+internal object MintegralInterstitialShowFingerprint : Fingerprint(
+    returnType = "V",
+    strings = listOf("com.mintegral", "MTGInterstitial"),
+)
+
+// -- AdMob Native --
+
+internal object AdMobNativeAdViewFingerprint : Fingerprint(
+    definingClass = "Lcom/google/android/gms/ads/nativead/NativeAdView;",
+    name = "setNativeAd",
+    returnType = "V",
+    parameters = listOf("Lcom/google/android/gms/ads/nativead/NativeAd;"),
+)
+
+internal object AdMobAdLoaderLoadFingerprint : Fingerprint(
+    definingClass = "Lcom/google/android/gms/ads/AdLoader;",
+    name = "loadAd",
+    returnType = "V",
+    parameters = listOf("Lcom/google/android/gms/ads/AdRequest;"),
+)
+
+// -- Pangle Native / Vungle show --
+
+internal object PangleNativeShowFingerprint : Fingerprint(
+    definingClass = "Lcom/bytedance/sdk/openadsdk/api/nativeAd/PAGNativeAd;",
+    name = "show",
+    returnType = "V",
+)
+
+internal object VungleInterstitialShowFingerprint : Fingerprint(
+    definingClass = "Lcom/vungle/ads/VungleInterstitialAd;",
+    name = "play",
+    returnType = "V",
+    parameters = listOf("Landroid/app/Activity;"),
+)
+
+internal object VungleRewardedShowFingerprint : Fingerprint(
+    definingClass = "Lcom/vungle/ads/VungleRewardedAd;",
+    name = "play",
+    returnType = "V",
+    parameters = listOf("Landroid/app/Activity;"),
+)
+
+// -- Yandex direct (non-Unity wrapper) --
+
+internal object YandexInterstitialAdLoadFingerprint : Fingerprint(
+    definingClass = "Lcom/yandex/mobile/ads/interstitial/InterstitialAdLoader;",
+    name = "loadAd",
+    returnType = "V",
+)
+
+internal object YandexRewardedAdLoadFingerprint : Fingerprint(
+    definingClass = "Lcom/yandex/mobile/ads/rewarded/RewardedAdLoader;",
+    name = "loadAd",
+    returnType = "V",
+)
+
 // -- Native MAX (non-Unity) fingerprints --
 
 internal object MaxRewardedAdIsReadyFingerprint : Fingerprint(

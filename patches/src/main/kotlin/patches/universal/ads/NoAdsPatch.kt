@@ -8,6 +8,7 @@ import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.stringOption
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
 import java.util.logging.Logger
+import patches.universal.ads.util.cloneMutableAndPreserveParameters
 import patches.universal.ads.util.fireHiddenCallbacks
 
 private val logger = Logger.getLogger("patches.universal.ads.NoAdsPatch")
@@ -103,7 +104,10 @@ private fun BytecodePatchContext.patchReturnFalse(fingerprint: Fingerprint): Int
             if (m.implementation == null) continue
             if (target != null) {
                 val def = m.definingClass
-                val isAd = def.contains("ads") || def.contains("applovin") || def.contains("ironsource") || def.contains("unity3d") || def.contains("vungle") || def.contains("facebook") || def.contains("bytedance") || def.contains("google/android/gms/ads") || def.contains("huawei") || def.contains("mytarget") || def.contains("yandex") || def.contains("startapp") || def.contains("mopub") || def.contains("chartboost") || def.contains("inmobi") || def == target
+                val isAd = def.contains("ads") || def.contains("applovin") || def.contains("ironsource") || def.contains("unity3d") || def.contains("vungle") || def.contains("facebook") || def.contains("bytedance") || def.contains("google/android/gms/ads") || def.contains("huawei") || def.contains("mytarget") || def.contains("yandex") || def.contains("startapp") || def.contains("mopub") || def.contains("chartboost") || def.contains("inmobi") || def == target ||
+                    m.implementation!!.instructions.any { insn ->
+                        (insn as? ReferenceInstruction)?.reference?.toString()?.contains("ads", ignoreCase = true) == true
+                    }
                 if (!isAd) continue
             }
             val mutableClass = mutableClassDefByOrNull(classDef.type) ?: return@classDefForEach
@@ -122,6 +126,17 @@ private fun BytecodePatchContext.patchWith(fingerprint: Fingerprint, smali: Stri
     if (exact != null && exact.implementation != null) {
         val rc = exact.implementation?.registerCount ?: 0
         if ((fingerprint === MaxInterstitialAdShowAdFingerprint || fingerprint === MaxAppOpenAdShowAdFingerprint || fingerprint === MaxRewardedAdShowAdFingerprint) && rc < 7) {
+            val classDef = fingerprint.classDefOrNull
+            if (classDef != null) {
+                try {
+                    val cloned = exact.cloneMutableAndPreserveParameters(classDef)
+                    cloned.addInstructions(0, smali)
+                    logger.info("No Ads: patched ${fingerprint.name} via clone (low regs $rc) in ${exact.definingClass}")
+                    return 1
+                } catch (e: Exception) {
+                    logger.warning("No Ads: clone failed for ${fingerprint.name}: ${e.message}")
+                }
+            }
             logger.warning("No Ads: skipping ${fingerprint.name} in ${exact.definingClass}: register count $rc < 7")
             return 0
         }
@@ -263,6 +278,15 @@ val noAdsPatch = bytecodePatch(
         val hasHuawei = HuaweiRewardAdIsLoadedFingerprint.methodOrNull != null ||
             HuaweiRewardAdShowFingerprint.methodOrNull != null ||
             HuaweiInterstitialAdShowFingerprint.methodOrNull != null
+        val hasStartApp = StartAppAdShowFingerprint.methodOrNull != null
+        val hasMoPub = MoPubInterstitialShowFingerprint.methodOrNull != null
+        val hasChartboost = ChartboostShowInterstitialFingerprint.methodOrNull != null
+        val hasInMobi = InMobiInterstitialShowFingerprint.methodOrNull != null
+        val hasMintegral = MintegralInterstitialShowFingerprint.methodOrNull != null
+        val hasAdMobNative = AdMobNativeAdViewFingerprint.methodOrNull != null || AdMobAdLoaderLoadFingerprint.methodOrNull != null
+        val hasPangleNative = PangleNativeShowFingerprint.methodOrNull != null
+        val hasVungleShow = VungleInterstitialShowFingerprint.methodOrNull != null || VungleRewardedShowFingerprint.methodOrNull != null
+        val hasYandexDirect = YandexInterstitialAdLoadFingerprint.methodOrNull != null || YandexRewardedAdLoadFingerprint.methodOrNull != null
 
         if (
             !hasMaxUnity &&
@@ -279,7 +303,16 @@ val noAdsPatch = bytecodePatch(
             !hasMyTarget &&
             !hasYandexRewarded &&
             !hasYandexInterstitial &&
-            !hasHuawei
+            !hasHuawei &&
+            !hasStartApp &&
+            !hasMoPub &&
+            !hasChartboost &&
+            !hasInMobi &&
+            !hasMintegral &&
+            !hasAdMobNative &&
+            !hasPangleNative &&
+            !hasVungleShow &&
+            !hasYandexDirect
         ) {
             detectionLogger.warning(
                 "Could not find supported ad SDK (MAX Unity, native MAX, AdMob, " +
@@ -293,18 +326,27 @@ val noAdsPatch = bytecodePatch(
                 if (hasMaxUnity) add("MAX Unity")
                 if (hasNativeMax) add("native MAX")
                 if (hasAdMob) add("AdMob")
+                if (hasAdMobNative) add("AdMob Native")
                 if (hasUnityAdsV3) add("Unity v3")
                 if (hasUnityAdsV4) add("Unity v4/RewardedAd")
                 if (hasIronSource) add("ironSource")
                 if (hasAppLovinLegacy) add("AppLovin legacy")
                 if (hasVungle) add("Vungle")
+                if (hasVungleShow) add("Vungle show")
                 if (hasFacebook) add("Meta")
                 if (hasPangle) add("Pangle")
+                if (hasPangleNative) add("Pangle Native")
                 if (hasLevelPlay) add("LevelPlay")
                 if (hasMyTarget) add("MyTarget")
                 if (hasYandexRewarded) add("Yandex rewarded")
                 if (hasYandexInterstitial) add("Yandex interstitial")
+                if (hasYandexDirect) add("Yandex direct")
                 if (hasHuawei) add("Huawei")
+                if (hasStartApp) add("StartApp")
+                if (hasMoPub) add("MoPub")
+                if (hasChartboost) add("Chartboost")
+                if (hasInMobi) add("InMobi")
+                if (hasMintegral) add("Mintegral")
             }
             detectionLogger.info("No Ads: detected SDK(s): ${found.joinToString(", ")}")
         }
@@ -487,9 +529,63 @@ val noAdsPatch = bytecodePatch(
         if (effectiveBlockRewarded) {
             totalPatched += patchVoid(PangleRewardedShowFingerprint)
         }
-        // Pangle Native, StartApp, MoPub, InMobi, Chartboost — often obfuscated (a.b.c)
-        // Generic scan fallback handles these via patchVoid isAd check above; no dedicated fingerprint yet
-        // TODO: add Fingerprints for StartApp/MoPub/Chartboost/InMobi when samples are available
+        if (effectiveBlockNative) {
+            totalPatched += patchVoid(PangleNativeShowFingerprint)
+        }
+
+        // -- Vungle show (beyond load) --
+        if (effectiveBlockInterstitials) {
+            totalPatched += patchVoid(VungleInterstitialShowFingerprint)
+        }
+        if (effectiveBlockRewarded) {
+            totalPatched += patchVoid(VungleRewardedShowFingerprint)
+        }
+
+        // -- Huawei full (banner/native/splash) --
+        if (effectiveBlockBanners) {
+            totalPatched += patchVoid(HuaweiBannerAdLoadFingerprint)
+        }
+        if (effectiveBlockNative) {
+            totalPatched += patchVoid(HuaweiNativeAdLoadFingerprint)
+        }
+        if (effectiveBlockAppOpen) {
+            totalPatched += patchVoid(HuaweiSplashAdLoadFingerprint)
+        }
+
+        // -- Yandex direct --
+        if (effectiveBlockInterstitials) {
+            totalPatched += patchVoid(YandexInterstitialAdLoadFingerprint)
+        }
+        if (effectiveBlockRewarded) {
+            totalPatched += patchVoid(YandexRewardedAdLoadFingerprint)
+        }
+
+        // -- AdMob Native --
+        if (effectiveBlockNative || effectiveBlockBanners) {
+            totalPatched += patchVoid(AdMobNativeAdViewFingerprint)
+            totalPatched += patchVoid(AdMobAdLoaderLoadFingerprint)
+        }
+
+        // -- StartApp / MoPub / Chartboost / InMobi / Mintegral (obfuscated) --
+        if (effectiveBlockInterstitials) {
+            totalPatched += patchVoid(StartAppAdShowFingerprint)
+            totalPatched += patchVoid(MoPubInterstitialShowFingerprint)
+            totalPatched += patchVoid(ChartboostShowInterstitialFingerprint)
+            totalPatched += patchVoid(InMobiInterstitialShowFingerprint)
+            totalPatched += patchVoid(MintegralInterstitialShowFingerprint)
+        }
+
+        // Hide rewarded UI when rewarded blocked (inverse of Ads Free Rewards fake true)
+        if (effectiveBlockRewarded) {
+            totalPatched += patchReturnFalse(UnityAdsAdvertisementIsReadyFingerprint)
+            totalPatched += patchReturnFalse(UnityAdsAdvertisementIsReadyPlacementFingerprint)
+            totalPatched += patchReturnFalse(UnityAdsSdkIsReadyFingerprint)
+            totalPatched += patchReturnFalse(IronSourceIsRewardedVideoAvailableFingerprint)
+            totalPatched += patchReturnFalse(IronSourceIsInterstitialReadyFingerprint)
+            totalPatched += patchReturnFalse(MaxInterstitialAdIsReadyFingerprint)
+            totalPatched += patchReturnFalse(MaxAppOpenAdIsReadyFingerprint)
+            totalPatched += patchReturnFalse(MaxRewardedAdIsReadyFingerprint)
+        }
 
         if (totalPatched == 0) {
             detectionLogger.warning("No Ads: no patchable ad methods found for selected options. Try enabling more categories or the app uses an unsupported SDK (check log for detected SDKs).")
