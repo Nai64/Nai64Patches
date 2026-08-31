@@ -1,3 +1,9 @@
+## [1.39.0](https://github.com/Nai64/Nai64Patches/compare/1.38.0...1.39.0) (2026-08-31)
+
+### New Features
+
+* major no ads patch improvements ([217e31f](https://github.com/Nai64/Nai64Patches/commit/217e31fdcfdaa5d9f43c0708a7ef2f9caa7a9edc))
+
 ## [1.38.0](https://github.com/Nai64/Nai64Patches/compare/1.37.0...1.38.0) (2026-08-30)
 
 ### New Features
