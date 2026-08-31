@@ -1,3 +1,9 @@
+## [1.0.13](https://github.com/Zanuaimi/Nai64Patches/compare/1.0.12...1.0.13) (2026-08-31)
+
+### Bug Fixes
+
+* anchor overlay description and controls ([9d32838](https://github.com/Zanuaimi/Nai64Patches/commit/9d3283841c7e7f931e083d473d39d41e733529e2))
+
 ## [1.0.12](https://github.com/Zanuaimi/Nai64Patches/compare/1.0.11...1.0.12) (2026-08-31)
 
 ### Bug Fixes

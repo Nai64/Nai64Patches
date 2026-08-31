@@ -1,6 +1,6 @@
 {
   "NOTE": "Do NOT manually edit this file. This file is automatically updated when semantic release (release.yml) runs. Manually editing this file can break your releases and break third party tools that use this file.",
-  "version": "1.0.12",
+  "version": "1.0.13",
   "patches": [
     {
       "name": "Skip Consent Popup",
@@ -3703,7 +3703,7 @@
         {
           "key": "runtimeOverlayTitle",
           "title": "Overlay title",
-          "description": "Title shown in the overlay menu.",
+          "description": "Title shown in the overlay menu. Limited to 80 characters.",
           "required": false,
           "type": "kotlin.String",
           "default": "Nai64Patches Runtime Controls Overlay",
@@ -3712,7 +3712,7 @@
         {
           "key": "runtimeOverlayDescription",
           "title": "Overlay description",
-          "description": "Welcome and information shown below the overlay title.",
+          "description": "Welcome and information shown below the overlay title. Limited to 500 characters.",
           "required": false,
           "type": "kotlin.String",
           "default": "Welcome to Nai64Patches Runtime Controls Overlay. This experimental in-app overlay contains controls that may change parts of the app or game at runtime. More may be added in future updates.",
