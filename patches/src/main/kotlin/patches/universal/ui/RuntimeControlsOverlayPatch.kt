@@ -514,7 +514,8 @@ private fun addOverlayListeners(
         "Allow screenshots".takeIf { includeScreenshots },
     )
     // Explicit width and height limits keep the ScrollView usable across host themes and OEM
-    // dialog implementations instead of allowing it to consume the entire display.
+    // dialog implementations instead of allowing it to consume the entire display. Height uses
+    // integer arithmetic so its register cannot be accidentally reused by width calculations.
     viewClick.addValidatedInstructionsWithLabels("onClick(View)", compactSmali("""
         instance-of v0, p1, Landroid/widget/CheckBox;
         if-eqz v0, :nai64_overlay_open_menu
@@ -573,10 +574,10 @@ private fun addOverlayListeners(
         mul-float/2addr v5, v9
         float-to-int v5, v5
         iget v6, v8, Landroid/util/DisplayMetrics;->heightPixels:I
-        int-to-float v6, v6
-        const/high16 v7, 0x3f333333
-        mul-float/2addr v6, v7
-        float-to-int v6, v6
+        const/16 v7, 0x7
+        mul-int/2addr v6, v7
+        const/16 v7, 0xa
+        div-int/2addr v6, v7
         iget v8, v8, Landroid/util/DisplayMetrics;->widthPixels:I
         sub-int/2addr v8, v5
         sub-int/2addr v8, v5
@@ -714,7 +715,7 @@ private fun addOverlayListeners(
         iput-boolean v1, p0, ${activity.type}->${TOUCH_DRAGGED}:Z
         invoke-virtual {p1}, Landroid/view/View;->animate()Landroid/view/ViewPropertyAnimator;
         move-result-object v0
-        const/4 v1, 0x0
+        const/high16 v1, 0x3f800000
         invoke-virtual {v0, v1}, Landroid/view/ViewPropertyAnimator;->alpha(F)Landroid/view/ViewPropertyAnimator;
         const-wide/16 v1, 0xb4
         invoke-virtual {v0, v1, v2}, Landroid/view/ViewPropertyAnimator;->setDuration(J)Landroid/view/ViewPropertyAnimator;
@@ -755,6 +756,13 @@ private fun addOverlayListeners(
         if-lez v1, :nai64_overlay_move_y_skip
         const/4 v1, 0x1
         iput-boolean v1, p0, ${activity.type}->${TOUCH_DRAGGED}:Z
+        invoke-virtual {p1}, Landroid/view/View;->animate()Landroid/view/ViewPropertyAnimator;
+        move-result-object v0
+        const/high16 v1, 0x3f800000
+        invoke-virtual {v0, v1}, Landroid/view/ViewPropertyAnimator;->alpha(F)Landroid/view/ViewPropertyAnimator;
+        const-wide/16 v1, 0xb4
+        invoke-virtual {v0, v1, v2}, Landroid/view/ViewPropertyAnimator;->setDuration(J)Landroid/view/ViewPropertyAnimator;
+        invoke-virtual {v0}, Landroid/view/ViewPropertyAnimator;->start()V
         invoke-virtual {p2}, Landroid/view/MotionEvent;->getRawY()F
         move-result v0
         iget v1, p0, ${activity.type}->${TOUCH_START_Y}:F
