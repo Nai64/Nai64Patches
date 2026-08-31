@@ -1,7 +1,7 @@
 {
-  "created_at": "2026-08-31T10:54:19",
-  "description": "## [1.0.13](https://github.com/Zanuaimi/Nai64Patches/compare/1.0.12...1.0.13) (2026-08-31)\n\n### Bug Fixes\n\n* anchor overlay description and controls ([9d32838](https://github.com/Zanuaimi/Nai64Patches/commit/9d3283841c7e7f931e083d473d39d41e733529e2))",
-  "download_url": "https://github.com/Zanuaimi/Nai64Patches/releases/download/1.0.13/patches-1.0.13.mpp",
+  "created_at": "2026-08-31T11:20:36",
+  "description": "## [1.0.14](https://github.com/Zanuaimi/Nai64Patches/compare/1.0.13...1.0.14) (2026-08-31)\n\n### Bug Fixes\n\n* Fix registers ([167fd92](https://github.com/Zanuaimi/Nai64Patches/commit/167fd926918f017d5d80693a2873ee4b6bef4065))",
+  "download_url": "https://github.com/Zanuaimi/Nai64Patches/releases/download/1.0.14/patches-1.0.14.mpp",
   "signature_download_url": "",
-  "version": "1.0.13"
+  "version": "1.0.14"
 }
