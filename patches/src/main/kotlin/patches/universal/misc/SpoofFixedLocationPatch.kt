@@ -12,7 +12,7 @@ import java.util.logging.Logger
 @Suppress("unused")
 val spoofFixedLocationPatch = bytecodePatch(
     name = "Spoof Fixed Location",
-    description = "Returns fixed GPS coordinates for all location requests instead of the real device location. Useful for region-locked apps like rajiko that require a specific location.",
+    description = "Fakes your GPS location.",
     default = false,
 ) {
     val latitude by stringOption(

@@ -6,7 +6,7 @@ import java.util.logging.Logger
 @Suppress("unused")
 val disableOrientationLockPatch = bytecodePatch(
     name = "Disable Orientation Lock",
-    description = "No-ops Activity.setRequestedOrientation(...) so the app cannot force a fixed screen orientation; the device rotation is respected.",
+    description = "Lets the app rotate with the device.",
     default = false,
 ) {
     execute {

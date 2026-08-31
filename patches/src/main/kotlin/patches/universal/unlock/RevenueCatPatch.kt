@@ -8,7 +8,7 @@ import java.util.logging.Logger
 @Suppress("unused")
 val unlockEntitlementsRevenueCatPatch = bytecodePatch(
     name = "Unlock RevenueCat Entitlements",
-    description = "RevenueCat powers in-app subscriptions and 'pro' unlocks. This marks every entitlement (premium, ad-free, etc.) as active, so paid features are available without purchasing.",
+    description = "Unlock premium features in apps that use RevenueCat.",
     default = false,
 ) {
     execute {

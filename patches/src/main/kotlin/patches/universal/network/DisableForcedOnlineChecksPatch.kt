@@ -67,7 +67,7 @@ private fun engineFlags(types: List<String>): EngineFlags = EngineFlags(
 @Suppress("unused")
 val disableForcedOnlineChecksPatch = bytecodePatch(
     name = "Disable Forced Online Checks (Experimental)",
-    description = "Tries to skip online checks that prevent the app from starting. Auto mode handles most apps; turn it off to pick strategies manually. Experimental and may break online features.",
+    description = "Lets the app start without internet.",
     default = false,
 ) {
     val autoMode by booleanOption(

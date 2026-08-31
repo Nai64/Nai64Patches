@@ -7,7 +7,7 @@ import java.util.logging.Logger
 @Suppress("unused")
 val spoofSimSerialPatch = bytecodePatch(
     name = "Spoof SIM Serial Number",
-    description = "Reports a chosen SIM serial number (ICCID) through TelephonyManager.getSimSerialNumber() so apps that fingerprint by ICCID see a constant value.",
+    description = "Fakes the SIM serial number.",
     default = false,
 ) {
     val iccid by stringOption(

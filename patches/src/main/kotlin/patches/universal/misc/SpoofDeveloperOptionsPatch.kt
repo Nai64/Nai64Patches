@@ -134,7 +134,7 @@ internal fun BytecodePatchContext.foldSettingsGetters(
 
 private val minSdkGuardPatch = app.morphe.patcher.patch.resourcePatch(
     name = "Spoof Developer Options (manifest guard) [internal]",
-    description = "Ensures AndroidManifest.xml retains a valid uses-sdk/minSdkVersion so apksig can sign the patched APK (fixes MinSdkVersionException on some Huawei APKs)",
+    description = "Fixes a Huawei install issue.",
     default = false,
 ) {
     execute {

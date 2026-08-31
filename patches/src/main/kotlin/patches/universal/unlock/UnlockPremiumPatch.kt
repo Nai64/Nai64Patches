@@ -14,7 +14,7 @@ import java.util.logging.Logger
 @Suppress("unused")
 val unlockPremiumPatch = bytecodePatch(
     name = "Unlock Premium",
-    description = "Unlocks premium features, subscriptions, and ownership checks. Makes isPremium/isOwned/isVip/hasReceipt return true, and forces SharedPreferences/DataStore purchase keys via getBoolean/getInt/contains to true.",
+    description = "Unlock premium features and remove paywalls.",
     default = false,
 ) {
     val extraKeys by stringOption(
