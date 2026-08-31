@@ -487,8 +487,11 @@ private fun addOverlayListeners(
         const-string v3, "${StartupHooks.escapeSmali(title)}"
         invoke-virtual {v2, v3}, Landroid/app/AlertDialog${'$'}Builder;->setTitle(Ljava/lang/CharSequence;)Landroid/app/AlertDialog${'$'}Builder;
         ${buildCustomMenuLayout(activity.type, description, menuItems, outlineColor)}
+        const/4 v4, 0x0
         const/4 v5, 0x0
-        invoke-virtual {v2, v3, v5, v5, v5, v5}, Landroid/app/AlertDialog${'$'}Builder;->setView(Landroid/view/View;IIII)Landroid/app/AlertDialog${'$'}Builder;
+        const/4 v6, 0x0
+        const/4 v7, 0x0
+        invoke-virtual/range {v2 .. v7}, Landroid/app/AlertDialog${'$'}Builder;->setView(Landroid/view/View;IIII)Landroid/app/AlertDialog${'$'}Builder;
         const-string v3, "${StartupHooks.escapeSmali(repositoryLabel)}"
         invoke-virtual {v2, v3, p0}, Landroid/app/AlertDialog${'$'}Builder;->setNeutralButton(Ljava/lang/CharSequence;Landroid/content/DialogInterface${'$'}OnClickListener;)Landroid/app/AlertDialog${'$'}Builder;
         const-string v3, "Close menu"
