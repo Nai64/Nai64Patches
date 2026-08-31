@@ -1,6 +1,6 @@
 {
   "NOTE": "Do NOT manually edit this file. This file is automatically updated when semantic release (release.yml) runs. Manually editing this file can break your releases and break third party tools that use this file.",
-  "version": "1.40.0",
+  "version": "1.0.0",
   "patches": [
     {
       "name": "Skip Consent Popup",
@@ -3699,6 +3699,183 @@
       "dependencies": [],
       "compatiblePackages": null,
       "options": []
+    },
+    {
+      "name": "Runtime Controls Overlay (Experimental)",
+      "description": "Experimental in-app floating runtime controls overlay with a custom in-Activity UI, configurable title and description, optional runtime controls, mandatory repository action, draggable button, and close actions.",
+      "default": false,
+      "dependencies": [
+        "ResourcePatch"
+      ],
+      "compatiblePackages": null,
+      "options": [
+        {
+          "key": "runtimeOverlayTitle",
+          "title": "Overlay title",
+          "description": "Title shown in the overlay menu. Limited to 80 characters.",
+          "required": false,
+          "type": "kotlin.String",
+          "default": "Nai64Patches Runtime Controls Overlay",
+          "values": null
+        },
+        {
+          "key": "runtimeOverlayDescription",
+          "title": "Overlay description",
+          "description": "Description below the title. Limited to 500 characters.",
+          "required": false,
+          "type": "kotlin.String",
+          "default": "Welcome to Nai64Patches Runtime Controls Overlay. This experimental in-app overlay contains controls that may change parts of the app or game at runtime. More may be added in future updates.",
+          "values": null
+        },
+        {
+          "key": "runtimeOverlayRepositoryText",
+          "title": "Repository button text",
+          "description": "Text of the always-present repository button.",
+          "required": false,
+          "type": "kotlin.String",
+          "default": "Nai64 repository",
+          "values": null
+        },
+        {
+          "key": "runtimeOverlayRepositoryUrl",
+          "title": "Repository button URL",
+          "description": "URL opened by the repository button.",
+          "required": false,
+          "type": "kotlin.String",
+          "default": "https://github.com/Nai64/Nai64Patches",
+          "values": null
+        },
+        {
+          "key": "runtimeOverlayBackgroundColor",
+          "title": "Overlay background color",
+          "description": "Overlay background as #RRGGBB or #AARRGGBB.",
+          "required": false,
+          "type": "kotlin.String",
+          "default": "#CC101820",
+          "values": null
+        },
+        {
+          "key": "runtimeOverlayOutlineColor",
+          "title": "Overlay outline color",
+          "description": "Overlay outline as #RRGGBB or #AARRGGBB.",
+          "required": false,
+          "type": "kotlin.String",
+          "default": "#FF55D6BE",
+          "values": null
+        },
+        {
+          "key": "runtimeOverlayButtonText",
+          "title": "Overlay button text",
+          "description": "Button text. Maximum three characters.",
+          "required": false,
+          "type": "kotlin.String",
+          "default": "N",
+          "values": null
+        },
+        {
+          "key": "runtimeOverlayButtonTextColor",
+          "title": "Overlay button text color",
+          "description": "Button text color.",
+          "required": false,
+          "type": "kotlin.String",
+          "default": "#FF000000",
+          "values": null
+        },
+        {
+          "key": "runtimeOverlayButtonBackgroundColor",
+          "title": "Overlay button background color",
+          "description": "Button background color.",
+          "required": false,
+          "type": "kotlin.String",
+          "default": "#FFFFFFFF",
+          "values": null
+        },
+        {
+          "key": "runtimeOverlayButtonShape",
+          "title": "Overlay button shape",
+          "description": "Button shape.",
+          "required": false,
+          "type": "kotlin.String",
+          "default": "circle",
+          "values": {
+            "Circle": "circle",
+            "Squircle": "squircle",
+            "Square": "square"
+          }
+        },
+        {
+          "key": "runtimeOverlayButtonSizeDp",
+          "title": "Overlay button size (dp)",
+          "description": "Button size in density-independent pixels.",
+          "required": false,
+          "type": "kotlin.Int",
+          "default": 56,
+          "values": null
+        },
+        {
+          "key": "runtimeOverlayButtonIdleOpacityPercent",
+          "title": "Overlay button idle opacity (%)",
+          "description": "Idle opacity from 10 to 100 percent.",
+          "required": false,
+          "type": "kotlin.Int",
+          "default": 35,
+          "values": null
+        },
+        {
+          "key": "runtimeOverlayButtonPosition",
+          "title": "Overlay button position",
+          "description": "Initial floating button position.",
+          "required": false,
+          "type": "kotlin.String",
+          "default": "topRight",
+          "values": {
+            "Top left": "topLeft",
+            "Top middle": "topMiddle",
+            "Top right": "topRight",
+            "Center left": "centerLeft",
+            "Center right": "centerRight",
+            "Bottom left": "bottomLeft",
+            "Bottom middle": "bottomMiddle",
+            "Bottom right": "bottomRight"
+          }
+        },
+        {
+          "key": "runtimeOverlayActivityNameOverride",
+          "title": "Overlay Activity name override",
+          "description": "Optional Activity fallback target.",
+          "required": false,
+          "type": "kotlin.String",
+          "default": "",
+          "values": null
+        },
+        {
+          "key": "runtimeOverlayIncludeKeepScreenAwakeV2",
+          "title": "Include keep screen awake control",
+          "description": "Include the keep-screen-awake control.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "runtimeOverlayIncludeFullscreenV2",
+          "title": "Include fullscreen control",
+          "description": "Include the fullscreen control.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "runtimeOverlayIncludeScreenshotsV2",
+          "title": "Include allow screenshots control",
+          "description": "Include the allow-screenshots control.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        }
+      ]
     },
     {
       "name": "Show Search Result Scores",
