@@ -1,7 +1,7 @@
 {
-  "created_at": "2026-08-31T10:13:56",
-  "description": "## [1.0.11](https://github.com/Zanuaimi/Nai64Patches/compare/1.0.10...1.0.11) (2026-08-31)\n\n### Bug Fixes\n\n* accept value-returning generated methods ([35a3fab](https://github.com/Zanuaimi/Nai64Patches/commit/35a3fabe0111141821de263ab540c3973157fe11))",
-  "download_url": "https://github.com/Zanuaimi/Nai64Patches/releases/download/1.0.11/patches-1.0.11.mpp",
+  "created_at": "2026-08-31T10:32:56",
+  "description": "## [1.0.12](https://github.com/Zanuaimi/Nai64Patches/compare/1.0.11...1.0.12) (2026-08-31)\n\n### Bug Fixes\n\n* restore overlay menu and drag animation ([2989a61](https://github.com/Zanuaimi/Nai64Patches/commit/2989a61bae2f4c38461eb9183e57f9a850d07bf9))",
+  "download_url": "https://github.com/Zanuaimi/Nai64Patches/releases/download/1.0.12/patches-1.0.12.mpp",
   "signature_download_url": "",
-  "version": "1.0.11"
+  "version": "1.0.12"
 }
