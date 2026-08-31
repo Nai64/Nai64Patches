@@ -1191,7 +1191,9 @@ private fun MutableMethod.addValidatedInstructionsWithLabels(methodName: String,
     check(Regex("(?m)^\\s*(?:return-[^\\s]+|throw)\\b").containsMatchIn(smali)) {
         "Generated $methodName has no terminal return or throw instruction."
     }
-    Regex("(?m)^\\s*invoke-(?![^ ]*/range)\\S+\\s+\\{([^}]*)}")
+    // Escape the closing brace explicitly: Android's ICU regex engine rejects an unescaped }
+    // even though some desktop Java regex implementations accept it as a literal.
+    Regex("(?m)^\\s*invoke-(?![^ ]*/range)\\S+\\s+\\{([^}]*)\\}")
         .findAll(smali)
         .forEach { match ->
             val registerCount = match.groupValues[1].split(',').count { it.isNotBlank() }
