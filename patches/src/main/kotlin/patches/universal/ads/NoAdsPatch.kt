@@ -587,6 +587,30 @@ val noAdsPatch = bytecodePatch(
             totalPatched += patchReturnFalse(MaxRewardedAdIsReadyFingerprint)
         }
 
+        // Generic audio DAI ads (Klassik Radio, etc.) — adsIdentityToken, cuepoints
+        classDefForEach { classDef ->
+            val tl = classDef.type.lowercase()
+            if (!tl.contains("song") && !tl.contains("station") && !tl.contains("stream") && !tl.contains("ad")) return@classDefForEach
+            if (tl.contains("okhttp") || tl.contains("androidx")) return@classDefForEach
+            try {
+                val mutableClass = mutableClassDefBy(classDef)
+                for (method in mutableClass.methods) {
+                    val n = method.name.lowercase()
+                    val isAdToken = n.contains("adsidentitytoken") || n.contains("adsresponse") || n.contains("adsduration") || n.contains("cuepoints") || n.contains("adsid")
+                    if (!isAdToken) continue
+                    try {
+                        if (method.returnType == "Ljava/lang/String;" && method.implementation != null) {
+                            method.addInstructions(0, "const-string v0, \"\"\nreturn-object v0")
+                            totalPatched++
+                        } else if ((method.returnType.contains("List") || method.returnType.contains("Collection")) && method.implementation != null) {
+                            method.addInstructions(0, "invoke-static {}, Ljava/util/Collections;->emptyList()Ljava/util/List;\nmove-result-object v0\nreturn-object v0")
+                            totalPatched++
+                        }
+                    } catch (_: Exception) {}
+                }
+            } catch (_: Exception) {}
+        }
+
         if (totalPatched == 0) {
             detectionLogger.warning("No Ads: no patchable ad methods found for selected options. Try enabling more categories or the app uses an unsupported SDK (check log for detected SDKs).")
         } else {

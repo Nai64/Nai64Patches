@@ -116,10 +116,10 @@ val unlockPremiumPatch = bytecodePatch(
             ) { it.addInstructions(0, "const/4 v0, 0x1\nreturn v0") }
         }
 
-        for (negName in listOf("isExpired", "isCancelled", "isTrialExpired")) {
+        for (negName in listOf("isExpired", "isCancelled", "isTrialExpired", "isLocked", "isPremiumLocked", "isContentLocked")) {
             patchAll(Fingerprint(name = negName, returnType = "Z", custom = { _, c ->
                 val t = c.type.lowercase()
-                t.contains("premium") || t.contains("subscription") || t.contains("entitle") || t.contains("vip") || t.contains("billing") || t.contains("purchase")
+                t.contains("premium") || t.contains("subscription") || t.contains("entitle") || t.contains("vip") || t.contains("billing") || t.contains("purchase") || t.contains("content") || t.contains("station")
             }), negName) {
                 it.addInstructions(0, "const/4 v0, 0x0\nreturn v0")
             }
