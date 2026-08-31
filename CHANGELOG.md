@@ -1,3 +1,17 @@
+## [1.40.0](https://github.com/Nai64/Nai64Patches/compare/1.39.0...1.40.0) (2026-08-31)
+
+### Bug Fixes
+
+* reduce heap for unlock premium and getter spoofer ([8d912f2](https://github.com/Nai64/Nai64Patches/commit/8d912f21c663d732fefd4d61a738a13c0f7ed601))
+* unlock premium improvements (part 666) ([000575a](https://github.com/Nai64/Nai64Patches/commit/000575a1ad7e85a956bb8691b194022a569fdbd9))
+
+### New Features
+
+* improve amoled theme patch ([82f5a33](https://github.com/Nai64/Nai64Patches/commit/82f5a3340e81ac98e560c7e0c3e0e2fdb936f4a2))
+* improve disable telemetry patch ([d99c34e](https://github.com/Nai64/Nai64Patches/commit/d99c34e7df96a5462546ce2538e8bc74df3da2f2))
+* iurgw9u4gisdfgsdfhgkdjfhdjkfhgdfgffsssddddddddddddddddddddddddd ([2e60b96](https://github.com/Nai64/Nai64Patches/commit/2e60b96ec45b7914d75a87c0fd74437f3a06f6cd))
+* orientation patch improvements ([14b5f4b](https://github.com/Nai64/Nai64Patches/commit/14b5f4b5e5bc6a180a5ec1066b28008f392e531d))
+
 ## [1.39.0](https://github.com/Nai64/Nai64Patches/compare/1.38.0...1.39.0) (2026-08-31)
 
 ### New Features
