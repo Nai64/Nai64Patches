@@ -44,6 +44,17 @@ private fun parseColor(value: String, fallback: Int): Int {
     return hex.toLongOrNull(16)?.toInt() ?: fallback
 }
 
+private fun floatLiteral(value: Float): String = "0x${value.toBits().toUInt().toString(16)}"
+
+private fun activityDescriptor(value: String): String {
+    val trimmed = value.trim()
+    return if (trimmed.startsWith("L") && trimmed.endsWith(";")) {
+        trimmed
+    } else {
+        "L${trimmed.replace('.', '/')};"
+    }
+}
+
 private fun validateOverlayTemplateInputs(
     title: String,
     description: String,
@@ -65,11 +76,15 @@ private fun validateOverlayTemplateInputs(
 val runtimeControlsOverlayPatch = bytecodePatch(
     name = "Runtime Controls Overlay (Experimental)",
     description =
-        "Experimental in-app floating runtime controls for Nai64Patches users. Select which " +
-            "controls to include in Morphe Manager. Each selected control adds APK hooks and a " +
-            "runtime switch to the overlay. Switches start with the original app or game behavior; " +
-            "changes apply to the current Activity immediately. The overlay also provides a " +
-            "repository link, hide/remove actions, and customizable colors, text, and URL.",
+        "Experimental in-app floating runtime controls overlay. Morphe Manager can enable the " +
+            "keep screen awake, fullscreen, and allow screenshots controls; each is disabled by " +
+            "default and initially preserves the app's original behavior. The overlay also " +
+            "provides a configurable repository link, drag-and-drop positioning, a hide menu " +
+            "action, and a fully close action. Customize the overlay title, description, " +
+            "repository label and URL, background and outline colors, button text and colors, " +
+            "button shape, size, and initial position. Leave the Activity name override empty for " +
+            "automatic selection, or specify an Activity from AndroidManifest.xml as a fallback " +
+            "when automatic injection targets the wrong screen.",
     default = false,
 ) {
     dependsOn(StartupHooks.resolveRealApplicationPatch)
@@ -145,6 +160,15 @@ val runtimeControlsOverlayPatch = bytecodePatch(
         key = "runtimeOverlayButtonSizeDp",
         description = "Button width and height in density-independent pixels. Recommended: 48-72.",
     )
+    val buttonIdleOpacityPercent by intOption(
+        title = "Overlay button idle opacity (%)",
+        default = 35,
+        key = "runtimeOverlayButtonIdleOpacityPercent",
+        description =
+            "Opacity of the overlay button when idle, from 10 to 100 percent. Default: 35 " +
+                "percent. The button fades to full opacity while being touched or dragged and " +
+                "while the overlay menu is open.",
+    )
     val buttonPosition by stringOption(
         title = "Overlay button position",
         default = "topRight",
@@ -160,6 +184,18 @@ val runtimeControlsOverlayPatch = bytecodePatch(
             "Bottom middle" to "bottomMiddle",
             "Bottom right" to "bottomRight",
         ),
+    )
+    val activityNameOverride by stringOption(
+        title = "Overlay Activity name override",
+        default = "",
+        key = "runtimeOverlayActivityNameOverride",
+        description =
+            "Optional fallback target for the overlay. Leave empty for automatic Activity " +
+                "selection. If the overlay is injected into the wrong screen, enter the target " +
+                "Activity's fully qualified name from AndroidManifest.xml, for example " +
+                "com.example.MainActivity. Smali descriptors such as " +
+                "Lcom/example/MainActivity; are also accepted. Do not enter a method name. " +
+                "The Activity must be present in classes.dex and extend android.app.Activity.",
     )
     val includeKeepScreenAwake by booleanOption(
         title = "Include keep screen awake control",
@@ -198,7 +234,9 @@ val runtimeControlsOverlayPatch = bytecodePatch(
         val buttonBackground = parseColor(buttonBackgroundColor.orEmpty(), 0xFFFFFFFF.toInt())
         val shape = parseButtonShape(buttonShape.orEmpty())
         val buttonSize = (buttonSizeDp ?: 56).coerceIn(32, 128)
+        val buttonIdleOpacity = ((buttonIdleOpacityPercent ?: 35).coerceIn(10, 100)) / 100f
         val buttonGravity = parseButtonGravity(buttonPosition.orEmpty())
+        val activityOverride = activityNameOverride.orEmpty().trim()
         val selectedControls = listOfNotNull(
             "keep screen awake".takeIf { includeKeepScreenAwake == true },
             "fullscreen".takeIf { includeFullscreen == true },
@@ -230,7 +268,47 @@ val runtimeControlsOverlayPatch = bytecodePatch(
         }
 
         val launcher = StartupHooks.resolvedLauncherActivityDescriptor
-        val activity = candidates.firstOrNull { it.type == launcher } ?: candidates.firstOrNull()
+        val noHistoryActivities = StartupHooks.resolvedNoHistoryActivityDescriptors
+        fun transientLaunchActivity(activity: MutableClass): Boolean {
+            val onCreate = activity.methods.firstOrNull {
+                it.name == "onCreate" && it.parameterTypes == listOf("Landroid/os/Bundle;")
+            } ?: return false
+            val instructions = onCreate.implementation?.instructions ?: return false
+            var startsActivity = false
+            var finishes = false
+            for (instruction in instructions) {
+                val text = instruction.toString()
+                startsActivity = startsActivity || "startActivity" in text
+                finishes = finishes || "->finish(" in text
+            }
+            return startsActivity && finishes
+        }
+        fun activityScore(activity: MutableClass): Int {
+            var score = 0
+            if (activity.type == launcher) score += 1000
+            if (activity.type in noHistoryActivities) score -= 1500
+            if (activity.type == launcher && transientLaunchActivity(activity)) score -= 1500
+            if (activity.methods.any { AccessFlags.NATIVE.isSet(it.accessFlags) }) score += 500
+            val onCreateSize = activity.methods.firstOrNull {
+                it.name == "onCreate" && it.parameterTypes == listOf("Landroid/os/Bundle;")
+            }?.implementation?.instructions?.count() ?: 0
+            score += onCreateSize.coerceAtMost(200)
+            if (activity.methods.any {
+                    it.name == "onWindowFocusChanged" && it.returnType == "V" &&
+                        it.parameterTypes == listOf("Z")
+                }) score += 10
+            return score
+        }
+        val requestedActivity = activityOverride.takeIf { it.isNotEmpty() }?.let(::activityDescriptor)
+        val activity = requestedActivity?.let { descriptor ->
+            candidates.firstOrNull { it.type == descriptor }
+        } ?: candidates.maxByOrNull(::activityScore)
+        if (requestedActivity != null && activity?.type != requestedActivity) {
+            logger.warning(
+                "Overlay Activity override $activityOverride was not found or is not an Activity. " +
+                    "Using automatic Activity selection.",
+            )
+        }
         if (activity != null) {
             val focusMethod = activity.methods.firstOrNull {
                 it.name == "onWindowFocusChanged" && it.returnType == "V" &&
@@ -287,6 +365,7 @@ val runtimeControlsOverlayPatch = bytecodePatch(
                 includeKeepScreenAwake == true,
                 includeFullscreen == true,
                 includeScreenshots == true,
+                buttonIdleOpacity,
             )
             injectOverlay(
                 onWindowFocusChanged,
@@ -301,6 +380,7 @@ val runtimeControlsOverlayPatch = bytecodePatch(
                 includeKeepScreenAwake == true,
                 includeFullscreen == true,
                 includeScreenshots == true,
+                buttonIdleOpacity,
             )
             patched = 1
         }
@@ -362,6 +442,7 @@ private fun addOverlayListeners(
     includeKeepScreenAwake: Boolean,
     includeFullscreen: Boolean,
     includeScreenshots: Boolean,
+    buttonIdleOpacity: Float,
 ) {
     activity.interfaces.add("Landroid/view/View\$OnClickListener;")
     activity.interfaces.add("Landroid/view/View\$OnTouchListener;")
@@ -389,6 +470,14 @@ private fun addOverlayListeners(
         )}
         return-void
         :nai64_overlay_open_menu
+        iget-object v0, p0, ${activity.type}->${OVERLAY_BUTTON}:$OVERLAY_BUTTON_FIELD
+        invoke-virtual {v0}, Landroid/view/View;->animate()Landroid/view/ViewPropertyAnimator;
+        move-result-object v0
+        const v1, 0x3f800000
+        invoke-virtual {v0, v1}, Landroid/view/ViewPropertyAnimator;->alpha(F)Landroid/view/ViewPropertyAnimator;
+        const-wide/16 v1, 0xb4
+        invoke-virtual {v0, v1, v2}, Landroid/view/ViewPropertyAnimator;->setDuration(J)Landroid/view/ViewPropertyAnimator;
+        invoke-virtual {v0}, Landroid/view/ViewPropertyAnimator;->start()V
         new-instance v3, Landroid/view/ContextThemeWrapper;
         const v4, 0x01030226
         invoke-direct {v3, p0, v4}, Landroid/view/ContextThemeWrapper;-><init>(Landroid/content/Context;I)V
@@ -448,6 +537,16 @@ private fun addOverlayListeners(
         const/4 v6, 0x0
         invoke-virtual {v5, v6}, Landroid/widget/TextView;->setAllCaps(Z)V
         invoke-virtual {v5, v6}, Landroid/view/View;->setBackgroundColor(I)V
+        invoke-virtual {v5}, Landroid/view/View;->getLayoutParams()Landroid/view/ViewGroup${'$'}LayoutParams;
+        move-result-object v6
+        check-cast v6, Landroid/widget/LinearLayout${'$'}LayoutParams;
+        const/4 v7, 0x0
+        iput v7, v6, Landroid/view/ViewGroup${'$'}LayoutParams;->width:I
+        const/high16 v7, 0x3f800000
+        iput v7, v6, Landroid/widget/LinearLayout${'$'}LayoutParams;->weight:F
+        const/16 v7, 0x11
+        invoke-virtual {v5, v7}, Landroid/widget/TextView;->setGravity(I)V
+        invoke-virtual {v5}, Landroid/view/View;->requestLayout()V
         const/16 v5, -0x2
         invoke-virtual {v2, v5}, Landroid/app/AlertDialog;->getButton(I)Landroid/widget/Button;
         move-result-object v5
@@ -474,6 +573,16 @@ private fun addOverlayListeners(
         const/4 v6, 0x0
         invoke-virtual {v5, v6}, Landroid/widget/TextView;->setAllCaps(Z)V
         invoke-virtual {v5, v6}, Landroid/view/View;->setBackgroundColor(I)V
+        invoke-virtual {v5}, Landroid/view/View;->getLayoutParams()Landroid/view/ViewGroup${'$'}LayoutParams;
+        move-result-object v6
+        check-cast v6, Landroid/widget/LinearLayout${'$'}LayoutParams;
+        const/4 v7, 0x0
+        iput v7, v6, Landroid/view/ViewGroup${'$'}LayoutParams;->width:I
+        const/high16 v7, 0x3f800000
+        iput v7, v6, Landroid/widget/LinearLayout${'$'}LayoutParams;->weight:F
+        const/16 v7, 0x11
+        invoke-virtual {v5, v7}, Landroid/widget/TextView;->setGravity(I)V
+        invoke-virtual {v5}, Landroid/view/View;->requestLayout()V
         :nai64_overlay_menu_done
         return-void
     """))
@@ -495,6 +604,13 @@ private fun addOverlayListeners(
         const/4 v0, 0x0
         return v0
         :nai64_overlay_touch_down
+        invoke-virtual {p1}, Landroid/view/View;->animate()Landroid/view/ViewPropertyAnimator;
+        move-result-object v0
+        const v1, 0x3f800000
+        invoke-virtual {v0, v1}, Landroid/view/ViewPropertyAnimator;->alpha(F)Landroid/view/ViewPropertyAnimator;
+        const-wide/16 v1, 0xb4
+        invoke-virtual {v0, v1, v2}, Landroid/view/ViewPropertyAnimator;->setDuration(J)Landroid/view/ViewPropertyAnimator;
+        invoke-virtual {v0}, Landroid/view/ViewPropertyAnimator;->start()V
         invoke-virtual {p2}, Landroid/view/MotionEvent;->getRawX()F
         move-result v0
         iput v0, p0, ${activity.type}->${TOUCH_START_X}:F
@@ -588,8 +704,17 @@ private fun addOverlayListeners(
         return v0
         :nai64_overlay_touch_up
         iget-boolean v0, p0, ${activity.type}->${TOUCH_DRAGGED}:Z
-        if-nez v0, :nai64_overlay_touch_consumed
+        if-nez v0, :nai64_overlay_drag_finished
         invoke-virtual {p1}, Landroid/view/View;->performClick()Z
+        goto :nai64_overlay_touch_consumed
+        :nai64_overlay_drag_finished
+        invoke-virtual {p1}, Landroid/view/View;->animate()Landroid/view/ViewPropertyAnimator;
+        move-result-object v0
+        const v1, ${floatLiteral(buttonIdleOpacity)}
+        invoke-virtual {v0, v1}, Landroid/view/ViewPropertyAnimator;->alpha(F)Landroid/view/ViewPropertyAnimator;
+        const-wide/16 v1, 0xb4
+        invoke-virtual {v0, v1, v2}, Landroid/view/ViewPropertyAnimator;->setDuration(J)Landroid/view/ViewPropertyAnimator;
+        invoke-virtual {v0}, Landroid/view/ViewPropertyAnimator;->start()V
         :nai64_overlay_touch_consumed
         const/4 v0, 0x1
         return v0
@@ -642,7 +767,15 @@ private fun addOverlayListeners(
         invoke-virtual {v1, v0}, Landroid/view/ViewGroup;->removeView(Landroid/view/View;)V
         goto :nai64_overlay_done
         :nai64_overlay_toast
-        const-string v1, "Overlay menu hidden. Tap the N button to open it again."
+        iget-object v0, p0, ${activity.type}->${OVERLAY_BUTTON}:$OVERLAY_BUTTON_FIELD
+        invoke-virtual {v0}, Landroid/view/View;->animate()Landroid/view/ViewPropertyAnimator;
+        move-result-object v0
+        const v1, ${floatLiteral(buttonIdleOpacity)}
+        invoke-virtual {v0, v1}, Landroid/view/ViewPropertyAnimator;->alpha(F)Landroid/view/ViewPropertyAnimator;
+        const-wide/16 v1, 0xb4
+        invoke-virtual {v0, v1, v2}, Landroid/view/ViewPropertyAnimator;->setDuration(J)Landroid/view/ViewPropertyAnimator;
+        invoke-virtual {v0}, Landroid/view/ViewPropertyAnimator;->start()V
+        const-string v1, "Overlay menu hidden. Press the overlay button to open it again."
         const/4 v2, 0x0
         invoke-static {p0, v1, v2}, Landroid/widget/Toast;->makeText(Landroid/content/Context;Ljava/lang/CharSequence;I)Landroid/widget/Toast;
         move-result-object v1
@@ -652,27 +785,12 @@ private fun addOverlayListeners(
         new-instance v0, Landroid/content/Intent;
         const-string v1, "android.intent.action.VIEW"
         invoke-direct {v0, v1}, Landroid/content/Intent;-><init>(Ljava/lang/String;)V
-        const-string v1, "android.intent.category.DEFAULT"
-        invoke-virtual {v0, v1}, Landroid/content/Intent;->addCategory(Ljava/lang/String;)Landroid/content/Intent;
-        const-string v1, "android.intent.category.BROWSABLE"
-        invoke-virtual {v0, v1}, Landroid/content/Intent;->addCategory(Ljava/lang/String;)Landroid/content/Intent;
         const-string v1, "${StartupHooks.escapeSmali(repositoryUrl)}"
         invoke-static {v1}, Landroid/net/Uri;->parse(Ljava/lang/String;)Landroid/net/Uri;
         move-result-object v1
         invoke-virtual {v0, v1}, Landroid/content/Intent;->setData(Landroid/net/Uri;)Landroid/content/Intent;
-        invoke-virtual {p0}, Landroid/content/Context;->getPackageManager()Landroid/content/pm/PackageManager;
-        move-result-object v2
-        invoke-virtual {v0, v2}, Landroid/content/Intent;->resolveActivity(Landroid/content/pm/PackageManager;)Landroid/content/ComponentName;
-        move-result-object v2
-        if-eqz v2, :nai64_overlay_repository_unavailable
         invoke-virtual {p0, v0}, Landroid/app/Activity;->startActivity(Landroid/content/Intent;)V
         goto :nai64_overlay_done
-        :nai64_overlay_repository_unavailable
-        const-string v1, "No browser is available to open the repository."
-        const/4 v2, 0x0
-        invoke-static {p0, v1, v2}, Landroid/widget/Toast;->makeText(Landroid/content/Context;Ljava/lang/CharSequence;I)Landroid/widget/Toast;
-        move-result-object v1
-        invoke-virtual {v1}, Landroid/widget/Toast;->show()V
         :nai64_overlay_done
         return-void
     """))
@@ -831,6 +949,7 @@ private fun injectOverlay(
     includeKeepScreenAwake: Boolean,
     includeFullscreen: Boolean,
     includeScreenshots: Boolean,
+    buttonIdleOpacity: Float,
 ) {
     val helperName = "nai64CreateRuntimeOverlay"
     val helper = newMethod(
@@ -879,7 +998,7 @@ private fun injectOverlay(
         const/high16 v3, 0x3f800000
         const v4, -0x1000000
         invoke-virtual/range {v0 .. v4}, Landroid/widget/TextView;->setShadowLayer(FFFI)V
-        const/high16 v1, 0x3e800000
+        const v1, ${floatLiteral(buttonIdleOpacity)}
         invoke-virtual {v0, v1}, Landroid/view/View;->setAlpha(F)V
         invoke-virtual {p0}, Landroid/content/Context;->getResources()Landroid/content/res/Resources;
         move-result-object v11
