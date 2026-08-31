@@ -16,6 +16,17 @@ import com.android.tools.smali.dexlib2.immutable.ImmutableMethod
 import com.android.tools.smali.dexlib2.immutable.ImmutableMethodImplementation
 import java.util.logging.Logger
 
+/**
+ * Runtime overlay architecture
+ *
+ * This file is a bytecode generator, not an Android UI class. The Kotlin code runs in Morphe
+ * while patching; the strings built below become Smali instructions inside the target APK.
+ * That distinction explains the deliberately explicit registers, labels, method signatures, and
+ * returns throughout the file. The generated overlay itself uses only platform Android Views so
+ * it can be attached to Activities from different app and game engines.
+ */
+
+// Generated field names are kept in one namespace to avoid collisions with host-app members.
 private const val OVERLAY_BUTTON = "nai64RuntimeOverlayButton"
 private const val OVERLAY_BUTTON_FIELD = "Landroid/view/View;"
 private const val ORIGINAL_WINDOW_FLAGS = "nai64OriginalWindowFlags"
@@ -34,6 +45,8 @@ private const val DEFAULT_DESCRIPTION =
         "contains controls that may change parts of the app or game at runtime. More may be " +
         "added in future updates."
 
+// Configuration parsing happens at patch time. Invalid user input falls back before any Smali is
+// generated, which keeps malformed strings, colors, sizes, and gravity values out of the APK.
 private fun parseColor(value: String, fallback: Int): Int {
     val normalized = value.trim().removePrefix("#")
     val hex = when (normalized.length) {
@@ -88,8 +101,13 @@ val runtimeControlsOverlayPatch = bytecodePatch(
             "when automatic injection targets the wrong screen.",
     default = false,
 ) {
+    // The resource dependency resolves manifest information before this bytecode patch runs.
+    // StartupHooks supplies the launcher, noHistory activities, and application metadata used by
+    // the universal Activity selector below.
     dependsOn(StartupHooks.resolveRealApplicationPatch)
 
+    // These options are resolved once while building the patch. Their values are embedded as
+    // constants in generated Smali; they are not runtime preferences inside the patched app.
     val title by stringOption(
         title = "Overlay title",
         default = "Nai64Patches Runtime Controls Overlay",
@@ -223,6 +241,7 @@ val runtimeControlsOverlayPatch = bytecodePatch(
                 "state: Off, preserving the app's original screenshot behavior.",
     )
     execute {
+        // Normalize all options once so the generator below can assume valid, non-null values.
         val logger = Logger.getLogger(this::class.java.name)
         val titleText = title.orEmpty().ifBlank { "Nai64Patches Runtime Controls Overlay" }
         val descriptionValue = descriptionText.orEmpty().ifBlank { DEFAULT_DESCRIPTION }
@@ -262,6 +281,8 @@ val runtimeControlsOverlayPatch = bytecodePatch(
             return superMap[type]?.let { isActivity(it, seen) } == true
         }
 
+        // Build the Activity candidate set from class inheritance rather than package names or
+        // framework-specific classes. This is the part that gives the patch cross-engine reach.
         val candidates = mutableListOf<MutableClass>()
         classDefForEach { classDef ->
             if (!isActivity(classDef.type)) return@classDefForEach
@@ -301,9 +322,16 @@ val runtimeControlsOverlayPatch = bytecodePatch(
             return score
         }
         val requestedActivity = activityOverride.takeIf { it.isNotEmpty() }?.let(::activityDescriptor)
+        // Prefer an explicit override when supplied; otherwise score likely visible Activities.
+        // A diagnostic list is logged because automatic Activity selection is otherwise opaque
+        // when an app has splash, deep-link, proxy, and gameplay Activities.
         val activity = requestedActivity?.let { descriptor ->
             candidates.firstOrNull { it.type == descriptor }
         } ?: candidates.maxByOrNull(::activityScore)
+        logger.info(
+            "Runtime overlay Activity candidates: " +
+                candidates.joinToString { "${it.type}(score=${activityScore(it)})" },
+        )
         if (requestedActivity != null && activity?.type != requestedActivity) {
             logger.warning(
                 "Overlay Activity override $activityOverride was not found or is not an Activity. " +
@@ -311,6 +339,18 @@ val runtimeControlsOverlayPatch = bytecodePatch(
             )
         }
         if (activity != null) {
+            // Never add a second generated helper or reuse a field with an incompatible type.
+            // A duplicate method/field can make dex merging fail or leave the verifier with an
+            // ambiguous definition, so this target is skipped instead.
+            if (activity.methods.any { it.name == "nai64CreateRuntimeOverlay" }) {
+                logger.warning("${activity.type} already contains the overlay helper. No changes applied.")
+                return@execute
+            }
+            val existingButtonField = activity.fields.firstOrNull { it.name == OVERLAY_BUTTON }
+            if (existingButtonField != null && existingButtonField.type != OVERLAY_BUTTON_FIELD) {
+                logger.warning("${activity.type} has an incompatible overlay button field. No changes applied.")
+                return@execute
+            }
             val focusMethod = activity.methods.firstOrNull {
                 it.name == "onWindowFocusChanged" && it.returnType == "V" &&
                     it.parameterTypes == listOf("Z")
@@ -391,6 +431,8 @@ val runtimeControlsOverlayPatch = bytecodePatch(
                 "Injected experimental runtime controls overlay into $patched activit(ies); " +
                     "selected controls: ${selectedControls.joinToString().ifEmpty { "none" }}",
             )
+            // TODO(device-test): exercise the generated APK on Android API levels and host
+            // frameworks that cannot be represented by a JVM-only patch build.
         } else {
             logger.warning("No compatible Activity window focus methods found. No changes applied.")
         }
@@ -398,6 +440,9 @@ val runtimeControlsOverlayPatch = bytecodePatch(
 }
 
 private fun addOverlayField(activity: MutableClass) {
+    // State is stored on the selected Activity so listeners can access it through p0 without a
+    // separate singleton or application-global object. The nullable button field is also the
+    // creation guard used by the focus callback.
     val fields = listOf(
         OVERLAY_BUTTON to OVERLAY_BUTTON_FIELD,
         ORIGINAL_WINDOW_FLAGS to "I",
@@ -445,17 +490,32 @@ private fun addOverlayListeners(
     includeScreenshots: Boolean,
     buttonIdleOpacity: Float,
 ) {
-    activity.interfaces.add("Landroid/view/View\$OnClickListener;")
-    activity.interfaces.add("Landroid/view/View\$OnTouchListener;")
-    activity.interfaces.add("Landroid/content/DialogInterface\$OnClickListener;")
+    // The three callbacks implement two Android listener interfaces: View.OnClickListener handles
+    // both the floating button and menu CheckBoxes, while DialogInterface.OnClickListener handles
+    // the dialog buttons. A target that already owns one of these signatures is skipped earlier.
+    // These methods are generated from scratch, so their register layouts are intentionally
+    // fixed below. Keep p0/p1/p2 for the method parameters and use v0-v9 only for temporaries.
+    if (!activity.interfaces.contains("Landroid/view/View\$OnClickListener;")) {
+        activity.interfaces.add("Landroid/view/View\$OnClickListener;")
+    }
+    if (!activity.interfaces.contains("Landroid/view/View\$OnTouchListener;")) {
+        activity.interfaces.add("Landroid/view/View\$OnTouchListener;")
+    }
+    if (!activity.interfaces.contains("Landroid/content/DialogInterface\$OnClickListener;")) {
+        activity.interfaces.add("Landroid/content/DialogInterface\$OnClickListener;")
+    }
 
+    // onClick(View): v0 is the CheckBox test/result, v1 is the menu item id, and v2-v9 are UI
+    // construction temporaries. The terminal label is shared by both checkbox and menu paths.
     val viewClick = newMethod(activity, "onClick", listOf("Landroid/view/View;"), "V", registers = 10)
     val menuItems = listOfNotNull(
         "Keep screen awake".takeIf { includeKeepScreenAwake },
         "Fullscreen".takeIf { includeFullscreen },
         "Allow screenshots".takeIf { includeScreenshots },
     )
-    viewClick.addInstructionsWithLabels(0, compactSmali("""
+    // Explicit width and height limits keep the ScrollView usable across host themes and OEM
+    // dialog implementations instead of allowing it to consume the entire display.
+    viewClick.addValidatedInstructionsWithLabels("onClick(View)", compactSmali("""
         instance-of v0, p1, Landroid/widget/CheckBox;
         if-eqz v0, :nai64_overlay_open_menu
         invoke-virtual {p1}, Landroid/view/View;->getId()I
@@ -468,8 +528,9 @@ private fun addOverlayListeners(
             includeKeepScreenAwake,
             includeFullscreen,
             includeScreenshots,
+            ":nai64_overlay_click_done",
         )}
-        return-void
+        goto :nai64_overlay_click_done
         :nai64_overlay_open_menu
         iget-object v0, p0, ${activity.type}->${OVERLAY_BUTTON}:$OVERLAY_BUTTON_FIELD
         invoke-virtual {v0}, Landroid/view/View;->animate()Landroid/view/ViewPropertyAnimator;
@@ -511,6 +572,11 @@ private fun addOverlayListeners(
         const/high16 v5, 0x41400000
         mul-float/2addr v5, v9
         float-to-int v5, v5
+        iget v6, v8, Landroid/util/DisplayMetrics;->heightPixels:I
+        int-to-float v6, v6
+        const/high16 v7, 0x3f333333
+        mul-float/2addr v6, v7
+        float-to-int v6, v6
         iget v8, v8, Landroid/util/DisplayMetrics;->widthPixels:I
         sub-int/2addr v8, v5
         sub-int/2addr v8, v5
@@ -520,8 +586,7 @@ private fun addOverlayListeners(
         float-to-int v7, v7
         invoke-static {v8, v7}, Ljava/lang/Math;->min(II)I
         move-result v8
-        const/4 v7, -0x2
-        invoke-virtual {v4, v8, v7}, Landroid/view/Window;->setLayout(II)V
+        invoke-virtual {v4, v8, v6}, Landroid/view/Window;->setLayout(II)V
         new-instance v5, Landroid/graphics/drawable/GradientDrawable;
         invoke-direct {v5}, Landroid/graphics/drawable/GradientDrawable;-><init>()V
         const v6, 0x${Integer.toHexString(backgroundColor)}
@@ -596,15 +661,18 @@ private fun addOverlayListeners(
         const/4 v7, 0x1
         invoke-virtual {v6, v7}, Landroid/widget/LinearLayout;->setGravity(I)V
         :nai64_overlay_menu_done
+        :nai64_overlay_click_done
         return-void
     """))
         activity.methods.add(viewClick)
 
+    // onTouch(View,MotionEvent) consumes all touch events so a drag cannot also open the menu.
     val touch = newMethod(activity, "onTouch", listOf(
         "Landroid/view/View;",
         "Landroid/view/MotionEvent;",
     ), "Z", registers = 8)
-    touch.addInstructionsWithLabels(0, compactSmali("""
+    // Touch handling uses v0-v3 for coordinates and v4-v7 for parent/layout temporaries.
+    touch.addValidatedInstructionsWithLabels("onTouch(View,MotionEvent)", compactSmali("""
         invoke-virtual {p2}, Landroid/view/MotionEvent;->getActionMasked()I
         move-result v0
         const/4 v1, 0x0
@@ -733,11 +801,15 @@ private fun addOverlayListeners(
     """))
     activity.methods.add(touch)
 
+    // Dialog buttons are identified by Android's standard -1/-2/-3 constants: positive,
+    // negative, and neutral. The close-confirmation flag distinguishes the second dialog.
     val dialogClick = newMethod(activity, "onClick", listOf(
         "Landroid/content/DialogInterface;",
         "I",
     ), "V")
-    dialogClick.addInstructionsWithLabels(0, compactSmali("""
+    // Resolve the repository Intent before launching it; some Android profiles have no browser
+    // handler, and that case must remain a normal in-app Toast rather than a crash.
+    dialogClick.addValidatedInstructionsWithLabels("onClick(DialogInterface,int)", compactSmali("""
         iget-boolean v3, p0, ${activity.type}->${CLOSE_CONFIRMATION}:Z
         if-eqz v3, :nai64_overlay_main_dialog
         const/4 v3, 0x0
@@ -793,6 +865,12 @@ private fun addOverlayListeners(
         invoke-static {v1}, Landroid/net/Uri;->parse(Ljava/lang/String;)Landroid/net/Uri;
         move-result-object v1
         invoke-virtual {v0, v1}, Landroid/content/Intent;->setData(Landroid/net/Uri;)Landroid/content/Intent;
+        invoke-virtual {p0}, Landroid/content/Context;->getPackageManager()Landroid/content/pm/PackageManager;
+        move-result-object v3
+        const/4 v4, 0x0
+        invoke-virtual {v3, v0, v4}, Landroid/content/pm/PackageManager;->resolveActivity(Landroid/content/Intent;I)Landroid/content/pm/ResolveInfo;
+        move-result-object v3
+        if-eqz v3, :nai64_overlay_repository_unavailable
         :try_start_nai64_overlay_repository
         invoke-virtual {p0, v0}, Landroid/app/Activity;->startActivity(Landroid/content/Intent;)V
         goto :nai64_overlay_done
@@ -818,6 +896,8 @@ private fun buildCustomMenuLayout(
     menuItems: List<String>,
     outlineColor: Int,
 ): String = buildString {
+    // Keep the content in a ScrollView because descriptions and future controls may exceed the
+    // available height. The caller separately constrains the dialog window dimensions.
     appendLine("new-instance v3, Landroid/widget/ScrollView;")
     appendLine("invoke-direct {v3, p0}, Landroid/widget/ScrollView;-><init>(Landroid/content/Context;)V")
     appendLine("new-instance v4, Landroid/widget/LinearLayout;")
@@ -843,6 +923,8 @@ private fun buildCustomMenuLayout(
     appendLine("invoke-virtual {v5, v6}, Landroid/widget/TextView;->setTextSize(F)V")
     appendLine("invoke-virtual {v4, v5}, Landroid/view/ViewGroup;->addView(Landroid/view/View;)V")
     menuItems.forEachIndexed { index, item ->
+        // IDs are local to this generated menu and intentionally start at one because the click
+        // handler subtracts one before matching the selected control index.
         appendLine("new-instance v5, Landroid/widget/CheckBox;")
         appendLine("invoke-direct {v5, p0}, Landroid/widget/CheckBox;-><init>(Landroid/content/Context;)V")
         appendLine("const-string v6, \"${StartupHooks.escapeSmali(item)}\"")
@@ -867,7 +949,10 @@ private fun buildControlHandler(
     includeKeepScreenAwake: Boolean,
     includeFullscreen: Boolean,
     includeScreenshots: Boolean,
+    terminalLabel: String,
 ): String {
+    // Control branches are emitted only for enabled options. Disabled options are absent from
+    // both the menu and the handler, preserving the target app's original behavior by default.
     val blocks = mutableListOf<String>()
     var index = 0
     if (includeKeepScreenAwake) {
@@ -879,11 +964,15 @@ private fun buildControlHandler(
         index++
     }
     if (includeScreenshots) blocks += controlBranch(activityType, index, "0x2000", "screenshots")
-    if (blocks.isEmpty()) return ""
-    return blocks.joinToString("\n") + "\n:nai64_control_done"
+    if (blocks.isEmpty()) return "goto $terminalLabel"
+    // Every checkbox path exits through the caller-owned terminal label. This avoids relying on
+    // fall-through from generated control blocks into whatever instructions follow them.
+    return blocks.joinToString("\n").replace(":nai64_control_done", terminalLabel)
 }
 
 private fun controlBranch(activityType: String, index: Int, mask: String, kind: String): String = when (kind) {
+    // Window flags are restored from the captured original values when a switch is turned off;
+    // this avoids assuming that the host app started with a particular flag configuration.
     "keep", "screenshots" -> """
         const/16 v3, $index
         if-ne v1, v3, :nai64_next_control_$index
@@ -934,6 +1023,8 @@ private fun newMethod(
     registers: Int = 8,
     accessFlags: Int = AccessFlags.PUBLIC.value,
 ): MutableMethod = ImmutableMethod(
+    // The implementation starts empty; addInstructionsWithLabels parses and attaches the
+    // generated instruction list afterward. `registers` is the total DEX register frame size.
     activity.type,
     name,
     parameterTypes.map { com.android.tools.smali.dexlib2.immutable.ImmutableMethodParameter(it, emptySet(), null) },
@@ -966,6 +1057,8 @@ private fun injectOverlay(
     includeScreenshots: Boolean,
     buttonIdleOpacity: Float,
 ) {
+    // The helper is called from onWindowFocusChanged because that callback runs after the
+    // Activity has a usable window. The field-null guard makes repeated focus callbacks harmless.
     val helperName = "nai64CreateRuntimeOverlay"
     val helper = newMethod(
         activity = activity,
@@ -975,13 +1068,15 @@ private fun injectOverlay(
         registers = 15,
         accessFlags = AccessFlags.PRIVATE.value or AccessFlags.STATIC.value,
     )
+    // The helper deliberately owns a larger fixed register frame because it constructs the
+    // complete view hierarchy and uses /range invokes for multi-argument framework calls.
     val initialState = buildInitialState(0, activity.type, includeKeepScreenAwake, includeFullscreen, includeScreenshots)
     val buttonCornerRadius = if (buttonShape == 2) {
         "const/high16 v4, 0x41400000\n        invoke-virtual {v3, v4}, Landroid/graphics/drawable/GradientDrawable;->setCornerRadius(F)V"
     } else {
         ""
     }
-    helper.addInstructionsWithLabels(0, compactSmali("""
+    helper.addValidatedInstructionsWithLabels("nai64CreateRuntimeOverlay", compactSmali("""
         invoke-virtual {p0}, Landroid/app/Activity;->hasWindowFocus()Z
         move-result v1
         if-eqz v1, :nai64_overlay_done
@@ -1069,7 +1164,43 @@ private fun injectOverlay(
 }
 
 private fun compactSmali(smali: String): String =
+    // Remove indentation-only blank lines while preserving instruction order and label names.
     smali.lines().filter(String::isNotBlank).joinToString("\n")
+
+/**
+ * Performs cheap, generator-side validation before dexlib parses injected instructions.
+ *
+ * This is not a replacement for Android's verifier, but it catches the failures that previously
+ * produced an installable APK with a truncated or unterminated listener method.
+ */
+private fun MutableMethod.addValidatedInstructionsWithLabels(methodName: String, smali: String) {
+    // This lightweight preflight runs before dexlib2 parses the text. It is intentionally small,
+    // but catches unresolved branches, missing terminal instructions, and short invoke overflow.
+    val labels = smali.lineSequence()
+        .map(String::trim)
+        .filter { it.startsWith(":") }
+        .map { it.substring(1) }
+        .toSet()
+    val branchTargets = Regex("\\b(?:goto|if-[^, ]+)\\s+(?::([A-Za-z0-9_]+))")
+        .findAll(smali)
+        .map { it.groupValues[1] }
+        .toSet()
+    check(branchTargets.all { it in labels }) {
+        "Generated $methodName contains an unresolved branch label."
+    }
+    check(Regex("(?m)^\\s*(?:return-[^\\s]+|throw)\\b").containsMatchIn(smali)) {
+        "Generated $methodName has no terminal return or throw instruction."
+    }
+    Regex("(?m)^\\s*invoke-(?![^ ]*/range)\\S+\\s+\\{([^}]*)}")
+        .findAll(smali)
+        .forEach { match ->
+            val registerCount = match.groupValues[1].split(',').count { it.isNotBlank() }
+            check(registerCount <= 5) {
+                "Generated $methodName uses $registerCount registers in a short invoke; use /range."
+            }
+        }
+    addInstructionsWithLabels(0, smali)
+}
 
 private fun parseButtonGravity(position: String): Int = when (position) {
     "topLeft" -> 0x33
@@ -1090,6 +1221,8 @@ private fun buildInitialState(
     includeFullscreen: Boolean,
     includeScreenshots: Boolean,
 ): String = buildList {
+    // Capture the host window's original state before the overlay changes anything. Turning a
+    // control off later can then restore only the bits that were originally enabled.
     if (includeKeepScreenAwake) add(
         """
         iget v$base, p0, $activityType->${ORIGINAL_WINDOW_FLAGS}:I
