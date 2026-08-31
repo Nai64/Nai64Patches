@@ -1,6 +1,6 @@
 {
   "NOTE": "Do NOT manually edit this file. This file is automatically updated when semantic release (release.yml) runs. Manually editing this file can break your releases and break third party tools that use this file.",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "patches": [
     {
       "name": "Skip Consent Popup",
@@ -3693,7 +3693,7 @@
     },
     {
       "name": "Runtime Controls Overlay (Experimental)",
-      "description": "Experimental in-app floating runtime controls overlay. Morphe Manager can enable the keep screen awake, fullscreen, and allow screenshots controls; each is disabled by default and initially preserves the app's original behavior. The overlay also provides a configurable repository link, drag-and-drop positioning, a hide menu action, and a fully close action. Customize the overlay title, description, repository label and URL, background and outline colors, button text and colors, button shape, size, and initial position. Leave the Activity name override empty for automatic selection, or specify an Activity from AndroidManifest.xml as a fallback when automatic injection targets the wrong screen.",
+      "description": "Experimental in-app floating runtime controls overlay. Morphe Manager can enable the keep screen awake, fullscreen, and allow screenshots controls; each is disabled by default and initially preserves the app's original behavior. The overlay also provides a configurable repository link, drag-and-drop positioning, a hide menu action, and a fully close action. Customize the overlay title, description, repository label and URL, background and outline colors, button text and colors, button shape, size, initial position, and idle opacity. The button fades fully transparent while being dragged or after it is pressed. Leave the Activity name override empty for automatic selection, or specify an Activity from AndroidManifest.xml as a fallback when automatic injection targets the wrong screen.",
       "default": false,
       "dependencies": [
         "ResourcePatch"
@@ -3806,7 +3806,7 @@
         {
           "key": "runtimeOverlayButtonIdleOpacityPercent",
           "title": "Overlay button idle opacity (%)",
-          "description": "Opacity of the overlay button when idle, from 10 to 100 percent. Default: 35 percent. The button fades to full opacity while being touched or dragged and while the overlay menu is open.",
+          "description": "Opacity of the overlay button when idle, from 10 to 100 percent. Default: 35 percent. The button becomes fully transparent while being dragged and fades to transparent when pressed to open the menu.",
           "required": false,
           "type": "kotlin.Int",
           "default": 35,
