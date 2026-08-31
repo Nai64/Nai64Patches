@@ -876,7 +876,8 @@ private fun buildControlHandler(
         index++
     }
     if (includeScreenshots) blocks += controlBranch(activityType, index, "0x2000", "screenshots")
-    return (blocks + "return-void").joinToString("\n")
+    if (blocks.isEmpty()) return ""
+    return blocks.joinToString("\n") + "\n:nai64_control_done"
 }
 
 private fun controlBranch(activityType: String, index: Int, mask: String, kind: String): String = when (kind) {
@@ -888,17 +889,17 @@ private fun controlBranch(activityType: String, index: Int, mask: String, kind: 
         move-result-object v4
         if-eqz v0, :nai64_restore_$index
         ${if (kind == "screenshots") "const v5, $mask\n        invoke-virtual {v4, v5}, Landroid/view/Window;->clearFlags(I)V" else "const v5, $mask\n        invoke-virtual {v4, v5}, Landroid/view/Window;->addFlags(I)V"}
-        goto :nai64_control_done_$index
+        goto :nai64_control_done
         :nai64_restore_$index
         iget v5, p0, $activityType->${ORIGINAL_WINDOW_FLAGS}:I
         const v6, $mask
         and-int/2addr v5, v6
         if-eqz v5, :nai64_clear_$index
         invoke-virtual {v4, v6}, Landroid/view/Window;->addFlags(I)V
-        goto :nai64_control_done_$index
+        goto :nai64_control_done
         :nai64_clear_$index
         invoke-virtual {v4, v6}, Landroid/view/Window;->clearFlags(I)V
-        goto :nai64_control_done_$index
+        goto :nai64_control_done
         :nai64_next_control_$index
     """.trimIndent()
     "fullscreen" -> """
@@ -912,11 +913,11 @@ private fun controlBranch(activityType: String, index: Int, mask: String, kind: 
         if-eqz v0, :nai64_restore_$index
         const v6, 0x1706
         invoke-virtual {v5, v6}, Landroid/view/View;->setSystemUiVisibility(I)V
-        goto :nai64_control_done_$index
+        goto :nai64_control_done
         :nai64_restore_$index
         iget v6, p0, $activityType->${ORIGINAL_SYSTEM_UI}:I
         invoke-virtual {v5, v6}, Landroid/view/View;->setSystemUiVisibility(I)V
-        goto :nai64_control_done_$index
+        goto :nai64_control_done
         :nai64_next_control_$index
     """.trimIndent()
     else -> ""
