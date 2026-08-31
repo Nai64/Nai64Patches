@@ -512,8 +512,10 @@ private fun addOverlayListeners(
     }
 
     // onClick(View): v0 is the CheckBox test/result, v1 is the menu item id, and v2-v9 are UI
-    // construction temporaries. The terminal label is shared by both checkbox and menu paths.
-    val viewClick = newMethod(activity, "onClick", listOf("Landroid/view/View;"), "V", registers = 10)
+    // construction temporaries. `registers` is the total frame size, including p0/p1, so 12 is
+    // required to keep v0-v9 local instead of allowing v8/v9 to alias the parameter registers.
+    // The terminal label is shared by both checkbox and menu paths.
+    val viewClick = newMethod(activity, "onClick", listOf("Landroid/view/View;"), "V", registers = 12)
     val menuItems = listOfNotNull(
         "Keep screen awake".takeIf { includeKeepScreenAwake },
         "Fullscreen".takeIf { includeFullscreen },
@@ -1220,6 +1222,17 @@ private fun MutableMethod.addValidatedInstructionsWithLabels(methodName: String,
     // as onTouch(Z). Accept both forms so validation does not reject a structurally valid listener.
     check(Regex("(?m)^\\s*(?:return(?:-[^\\s]+)?|throw)\\b").containsMatchIn(smali)) {
         "Generated $methodName has no terminal return or throw instruction."
+    }
+    val parameterRegisters = parameterTypes.sumOf { type ->
+        if (type == "J" || type == "D") 2 else 1
+    } + if (AccessFlags.STATIC.isSet(accessFlags)) 0 else 1
+    val localRegisterCount = implementation?.registerCount?.minus(parameterRegisters) ?: 0
+    val highestLocalRegister = Regex("\\bv(\\d+)\\b")
+        .findAll(smali)
+        .map { it.groupValues[1].toInt() }
+        .maxOrNull() ?: -1
+    check(highestLocalRegister < localRegisterCount) {
+        "Generated $methodName uses v$highestLocalRegister, but only v0-v${localRegisterCount - 1} are local."
     }
     // Escape the closing brace explicitly: Android's ICU regex engine rejects an unescaped }
     // even though some desktop Java regex implementations accept it as a literal.
