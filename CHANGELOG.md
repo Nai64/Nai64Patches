@@ -1,3 +1,9 @@
+## [1.0.5](https://github.com/Zanuaimi/Nai64Patches/compare/1.0.4...1.0.5) (2026-08-31)
+
+### Bug Fixes
+
+* improve compatibility with more types of apps ([c5e08b6](https://github.com/Zanuaimi/Nai64Patches/commit/c5e08b6bd908e5a5d0a77ad6d633310ff36511d4))
+
 ## [1.0.4](https://github.com/Zanuaimi/Nai64Patches/compare/1.0.3...1.0.4) (2026-08-30)
 
 ### Bug Fixes
