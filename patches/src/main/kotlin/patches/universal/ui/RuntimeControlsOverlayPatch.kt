@@ -82,7 +82,8 @@ val runtimeControlsOverlayPatch = bytecodePatch(
             "provides a configurable repository link, drag-and-drop positioning, a hide menu " +
             "action, and a fully close action. Customize the overlay title, description, " +
             "repository label and URL, background and outline colors, button text and colors, " +
-            "button shape, size, and initial position. Leave the Activity name override empty for " +
+            "button shape, size, initial position, and idle opacity. The button fades fully " +
+            "transparent while being dragged or after it is pressed. Leave the Activity name override empty for " +
             "automatic selection, or specify an Activity from AndroidManifest.xml as a fallback " +
             "when automatic injection targets the wrong screen.",
     default = false,
@@ -166,8 +167,8 @@ val runtimeControlsOverlayPatch = bytecodePatch(
         key = "runtimeOverlayButtonIdleOpacityPercent",
         description =
             "Opacity of the overlay button when idle, from 10 to 100 percent. Default: 35 " +
-                "percent. The button fades to full opacity while being touched or dragged and " +
-                "while the overlay menu is open.",
+                "percent. The button becomes fully transparent while being dragged and fades " +
+                "to transparent when pressed to open the menu.",
     )
     val buttonPosition by stringOption(
         title = "Overlay button position",
@@ -473,7 +474,7 @@ private fun addOverlayListeners(
         iget-object v0, p0, ${activity.type}->${OVERLAY_BUTTON}:$OVERLAY_BUTTON_FIELD
         invoke-virtual {v0}, Landroid/view/View;->animate()Landroid/view/ViewPropertyAnimator;
         move-result-object v0
-        const v1, 0x3f800000
+        const/4 v1, 0x0
         invoke-virtual {v0, v1}, Landroid/view/ViewPropertyAnimator;->alpha(F)Landroid/view/ViewPropertyAnimator;
         const-wide/16 v1, 0xb4
         invoke-virtual {v0, v1, v2}, Landroid/view/ViewPropertyAnimator;->setDuration(J)Landroid/view/ViewPropertyAnimator;
@@ -486,7 +487,8 @@ private fun addOverlayListeners(
         const-string v3, "${StartupHooks.escapeSmali(title)}"
         invoke-virtual {v2, v3}, Landroid/app/AlertDialog${'$'}Builder;->setTitle(Ljava/lang/CharSequence;)Landroid/app/AlertDialog${'$'}Builder;
         ${buildCustomMenuLayout(activity.type, description, menuItems, outlineColor)}
-        invoke-virtual {v2, v3}, Landroid/app/AlertDialog${'$'}Builder;->setView(Landroid/view/View;)Landroid/app/AlertDialog${'$'}Builder;
+        const/4 v5, 0x0
+        invoke-virtual {v2, v3, v5, v5, v5, v5}, Landroid/app/AlertDialog${'$'}Builder;->setView(Landroid/view/View;IIII)Landroid/app/AlertDialog${'$'}Builder;
         const-string v3, "${StartupHooks.escapeSmali(repositoryLabel)}"
         invoke-virtual {v2, v3, p0}, Landroid/app/AlertDialog${'$'}Builder;->setNeutralButton(Ljava/lang/CharSequence;Landroid/content/DialogInterface${'$'}OnClickListener;)Landroid/app/AlertDialog${'$'}Builder;
         const-string v3, "Close menu"
@@ -583,6 +585,13 @@ private fun addOverlayListeners(
         const/16 v7, 0x11
         invoke-virtual {v5, v7}, Landroid/widget/TextView;->setGravity(I)V
         invoke-virtual {v5}, Landroid/view/View;->requestLayout()V
+        invoke-virtual {v5}, Landroid/view/View;->getParent()Landroid/view/ViewParent;
+        move-result-object v6
+        instance-of v7, v6, Landroid/widget/LinearLayout;
+        if-eqz v7, :nai64_overlay_menu_done
+        check-cast v6, Landroid/widget/LinearLayout;
+        const/4 v7, 0x1
+        invoke-virtual {v6, v7}, Landroid/widget/LinearLayout;->setGravity(I)V
         :nai64_overlay_menu_done
         return-void
     """))
@@ -604,13 +613,6 @@ private fun addOverlayListeners(
         const/4 v0, 0x0
         return v0
         :nai64_overlay_touch_down
-        invoke-virtual {p1}, Landroid/view/View;->animate()Landroid/view/ViewPropertyAnimator;
-        move-result-object v0
-        const v1, 0x3f800000
-        invoke-virtual {v0, v1}, Landroid/view/ViewPropertyAnimator;->alpha(F)Landroid/view/ViewPropertyAnimator;
-        const-wide/16 v1, 0xb4
-        invoke-virtual {v0, v1, v2}, Landroid/view/ViewPropertyAnimator;->setDuration(J)Landroid/view/ViewPropertyAnimator;
-        invoke-virtual {v0}, Landroid/view/ViewPropertyAnimator;->start()V
         invoke-virtual {p2}, Landroid/view/MotionEvent;->getRawX()F
         move-result v0
         iput v0, p0, ${activity.type}->${TOUCH_START_X}:F
@@ -639,6 +641,13 @@ private fun addOverlayListeners(
         if-lez v1, :nai64_overlay_move_x_skip
         const/4 v1, 0x1
         iput-boolean v1, p0, ${activity.type}->${TOUCH_DRAGGED}:Z
+        invoke-virtual {p1}, Landroid/view/View;->animate()Landroid/view/ViewPropertyAnimator;
+        move-result-object v0
+        const/4 v1, 0x0
+        invoke-virtual {v0, v1}, Landroid/view/ViewPropertyAnimator;->alpha(F)Landroid/view/ViewPropertyAnimator;
+        const-wide/16 v1, 0xb4
+        invoke-virtual {v0, v1, v2}, Landroid/view/ViewPropertyAnimator;->setDuration(J)Landroid/view/ViewPropertyAnimator;
+        invoke-virtual {v0}, Landroid/view/ViewPropertyAnimator;->start()V
         invoke-virtual {p2}, Landroid/view/MotionEvent;->getRawX()F
         move-result v0
         iget v1, p0, ${activity.type}->${TOUCH_START_X}:F
@@ -767,14 +776,6 @@ private fun addOverlayListeners(
         invoke-virtual {v1, v0}, Landroid/view/ViewGroup;->removeView(Landroid/view/View;)V
         goto :nai64_overlay_done
         :nai64_overlay_toast
-        iget-object v0, p0, ${activity.type}->${OVERLAY_BUTTON}:$OVERLAY_BUTTON_FIELD
-        invoke-virtual {v0}, Landroid/view/View;->animate()Landroid/view/ViewPropertyAnimator;
-        move-result-object v0
-        const v1, ${floatLiteral(buttonIdleOpacity)}
-        invoke-virtual {v0, v1}, Landroid/view/ViewPropertyAnimator;->alpha(F)Landroid/view/ViewPropertyAnimator;
-        const-wide/16 v1, 0xb4
-        invoke-virtual {v0, v1, v2}, Landroid/view/ViewPropertyAnimator;->setDuration(J)Landroid/view/ViewPropertyAnimator;
-        invoke-virtual {v0}, Landroid/view/ViewPropertyAnimator;->start()V
         const-string v1, "Overlay menu hidden. Press the overlay button to open it again."
         const/4 v2, 0x0
         invoke-static {p0, v1, v2}, Landroid/widget/Toast;->makeText(Landroid/content/Context;Ljava/lang/CharSequence;I)Landroid/widget/Toast;
@@ -789,7 +790,17 @@ private fun addOverlayListeners(
         invoke-static {v1}, Landroid/net/Uri;->parse(Ljava/lang/String;)Landroid/net/Uri;
         move-result-object v1
         invoke-virtual {v0, v1}, Landroid/content/Intent;->setData(Landroid/net/Uri;)Landroid/content/Intent;
+        :try_start_nai64_overlay_repository
         invoke-virtual {p0, v0}, Landroid/app/Activity;->startActivity(Landroid/content/Intent;)V
+        goto :nai64_overlay_done
+        :try_end_nai64_overlay_repository
+        .catch Landroid/content/ActivityNotFoundException; {:try_start_nai64_overlay_repository .. :try_end_nai64_overlay_repository} :nai64_overlay_repository_unavailable
+        :nai64_overlay_repository_unavailable
+        const-string v1, "No app is available to open the repository link."
+        const/4 v2, 0x0
+        invoke-static {p0, v1, v2}, Landroid/widget/Toast;->makeText(Landroid/content/Context;Ljava/lang/CharSequence;I)Landroid/widget/Toast;
+        move-result-object v1
+        invoke-virtual {v1}, Landroid/widget/Toast;->show()V
         goto :nai64_overlay_done
         :nai64_overlay_done
         return-void
