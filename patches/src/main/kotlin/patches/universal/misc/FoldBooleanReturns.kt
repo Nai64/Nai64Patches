@@ -23,6 +23,16 @@ internal fun BytecodePatchContext.foldBooleanReturns(
 ): Int {
     var patched = 0
     classDefForEach { classDef ->
+        var hasRef = false
+        for (m in classDef.methods) {
+            val impl = m.implementation ?: continue
+            for (insn in impl.instructions) {
+                val ref = (insn as? ReferenceInstruction)?.reference as? MethodReference ?: continue
+                if (targets[ref.definingClass]?.containsKey(ref.name) == true && ref.returnType == returnType) { hasRef = true; break }
+            }
+            if (hasRef) break
+        }
+        if (!hasRef) return@classDefForEach
         val mutableClass = mutableClassDefBy(classDef)
         for (method in mutableClass.methods) {
             val implementation = method.implementation ?: continue

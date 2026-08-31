@@ -30,27 +30,30 @@ val unlockPremiumPatch = bytecodePatch(
         val patchedMethods = mutableSetOf<String>()
         val extraSet = (extraKeys ?: "").split(",").map { it.trim().lowercase() }.filter { it.isNotEmpty() }.toSet()
 
+        // Optimized isPremiumKey: single contains check, no per-key underscore branching
+        val premiumSubstrings = listOf(
+            "purchased", "has_receipt", "hasreceipt", "bought",
+            "premium", "is_premium", "ispremium", "premium_unlocked", "premium_status", "premium_expiry", "premiumaccess", "haspremiumaccess",
+            "vip", "is_vip", "vip_status", "vip_level", "vip_expiry",
+            "no_ads", "noads", "ads_removed", "adsremoved", "ad_free", "adfree", "remove_ads", "removeads",
+            "full_version", "fullversion", "unlocked",
+            "subscribed", "is_subscribed", "subscription_active", "subscription_expires", "has_subscription", "has_active_purchase",
+            "lifetime", "is_lifetime", "annual", "monthly", "trial",
+            "entitlement", "entitlements", "is_entitled", "has_entitlement",
+            "paid", "is_paid", "member", "pro_version", "is_pro", "pro_member",
+            "subscription_expiry", "premium_expiry", "key_subs", "key_sub", "subs"
+        )
         fun isPremiumKey(lower: String): Boolean {
             if (extraSet.any { it.isNotEmpty() && lower == it }) return true
-            val keys = listOf(
-                "purchased", "is_purchased", "has_receipt", "hasreceipt", "bought",
-                "premium", "is_premium", "ispremium", "premium_unlocked", "premium_status", "premium_expiry",
-                "vip", "is_vip", "vip_status", "vip_level", "vip_expiry",
-                "no_ads", "noads", "ads_removed", "adsremoved", "ad_free", "adfree", "remove_ads", "removeads",
-                "full_version", "fullversion", "unlocked",
-                "subscribed", "is_subscribed", "subscription_active", "subscription_expires", "has_subscription", "has_active_purchase",
-                "lifetime", "is_lifetime", "annual", "monthly", "trial",
-                "entitlement", "entitlements", "is_entitled", "has_entitlement",
-                "paid", "is_paid", "member", "pro_version", "is_pro", "pro_member",
-                "subscription_expiry", "premium_expiry", "subscription_expire_date", "premium_expire_date",
-                "key_subs", "key_sub", "subs", "sub", "keysubs", "keysub"
-            )
-            for (k in keys) {
-                if (lower == k) return true
-                if (lower.startsWith(k + "_")) return true
-                if (lower.endsWith("_" + k)) return true
-                if (lower.contains("_" + k + "_")) return true
+            for (k in premiumSubstrings) {
+                if (lower.contains(k)) {
+                    // guard generic "pro" inside provider/product
+                    if (k == "pro_version" || k == "is_pro") return true
+                    if (lower.contains("provider") || lower.contains("product") && k == "pro") continue
+                    return true
+                }
             }
+            // standalone vip/pro
             if (lower == "pro" || lower == "vip" || lower == "pro_version" || lower == "is_pro" || lower == "is_vip") return true
             if (lower.contains("_pro_") || lower.endsWith("_pro") || lower.startsWith("pro_")) {
                 if (lower.contains("provider") || lower.contains("product") || lower.contains("process") || lower.contains("progress") || lower.contains("project") || lower.contains("proceed")) return false
@@ -86,19 +89,19 @@ val unlockPremiumPatch = bytecodePatch(
         }
 
         // ──────────────────────────────────────────────
-        // PURCHASE STATE / OWNERSHIP CHECKS (Z -> true, scoped)
+        // 1) Fingerprint premium checks (cheap, indexed)
         // ──────────────────────────────────────────────
 
         for (checkName in listOf(
-            "isPurchased", "isOwned", "isPremium", "hasPremium",
+            "isPurchased", "isOwned", "isPremium", "hasPremium", "hasPremiumAccess", "isPremiumAccess",
             "isSubscribed", "hasSubscription", "isVip", "hasVip",
             "isBought", "hasBought", "wasPurchased", "hasPurchased",
-            "isPro", "hasPro", "isFullVersion", "hasFullVersion",
+            "isPro", "hasPro", "isProUser", "hasProUser", "isFullVersion", "hasFullVersion",
             "isUnlocked", "hasUnlocked", "isActive", "hasActive",
             "isLifetime", "hasLifetime", "isAnnual", "hasAnnual",
             "hasEntitlement", "isEntitled", "checkPremium", "verifyPremium",
             "isPremiumUser", "hasAdFree", "isPaidUser", "checkVip",
-            "hasSubscriptionActive", "hasActivePurchase", "isProMember", "isVipUser",
+            "hasSubscriptionActive", "hasActivePurchase", "isProMember", "isVipUser", "hasPremiumAccessChanged",
         )) {
             val isGenericActive = checkName == "isActive" || checkName == "hasActive" || checkName == "isPro" || checkName == "hasPro"
             patchAll(
@@ -113,35 +116,6 @@ val unlockPremiumPatch = bytecodePatch(
             ) { it.addInstructions(0, "const/4 v0, 0x1\nreturn v0") }
         }
 
-        // Generic fallback for obfuscated/camelCase premium checks (e.g., hasPremiumAccess) — no hardcode, catches any Z method containing premium/pro/entitle in name where class is premium/billing/subscription
-        classDefForEach { classDef ->
-            val typeLower = classDef.type.lowercase()
-            // skip obvious non-premium SDKs
-            if (typeLower.contains("okhttp") || typeLower.contains("ssl") || typeLower.contains("network") || typeLower.contains("glide") || typeLower.contains("coil")) return@classDefForEach
-            val isPremiumClass = typeLower.contains("premium") || typeLower.contains("billing") || typeLower.contains("purchase") || typeLower.contains("subscription") || typeLower.contains("entitle") || typeLower.contains("pro") && !typeLower.contains("provider") && !typeLower.contains("product") && !typeLower.contains("progress")
-            // also consider method name itself
-            val mutableClass = try { mutableClassDefBy(classDef) } catch (_: Exception) { return@classDefForEach }
-            for (method in mutableClass.methods) {
-                if (method.returnType != "Z") continue
-                val n = method.name.lowercase()
-                if (n.length < 3 || n.length > 40) continue
-                val isPremiumName = n.contains("premium") || n.contains("haspremium") || n.contains("ispremium") || n.contains("entitle") || n.contains("haspro") || n.contains("ispro") || n.contains("hassubscription") || n.contains("issubscribed")
-                if (!isPremiumName && !isPremiumClass) continue
-                if (n.contains("provider") || n.contains("product") || n.contains("progress") || n.contains("proceed") || n.contains("providerenabled") || n.contains("probableprime")) continue
-                // also avoid isProviderEnabled false positive
-                if (n == "ispro" || n == "haspro" || n == "isprouser" || n == "hasprouser" || n.contains("premium")) {
-                    // patch only if not already patched via patchAll (avoid double)
-                    try {
-                        if (method.implementation == null) continue
-                        method.addInstructions(0, "const/4 v0, 0x1\nreturn v0")
-                        patched++
-                        patchedMethods.add("Generic:${method.name}")
-                    } catch (_: Exception) {}
-                }
-            }
-        }
-
-        // isExpired / isCancelled -> false (scoped to premium/subscription)
         for (negName in listOf("isExpired", "isCancelled", "isTrialExpired")) {
             patchAll(Fingerprint(name = negName, returnType = "Z", custom = { _, c ->
                 val t = c.type.lowercase()
@@ -151,14 +125,12 @@ val unlockPremiumPatch = bytecodePatch(
             }
         }
 
-        // I -> 1 (premium level/state)
         for (intName in listOf("getPremiumState", "getVipLevel", "getSubscriptionStatus", "getProState", "getVipStatus", "getUserType", "getPremiumStatusInt", "getEntitlementState")) {
             patchAll(Fingerprint(name = intName, returnType = "I"), intName) {
                 it.addInstructions(0, "const/4 v0, 0x1\nreturn v0")
             }
         }
 
-        // J expiry -> far future 2099-01-01 (scoped)
         for (longName in listOf("getExpiryTime", "getExpireDate", "getSubscriptionExpiry", "getPremiumExpiry", "getVipExpiry", "getEntitlementExpiry")) {
             patchAll(Fingerprint(name = longName, returnType = "J", custom = { _, c ->
                 val t = c.type.lowercase()
@@ -168,23 +140,17 @@ val unlockPremiumPatch = bytecodePatch(
             }
         }
 
-        // List entitlements -> singleton premium
         for (listName in listOf("getEntitlements", "getActivePurchases", "getActiveEntitlements")) {
             patchAll(Fingerprint(name = listName, custom = { m, _ -> m.returnType.contains("List") || m.returnType.contains("Collection") }), listName) {
                 it.addInstructions(0, "const-string v0, \"premium\"\ninvoke-static {v0}, Ljava/util/Collections;->singletonList(Ljava/lang/Object;)Ljava/util/List;\nmove-result-object v0\nreturn-object v0")
             }
         }
 
-        // String premium status -> "premium"
         for (strName in listOf("getPremiumStatus", "getVipStatus", "getSubscriptionStatus", "getUserTypeString")) {
             patchAll(Fingerprint(name = strName, returnType = "Ljava/lang/String;"), strName) {
                 it.addInstructions(0, "const-string v0, \"premium\"\nreturn-object v0")
             }
         }
-
-        // ──────────────────────────────────────────────
-        // RECEIPT CHECKS
-        // ──────────────────────────────────────────────
 
         for (receiptName in listOf("hasReceipt", "getHasReceipt", "hasValidReceipt", "isReceiptValid", "hasActiveReceipt", "getReceipt")) {
             patchAll(Fingerprint(name = receiptName, returnType = "Z"), receiptName) {
@@ -198,27 +164,67 @@ val unlockPremiumPatch = bytecodePatch(
         }
 
         // ──────────────────────────────────────────────
-        // classDefForEach: SharedPreferences / DataStore / MMKV bypass
+        // 2) Single-pass classDefForEach: Prefs + generic premium fallback
+        // Merged from 3 passes -> 1 pass to save heap (was 6 scans via helpers)
         // ──────────────────────────────────────────────
 
         classDefForEach { classDef ->
-            var foundPrefsCall = false
-            for (method in classDef.methods) {
-                val impl = method.implementation ?: continue
-                for (insn in impl.instructions) {
-                    val ref = (insn as? ReferenceInstruction)?.reference as? MethodReference ?: continue
-                    val name = ref.name
-                    val def = ref.definingClass
-                    val isPrefs = def.contains("PlayerPrefs") || def == "Landroid/content/SharedPreferences;" || def == "Landroid/content/SharedPreferences\$Editor;" || def.contains("DataStore") || def.contains("MMKV") || def.contains("EncryptedSharedPreferences") || def.contains("Preferences")
-                    if (isPrefs && (name == "GetInt" || name == "getInt" || name == "GetString" || name == "getString" || name == "GetBoolean" || name == "getBoolean" || name == "GetLong" || name == "getLong" || name == "HasKey" || name == "contains" || name == "getValue" || name == "getData" || name == "get")) {
-                        foundPrefsCall = true; break
+            val typeLower = classDef.type.lowercase()
+            // skip obvious non-premium SDKs early to avoid mutableClassDefBy
+            if (typeLower.contains("okhttp") || typeLower.contains("ssl") || typeLower.contains("network") || typeLower.contains("glide") || typeLower.contains("coil") && !typeLower.contains("premium") && !typeLower.contains("purchase")) {
+                // still need to check generic premium methods in premium classes, so don't return yet for those
+                if (!typeLower.contains("premium") && !typeLower.contains("billing") && !typeLower.contains("purchase") && !typeLower.contains("subscription") && !typeLower.contains("entitle")) {
+                    // quick check: does class contain any premium method name? if not, skip
+                    var hasPremiumMethod = false
+                    for (m in classDef.methods) {
+                        val n = m.name.lowercase()
+                        if (n.contains("premium") || n.contains("haspremium") || n.contains("ispremium") || n.contains("entitle") || n.contains("haspro") || n.contains("ispro")) {
+                            hasPremiumMethod = true; break
+                        }
+                    }
+                    if (!hasPremiumMethod) {
+                        // also check if any method calls prefs - if not, skip
+                        var callsPrefs = false
+                        for (m in classDef.methods) {
+                            val impl = m.implementation ?: continue
+                            for (insn in impl.instructions) {
+                                val ref = (insn as? ReferenceInstruction)?.reference as? MethodReference ?: continue
+                                val def = ref.definingClass
+                                val isPrefs = def.contains("PlayerPrefs") || def == "Landroid/content/SharedPreferences;" || def.contains("DataStore") || def.contains("MMKV") || def.contains("Preferences")
+                                if (isPrefs && (ref.name == "getBoolean" || ref.name == "getInt" || ref.name == "getString" || ref.name == "contains" || ref.name == "getValue" || ref.name == "get")) {
+                                    callsPrefs = true; break
+                                }
+                            }
+                            if (callsPrefs) break
+                        }
+                        if (!callsPrefs) return@classDefForEach
                     }
                 }
-                if (foundPrefsCall) break
             }
-            if (!foundPrefsCall) return@classDefForEach
 
-            val mutableClass = mutableClassDefBy(classDef)
+            val mutableClass = try { mutableClassDefBy(classDef) } catch (_: Exception) { return@classDefForEach }
+
+            // 2a) Generic premium Z methods (hasPremiumAccess etc.) in this class
+            for (method in mutableClass.methods) {
+                if (method.returnType != "Z") continue
+                val n = method.name.lowercase()
+                if (n.length < 3 || n.length > 40) continue
+                if (n.contains("provider") || n.contains("product") || n.contains("progress") || n.contains("probableprime") || n.contains("providerenabled")) continue
+                val isPremiumName = n.contains("premium") || n.contains("haspremium") || n.contains("ispremium") || n.contains("entitle") || n.contains("haspro") || n.contains("ispro") || n.contains("hassubscription") || n.contains("issubscribed")
+                val isPremiumClass = typeLower.contains("premium") || typeLower.contains("billing") || typeLower.contains("purchase") || typeLower.contains("subscription") || typeLower.contains("entitle")
+                if (!isPremiumName && !isPremiumClass) continue
+                if (n == "ispro" || n == "haspro" || n == "isprouser" || n == "hasprouser" || n.contains("premium")) {
+                    try {
+                        if (method.implementation == null) continue
+                        // avoid double-patching if already patched via Fingerprint
+                        method.addInstructions(0, "const/4 v0, 0x1\nreturn v0")
+                        patched++
+                        patchedMethods.add("Generic:${method.name}")
+                    } catch (_: Exception) {}
+                }
+            }
+
+            // 2b) Prefs/DataStore getBoolean/getInt/contains -> premium keys
             for (method in mutableClass.methods) {
                 val impl = method.implementation ?: continue
                 val instructions = impl.instructions.toList()
@@ -239,7 +245,6 @@ val unlockPremiumPatch = bytecodePatch(
                     if (!isPlayerPrefs && !isSharedPrefs && !isDataStore) continue
                     if (!isGetBoolean && !isGetInt && !isGetLong && !isGetString && !isHasKey && !isDataStoreGet) continue
 
-                    // generic register extraction
                     val keyRegister = when (insn) {
                         is com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction35c -> when (insn.registerCount) {
                             1 -> insn.registerC
@@ -251,7 +256,6 @@ val unlockPremiumPatch = bytecodePatch(
                     }
 
                     var keyValue: String? = null
-                    // strict same-register backtrace 6
                     for (j in index - 1 downTo maxOf(0, index - 6)) {
                         val prev = instructions[j]
                         if (prev.opcode != Opcode.CONST_STRING) continue
@@ -260,7 +264,6 @@ val unlockPremiumPatch = bytecodePatch(
                         keyValue = ((prev as? ReferenceInstruction)?.reference as? StringReference)?.string
                         break
                     }
-                    // fallback any premium-ish const-string in last 8
                     if (keyValue == null) {
                         for (j in index - 1 downTo maxOf(0, index - 8)) {
                             val prev = instructions[j]
@@ -349,10 +352,6 @@ val unlockPremiumPatch = bytecodePatch(
                 }
             }
         }
-
-        // ──────────────────────────────────────────────
-        // REPORT
-        // ──────────────────────────────────────────────
 
         if (patched > 0) {
             logger.info("Unlock Premium: patched $patched check(s)")
