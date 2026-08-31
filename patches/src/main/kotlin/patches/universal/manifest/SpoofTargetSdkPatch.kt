@@ -20,7 +20,7 @@ import java.util.logging.Logger
 @Suppress("unused")
 val spoofTargetSdkPatch = resourcePatch(
     name = "Spoof Target SDK",
-    description = "Sets the app's targetSdkVersion in the manifest to a chosen value (default 34) so apps that target a too-low SDK can be installed on newer Android.",
+    description = "Fixes install errors on newer Android versions.",
     default = false,
 ) {
     val targetSdk by intOption(

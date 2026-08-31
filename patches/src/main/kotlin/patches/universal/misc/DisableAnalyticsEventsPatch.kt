@@ -6,7 +6,7 @@ import java.util.logging.Logger
 @Suppress("unused")
 val disableAnalyticsEventsPatch = bytecodePatch(
     name = "Disable Analytics Events",
-    description = "No-ops FirebaseAnalytics and Facebook AppEventsLogger logEvent(...) calls so the app cannot send analytics/usage events to tracking servers.",
+    description = "Blocks app tracking and analytics.",
     default = false,
 ) {
     execute {

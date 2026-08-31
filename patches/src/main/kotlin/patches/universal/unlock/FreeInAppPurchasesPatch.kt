@@ -8,7 +8,7 @@ import java.util.logging.Logger
 @Suppress("unused")
 val freeInAppPurchasesPatch = bytecodePatch(
     name = "Free In-app Purchases (Experimental)",
-    description = "Spoofs in-app purchases to appear successful. Covers Google Play Billing, Unity IAP, Xsolla, Amazon, Huawei, Samsung and common receipt verification. Server-side verification may still block in online games.",
+    description = "Get paid items for free. Best for offline games.",
     default = false,
 ) {
     execute {

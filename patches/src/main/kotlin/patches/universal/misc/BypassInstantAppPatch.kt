@@ -6,7 +6,7 @@ import java.util.logging.Logger
 @Suppress("unused")
 val bypassInstantAppPatch = bytecodePatch(
     name = "Bypass Instant App",
-    description = "Makes PackageManager.isInstantApp() report false so apps that restrict features or purchases on instant-app installs behave as a full install.",
+    description = "Treats instant apps as full installs.",
     default = false,
 ) {
     execute {

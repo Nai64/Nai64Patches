@@ -55,6 +55,16 @@ internal fun BytecodePatchContext.foldSettingsGetterConst(
 ): Int {
     var patched = 0
     classDefForEach { classDef ->
+        var hasRef = false
+        for (m in classDef.methods) {
+            val impl = m.implementation ?: continue
+            for (insn in impl.instructions) {
+                val ref = (insn as? ReferenceInstruction)?.reference as? MethodReference ?: continue
+                if (ref.definingClass in classes && (ref.name == "getInt" || ref.name == "getString" || ref.name == "getFloat") && ref.parameterTypes.size >=2) { hasRef = true; break }
+            }
+            if (hasRef) break
+        }
+        if (!hasRef) return@classDefForEach
         val mutableClass = mutableClassDefBy(classDef)
         for (method in mutableClass.methods) {
             val implementation = method.implementation ?: continue
@@ -161,6 +171,16 @@ internal fun BytecodePatchContext.foldNoArgStringGetter(
 ): Int {
     var patched = 0
     classDefForEach { classDef ->
+        var hasRef = false
+        for (m in classDef.methods) {
+            val impl = m.implementation ?: continue
+            for (insn in impl.instructions) {
+                val ref = (insn as? ReferenceInstruction)?.reference as? MethodReference ?: continue
+                if (ref.definingClass == definingClass && ref.name in methodNames && ref.parameterTypes.isEmpty()) { hasRef = true; break }
+            }
+            if (hasRef) break
+        }
+        if (!hasRef) return@classDefForEach
         val mutableClass = mutableClassDefBy(classDef)
         for (method in mutableClass.methods) {
             val implementation = method.implementation ?: continue
@@ -201,6 +221,16 @@ internal fun BytecodePatchContext.foldNoArgIntGetter(
 ): Int {
     var patched = 0
     classDefForEach { classDef ->
+        var hasRef = false
+        for (m in classDef.methods) {
+            val impl = m.implementation ?: continue
+            for (insn in impl.instructions) {
+                val ref = (insn as? ReferenceInstruction)?.reference as? MethodReference ?: continue
+                if (ref.definingClass == definingClass && ref.name in methodNames && ref.parameterTypes.isEmpty()) { hasRef = true; break }
+            }
+            if (hasRef) break
+        }
+        if (!hasRef) return@classDefForEach
         val mutableClass = mutableClassDefBy(classDef)
         for (method in mutableClass.methods) {
             val implementation = method.implementation ?: continue
@@ -245,6 +275,16 @@ internal fun BytecodePatchContext.foldNoArgIntGetter(
 internal fun BytecodePatchContext.foldLocaleGetDefault(tag: String): Int {
     var patched = 0
     classDefForEach { classDef ->
+        var hasRef = false
+        for (m in classDef.methods) {
+            val impl = m.implementation ?: continue
+            for (insn in impl.instructions) {
+                val ref = (insn as? ReferenceInstruction)?.reference as? MethodReference ?: continue
+                if (ref.definingClass == "Ljava/util/Locale;" && ref.name == "getDefault" && ref.parameterTypes.isEmpty()) { hasRef = true; break }
+            }
+            if (hasRef) break
+        }
+        if (!hasRef) return@classDefForEach
         val mutableClass = mutableClassDefBy(classDef)
         for (method in mutableClass.methods) {
             val implementation = method.implementation ?: continue
@@ -298,6 +338,16 @@ internal fun BytecodePatchContext.foldStringGetterConst(
 ): Int {
     var patched = 0
     classDefForEach { classDef ->
+        var hasRef = false
+        for (m in classDef.methods) {
+            val impl = m.implementation ?: continue
+            for (insn in impl.instructions) {
+                val ref = (insn as? ReferenceInstruction)?.reference as? MethodReference ?: continue
+                if (ref.definingClass == definingClass && ref.name in methodNames && ref.returnType == "Ljava/lang/String;") { hasRef = true; break }
+            }
+            if (hasRef) break
+        }
+        if (!hasRef) return@classDefForEach
         val mutableClass = mutableClassDefBy(classDef)
         for (method in mutableClass.methods) {
             val implementation = method.implementation ?: continue
@@ -333,6 +383,17 @@ internal fun BytecodePatchContext.foldBooleanGetterConst(
 ): Int {
     var patched = 0
     classDefForEach { classDef ->
+        // prefilter: skip classes that never reference the target definingClass
+        var hasRef = false
+        for (m in classDef.methods) {
+            val impl = m.implementation ?: continue
+            for (insn in impl.instructions) {
+                val ref = (insn as? ReferenceInstruction)?.reference ?: continue
+                if (ref is MethodReference && ref.definingClass == definingClass && ref.name in methodNames) { hasRef = true; break }
+            }
+            if (hasRef) break
+        }
+        if (!hasRef) return@classDefForEach
         val mutableClass = mutableClassDefBy(classDef)
         for (method in mutableClass.methods) {
             val implementation = method.implementation ?: continue
@@ -373,6 +434,16 @@ internal fun BytecodePatchContext.foldObjectGetterToNull(
 ): Int {
     var patched = 0
     classDefForEach { classDef ->
+        var hasRef = false
+        for (m in classDef.methods) {
+            val impl = m.implementation ?: continue
+            for (insn in impl.instructions) {
+                val ref = (insn as? ReferenceInstruction)?.reference as? MethodReference ?: continue
+                if (ref.definingClass == definingClass && ref.name in methodNames && ref.returnType == returnType) { hasRef = true; break }
+            }
+            if (hasRef) break
+        }
+        if (!hasRef) return@classDefForEach
         val mutableClass = mutableClassDefBy(classDef)
         for (method in mutableClass.methods) {
             val implementation = method.implementation ?: continue
@@ -412,6 +483,16 @@ internal fun BytecodePatchContext.replaceGetterWithStaticCall(
 ): Int {
     var patched = 0
     classDefForEach { classDef ->
+        var hasRef = false
+        for (m in classDef.methods) {
+            val impl = m.implementation ?: continue
+            for (insn in impl.instructions) {
+                val ref = (insn as? ReferenceInstruction)?.reference as? MethodReference ?: continue
+                if (ref.definingClass == definingClass && ref.name in methodNames && ref.returnType == returnType) { hasRef = true; break }
+            }
+            if (hasRef) break
+        }
+        if (!hasRef) return@classDefForEach
         val mutableClass = mutableClassDefBy(classDef)
         for (method in mutableClass.methods) {
             val implementation = method.implementation ?: continue
@@ -448,6 +529,17 @@ internal fun BytecodePatchContext.foldStaticStringField(
 ): Int {
     var patched = 0
     classDefForEach { classDef ->
+        var hasRef = false
+        for (m in classDef.methods) {
+            val impl = m.implementation ?: continue
+            for (insn in impl.instructions) {
+                if (insn.opcode != Opcode.SGET_OBJECT) continue
+                val ref = (insn as? ReferenceInstruction)?.reference as? FieldReference ?: continue
+                if (ref.definingClass == definingClass && ref.type == "Ljava/lang/String;" && ref.name in values) { hasRef = true; break }
+            }
+            if (hasRef) break
+        }
+        if (!hasRef) return@classDefForEach
         val mutableClass = mutableClassDefBy(classDef)
         for (method in mutableClass.methods) {
             val implementation = method.implementation ?: continue

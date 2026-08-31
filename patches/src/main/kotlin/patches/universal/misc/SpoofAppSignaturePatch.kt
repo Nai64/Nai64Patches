@@ -13,7 +13,7 @@ import java.util.logging.Logger
 @Suppress("unused")
 val spoofAppSignaturePatch = bytecodePatch(
     name = "Spoof App Signature",
-    description = "Spoofs the app's signing certificate and package name so self-signature checks pass after re-signing",
+    description = "Bypasses signature checks.",
     default = false,
 ) {
     val spoofSignature by booleanOption(

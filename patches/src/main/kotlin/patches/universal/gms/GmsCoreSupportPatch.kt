@@ -53,7 +53,7 @@ private val gmsCoreManifestPatch = resourcePatch(
 @Suppress("unused")
 val gmsCoreSupportPatch = bytecodePatch(
     name = "GmsCore support (MicroG)",
-    description = "Routes Google Play Services API calls through MicroG (enables Google Sign-In on non-root/no-GMS) with selectable MicroG package and optional main activity / package name overrides",
+    description = "Use MicroG instead of Google Play Services for logins.",
     default = false,
 ) {
     dependsOn(gmsCoreManifestPatch)

@@ -6,7 +6,7 @@ import java.util.logging.Logger
 @Suppress("unused")
 val disableKeyboardSoundPatch = bytecodePatch(
     name = "Disable Keyboard Sound",
-    description = "No-ops AudioManager.playSoundEffect(...) so keyboard/typing and other system sound effects are silenced inside the patched app (typically an IME).",
+    description = "Silences keyboard and system sounds.",
     default = false,
 ) {
     execute {

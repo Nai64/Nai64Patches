@@ -7,7 +7,7 @@ import java.util.logging.Logger
 @Suppress("unused")
 val spoofNetworkOperatorNamePatch = bytecodePatch(
     name = "Spoof Network Operator Name",
-    description = "Reports a chosen operator name through TelephonyManager.getNetworkOperatorName() so apps that check the carrier name see a generic value.",
+    description = "Fakes the network operator name.",
     default = false,
 ) {
     val operatorName by stringOption(

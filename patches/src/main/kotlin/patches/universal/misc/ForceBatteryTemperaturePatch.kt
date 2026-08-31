@@ -16,7 +16,7 @@ import java.util.logging.Logger
 @Suppress("unused")
 val forceBatteryTemperaturePatch = bytecodePatch(
     name = "Force Battery Temperature",
-    description = "Reports a chosen battery temperature through BatteryManager.getIntProperty for the temperature property, so apps that throttle or warn on a hot device stop doing so.",
+    description = "Fakes the battery temperature.",
     default = false,
 ) {
     val temperature by intOption(

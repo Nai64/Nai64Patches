@@ -8,7 +8,7 @@ import java.util.logging.Logger
 @Suppress("unused")
 val changePackageNamePatch = resourcePatch(
     name = "Change Package Name",
-    description = "Clones the app by changing its package name — append a suffix or set a fully custom name, with optional provider and permission fixes",
+    description = "Clone the app with a new package name.",
     default = false,
 ) {
     val customPackageName by stringOption(

@@ -17,7 +17,7 @@ import java.util.logging.Logger
 @Suppress("unused")
 val fakeStayOnWhilePluggedPatch = bytecodePatch(
     name = "Fake Stay On While Plugged",
-    description = "Reports a chosen stay-on-while-plugged state through Settings.Global so apps that restrict features based on this setting stop doing so.",
+    description = "Fakes the stay-on-while-charging setting.",
     default = false,
 ) {
     val plugType by stringOption(

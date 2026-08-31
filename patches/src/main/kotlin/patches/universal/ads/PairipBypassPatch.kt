@@ -38,7 +38,7 @@ private fun ResourcePatchContext.discoverPairipAppClass(logger: Logger): String?
 @Suppress("unused")
 val pairipBypassPatch = bytecodePatch(
     name = "Pairip Bypass (Experimental)",
-    description = "Tries to bypass PairIP protection so patched apps can run. Experimental.",
+    description = "Bypass app protection so the patched app can start.",
     default = false,
 ) {
     val automaticStrategySelection by booleanOption(

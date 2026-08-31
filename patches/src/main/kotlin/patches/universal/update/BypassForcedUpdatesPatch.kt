@@ -124,7 +124,7 @@ private fun isFalseConstant(instruction: Any?, register: Int): Boolean =
 @Suppress("unused")
 val bypassForcedUpdatesPatch = bytecodePatch(
     name = "Bypass Forced Updates (Experimental)",
-    description = "Tries to skip forced update screens. Enable the toggles to ignore version checks, make dialogs closable, block store redirects, or disable Play Core updates. Experimental.",
+    description = "Skip forced update screens and keep using the app.",
     default = false,
 ) {
     val bypassUpdateGate by booleanOption(

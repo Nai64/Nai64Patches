@@ -6,7 +6,7 @@ import java.util.logging.Logger
 @Suppress("unused")
 val disableHeadsUpNotificationsPatch = bytecodePatch(
     name = "Disable Heads-up Notifications",
-    description = "Forces Notification(.Builder).setFullScreenIntent(...) to receive a null PendingIntent so heads-up/peek pop-overs no longer appear.",
+    description = "Blocks pop-up notifications.",
     default = false,
 ) {
     execute {

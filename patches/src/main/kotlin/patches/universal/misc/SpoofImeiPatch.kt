@@ -7,7 +7,7 @@ import java.util.logging.Logger
 @Suppress("unused")
 val spoofImeiPatch = bytecodePatch(
     name = "Spoof IMEI",
-    description = "Reports a chosen IMEI through TelephonyManager.getDeviceId()/getImei() so apps that fingerprint the device by IMEI see a constant value.",
+    description = "Fakes the device IMEI.",
     default = false,
 ) {
     val imei by stringOption(
