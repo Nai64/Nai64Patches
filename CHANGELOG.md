@@ -1,3 +1,9 @@
+## [1.0.9](https://github.com/Zanuaimi/Nai64Patches/compare/1.0.8...1.0.9) (2026-08-31)
+
+### Bug Fixes
+
+* refactoring patch ([0f6d676](https://github.com/Zanuaimi/Nai64Patches/commit/0f6d67609200dc38369e2a606bdda0256b5d191a))
+
 ## [1.0.8](https://github.com/Zanuaimi/Nai64Patches/compare/1.0.7...1.0.8) (2026-08-31)
 
 ### Bug Fixes
