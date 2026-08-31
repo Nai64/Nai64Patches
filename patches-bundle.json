@@ -1,7 +1,7 @@
 {
-  "created_at": "2026-08-31T09:59:55",
-  "description": "## [1.0.10](https://github.com/Zanuaimi/Nai64Patches/compare/1.0.9...1.0.10) (2026-08-31)\n\n### Bug Fixes\n\n* escape closing brace explicitly ([d248c38](https://github.com/Zanuaimi/Nai64Patches/commit/d248c38039fe3a64beeec6c06fe90f42c2768e9e))",
-  "download_url": "https://github.com/Zanuaimi/Nai64Patches/releases/download/1.0.10/patches-1.0.10.mpp",
+  "created_at": "2026-08-31T10:13:56",
+  "description": "## [1.0.11](https://github.com/Zanuaimi/Nai64Patches/compare/1.0.10...1.0.11) (2026-08-31)\n\n### Bug Fixes\n\n* accept value-returning generated methods ([35a3fab](https://github.com/Zanuaimi/Nai64Patches/commit/35a3fabe0111141821de263ab540c3973157fe11))",
+  "download_url": "https://github.com/Zanuaimi/Nai64Patches/releases/download/1.0.11/patches-1.0.11.mpp",
   "signature_download_url": "",
-  "version": "1.0.10"
+  "version": "1.0.11"
 }
