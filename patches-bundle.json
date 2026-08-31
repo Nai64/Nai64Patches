@@ -1,7 +1,7 @@
 {
-  "created_at": "2026-08-31T08:34:51",
-  "description": "## [1.0.7](https://github.com/Zanuaimi/Nai64Patches/compare/1.0.6...1.0.7) (2026-08-31)\n\n### Bug Fixes\n\n* fixes ([451ca91](https://github.com/Zanuaimi/Nai64Patches/commit/451ca9108224b4d103a5dccfe8ff4dddba69464b))",
-  "download_url": "https://github.com/Zanuaimi/Nai64Patches/releases/download/1.0.7/patches-1.0.7.mpp",
+  "created_at": "2026-08-31T08:58:24",
+  "description": "## [1.0.8](https://github.com/Zanuaimi/Nai64Patches/compare/1.0.7...1.0.8) (2026-08-31)\n\n### Bug Fixes\n\n* register fixes ([7c8bb64](https://github.com/Zanuaimi/Nai64Patches/commit/7c8bb642d621161e9c2dbc07c1f57a38c4a7f9b6))",
+  "download_url": "https://github.com/Zanuaimi/Nai64Patches/releases/download/1.0.8/patches-1.0.8.mpp",
   "signature_download_url": "",
-  "version": "1.0.7"
+  "version": "1.0.8"
 }
