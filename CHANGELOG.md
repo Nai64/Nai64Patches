@@ -1,3 +1,9 @@
+## [1.0.12](https://github.com/Zanuaimi/Nai64Patches/compare/1.0.11...1.0.12) (2026-08-31)
+
+### Bug Fixes
+
+* restore overlay menu and drag animation ([2989a61](https://github.com/Zanuaimi/Nai64Patches/commit/2989a61bae2f4c38461eb9183e57f9a850d07bf9))
+
 ## [1.0.11](https://github.com/Zanuaimi/Nai64Patches/compare/1.0.10...1.0.11) (2026-08-31)
 
 ### Bug Fixes
