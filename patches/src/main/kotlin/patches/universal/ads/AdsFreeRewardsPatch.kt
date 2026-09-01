@@ -22,6 +22,11 @@ val adsFreeRewardsPatch = bytecodePatch(
         title = "Patch version",
         description = "Choose the implementation to use. Each version is a snapshot — newer ones support more networks. If the latest does not work for your app, try an older version.",
         values = linkedMapOf(
+            "1.41.0" to "1.41.0",
+            "1.40.0" to "1.40.0",
+            "1.38.0" to "1.38.0",
+            "1.34.0" to "1.34.0",
+            "1.33.0" to "1.33.0",
             "1.32.0" to "1.32.0",
             "1.31.0" to "1.31.0",
             "1.30.0" to "1.30.0",
@@ -79,6 +84,11 @@ val adsFreeRewardsPatch = bytecodePatch(
             "1.22.0" -> applyAdsFreeRewardsV1220(logger, rewardStrategy, instantReward)
             "1.30.0" -> applyAdsFreeRewardsV1300(logger, rewardStrategy, instantReward)
             "1.31.0" -> applyAdsFreeRewardsV1310(logger, rewardStrategy, instantReward)
+            "1.33.0" -> applyAdsFreeRewardsV1330(logger, rewardStrategy, instantReward)
+            "1.34.0" -> applyAdsFreeRewardsV1340(logger, rewardStrategy, instantReward)
+            "1.38.0" -> applyAdsFreeRewardsV1380(logger, rewardStrategy, instantReward)
+            "1.40.0" -> applyAdsFreeRewardsV1400(logger, rewardStrategy, instantReward)
+            "1.41.0" -> applyAdsFreeRewardsV1410(logger, rewardStrategy, instantReward)
             else -> applyAdsFreeRewardsV1320(logger, rewardStrategy, instantReward)
         }
         if (fakeAdAvailability == true) {
@@ -371,24 +381,21 @@ private fun BytecodePatchContext.applyNativeMaxStrategy(logger: Logger, useMax: 
 private fun BytecodePatchContext.applyAdMobRewardedStrategy(logger: Logger, useMax: Boolean, instantReward: Boolean?) {
     if (!useMax || instantReward != true) return
     val adMobShow = AdMobRewardedShowFingerprint.methodOrNull ?: return
-    // AdMob RewardedAd.show(Activity, OnUserEarnedRewardListener) -> fire reward instantly
-    // Use clone to handle low regs like native MAX
     val showClass = AdMobRewardedShowFingerprint.classDefOrNull ?: return
+    val smali = """
+        if-eqz p2, :morphe_admob_null
+        const/4 v0, 0x0
+        invoke-interface {p2, v0}, Lcom/google/android/gms/ads/OnUserEarnedRewardListener;->onUserEarnedReward(Lcom/google/android/gms/ads/rewarded/RewardItem;)V
+        :morphe_admob_null
+        return-void
+    """.trimIndent()
     try {
         val cloned = adMobShow.cloneMutableAndPreserveParameters(showClass)
-        cloned.addInstructions(0, """
-            const/4 v0, 0x0
-            invoke-interface {p2, v0}, Lcom/google/android/gms/ads/OnUserEarnedRewardListener;->onUserEarnedReward(Lcom/google/android/gms/ads/rewarded/RewardItem;)V
-            return-void
-        """.trimIndent())
+        cloned.addInstructions(0, smali)
         logger.info("Ads Free Rewards: AdMob rewarded patch (fuck google) via clone")
     } catch (e: Exception) {
         try {
-            adMobShow.addInstructions(0, """
-                const/4 v0, 0x0
-                invoke-interface {p2, v0}, Lcom/google/android/gms/ads/OnUserEarnedRewardListener;->onUserEarnedReward(Lcom/google/android/gms/ads/rewarded/RewardItem;)V
-                return-void
-            """.trimIndent())
+            adMobShow.addInstructions(0, smali)
             logger.info("Ads Free Rewards: AdMob rewarded patch (fuck google) direct")
         } catch (_: Exception) {
             logger.warning("Ads Free Rewards: AdMob clone failed: ${e.message}")
@@ -498,5 +505,25 @@ private fun BytecodePatchContext.applyAdsFreeRewardsV1310(logger: Logger, reward
 }
 private fun BytecodePatchContext.applyAdsFreeRewardsV1320(logger: Logger, rewardStrategy: String?, instantReward: Boolean?) {
     logger.info("Ads Free Rewards v1.32.0 selected")
+    applyAdsFreeRewardsV1190(logger, rewardStrategy, instantReward)
+}
+private fun BytecodePatchContext.applyAdsFreeRewardsV1330(logger: Logger, rewardStrategy: String?, instantReward: Boolean?) {
+    logger.info("Ads Free Rewards v1.33.0 selected")
+    applyAdsFreeRewardsV1190(logger, rewardStrategy, instantReward)
+}
+private fun BytecodePatchContext.applyAdsFreeRewardsV1340(logger: Logger, rewardStrategy: String?, instantReward: Boolean?) {
+    logger.info("Ads Free Rewards v1.34.0 selected")
+    applyAdsFreeRewardsV1190(logger, rewardStrategy, instantReward)
+}
+private fun BytecodePatchContext.applyAdsFreeRewardsV1380(logger: Logger, rewardStrategy: String?, instantReward: Boolean?) {
+    logger.info("Ads Free Rewards v1.38.0 selected")
+    applyAdsFreeRewardsV1190(logger, rewardStrategy, instantReward)
+}
+private fun BytecodePatchContext.applyAdsFreeRewardsV1400(logger: Logger, rewardStrategy: String?, instantReward: Boolean?) {
+    logger.info("Ads Free Rewards v1.40.0 selected")
+    applyAdsFreeRewardsV1190(logger, rewardStrategy, instantReward)
+}
+private fun BytecodePatchContext.applyAdsFreeRewardsV1410(logger: Logger, rewardStrategy: String?, instantReward: Boolean?) {
+    logger.info("Ads Free Rewards v1.41.0 selected")
     applyAdsFreeRewardsV1190(logger, rewardStrategy, instantReward)
 }
