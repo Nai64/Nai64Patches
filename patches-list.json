@@ -1,6 +1,6 @@
 {
   "NOTE": "Do NOT manually edit this file. This file is automatically updated when semantic release (release.yml) runs. Manually editing this file can break your releases and break third party tools that use this file.",
-  "version": "1.41.1",
+  "version": "1.42.0",
   "patches": [
     {
       "name": "Skip Consent Popup",
@@ -1159,7 +1159,7 @@
         {
           "key": "patchVersion",
           "title": "Patch version",
-          "description": "Choose the implementation to use. Each version is a snapshot — newer ones support more networks. If the latest does not work for your app, try an older version.",
+          "description": "Choose the implementation to use. Each version is a snapshot  -  newer ones support more networks. If the latest does not work for your app, try an older version.",
           "required": false,
           "type": "kotlin.String",
           "default": "1.32.0",
@@ -3614,7 +3614,7 @@
         {
           "key": "blockRewarded",
           "title": "Block Rewarded",
-          "description": "Rewarded video — disable if you use Ads Free Rewards, otherwise progress gates may break. Enable only to fully remove rewarded ads.",
+          "description": "Rewarded video  -  disable if you use Ads Free Rewards, otherwise progress gates may break. Enable only to fully remove rewarded ads.",
           "required": false,
           "type": "kotlin.Boolean",
           "default": false,

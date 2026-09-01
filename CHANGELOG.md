@@ -1,3 +1,9 @@
+## [1.42.0](https://github.com/Nai64/Nai64Patches/compare/1.41.1...1.42.0) (2026-09-01)
+
+### New Features
+
+* more console logs for ad free rewards patch ([dafbc2c](https://github.com/Nai64/Nai64Patches/commit/dafbc2c9a6bc39ee3b615d51dca5275849682dfe))
+
 ## [1.41.1](https://github.com/Nai64/Nai64Patches/compare/1.41.0...1.41.1) (2026-09-01)
 
 ### Bug Fixes
