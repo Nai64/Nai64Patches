@@ -1,7 +1,7 @@
 {
-  "created_at": "2026-09-01T14:09:27",
-  "description": "## [1.41.0](https://github.com/Nai64/Nai64Patches/compare/1.40.0...1.41.0) (2026-09-01)\n\n### New Features\n\n* fuck google ([39de9a6](https://github.com/Nai64/Nai64Patches/commit/39de9a672df5f7288c46a64d3fb0fa4069765a7c))",
-  "download_url": "https://github.com/Nai64/Nai64Patches/releases/download/1.41.0/patches-1.41.0.mpp",
+  "created_at": "2026-09-01T14:25:41",
+  "description": "## [1.41.1](https://github.com/Nai64/Nai64Patches/compare/1.41.0...1.41.1) (2026-09-01)\n\n### Bug Fixes\n\n* ads free rewards admob fix ([836af84](https://github.com/Nai64/Nai64Patches/commit/836af841d5dc2c68f355de350c2bcc59875f9d57))",
+  "download_url": "https://github.com/Nai64/Nai64Patches/releases/download/1.41.1/patches-1.41.1.mpp",
   "signature_download_url": "",
-  "version": "1.41.0"
+  "version": "1.41.1"
 }
