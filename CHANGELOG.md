@@ -1,3 +1,9 @@
+## [1.41.1](https://github.com/Nai64/Nai64Patches/compare/1.41.0...1.41.1) (2026-09-01)
+
+### Bug Fixes
+
+* ads free rewards admob fix ([836af84](https://github.com/Nai64/Nai64Patches/commit/836af841d5dc2c68f355de350c2bcc59875f9d57))
+
 ## [1.41.0](https://github.com/Nai64/Nai64Patches/compare/1.40.0...1.41.0) (2026-09-01)
 
 ### New Features
