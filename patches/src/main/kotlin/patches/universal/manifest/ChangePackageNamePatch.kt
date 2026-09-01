@@ -62,9 +62,9 @@ val changePackageNamePatch = resourcePatch(
                 }
             }
 
-            // Basic validation — package must be lowercase, dot-separated
+            // Basic validation  -  package must be lowercase, dot-separated
             if (!newPackage.matches(Regex("^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)+$"))) {
-                logger.warning("New package name \"$newPackage\" looks invalid — proceeding anyway")
+                logger.warning("New package name \"$newPackage\" looks invalid  -  proceeding anyway")
             }
 
             if (newPackage == original) {

@@ -193,7 +193,7 @@ val noAdsPatch = bytecodePatch(
         title = "Block Rewarded",
         default = false,
         key = "blockRewarded",
-        description = "Rewarded video — disable if you use Ads Free Rewards, otherwise progress gates may break. Enable only to fully remove rewarded ads.",
+        description = "Rewarded video  -  disable if you use Ads Free Rewards, otherwise progress gates may break. Enable only to fully remove rewarded ads.",
     )
     val blockNative by booleanOption(
         title = "Block Native",
@@ -238,7 +238,7 @@ val noAdsPatch = bytecodePatch(
         }
 
         if (effectiveBlockRewarded && preset == "recommended") {
-            detectionLogger.info("No Ads: Block Rewarded is off in Recommended preset — use Ads Free Rewards to keep rewarded progress working")
+            detectionLogger.info("No Ads: Block Rewarded is off in Recommended preset  -  use Ads Free Rewards to keep rewarded progress working")
         }
 
         val hasMaxUnity = ShowInterstitialFingerprint.methodOrNull != null ||
@@ -318,7 +318,7 @@ val noAdsPatch = bytecodePatch(
                 "Could not find supported ad SDK (MAX Unity, native MAX, AdMob, " +
                     "Unity Ads v3/v4, ironSource/LevelPlay, AppLovin, Vungle, " +
                     "Meta, Pangle, VK MyTarget, Yandex or Huawei Ads Kit). No changes applied. " +
-                    "If this app shows ads but wasn't detected, please report the APK — it may use StartApp/MoPub/Chartboost/InMobi or a custom wrapper.",
+                    "If this app shows ads but wasn't detected, please report the APK  -  it may use StartApp/MoPub/Chartboost/InMobi or a custom wrapper.",
             )
             return@execute
         } else {
@@ -404,7 +404,7 @@ val noAdsPatch = bytecodePatch(
             totalPatched += patchVoid(StartMRecAutoRefreshFingerprint)
         }
         if (effectiveBlockNative) {
-            // MAX native ads often use MaxAdView for native as well — block its refresh
+            // MAX native ads often use MaxAdView for native as well  -  block its refresh
             totalPatched += patchVoid(MaxAdViewStartAutoRefreshFingerprint)
         }
 
@@ -438,7 +438,7 @@ val noAdsPatch = bytecodePatch(
             totalPatched += patchVoid(AdMobRewardedShowFingerprint)
             totalPatched += patchVoid(AdMobLegacyRewardedVideoShowFingerprint)
         }
-        // Native ads often use AdMob NativeAdView — block its load if present
+        // Native ads often use AdMob NativeAdView  -  block its load if present
         // (AdMobNativeAdShowFingerprint not yet fingerprinted; handled via generic scan below)
 
         // -- Rewarded ads --
@@ -587,7 +587,7 @@ val noAdsPatch = bytecodePatch(
             totalPatched += patchReturnFalse(MaxRewardedAdIsReadyFingerprint)
         }
 
-        // Generic audio DAI ads (Klassik Radio, etc.) — adsIdentityToken, cuepoints
+        // Generic audio DAI ads (Klassik Radio, etc.)  -  adsIdentityToken, cuepoints
         classDefForEach { classDef ->
             val tl = classDef.type.lowercase()
             if (!tl.contains("song") && !tl.contains("station") && !tl.contains("stream") && !tl.contains("ad")) return@classDefForEach
@@ -614,7 +614,7 @@ val noAdsPatch = bytecodePatch(
         if (totalPatched == 0) {
             detectionLogger.warning("No Ads: no patchable ad methods found for selected options. Try enabling more categories or the app uses an unsupported SDK (check log for detected SDKs).")
         } else {
-            detectionLogger.info("No Ads: patched $totalPatched method(s) in total — preset: $preset, interstitials=$effectiveBlockInterstitials, banners=$effectiveBlockBanners, appOpen=$effectiveBlockAppOpen, mrec=$effectiveBlockMRec, rewarded=$effectiveBlockRewarded, native=$effectiveBlockNative")
+            detectionLogger.info("No Ads: patched $totalPatched method(s) in total  -  preset: $preset, interstitials=$effectiveBlockInterstitials, banners=$effectiveBlockBanners, appOpen=$effectiveBlockAppOpen, mrec=$effectiveBlockMRec, rewarded=$effectiveBlockRewarded, native=$effectiveBlockNative")
         }
     }
 }

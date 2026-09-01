@@ -64,7 +64,7 @@ private fun BytecodePatchContext.foldShowSearchResultScore(): Int {
                     method.replaceInstruction(index + 1, "nop")
                     patched++
                 } else if (next == null || next.opcode != Opcode.MOVE_RESULT) {
-                    // no move-result (unused) – just nop the invoke
+                    // no move-result (unused)  -  just nop the invoke
                     method.replaceInstruction(index, "nop")
                     patched++
                 }

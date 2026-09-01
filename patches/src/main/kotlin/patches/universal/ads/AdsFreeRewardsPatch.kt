@@ -20,7 +20,7 @@ val adsFreeRewardsPatch = bytecodePatch(
         key = "patchVersion",
         default = "1.32.0",
         title = "Patch version",
-        description = "Choose the implementation to use. Each version is a snapshot — newer ones support more networks. If the latest does not work for your app, try an older version.",
+        description = "Choose the implementation to use. Each version is a snapshot  -  newer ones support more networks. If the latest does not work for your app, try an older version.",
         values = linkedMapOf(
             "1.41.0" to "1.41.0",
             "1.40.0" to "1.40.0",
@@ -115,11 +115,11 @@ private fun BytecodePatchContext.forceAdAvailability(logger: Logger): Int {
     fun patchIsReady(label: String, fingerprint: app.morphe.patcher.Fingerprint) {
         val method = fingerprint.methodOrNull ?: return
         val impl = method.implementation ?: run {
-            logger.warning("Ads Free Rewards: skip $label — no implementation")
+            logger.warning("Ads Free Rewards: skip $label  -  no implementation")
             return
         }
         if (impl.registerCount < 1) {
-            logger.warning("Ads Free Rewards: skip $label — registerCount ${impl.registerCount} < 1")
+            logger.warning("Ads Free Rewards: skip $label  -  registerCount ${impl.registerCount} < 1")
             return
         }
         method.addInstructions(
@@ -172,10 +172,10 @@ private fun BytecodePatchContext.applyAdsFreeRewardsV1190(logger: Logger, reward
         HuaweiRewardAdShowFingerprint.methodOrNull != null
     val hasAdMob = AdMobRewardedShowFingerprint.methodOrNull != null
 
-    logger.info("Ads Free Rewards: detected SDKs — MAX Unity=$hasMaxUnity native MAX=$hasNativeMax UnityAds=$hasUnityAds UnityAdsV4=$hasUnityAdsV4 LevelPlay=$hasLevelPlay ironSourceBridge=$hasIronSourceUnityBridge MyTarget=$hasMyTarget Yandex=$hasYandexUnityRewarded Huawei=$hasHuawei AdMob=$hasAdMob")
+    logger.info("Ads Free Rewards: detected SDKs  -  MAX Unity=$hasMaxUnity native MAX=$hasNativeMax UnityAds=$hasUnityAds UnityAdsV4=$hasUnityAdsV4 LevelPlay=$hasLevelPlay ironSourceBridge=$hasIronSourceUnityBridge MyTarget=$hasMyTarget Yandex=$hasYandexUnityRewarded Huawei=$hasHuawei AdMob=$hasAdMob")
 
     if (!hasMaxUnity && !hasNativeMax && !hasUnityAds && !hasUnityAdsV4 && !hasLevelPlay && !hasIronSourceUnityBridge && !hasMyTarget && !hasYandexUnityRewarded && !hasHuawei && !hasAdMob) {
-        logger.warning("Ads Free Rewards: no supported ad SDK found for reward strategy $strategy — no changes applied")
+        logger.warning("Ads Free Rewards: no supported ad SDK found for reward strategy $strategy  -  no changes applied")
         return
     }
 
@@ -199,11 +199,11 @@ private fun BytecodePatchContext.applyAdsFreeRewardsV1190(logger: Logger, reward
             """.trimIndent())
             logger.info("Huawei Ads Kit rewarded patch succeeded")
         } else {
-            logger.warning("Ads Free Rewards: Huawei show class not found — skipping")
+            logger.warning("Ads Free Rewards: Huawei show class not found  -  skipping")
         }
     } else {
         if (!useHuawei) logger.info("Ads Free Rewards: Huawei strategy disabled by rewardStrategy=$strategy")
-        else if (!hasHuawei) logger.info("Ads Free Rewards: Huawei SDK not detected — skipping")
+        else if (!hasHuawei) logger.info("Ads Free Rewards: Huawei SDK not detected  -  skipping")
         else logger.info("Ads Free Rewards: Huawei skipped (instantReward=$instantReward)")
     }
 
@@ -224,7 +224,7 @@ private fun BytecodePatchContext.applyMyTargetStrategy(logger: Logger) {
     val myTargetShow = MyTargetBaseInterstitialShowFingerprint.methodOrNull ?: return
     val hasShow = myTargetShow.implementation?.registerCount ?: 0 >= 2
     if (!hasShow) {
-        logger.warning("Ads Free Rewards: skip MyTarget — low registerCount")
+        logger.warning("Ads Free Rewards: skip MyTarget  -  low registerCount")
         return
     }
     val showClass = MyTargetBaseInterstitialShowFingerprint.classDefOrNull ?: return
@@ -384,7 +384,7 @@ private fun BytecodePatchContext.applyNativeMaxStrategy(logger: Logger, useMax: 
                     logger.warning("Ads Free Rewards: clone failed for native MAX: ${e.message}")
                 }
             } else {
-                logger.warning("Ads Free Rewards: skip native MAX showAd() — registerCount $rc < 7")
+                logger.warning("Ads Free Rewards: skip native MAX showAd()  -  registerCount $rc < 7")
             }
         }
     }
@@ -432,18 +432,18 @@ private fun BytecodePatchContext.applyAdMobRewardedStrategy(logger: Logger, useM
                         :morphe_admob_skip_$index
                     """.trimIndent())
                     // Keep original invoke as well? Actually we want to skip the ad, so we should nop the original invoke
-                    // Instead, we just inserted reward before, and let original show still run — it will show ad but also give reward instantly
+                    // Instead, we just inserted reward before, and let original show still run  -  it will show ad but also give reward instantly
                     // To fully skip ad, we could nop the invoke, but that may break flow; for now we give instant reward plus still show ad (user sees ad but also gets reward)
-                    // For Ringdale, the ad is via MAX mediation, not direct, so this call site may not be the primary — but patching it still gives instant reward
+                    // For Ringdale, the ad is via MAX mediation, not direct, so this call site may not be the primary  -  but patching it still gives instant reward
                     patchedCallSites++
                 } catch (_: Exception) {}
             }
         }
     }
     if (patchedCallSites > 0) {
-        logger.info("Ads Free Rewards: AdMob rewarded patch (fuck google) — patched $patchedCallSites call site(s) to instantly reward")
+        logger.info("Ads Free Rewards: AdMob patch - patched $patchedCallSites call site(s)")
     } else {
-        logger.info("Ads Free Rewards: AdMob RewardedAd.show call sites not found — skipping AdMob (may be via MAX mediation)")
+        logger.info("Ads Free Rewards: AdMob show call sites not found - skipping")
     }
 }
 
