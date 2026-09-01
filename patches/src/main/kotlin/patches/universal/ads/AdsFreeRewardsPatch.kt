@@ -191,6 +191,7 @@ private fun BytecodePatchContext.applyAdsFreeRewardsV1190(logger: Logger, reward
     }
     if (applyMaxUnityStrategy(logger, useMax, instantReward)) return
     applyNativeMaxStrategy(logger, useMax, instantReward)
+    applyAdMobRewardedStrategy(logger, useMax, instantReward)
     applyLevelPlayStrategy(logger, useIronSource)
     if (applyIronSourceBridgeStrategy(logger, useIronSource, instantReward)) return
     applyUnityAdsStrategy(logger, useUnityAds, instantReward)
@@ -346,10 +347,52 @@ private fun BytecodePatchContext.applyNativeMaxStrategy(logger: Logger, useMax: 
         const/4 v0, 0x1
         return v0
     """.trimIndent())
-    if (instantReward == true && (nativeShow.implementation?.registerCount ?: 0) >= 7) {
-        nativeShow.addInstructions(0, fireRewardedAdCallbacks())
-    } else if (instantReward == true) {
-        logger.warning("Ads Free Rewards: skip native MAX showAd() — registerCount ${nativeShow.implementation?.registerCount} < 7")
+    if (instantReward == true) {
+        val rc = nativeShow.implementation?.registerCount ?: 0
+        if (rc >= 7) {
+            nativeShow.addInstructions(0, fireRewardedAdCallbacks())
+        } else {
+            val showClass = MaxRewardedAdShowAdFingerprint.classDefOrNull
+            if (showClass != null) {
+                try {
+                    val cloned = nativeShow.cloneMutableAndPreserveParameters(showClass)
+                    cloned.addInstructions(0, fireRewardedAdCallbacks())
+                    logger.info("Ads Free Rewards: native MAX via clone (low regs $rc)")
+                } catch (e: Exception) {
+                    logger.warning("Ads Free Rewards: clone failed for native MAX: ${e.message}")
+                }
+            } else {
+                logger.warning("Ads Free Rewards: skip native MAX showAd() — registerCount $rc < 7")
+            }
+        }
+    }
+}
+
+private fun BytecodePatchContext.applyAdMobRewardedStrategy(logger: Logger, useMax: Boolean, instantReward: Boolean?) {
+    if (!useMax || instantReward != true) return
+    val adMobShow = AdMobRewardedShowFingerprint.methodOrNull ?: return
+    // AdMob RewardedAd.show(Activity, OnUserEarnedRewardListener) -> fire reward instantly
+    // Use clone to handle low regs like native MAX
+    val showClass = AdMobRewardedShowFingerprint.classDefOrNull ?: return
+    try {
+        val cloned = adMobShow.cloneMutableAndPreserveParameters(showClass)
+        cloned.addInstructions(0, """
+            const/4 v0, 0x0
+            invoke-interface {p2, v0}, Lcom/google/android/gms/ads/OnUserEarnedRewardListener;->onUserEarnedReward(Lcom/google/android/gms/ads/rewarded/RewardItem;)V
+            return-void
+        """.trimIndent())
+        logger.info("Ads Free Rewards: AdMob rewarded patch (fuck google) via clone")
+    } catch (e: Exception) {
+        try {
+            adMobShow.addInstructions(0, """
+                const/4 v0, 0x0
+                invoke-interface {p2, v0}, Lcom/google/android/gms/ads/OnUserEarnedRewardListener;->onUserEarnedReward(Lcom/google/android/gms/ads/rewarded/RewardItem;)V
+                return-void
+            """.trimIndent())
+            logger.info("Ads Free Rewards: AdMob rewarded patch (fuck google) direct")
+        } catch (_: Exception) {
+            logger.warning("Ads Free Rewards: AdMob clone failed: ${e.message}")
+        }
     }
 }
 
