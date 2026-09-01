@@ -1,3 +1,9 @@
+## [1.41.0](https://github.com/Nai64/Nai64Patches/compare/1.40.0...1.41.0) (2026-09-01)
+
+### New Features
+
+* fuck google ([39de9a6](https://github.com/Nai64/Nai64Patches/commit/39de9a672df5f7288c46a64d3fb0fa4069765a7c))
+
 ## [1.40.0](https://github.com/Nai64/Nai64Patches/compare/1.39.0...1.40.0) (2026-08-31)
 
 ### Bug Fixes
