@@ -296,7 +296,8 @@ public final class UniversalOverlayRuntime {
             int buttonX = Math.round(floatingButton.getX());
             int buttonY = Math.round(floatingButton.getY());
             int count = 0;
-            for (TextView monitor : statisticMonitors.values()) {
+            for (UniversalOverlayStatisticModule module : statistics) {
+                TextView monitor = statisticMonitors.get(module.key());
                 if (monitor.getVisibility() == View.VISIBLE) count++;
             }
             int spacing = dp(4);
@@ -308,7 +309,9 @@ public final class UniversalOverlayRuntime {
             int monitorX = buttonX + (floatingButton.getWidth() - monitorWidth) / 2;
             monitorX = Math.max(0, Math.min(monitorX, Math.max(0, root.getWidth() - monitorWidth)));
             int y = monitorStartY;
-            for (TextView monitor : statisticMonitors.values()) {
+            // Follow the same stable order used by addModules: system time, FPS, session time.
+            for (UniversalOverlayStatisticModule module : statistics) {
+                TextView monitor = statisticMonitors.get(module.key());
                 if (monitor.getVisibility() != View.VISIBLE) continue;
                 monitor.setX(monitorX);
                 monitor.setY(y);
@@ -320,6 +323,15 @@ public final class UniversalOverlayRuntime {
             for (TextView monitor : statisticMonitors.values()) {
                 if (monitor.getVisibility() == View.VISIBLE) {
                     monitor.animate().alpha(alpha).setDuration(180).start();
+                }
+            }
+        }
+
+        private void setMonitorAlphaImmediate(float alpha) {
+            for (TextView monitor : statisticMonitors.values()) {
+                if (monitor.getVisibility() == View.VISIBLE) {
+                    monitor.animate().cancel();
+                    monitor.setAlpha(alpha);
                 }
             }
         }
@@ -707,7 +719,7 @@ public final class UniversalOverlayRuntime {
                         // The idle state is intentionally translucent, but dragging must make
                         // the control fully visible so its position remains easy to track.
                         view.setAlpha(1f);
-                        setMonitorAlpha(1f);
+                        setMonitorAlphaImmediate(1f);
                         updateMonitorLayout();
                     }
                     return true;
