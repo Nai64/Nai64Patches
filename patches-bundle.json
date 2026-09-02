@@ -1,7 +1,7 @@
 {
-  "created_at": "2026-09-02T11:37:21",
-  "description": "## [1.5.2](https://github.com/Zanuaimi/Nai64Patches/compare/1.5.1...1.5.2) (2026-09-02)\n\n### Bug Fixes\n\n* keep overlay safe across activities ([66d676d](https://github.com/Zanuaimi/Nai64Patches/commit/66d676d2c18b084c6a65ce3fad0d32e990a39925))",
-  "download_url": "https://github.com/Zanuaimi/Nai64Patches/releases/download/1.5.2/patches-1.5.2.mpp",
+  "created_at": "2026-09-02T13:57:00",
+  "description": "## [1.5.3](https://github.com/Zanuaimi/Nai64Patches/compare/1.5.2...1.5.3) (2026-09-02)\n\n### Bug Fixes\n\n* retry semantic release workflow ([d5955df](https://github.com/Zanuaimi/Nai64Patches/commit/d5955df95efed5e7447b5b4e22d5058459bbd938))",
+  "download_url": "https://github.com/Zanuaimi/Nai64Patches/releases/download/1.5.3/patches-1.5.3.mpp",
   "signature_download_url": "",
-  "version": "1.5.2"
+  "version": "1.5.3"
 }
