@@ -201,19 +201,19 @@ val runtimeControlsOverlayPatch = bytecodePatch(
     val includeKeepAwake by booleanOption(
         title = "Include keep screen awake control",
         default = false,
-        key = "runtimeOverlayIncludeKeepScreenAwakeV2",
+        key = "runtimeOverlayIncludeKeepScreenAwake",
         description = "Include the keep-screen-awake control.",
     )
     val includeFullscreen by booleanOption(
         title = "Include fullscreen control",
         default = false,
-        key = "runtimeOverlayIncludeFullscreenV2",
+        key = "runtimeOverlayIncludeFullscreen",
         description = "Include the fullscreen control.",
     )
     val includeScreenshots by booleanOption(
         title = "Include allow screenshots control",
         default = false,
-        key = "runtimeOverlayIncludeScreenshotsV2",
+        key = "runtimeOverlayIncludeScreenshots",
         description = "Include the allow-screenshots control.",
     )
 
