@@ -78,7 +78,10 @@ private fun injectMethod(owner: MutableClass, method: MutableMethod, config: Str
     // neither temporary can alias p0/p1 after cloning.
     val cloned = method.cloneMutable(additionalRegisters = method.numberOfParameterRegisters + 2)
     val originalReceiver = cloned.p0Register
-    val type = if (application) "Landroid/app/Application;" else owner.type
+    // The runtime API accepts the platform base type. The injected receiver may be any concrete
+    // Activity subclass; using owner.type here would generate a method descriptor that does not
+    // exist in RuntimeOverlayRuntime and fail with NoSuchMethodError at launch.
+    val type = if (application) "Landroid/app/Application;" else "Landroid/app/Activity;"
     // Use the label-aware compiler entry point. Morphe Manager versions in the wild have
     // rejected range instructions through addInstructions even though the same Smali is valid
     // when compiled through addInstructionsWithLabels.
