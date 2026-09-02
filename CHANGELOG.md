@@ -1,3 +1,9 @@
+## [1.4.4](https://github.com/Zanuaimi/Nai64Patches/compare/1.4.3...1.4.4) (2026-09-02)
+
+### Bug Fixes
+
+* use universal activity bridge descriptor ([0d9d758](https://github.com/Zanuaimi/Nai64Patches/commit/0d9d75821d60001bb916fe7ec71af36138faeec4))
+
 ## [1.4.3](https://github.com/Zanuaimi/Nai64Patches/compare/1.4.2...1.4.3) (2026-09-02)
 
 ### Bug Fixes
