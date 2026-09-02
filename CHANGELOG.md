@@ -1,3 +1,9 @@
+## [1.4.6](https://github.com/Zanuaimi/Nai64Patches/compare/1.4.5...1.4.6) (2026-09-02)
+
+### Bug Fixes
+
+* prevent invalid overlay injection index ([a348702](https://github.com/Zanuaimi/Nai64Patches/commit/a3487025688ca15f68e11187cd4945de4c6e0bcc))
+
 ## [1.4.5](https://github.com/Zanuaimi/Nai64Patches/compare/1.4.4...1.4.5) (2026-09-02)
 
 ### Bug Fixes
