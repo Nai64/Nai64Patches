@@ -1,3 +1,9 @@
+## [1.4.0](https://github.com/Zanuaimi/Nai64Patches/compare/1.3.0...1.4.0) (2026-09-02)
+
+### New Features
+
+* improve runtime control UI ([82a669c](https://github.com/Zanuaimi/Nai64Patches/commit/82a669c569012585a987d4b89f93355c95e1f541))
+
 ## [1.3.0](https://github.com/Zanuaimi/Nai64Patches/compare/1.2.0...1.3.0) (2026-09-02)
 
 ### New Features
