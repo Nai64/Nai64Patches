@@ -222,16 +222,15 @@ val runtimeControlsOverlayPatch = bytecodePatch(
         // only a compatibility fallback for APKs without a resolvable Application method.
         val appDescriptor = StartupHooks.resolvedApplicationDescriptor
         val appClass = appDescriptor?.let { mutableClassDefByOrNull(it) }
-        val appOnCreate = appClass?.methods?.firstOrNull {
-            it.name == "onCreate" && it.returnType == "V" && it.parameterTypes.isEmpty()
-        }
-        if (appClass != null && appOnCreate != null) {
+        val appMethod = appClass?.let { findInheritedApplicationOnCreate(it) }
+        if (appMethod != null) {
+            val (appOwner, appOnCreate) = appMethod
             if (appOnCreate.implementation?.instructions?.any { it.toString().contains(RUNTIME_CLASS) } == true) {
-                logger.info("Runtime overlay bridge already exists in ${appClass.type}->onCreate")
+                logger.info("Runtime overlay bridge already exists in ${appOwner.type}->onCreate")
                 return@execute
             }
-            injectMethod(appClass, appOnCreate, config, application = true)
-            logger.info("Runtime overlay bridge injected into ${appClass.type}->onCreate")
+            injectMethod(appOwner, appOnCreate, config, application = true)
+            logger.info("Runtime overlay bridge injected into ${appOwner.type}->onCreate")
             return@execute
         }
 
@@ -263,14 +262,37 @@ private fun app.morphe.patcher.patch.BytecodePatchContext.findFallbackActivity()
         return superMap[type]?.let { isActivity(it, seen) } == true
     }
     val override = StartupHooks.resolvedLauncherActivityDescriptor
-    var selected: MutableClass? = null
+    val candidates = mutableListOf<MutableClass>()
     classDefForEach { classDef ->
-        if (selected != null || !isActivity(classDef.type)) return@classDefForEach
+        if (!isActivity(classDef.type)) return@classDefForEach
         val candidate = mutableClassDefBy(classDef)
         if (candidate.methods.any { it.name == "onCreate" && it.returnType == "V" && it.parameterTypes == listOf("Landroid/os/Bundle;") }) {
-            if (candidate.type == override) selected = candidate
-            else if (selected == null) selected = candidate
+            candidates += candidate
         }
     }
-    return selected
+    return candidates.firstOrNull { it.type == override } ?: candidates.firstOrNull()
+}
+
+/**
+ * Finds the implementation of Application.onCreate, including an implementation inherited by
+ * the manifest-declared Application class. Mutating a bundled application superclass is safe here:
+ * it is still the process Application entry point, whereas selecting an arbitrary Activity or SDK
+ * class can leave the actual game screen without an overlay.
+ */
+private fun app.morphe.patcher.patch.BytecodePatchContext.findInheritedApplicationOnCreate(
+    start: MutableClass,
+): Pair<MutableClass, MutableMethod>? {
+    val seen = mutableSetOf<String>()
+    var current: MutableClass? = start
+    while (current != null && seen.add(current.type)) {
+        val method = current.methods.firstOrNull {
+            it.name == "onCreate" && it.returnType == "V" && it.parameterTypes.isEmpty()
+        }
+        if (method != null) return current to method
+
+        val superclass = current.superclass ?: return null
+        if (superclass == "Landroid/app/Application;" || superclass == "Ljava/lang/Object;") return null
+        current = mutableClassDefByOrNull(superclass)
+    }
+    return null
 }
