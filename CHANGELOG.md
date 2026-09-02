@@ -1,3 +1,9 @@
+## [1.4.3](https://github.com/Zanuaimi/Nai64Patches/compare/1.4.2...1.4.3) (2026-09-02)
+
+### Bug Fixes
+
+* harden runtime overlay lifecycle ([26912bf](https://github.com/Zanuaimi/Nai64Patches/commit/26912bfd8a743005aca59e2b1566c7ba234a0e7c))
+
 ## [1.4.2](https://github.com/Zanuaimi/Nai64Patches/compare/1.4.1...1.4.2) (2026-09-02)
 
 ### Bug Fixes
