@@ -92,7 +92,9 @@ public final class RuntimeOverlayRuntime {
         private final FrameLayout root;
         private final TextView floatingButton;
         private final FrameLayout menuLayer;
+        private final View menuScrim;
         private final LinearLayout panel;
+        private final FrameLayout confirmationLayer;
         private final int originalWindowFlags;
         private final int originalSystemUi;
         private boolean menuVisible;
@@ -113,7 +115,9 @@ public final class RuntimeOverlayRuntime {
             root.setClipChildren(false);
             floatingButton = createFloatingButton();
             menuLayer = new FrameLayout(activity);
+            menuScrim = createMenuScrim();
             panel = createMenuPanel();
+            confirmationLayer = createConfirmationLayer();
         }
 
         void attach() {
@@ -124,9 +128,14 @@ public final class RuntimeOverlayRuntime {
             activity.addContentView(root, rootParams);
             root.addView(menuLayer, new FrameLayout.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+            menuLayer.addView(menuScrim, new FrameLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
             menuLayer.addView(panel, panel.getLayoutParams());
             root.addView(floatingButton, buttonParams());
+            root.addView(confirmationLayer, new FrameLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
             menuLayer.setVisibility(View.GONE);
+            confirmationLayer.setVisibility(View.GONE);
         }
 
         void detach() {
@@ -158,14 +167,32 @@ public final class RuntimeOverlayRuntime {
 
         private FrameLayout createMenuLayer() {
             FrameLayout layer = new FrameLayout(activity);
-            layer.setBackgroundColor(0x66000000);
-            layer.setOnClickListener(v -> closeMenu());
+            // This full-screen container remains touchable while the menu is open. Its children
+            // consume all background touches so Unity/host content cannot receive game input.
+            layer.setClickable(true);
+            layer.setFocusable(true);
             return layer;
+        }
+
+        private View createMenuScrim() {
+            View scrim = new View(activity);
+            scrim.setBackgroundColor(0x99000000);
+            scrim.setClickable(true);
+            scrim.setFocusable(true);
+            scrim.setOnClickListener(v -> closeMenu());
+            // The clickable View consumes the gesture and still delivers its click callback;
+            // returning true here would bypass View.onTouchEvent and prevent dismissal.
+            scrim.setOnTouchListener((v, event) -> false);
+            return scrim;
         }
 
         private LinearLayout createMenuPanel() {
             LinearLayout menu = new LinearLayout(activity);
             menu.setOrientation(LinearLayout.VERTICAL);
+            menu.setClickable(true);
+            menu.setFocusable(true);
+            // Consume unused panel area without preventing its child controls from receiving taps.
+            menu.setOnTouchListener((v, event) -> true);
             menu.setPadding(dp(20), dp(18), dp(20), dp(12));
             menu.setBackground(background(config.background, config.outline, false));
             FrameLayout.LayoutParams panelParams = new FrameLayout.LayoutParams(
@@ -199,8 +226,48 @@ public final class RuntimeOverlayRuntime {
             menu.addView(actions, new LinearLayout.LayoutParams(-1, -2));
             addAction(actions, config.repositoryText, v -> openRepository());
             addAction(actions, "Close menu", v -> closeMenu());
-            addAction(actions, "Fully close", v -> fullyClose());
+            addAction(actions, "Fully close", v -> showCloseConfirmation());
             return menu;
+        }
+
+        private FrameLayout createConfirmationLayer() {
+            FrameLayout layer = new FrameLayout(activity);
+            layer.setBackgroundColor(0xB3000000);
+            layer.setClickable(true);
+            layer.setFocusable(true);
+            layer.setOnClickListener(v -> hideCloseConfirmation());
+
+            LinearLayout card = new LinearLayout(activity);
+            card.setOrientation(LinearLayout.VERTICAL);
+            card.setPadding(dp(20), dp(18), dp(20), dp(12));
+            card.setBackground(background(config.background, config.outline, false));
+            card.setClickable(true);
+            card.setOnClickListener(v -> { });
+
+            TextView title = text("Close overlay?", 20, config.outline);
+            title.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
+            card.addView(title, new LinearLayout.LayoutParams(-1, -2));
+
+            TextView message = text("The overlay will be removed for this Activity.", 14, config.outline);
+            LinearLayout.LayoutParams messageParams = new LinearLayout.LayoutParams(-1, -2);
+            messageParams.topMargin = dp(8);
+            card.addView(message, messageParams);
+
+            LinearLayout actions = new LinearLayout(activity);
+            actions.setOrientation(LinearLayout.HORIZONTAL);
+            actions.setGravity(Gravity.CENTER);
+            LinearLayout.LayoutParams actionsParams = new LinearLayout.LayoutParams(-1, -2);
+            actionsParams.topMargin = dp(8);
+            card.addView(actions, actionsParams);
+            addAction(actions, "Cancel", v -> hideCloseConfirmation());
+            addAction(actions, "Fully close", v -> fullyClose());
+
+            FrameLayout.LayoutParams cardParams = new FrameLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT,
+                    Gravity.CENTER);
+            cardParams.setMargins(dp(20), dp(20), dp(20), dp(20));
+            layer.addView(card, cardParams);
+            return layer;
         }
 
         private void addControls(LinearLayout controls) {
@@ -246,14 +313,39 @@ public final class RuntimeOverlayRuntime {
         private void toggleMenu() {
             if (fullyClosed) return;
             menuVisible = !menuVisible;
-            menuLayer.setVisibility(menuVisible ? View.VISIBLE : View.GONE);
+            if (menuVisible) {
+                menuLayer.setVisibility(View.VISIBLE);
+                menuScrim.animate().cancel();
+                menuScrim.setAlpha(0f);
+                menuScrim.animate().alpha(1f).setDuration(180).start();
+            } else {
+                hideMenuLayer();
+            }
             floatingButton.animate().alpha(menuVisible ? 0f : config.opacity).setDuration(180).start();
         }
 
         private void closeMenu() {
             menuVisible = false;
-            menuLayer.setVisibility(View.GONE);
+            hideMenuLayer();
             floatingButton.animate().alpha(config.opacity).setDuration(180).start();
+        }
+
+        private void hideMenuLayer() {
+            menuScrim.animate().cancel();
+            menuScrim.animate().alpha(0f).setDuration(180).withEndAction(() -> {
+                if (!menuVisible) menuLayer.setVisibility(View.GONE);
+            }).start();
+        }
+
+        private void showCloseConfirmation() {
+            confirmationLayer.setAlpha(0f);
+            confirmationLayer.setVisibility(View.VISIBLE);
+            confirmationLayer.animate().alpha(1f).setDuration(180).start();
+        }
+
+        private void hideCloseConfirmation() {
+            confirmationLayer.animate().alpha(0f).setDuration(160).withEndAction(() ->
+                    confirmationLayer.setVisibility(View.GONE)).start();
         }
 
         private void fullyClose() {
@@ -283,7 +375,9 @@ public final class RuntimeOverlayRuntime {
                     if (dragged) {
                         view.setX(clamp(startX + dx, 0, root.getWidth() - view.getWidth()));
                         view.setY(clamp(startY + dy, 0, root.getHeight() - view.getHeight()));
-                        view.setAlpha(0f);
+                        // The idle state is intentionally translucent, but dragging must make
+                        // the control fully visible so its position remains easy to track.
+                        view.setAlpha(1f);
                     }
                     return true;
                 case MotionEvent.ACTION_UP:
