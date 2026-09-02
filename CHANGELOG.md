@@ -1,3 +1,9 @@
+## [1.4.2](https://github.com/Zanuaimi/Nai64Patches/compare/1.4.1...1.4.2) (2026-09-02)
+
+### Bug Fixes
+
+* simplify runtime control setting keys ([ac0ee7c](https://github.com/Zanuaimi/Nai64Patches/commit/ac0ee7c18980074719c4a6ee7da7fa37e2d1fb9c))
+
 ## [1.4.1](https://github.com/Zanuaimi/Nai64Patches/compare/1.4.0...1.4.1) (2026-09-02)
 
 ### Bug Fixes

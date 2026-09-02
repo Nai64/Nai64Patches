@@ -1,6 +1,6 @@
 {
   "NOTE": "Do NOT manually edit this file. This file is automatically updated when semantic release (release.yml) runs. Manually editing this file can break your releases and break third party tools that use this file.",
-  "version": "1.4.1",
+  "version": "1.4.2",
   "patches": [
     {
       "name": "Skip Consent Popup",
@@ -3854,7 +3854,7 @@
           "values": null
         },
         {
-          "key": "runtimeOverlayIncludeKeepScreenAwakeV2",
+          "key": "runtimeOverlayIncludeKeepScreenAwake",
           "title": "Include keep screen awake control",
           "description": "Include the keep-screen-awake control.",
           "required": false,
@@ -3863,7 +3863,7 @@
           "values": null
         },
         {
-          "key": "runtimeOverlayIncludeFullscreenV2",
+          "key": "runtimeOverlayIncludeFullscreen",
           "title": "Include fullscreen control",
           "description": "Include the fullscreen control.",
           "required": false,
@@ -3872,7 +3872,7 @@
           "values": null
         },
         {
-          "key": "runtimeOverlayIncludeScreenshotsV2",
+          "key": "runtimeOverlayIncludeScreenshots",
           "title": "Include allow screenshots control",
           "description": "Include the allow-screenshots control.",
           "required": false,
