@@ -64,7 +64,7 @@ private fun injectMethod(owner: MutableClass, method: MutableMethod, config: Str
         """
         move-object/from16 v$temporaryBase, v$originalReceiver
         const-string v${temporaryBase + 1}, "${StartupHooks.escapeSmali(config)}"
-        invoke-static/range {v$temporaryBase .. v${temporaryBase + 1}}, $RUNTIME_CLASS->${if (application) "install" else "installActivity"}($type;Ljava/lang/String;)V
+        invoke-static/range {v$temporaryBase .. v${temporaryBase + 1}}, $RUNTIME_CLASS->${if (application) "install" else "installActivity"}(${type}Ljava/lang/String;)V
         """.trimIndent(),
     )
     owner.methods.remove(method)
