@@ -2,11 +2,8 @@ package nai64.runtime;
 
 import android.app.Activity;
 import android.app.Application;
-import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
 import android.graphics.Typeface;
-import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.Gravity;
@@ -35,16 +32,16 @@ import java.util.WeakHashMap;
 public final class RuntimeOverlayRuntime {
     private static final Map<Activity, Controller> CONTROLLERS = new WeakHashMap<>();
     private static boolean callbacksRegistered;
-    private static Config configuration;
+    private static RuntimeOverlayConfig configuration;
 
     private RuntimeOverlayRuntime() { }
 
     /** Primary entry point, called once from Application.onCreate(). */
     public static synchronized void install(Application application, String encodedConfig) {
         if (application == null) return;
-        configuration = Config.decode(encodedConfig);
+        configuration = RuntimeOverlayConfig.decode(encodedConfig);
         if (!callbacksRegistered) {
-            application.registerActivityLifecycleCallbacks(new LifecycleCallbacks());
+            application.registerActivityLifecycleCallbacks(new RuntimeOverlayLifecycle());
             callbacksRegistered = true;
         }
     }
@@ -52,11 +49,11 @@ public final class RuntimeOverlayRuntime {
     /** Compatibility fallback for APKs where Application.onCreate cannot be resolved. */
     public static synchronized void installActivity(Activity activity, String encodedConfig) {
         if (activity == null) return;
-        configuration = Config.decode(encodedConfig);
-        show(activity);
+        configuration = RuntimeOverlayConfig.decode(encodedConfig);
+        showActivity(activity);
     }
 
-    private static synchronized void show(Activity activity) {
+    static synchronized void showActivity(Activity activity) {
         if (activity.isFinishing() || (android.os.Build.VERSION.SDK_INT >= 17 && activity.isDestroyed())) return;
         if (CONTROLLERS.containsKey(activity)) return;
         try {
@@ -70,25 +67,15 @@ public final class RuntimeOverlayRuntime {
         }
     }
 
-    private static synchronized void remove(Activity activity) {
+    static synchronized void removeActivity(Activity activity) {
         Controller controller = CONTROLLERS.remove(activity);
         if (controller != null) controller.detach();
-    }
-
-    private static final class LifecycleCallbacks implements Application.ActivityLifecycleCallbacks {
-        @Override public void onActivityCreated(Activity a, Bundle state) { }
-        @Override public void onActivityStarted(Activity a) { }
-        @Override public void onActivityResumed(Activity a) { show(a); }
-        @Override public void onActivityPaused(Activity a) { }
-        @Override public void onActivityStopped(Activity a) { }
-        @Override public void onActivitySaveInstanceState(Activity a, Bundle state) { }
-        @Override public void onActivityDestroyed(Activity a) { remove(a); }
     }
 
     /** Owns all views and state for exactly one Activity. */
     private static final class Controller {
         private final Activity activity;
-        private final Config config;
+        private final RuntimeOverlayConfig config;
         private final FrameLayout root;
         private final TextView floatingButton;
         private final FrameLayout menuLayer;
@@ -105,7 +92,7 @@ public final class RuntimeOverlayRuntime {
         private float startY;
         private boolean dragged;
 
-        Controller(Activity activity, Config config) {
+        Controller(Activity activity, RuntimeOverlayConfig config) {
             this.activity = activity;
             this.config = config;
             Window window = activity.getWindow();
@@ -159,7 +146,7 @@ public final class RuntimeOverlayRuntime {
             button.setGravity(Gravity.CENTER);
             button.setAlpha(config.opacity);
             button.setContentDescription(config.buttonText);
-            button.setBackground(background(config.buttonBackground, config.outline, config.shape == 1));
+            button.setBackground(RuntimeOverlayViews.background(config.buttonBackground, config.outline, config.shape == 1));
             button.setOnClickListener(v -> toggleMenu());
             button.setOnTouchListener(this::onButtonTouch);
             return button;
@@ -194,7 +181,7 @@ public final class RuntimeOverlayRuntime {
             // Consume unused panel area without preventing its child controls from receiving taps.
             menu.setOnTouchListener((v, event) -> true);
             menu.setPadding(dp(20), dp(18), dp(20), dp(12));
-            menu.setBackground(background(config.background, config.outline, false));
+            menu.setBackground(RuntimeOverlayViews.background(config.background, config.outline, false));
             FrameLayout.LayoutParams panelParams = new FrameLayout.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT,
                     Gravity.CENTER);
@@ -240,7 +227,7 @@ public final class RuntimeOverlayRuntime {
             LinearLayout card = new LinearLayout(activity);
             card.setOrientation(LinearLayout.VERTICAL);
             card.setPadding(dp(20), dp(18), dp(20), dp(12));
-            card.setBackground(background(config.background, config.outline, false));
+            card.setBackground(RuntimeOverlayViews.background(config.background, config.outline, false));
             card.setClickable(true);
             card.setOnClickListener(v -> { });
 
@@ -271,14 +258,15 @@ public final class RuntimeOverlayRuntime {
         }
 
         private void addControls(LinearLayout controls) {
-            // TODO(runtime-overlay): add future controls as independent feature classes. The
-            // current three controls remain the only optional rows in the scrollable container.
-            if (config.keepAwake) addSwitch(controls, "Keep screen awake", (originalWindowFlags & 0x80) != 0,
-                    checked -> { if (checked) activity.getWindow().addFlags(0x80); else restoreWindowFlag(0x80); });
-            if (config.fullscreen) addSwitch(controls, "Fullscreen", (originalSystemUi & 0x4) != 0,
-                    checked -> activity.getWindow().getDecorView().setSystemUiVisibility(checked ? 0x1706 : originalSystemUi));
-            if (config.screenshots) addSwitch(controls, "Allow screenshots", (originalWindowFlags & 0x2000) == 0,
-                    checked -> { if (checked) activity.getWindow().clearFlags(0x2000); else activity.getWindow().addFlags(0x2000); });
+            if (config.keepAwake) addFeature(controls, new KeepAwakeFeature());
+            if (config.fullscreen) addFeature(controls, new FullscreenFeature());
+            if (config.screenshots) addFeature(controls, new ScreenshotsFeature());
+        }
+
+        private void addFeature(LinearLayout controls, RuntimeOverlayFeature feature) {
+            addSwitch(controls, feature.label(),
+                    feature.initiallyEnabled(activity, originalWindowFlags, originalSystemUi),
+                    checked -> feature.setEnabled(activity, checked, originalWindowFlags, originalSystemUi));
         }
 
         private void addSwitch(LinearLayout parent, String label, boolean initial, final Toggle toggle) {
@@ -305,7 +293,7 @@ public final class RuntimeOverlayRuntime {
             action.setGravity(Gravity.CENTER);
             action.setContentDescription(label);
             action.setOnClickListener(listener);
-            action.setBackground(selectableBackground(activity));
+            action.setBackground(RuntimeOverlayViews.selectableBackground(activity));
             LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(0, dp(48), 1f);
             row.addView(action, params);
         }
@@ -388,11 +376,6 @@ public final class RuntimeOverlayRuntime {
             }
         }
 
-        private void restoreWindowFlag(int flag) {
-            if ((originalWindowFlags & flag) != 0) activity.getWindow().addFlags(flag);
-            else activity.getWindow().clearFlags(flag);
-        }
-
         private int dp(int value) { return (int) (value * activity.getResources().getDisplayMetrics().density + .5f); }
     }
 
@@ -400,71 +383,4 @@ public final class RuntimeOverlayRuntime {
 
     private static float clamp(float value, float min, float max) { return Math.max(min, Math.min(value, max)); }
 
-    private static GradientDrawable background(int color, int stroke, boolean circle) {
-        GradientDrawable drawable = new GradientDrawable();
-        drawable.setColor(color);
-        drawable.setCornerRadius(circle ? 1000f : 24f);
-        drawable.setStroke(1, stroke);
-        return drawable;
-    }
-
-    private static android.graphics.drawable.Drawable selectableBackground(Context context) {
-        android.content.res.TypedArray attributes = context.obtainStyledAttributes(
-                new int[] { android.R.attr.selectableItemBackgroundBorderless });
-        android.graphics.drawable.Drawable drawable = attributes.getDrawable(0);
-        attributes.recycle();
-        return drawable;
-    }
-
-    private static final class Config {
-        String title, description, repositoryText, repositoryUrl, buttonText;
-        int background, outline, buttonTextColor, buttonBackground, buttonSize, gravity;
-        float opacity;
-        int shape;
-        boolean keepAwake, fullscreen, screenshots;
-
-        static Config decode(String encoded) {
-            Config c = new Config();
-            String[] values = encoded == null ? new String[0] : encoded.split("\\|", -1);
-            String[] v = new String[14];
-            for (int i = 0; i < v.length; i++) v[i] = i < values.length ? decodePart(values[i]) : "";
-            c.title = limit(v[0], 80, "Nai64Patches Runtime Controls Overlay");
-            c.description = limit(v[1], 500, "Nai64Patches Runtime Controls Overlay");
-            c.repositoryText = empty(v[2], "Nai64 repository");
-            c.repositoryUrl = empty(v[3], "https://github.com/Nai64/Nai64Patches");
-            c.background = color(v[4], 0xCC101820);
-            c.outline = color(v[5], 0xFF55D6BE);
-            c.buttonText = limit(empty(v[6], "N"), 3, "N");
-            c.buttonTextColor = color(v[7], Color.BLACK);
-            c.buttonBackground = color(v[8], Color.WHITE);
-            c.shape = "square".equals(v[9]) ? 0 : ("squircle".equals(v[9]) ? 2 : 1);
-            c.buttonSize = integer(v[10], 56, 32, 128);
-            c.opacity = integer(v[11], 35, 10, 100) / 100f;
-            c.gravity = gravity(v[12]);
-            String controls = v[13];
-            c.keepAwake = controls.contains("keep");
-            c.fullscreen = controls.contains("fullscreen");
-            c.screenshots = controls.contains("screenshots");
-            return c;
-        }
-
-        private static String decodePart(String value) {
-            try { return new String(android.util.Base64.decode(value, android.util.Base64.DEFAULT), java.nio.charset.Charset.forName("UTF-8")); }
-            catch (RuntimeException ignored) { return ""; }
-        }
-        private static String empty(String value, String fallback) { return value == null || value.isEmpty() ? fallback : value; }
-        private static String limit(String value, int max, String fallback) { String result = empty(value, fallback); return result.substring(0, Math.min(max, result.length())); }
-        private static int integer(String value, int fallback, int min, int max) { try { return Math.max(min, Math.min(max, Integer.parseInt(value))); } catch (RuntimeException ignored) { return fallback; } }
-        private static int color(String value, int fallback) { try { String v = value.replace("#", ""); if (v.length() == 6) v = "FF" + v; return (int) Long.parseLong(v, 16); } catch (RuntimeException ignored) { return fallback; } }
-        private static int gravity(String value) {
-            if ("topLeft".equals(value)) return Gravity.TOP | Gravity.LEFT;
-            if ("topMiddle".equals(value)) return Gravity.TOP | Gravity.CENTER_HORIZONTAL;
-            if ("centerLeft".equals(value)) return Gravity.CENTER_VERTICAL | Gravity.LEFT;
-            if ("centerRight".equals(value)) return Gravity.CENTER_VERTICAL | Gravity.RIGHT;
-            if ("bottomLeft".equals(value)) return Gravity.BOTTOM | Gravity.LEFT;
-            if ("bottomMiddle".equals(value)) return Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL;
-            if ("bottomRight".equals(value)) return Gravity.BOTTOM | Gravity.RIGHT;
-            return Gravity.TOP | Gravity.RIGHT;
-        }
-    }
 }

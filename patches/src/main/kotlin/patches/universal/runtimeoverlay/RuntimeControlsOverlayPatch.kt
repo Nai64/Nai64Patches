@@ -11,11 +11,11 @@ import patches.universal.ads.util.cloneMutable
 import patches.universal.ads.util.numberOfParameterRegisters
 import patches.universal.ads.util.p0Register
 import patches.universal.ui.StartupHooks
-import patches.universal.ui.findApplicationOnCreate
 import java.util.Base64
 import java.util.logging.Logger
 
 private const val RUNTIME_CLASS = "Lnai64/runtime/RuntimeOverlayRuntime;"
+private const val CONFIG_VERSION = "2"
 private const val MAX_TITLE_CHARACTERS = 80
 private const val MAX_DESCRIPTION_CHARACTERS = 500
 private const val DEFAULT_DESCRIPTION =
@@ -32,12 +32,31 @@ private fun descriptor(value: String): String {
     else "L${trimmed.replace('.', '/')};"
 }
 
-private fun validate(title: String, description: String, label: String, url: String, size: Int) {
+private fun validate(
+    title: String,
+    description: String,
+    label: String,
+    url: String,
+    background: String,
+    outline: String,
+    buttonTextColor: String,
+    buttonBackground: String,
+    shape: String,
+    position: String,
+    size: Int,
+    opacity: Int,
+) {
     check(title.isNotBlank() && title.length <= MAX_TITLE_CHARACTERS)
     check(description.isNotBlank() && description.length <= MAX_DESCRIPTION_CHARACTERS)
-    check(label.isNotBlank())
+    check(label.isNotBlank() && label.length <= MAX_TITLE_CHARACTERS)
     check(url.startsWith("http://") || url.startsWith("https://"))
+    fun validColor(value: String) = value.matches(Regex("#[0-9a-fA-F]{6}([0-9a-fA-F]{2})?"))
+    check(validColor(background) && validColor(outline))
+    check(validColor(buttonTextColor) && validColor(buttonBackground))
+    check(shape in setOf("circle", "squircle", "square"))
+    check(position in setOf("topLeft", "topMiddle", "topRight", "centerLeft", "centerRight", "bottomLeft", "bottomMiddle", "bottomRight"))
     check(size in 32..128)
+    check(opacity in 10..100)
 }
 
 private fun injectMethod(owner: MutableClass, method: MutableMethod, config: String, application: Boolean) {
@@ -210,13 +229,21 @@ val runtimeControlsOverlayPatch = bytecodePatch(
         val opacityValue = (buttonOpacity ?: 35).coerceIn(10, 100)
         val shapeValue = buttonShape.orEmpty().ifBlank { "circle" }
         val positionValue = buttonPosition.orEmpty().ifBlank { "topRight" }
-        validate(titleValue, descriptionValue, labelValue, urlValue, sizeValue)
+        val backgroundValue = backgroundColor.orEmpty().ifBlank { "#CC101820" }
+        val outlineValue = outlineColor.orEmpty().ifBlank { "#FF55D6BE" }
+        val buttonTextColorValue = buttonTextColor.orEmpty().ifBlank { "#FF000000" }
+        val buttonBackgroundValue = buttonBackgroundColor.orEmpty().ifBlank { "#FFFFFFFF" }
+        validate(
+            titleValue, descriptionValue, labelValue, urlValue,
+            backgroundValue, outlineValue, buttonTextColorValue, buttonBackgroundValue,
+            shapeValue, positionValue, sizeValue, opacityValue,
+        )
         check(buttonText.orEmpty().trim().length <= 3)
 
         val config = listOf(
-            titleValue, descriptionValue, labelValue, urlValue,
-            backgroundColor.orEmpty(), outlineColor.orEmpty(), buttonText.orEmpty().trim().take(3).ifBlank { "N" },
-            buttonTextColor.orEmpty(), buttonBackgroundColor.orEmpty(), shapeValue,
+            CONFIG_VERSION, titleValue, descriptionValue, labelValue, urlValue,
+            backgroundValue, outlineValue, buttonText.orEmpty().trim().take(3).ifBlank { "N" },
+            buttonTextColorValue, buttonBackgroundValue, shapeValue,
             sizeValue.toString(), opacityValue.toString(), positionValue,
             listOf(if (includeKeepAwake == true) "keep" else null, if (includeFullscreen == true) "fullscreen" else null,
                 if (includeScreenshots == true) "screenshots" else null).filterNotNull().joinToString(","),
