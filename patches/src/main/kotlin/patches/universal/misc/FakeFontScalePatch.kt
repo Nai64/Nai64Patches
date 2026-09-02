@@ -30,7 +30,7 @@ val fakeFontScalePatch = bytecodePatch(
         val logger = Logger.getLogger(this::class.java.name)
         val scale = (fontScale ?: 100) / 100.0f
         // Compute IEEE 754 bits; const/high16 uses only the top 16 bits,
-        // bottom 16 are zeroed — acceptable precision loss for font scaling.
+        // bottom 16 are zeroed  -  acceptable precision loss for font scaling.
         val floatBits = java.lang.Float.floatToRawIntBits(scale)
         val hex = "0x" + Integer.toHexString(floatBits)
         logger.info("Using font scale $scale ($hex)")

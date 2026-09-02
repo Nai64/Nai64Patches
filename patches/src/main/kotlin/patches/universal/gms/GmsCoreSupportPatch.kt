@@ -53,7 +53,7 @@ private val gmsCoreManifestPatch = resourcePatch(
 @Suppress("unused")
 val gmsCoreSupportPatch = bytecodePatch(
     name = "GmsCore support (MicroG)",
-    description = "Routes Google Play Services API calls through MicroG (enables Google Sign-In on non-root/no-GMS) with selectable MicroG package and optional main activity / package name overrides",
+    description = "Use MicroG instead of Google Play Services for logins.",
     default = false,
 ) {
     dependsOn(gmsCoreManifestPatch)
@@ -119,20 +119,20 @@ val gmsCoreSupportPatch = bytecodePatch(
 
         // If a main activity override is provided, ensure it is exported and has MAIN/LAUNCHER
         if (mainActivity.isNotEmpty()) {
-            logger.info("Main Activity override configured: $mainActivity — ensure it is exported in manifest if needed")
+            logger.info("Main Activity override configured: $mainActivity  -  ensure it is exported in manifest if needed")
             // Manifest handling for main activity would be done here via resourcePatch, but we keep it as a log for now
             // as most apps auto-detect via <intent-filter> with MAIN/LAUNCHER.
         }
 
         if (pkgOverride.isNotEmpty()) {
-            logger.info("Custom package name override: $pkgOverride — Change Package Name patch should be applied first if package was renamed")
+            logger.info("Custom package name override: $pkgOverride  -  Change Package Name patch should be applied first if package was renamed")
         }
 
         // Also patch GmsClient and related GMS core classes to use the selected MicroG package
         // For now, the isGooglePlayServicesAvailable bypass is the primary enabler; MicroG itself
         // will handle the actual GMS API routing once the package is visible via queries.
         // We log the selected package for debugging.
-        logger.info("GmsCore support configured for $gmsPackage — ${if (patched > 0) "$patched availability checks bypassed" else "no availability checks found, relying on manifest queries"}")
+        logger.info("GmsCore support configured for $gmsPackage  -  ${if (patched > 0) "$patched availability checks bypassed" else "no availability checks found, relying on manifest queries"}")
 
         if (patched == 0) {
             logger.warning("No Google Play Services availability checks found. Manifest queries for $gmsPackage were still added for MicroG routing.")

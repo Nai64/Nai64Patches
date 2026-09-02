@@ -42,6 +42,10 @@ val forceOrientationPatch = resourcePatch(
             for (i in 0 until activities.length) {
                 containers.add(activities.item(i) as org.w3c.dom.Element)
             }
+            val depsActivities = manifest.getElementsByTagName("activity-alias")
+            for (i in 0 until depsActivities.length) {
+                containers.add(depsActivities.item(i) as org.w3c.dom.Element)
+            }
             val application = manifest.documentElement.getElementsByTagName("application")
             if (application.length > 0) {
                 containers.add(application.item(0) as org.w3c.dom.Element)
@@ -49,8 +53,31 @@ val forceOrientationPatch = resourcePatch(
 
             for (element in containers) {
                 element.setAttribute("android:screenOrientation", value)
+                // Foldable/tablet fix (#61): make large inner display respect orientation and allow resize
+                element.setAttributeNS("http://schemas.android.com/apk/res/android", "android:resizeableActivity", "true")
+                val existingConfig = element.getAttributeNS("http://schemas.android.com/apk/res/android", "configChanges")
+                val needed = listOf("orientation", "screenSize", "smallestScreenSize", "screenLayout", "density", "layoutDirection")
+                val merged = if (existingConfig.isNullOrEmpty()) {
+                    needed.joinToString("|")
+                } else {
+                    val parts = existingConfig.split("|").map { it.trim() }.toMutableSet()
+                    parts.addAll(needed)
+                    parts.joinToString("|")
+                }
+                element.setAttributeNS("http://schemas.android.com/apk/res/android", "android:configChanges", merged)
                 patched++
             }
+            // Ensure supports-screens allows large/xlarge for foldable inner display
+            var supportsScreens = manifest.getElementsByTagName("supports-screens").item(0) as? org.w3c.dom.Element
+            if (supportsScreens == null) {
+                supportsScreens = manifest.createElement("supports-screens")
+                manifest.documentElement.appendChild(supportsScreens)
+            }
+            supportsScreens.setAttributeNS("http://schemas.android.com/apk/res/android", "android:smallScreens", "true")
+            supportsScreens.setAttributeNS("http://schemas.android.com/apk/res/android", "android:normalScreens", "true")
+            supportsScreens.setAttributeNS("http://schemas.android.com/apk/res/android", "android:largeScreens", "true")
+            supportsScreens.setAttributeNS("http://schemas.android.com/apk/res/android", "android:xlargeScreens", "true")
+            supportsScreens.setAttributeNS("http://schemas.android.com/apk/res/android", "android:requiresSmallestWidthDp", "0")
         }
 
         if (patched == 0) {

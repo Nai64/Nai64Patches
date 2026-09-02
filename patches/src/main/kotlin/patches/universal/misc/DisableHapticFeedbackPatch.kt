@@ -6,7 +6,7 @@ import java.util.logging.Logger
 @Suppress("unused")
 val disableHapticFeedbackPatch = bytecodePatch(
     name = "Disable Haptic Feedback",
-    description = "Makes View.performHapticFeedback(...) report false (and do nothing) so the app's haptic/vibration feedback is suppressed.",
+    description = "Disables vibration feedback.",
     default = false,
 ) {
     execute {

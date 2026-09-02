@@ -29,7 +29,7 @@ private val ICON_DENSITIES = listOf(
 @Suppress("unused")
 val customAppIconPatch = resourcePatch(
     name = "Custom App Icon",
-    description = "Replaces the launcher icon with a custom image you supply (image URL, file path, or base64). Optionally apply hue shift, negative, sepia, or flip to the icon (works on original icon even without custom source).",
+    description = "Change the app icon.",
     default = false,
 ) {
     val iconSource by stringOption(

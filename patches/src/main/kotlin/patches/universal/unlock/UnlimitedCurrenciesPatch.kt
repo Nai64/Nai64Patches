@@ -99,7 +99,7 @@ private fun isPriceMethod(name: String): Boolean {
 @Suppress("unused")
 val unlimitedCurrenciesPatch = bytecodePatch(
     name = "Unlimited Currencies",
-    description = "Spoofs currency checks so you never run out. Covers PlayerPrefs, SharedPreferences and common Unity fields. WARNING: Only works on Mono-based Unity games and traditional Java/Android games. IL2CPP games (check for libil2cpp.so in the APK) store currencies in native memory — this patch cannot reach them.",
+    description = "Get unlimited coins, gems and other currencies. Works on most games. Not supported on newer Unity games.",
     default = false,
 ) {
     val amount by intOption(

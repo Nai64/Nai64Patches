@@ -12,7 +12,7 @@ import java.util.logging.Logger
 @Suppress("unused")
 val spoofFixedLocationPatch = bytecodePatch(
     name = "Spoof Fixed Location",
-    description = "Returns fixed GPS coordinates for all location requests instead of the real device location. Useful for region-locked apps like rajiko that require a specific location.",
+    description = "Fakes your GPS location.",
     default = false,
 ) {
     val latitude by stringOption(
@@ -35,7 +35,7 @@ val spoofFixedLocationPatch = bytecodePatch(
         val lat = latStr.toDoubleOrNull()
         val lon = lonStr.toDoubleOrNull()
         if (lat == null || lon == null) {
-            logger.warning("Invalid coordinates lat=$latStr lon=$lonStr — expected decimal numbers. No changes applied.")
+            logger.warning("Invalid coordinates lat=$latStr lon=$lonStr  -  expected decimal numbers. No changes applied.")
             return@execute
         }
         // Use raw IEEE 754 bits for const-wide

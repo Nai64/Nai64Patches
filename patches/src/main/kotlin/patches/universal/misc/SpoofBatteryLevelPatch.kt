@@ -16,7 +16,7 @@ import java.util.logging.Logger
 @Suppress("unused")
 val spoofBatteryLevelPatch = bytecodePatch(
     name = "Spoof Battery Level",
-    description = "Reports a chosen battery level through BatteryManager.getIntProperty for the capacity property, so apps that restrict features on low battery stop doing so.",
+    description = "Fakes the battery level.",
     default = false,
 ) {
     val level by intOption(

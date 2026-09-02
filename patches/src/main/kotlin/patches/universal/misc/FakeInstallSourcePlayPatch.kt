@@ -7,7 +7,7 @@ import java.util.logging.Logger
 @Suppress("unused")
 val fakeInstallSourcePlayPatch = bytecodePatch(
     name = "Fake Play Store Install Source",
-    description = "Makes PackageManager.getInstallerPackageName() report a chosen store so apps that warn about sideloading or gate Play-only features stop doing so.",
+    description = "Fakes the install source.",
     default = false,
 ) {
     val installer by stringOption(

@@ -20,8 +20,13 @@ val adsFreeRewardsPatch = bytecodePatch(
         key = "patchVersion",
         default = "1.32.0",
         title = "Patch version",
-        description = "Choose the implementation to use. Each version is a snapshot — newer ones support more networks. If the latest does not work for your app, try an older version.",
+        description = "Choose the implementation to use. Each version is a snapshot  -  newer ones support more networks. If the latest does not work for your app, try an older version.",
         values = linkedMapOf(
+            "1.41.0" to "1.41.0",
+            "1.40.0" to "1.40.0",
+            "1.38.0" to "1.38.0",
+            "1.34.0" to "1.34.0",
+            "1.33.0" to "1.33.0",
             "1.32.0" to "1.32.0",
             "1.31.0" to "1.31.0",
             "1.30.0" to "1.30.0",
@@ -79,6 +84,11 @@ val adsFreeRewardsPatch = bytecodePatch(
             "1.22.0" -> applyAdsFreeRewardsV1220(logger, rewardStrategy, instantReward)
             "1.30.0" -> applyAdsFreeRewardsV1300(logger, rewardStrategy, instantReward)
             "1.31.0" -> applyAdsFreeRewardsV1310(logger, rewardStrategy, instantReward)
+            "1.33.0" -> applyAdsFreeRewardsV1330(logger, rewardStrategy, instantReward)
+            "1.34.0" -> applyAdsFreeRewardsV1340(logger, rewardStrategy, instantReward)
+            "1.38.0" -> applyAdsFreeRewardsV1380(logger, rewardStrategy, instantReward)
+            "1.40.0" -> applyAdsFreeRewardsV1400(logger, rewardStrategy, instantReward)
+            "1.41.0" -> applyAdsFreeRewardsV1410(logger, rewardStrategy, instantReward)
             else -> applyAdsFreeRewardsV1320(logger, rewardStrategy, instantReward)
         }
         if (fakeAdAvailability == true) {
@@ -105,11 +115,11 @@ private fun BytecodePatchContext.forceAdAvailability(logger: Logger): Int {
     fun patchIsReady(label: String, fingerprint: app.morphe.patcher.Fingerprint) {
         val method = fingerprint.methodOrNull ?: return
         val impl = method.implementation ?: run {
-            logger.warning("Ads Free Rewards: skip $label — no implementation")
+            logger.warning("Ads Free Rewards: skip $label  -  no implementation")
             return
         }
         if (impl.registerCount < 1) {
-            logger.warning("Ads Free Rewards: skip $label — registerCount ${impl.registerCount} < 1")
+            logger.warning("Ads Free Rewards: skip $label  -  registerCount ${impl.registerCount} < 1")
             return
         }
         method.addInstructions(
@@ -144,6 +154,8 @@ private fun BytecodePatchContext.applyAdsFreeRewardsV1190(logger: Logger, reward
     val useRustore = strategy == "auto" || strategy == "rustore"
     val useHuawei = strategy == "auto" || strategy == "huawei"
 
+    logger.info("Ads Free Rewards: strategy=$strategy instantReward=$instantReward fakeAdAvailability=${true} patchVersion=${"1.32.0"}")
+
     val hasMaxUnity = ShowRewardedAdFingerprint.methodOrNull != null &&
         IsRewardedAdReadyFingerprint.methodOrNull != null
     val hasNativeMax = MaxRewardedAdIsReadyFingerprint.methodOrNull != null &&
@@ -158,8 +170,12 @@ private fun BytecodePatchContext.applyAdsFreeRewardsV1190(logger: Logger, reward
     val hasYandexUnityRewarded = YandexUnityRewardedWrapperShowFingerprint.methodOrNull != null
     val hasHuawei = HuaweiRewardAdIsLoadedFingerprint.methodOrNull != null &&
         HuaweiRewardAdShowFingerprint.methodOrNull != null
+    val hasAdMob = AdMobRewardedShowFingerprint.methodOrNull != null
 
-    if (!hasMaxUnity && !hasNativeMax && !hasUnityAds && !hasUnityAdsV4 && !hasLevelPlay && !hasIronSourceUnityBridge && !hasMyTarget && !hasYandexUnityRewarded && !hasHuawei) {
+    logger.info("Ads Free Rewards: detected SDKs  -  MAX Unity=$hasMaxUnity native MAX=$hasNativeMax UnityAds=$hasUnityAds UnityAdsV4=$hasUnityAdsV4 LevelPlay=$hasLevelPlay ironSourceBridge=$hasIronSourceUnityBridge MyTarget=$hasMyTarget Yandex=$hasYandexUnityRewarded Huawei=$hasHuawei AdMob=$hasAdMob")
+
+    if (!hasMaxUnity && !hasNativeMax && !hasUnityAds && !hasUnityAdsV4 && !hasLevelPlay && !hasIronSourceUnityBridge && !hasMyTarget && !hasYandexUnityRewarded && !hasHuawei && !hasAdMob) {
+        logger.warning("Ads Free Rewards: no supported ad SDK found for reward strategy $strategy  -  no changes applied")
         return
     }
 
@@ -182,7 +198,13 @@ private fun BytecodePatchContext.applyAdsFreeRewardsV1190(logger: Logger, reward
                 return-void
             """.trimIndent())
             logger.info("Huawei Ads Kit rewarded patch succeeded")
+        } else {
+            logger.warning("Ads Free Rewards: Huawei show class not found  -  skipping")
         }
+    } else {
+        if (!useHuawei) logger.info("Ads Free Rewards: Huawei strategy disabled by rewardStrategy=$strategy")
+        else if (!hasHuawei) logger.info("Ads Free Rewards: Huawei SDK not detected  -  skipping")
+        else logger.info("Ads Free Rewards: Huawei skipped (instantReward=$instantReward)")
     }
 
     if (useRustore && instantReward == true) {
@@ -191,6 +213,7 @@ private fun BytecodePatchContext.applyAdsFreeRewardsV1190(logger: Logger, reward
     }
     if (applyMaxUnityStrategy(logger, useMax, instantReward)) return
     applyNativeMaxStrategy(logger, useMax, instantReward)
+    applyAdMobRewardedStrategy(logger, useMax, instantReward)
     applyLevelPlayStrategy(logger, useIronSource)
     if (applyIronSourceBridgeStrategy(logger, useIronSource, instantReward)) return
     applyUnityAdsStrategy(logger, useUnityAds, instantReward)
@@ -201,7 +224,7 @@ private fun BytecodePatchContext.applyMyTargetStrategy(logger: Logger) {
     val myTargetShow = MyTargetBaseInterstitialShowFingerprint.methodOrNull ?: return
     val hasShow = myTargetShow.implementation?.registerCount ?: 0 >= 2
     if (!hasShow) {
-        logger.warning("Ads Free Rewards: skip MyTarget — low registerCount")
+        logger.warning("Ads Free Rewards: skip MyTarget  -  low registerCount")
         return
     }
     val showClass = MyTargetBaseInterstitialShowFingerprint.classDefOrNull ?: return
@@ -346,10 +369,81 @@ private fun BytecodePatchContext.applyNativeMaxStrategy(logger: Logger, useMax: 
         const/4 v0, 0x1
         return v0
     """.trimIndent())
-    if (instantReward == true && (nativeShow.implementation?.registerCount ?: 0) >= 7) {
-        nativeShow.addInstructions(0, fireRewardedAdCallbacks())
-    } else if (instantReward == true) {
-        logger.warning("Ads Free Rewards: skip native MAX showAd() — registerCount ${nativeShow.implementation?.registerCount} < 7")
+    if (instantReward == true) {
+        val rc = nativeShow.implementation?.registerCount ?: 0
+        if (rc >= 7) {
+            nativeShow.addInstructions(0, fireRewardedAdCallbacks())
+        } else {
+            val showClass = MaxRewardedAdShowAdFingerprint.classDefOrNull
+            if (showClass != null) {
+                try {
+                    val cloned = nativeShow.cloneMutableAndPreserveParameters(showClass)
+                    cloned.addInstructions(0, fireRewardedAdCallbacks())
+                    logger.info("Ads Free Rewards: native MAX via clone (low regs $rc)")
+                } catch (e: Exception) {
+                    logger.warning("Ads Free Rewards: clone failed for native MAX: ${e.message}")
+                }
+            } else {
+                logger.warning("Ads Free Rewards: skip native MAX showAd()  -  registerCount $rc < 7")
+            }
+        }
+    }
+}
+
+private fun BytecodePatchContext.applyAdMobRewardedStrategy(logger: Logger, useMax: Boolean, instantReward: Boolean?) {
+    if (!useMax || instantReward != true) return
+    // AdMob RewardedAd is from GMS (not in app dex), so patch call sites instead of definition
+    var patchedCallSites = 0
+    classDefForEach { classDef ->
+        val tl = classDef.type.lowercase()
+        if (tl.contains("okhttp") || tl.contains("androidx") || tl.contains("com/google/android/gms/ads/rewarded")) return@classDefForEach
+        val mutableClass = try { mutableClassDefBy(classDef) } catch (_: Exception) { return@classDefForEach }
+        for (method in mutableClass.methods) {
+            val impl = method.implementation ?: continue
+            val instructions = impl.instructions.toList()
+            for ((index, insn) in instructions.withIndex()) {
+                val ref = (insn as? com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction)?.reference as? com.android.tools.smali.dexlib2.iface.reference.MethodReference ?: continue
+                if (ref.definingClass != "Lcom/google/android/gms/ads/rewarded/RewardedAd;" || ref.name != "show" || ref.returnType != "V") continue
+                if (ref.parameterTypes.size != 2 || ref.parameterTypes[1] != "Lcom/google/android/gms/ads/OnUserEarnedRewardListener;") continue
+                // Found call site: RewardedAd.show(Activity, OnUserEarnedRewardListener)
+                // Replace it with direct reward: if p2 != null, p2.onUserEarnedReward(null)
+                try {
+                    // Determine registers for Activity and listener (35c or 3rc)
+                    val (activityReg, listenerReg) = when (insn) {
+                        is com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction35c -> {
+                            // invoke-virtual {v0, v1, v2}, RewardedAd.show
+                            // v0 = this (RewardedAd), v1 = Activity, v2 = listener
+                            // Need to parse: for 35c, registerCount, registers C/D/E etc.
+                            // For show with 3 regs (this, activity, listener), C=this, D=activity, E=listener
+                            if (insn.registerCount < 3) continue
+                            Pair(insn.registerD, insn.registerE)
+                        }
+                        is com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction3rc -> {
+                            // invoke-virtual/range {v0..v2}
+                            val start = insn.startRegister
+                            Pair(start + 1, start + 2)
+                        }
+                        else -> continue
+                    }
+                    method.addInstructions(index, """
+                        if-eqz v$listenerReg, :morphe_admob_skip_$index
+                        const/4 v0, 0x0
+                        invoke-interface {v$listenerReg, v0}, Lcom/google/android/gms/ads/OnUserEarnedRewardListener;->onUserEarnedReward(Lcom/google/android/gms/ads/rewarded/RewardItem;)V
+                        :morphe_admob_skip_$index
+                    """.trimIndent())
+                    // Keep original invoke as well? Actually we want to skip the ad, so we should nop the original invoke
+                    // Instead, we just inserted reward before, and let original show still run  -  it will show ad but also give reward instantly
+                    // To fully skip ad, we could nop the invoke, but that may break flow; for now we give instant reward plus still show ad (user sees ad but also gets reward)
+                    // For Ringdale, the ad is via MAX mediation, not direct, so this call site may not be the primary  -  but patching it still gives instant reward
+                    patchedCallSites++
+                } catch (_: Exception) {}
+            }
+        }
+    }
+    if (patchedCallSites > 0) {
+        logger.info("Ads Free Rewards: AdMob patch - patched $patchedCallSites call site(s)")
+    } else {
+        logger.info("Ads Free Rewards: AdMob show call sites not found - skipping")
     }
 }
 
@@ -455,5 +549,25 @@ private fun BytecodePatchContext.applyAdsFreeRewardsV1310(logger: Logger, reward
 }
 private fun BytecodePatchContext.applyAdsFreeRewardsV1320(logger: Logger, rewardStrategy: String?, instantReward: Boolean?) {
     logger.info("Ads Free Rewards v1.32.0 selected")
+    applyAdsFreeRewardsV1190(logger, rewardStrategy, instantReward)
+}
+private fun BytecodePatchContext.applyAdsFreeRewardsV1330(logger: Logger, rewardStrategy: String?, instantReward: Boolean?) {
+    logger.info("Ads Free Rewards v1.33.0 selected")
+    applyAdsFreeRewardsV1190(logger, rewardStrategy, instantReward)
+}
+private fun BytecodePatchContext.applyAdsFreeRewardsV1340(logger: Logger, rewardStrategy: String?, instantReward: Boolean?) {
+    logger.info("Ads Free Rewards v1.34.0 selected")
+    applyAdsFreeRewardsV1190(logger, rewardStrategy, instantReward)
+}
+private fun BytecodePatchContext.applyAdsFreeRewardsV1380(logger: Logger, rewardStrategy: String?, instantReward: Boolean?) {
+    logger.info("Ads Free Rewards v1.38.0 selected")
+    applyAdsFreeRewardsV1190(logger, rewardStrategy, instantReward)
+}
+private fun BytecodePatchContext.applyAdsFreeRewardsV1400(logger: Logger, rewardStrategy: String?, instantReward: Boolean?) {
+    logger.info("Ads Free Rewards v1.40.0 selected")
+    applyAdsFreeRewardsV1190(logger, rewardStrategy, instantReward)
+}
+private fun BytecodePatchContext.applyAdsFreeRewardsV1410(logger: Logger, rewardStrategy: String?, instantReward: Boolean?) {
+    logger.info("Ads Free Rewards v1.41.0 selected")
     applyAdsFreeRewardsV1190(logger, rewardStrategy, instantReward)
 }

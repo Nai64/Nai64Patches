@@ -11,7 +11,7 @@ import java.util.logging.Logger
 @Suppress("unused")
 val excludeFromRecentsPatch = resourcePatch(
     name = "Exclude From Recents",
-    description = "Hides the app from the Android recent-tasks list by setting excludeFromRecents on the application, so it does not appear in the overview screen.",
+    description = "Hides the app from recent apps.",
     default = false,
 ) {
     execute {

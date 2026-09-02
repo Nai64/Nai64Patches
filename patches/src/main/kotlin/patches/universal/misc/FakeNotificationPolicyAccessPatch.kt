@@ -7,7 +7,7 @@ import java.util.logging.Logger
 @Suppress("unused")
 val fakeNotificationPolicyAccessPatch = bytecodePatch(
     name = "Fake Notification Policy Access",
-    description = "Makes NotificationManager.isNotificationPolicyAccessGranted() report a chosen state so apps that gate features behind DND policy access stop doing so.",
+    description = "Fakes Do Not Disturb access.",
     default = false,
 ) {
     val granted by booleanOption(

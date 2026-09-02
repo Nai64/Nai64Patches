@@ -101,6 +101,12 @@ val disableTelemetryPatch = bytecodePatch(
         key = "blockGameAnalytics",
         description = "Game-focused analytics",
     )
+    val blockGeneric by booleanOption(
+        title = "Block Generic Analytics",
+        default = false,
+        key = "blockGeneric",
+        description = "Block any remaining analytics via generic logEvent detection (may be aggressive)",
+    )
 
     execute {
         val logger = Logger.getLogger(this::class.java.name)
@@ -177,6 +183,31 @@ val disableTelemetryPatch = bytecodePatch(
             safeEarlyReturn(GameAnalyticsDesignEventFingerprint)
         }
 
+        if (blockGeneric == true) {
+            var genericPatched = 0
+            classDefForEach { classDef ->
+                val tl = classDef.type.lowercase()
+                if (!tl.contains("analytics") && !tl.contains("tracker") && !tl.contains("telemetry") && !tl.contains("event") && !tl.contains("metric")) return@classDefForEach
+                if (tl.contains("okhttp") || tl.contains("androidx") || tl.contains("com/google/android/gms")) return@classDefForEach
+                val mutableClass = try { mutableClassDefBy(classDef) } catch (_: Exception) { return@classDefForEach }
+                for (method in mutableClass.methods) {
+                    val n = method.name.lowercase()
+                    if (!n.contains("logevent") && !n.contains("track") && !n.contains("send") && !n.contains("analytics")) continue
+                    if (method.implementation == null) continue
+                    try {
+                        val ret = method.returnType
+                        when {
+                            ret == "V" -> method.addInstructions(0, "return-void")
+                            ret.startsWith("L") || ret.startsWith("[") -> method.addInstructions(0, "const/4 v0, 0x0\nreturn-object v0")
+                            else -> method.addInstructions(0, "const/4 v0, 0x0\nreturn v0")
+                        }
+                        genericPatched++
+                    } catch (_: Exception) {}
+                }
+            }
+            if (genericPatched > 0) logger.info("Blocked $genericPatched generic analytics call(s)")
+        }
+
         val blocked = buildList {
             if (blockFirebase == true && FirebaseInitializeFingerprint.methodOrNull != null) add("Firebase")
             if (blockAppsFlyer == true && AppsFlyerStartFingerprint.methodOrNull != null) add("AppsFlyer")
@@ -193,6 +224,7 @@ val disableTelemetryPatch = bytecodePatch(
                 GameAnalyticsInitializeFingerprint.methodOrNull != null ||
                 GameAnalyticsInitializeNoArgFingerprint.methodOrNull != null
             )) add("GameAnalytics")
+            if (blockGeneric == true) add("Generic")
         }
         blocked.forEach { logger.info("Blocked telemetry SDK: $it") }
         logger.info("Disable Telemetry patch succeeded (${blocked.size} SDK(s) blocked)")

@@ -16,7 +16,7 @@ import java.util.logging.Logger
 @Suppress("unused")
 val forceChargingStatusPatch = bytecodePatch(
     name = "Force Charging Status",
-    description = "Reports a chosen charging status through BatteryManager.getIntProperty for the status property, so apps that gate features behind a charging state stop doing so.",
+    description = "Fakes the charging state.",
     default = false,
 ) {
     val status by stringOption(
