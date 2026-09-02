@@ -1,3 +1,9 @@
+## [1.5.1](https://github.com/Zanuaimi/Nai64Patches/compare/1.5.0...1.5.1) (2026-09-02)
+
+### Bug Fixes
+
+* isolate overlay window touch bounds ([8f8ed71](https://github.com/Zanuaimi/Nai64Patches/commit/8f8ed714b86756863a37c3236b8d5b67a94016ca))
+
 ## [1.5.0](https://github.com/Zanuaimi/Nai64Patches/compare/1.4.6...1.5.0) (2026-09-02)
 
 ### New Features

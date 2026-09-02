@@ -1,7 +1,7 @@
 {
-  "created_at": "2026-09-02T10:24:22",
-  "description": "## [1.5.0](https://github.com/Zanuaimi/Nai64Patches/compare/1.4.6...1.5.0) (2026-09-02)\n\n### New Features\n\n* support overlays across app activities ([6c86eb8](https://github.com/Zanuaimi/Nai64Patches/commit/6c86eb82c1037f4570ac628fc8006b562324a8e4))",
-  "download_url": "https://github.com/Zanuaimi/Nai64Patches/releases/download/1.5.0/patches-1.5.0.mpp",
+  "created_at": "2026-09-02T10:47:05",
+  "description": "## [1.5.1](https://github.com/Zanuaimi/Nai64Patches/compare/1.5.0...1.5.1) (2026-09-02)\n\n### Bug Fixes\n\n* isolate overlay window touch bounds ([8f8ed71](https://github.com/Zanuaimi/Nai64Patches/commit/8f8ed714b86756863a37c3236b8d5b67a94016ca))",
+  "download_url": "https://github.com/Zanuaimi/Nai64Patches/releases/download/1.5.1/patches-1.5.1.mpp",
   "signature_download_url": "",
-  "version": "1.5.0"
+  "version": "1.5.1"
 }
