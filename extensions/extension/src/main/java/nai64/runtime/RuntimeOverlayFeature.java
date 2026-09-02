@@ -7,4 +7,5 @@ interface RuntimeOverlayFeature {
     String label();
     boolean initiallyEnabled(Activity activity, int originalWindowFlags, int originalSystemUi);
     void setEnabled(Activity activity, boolean enabled, int originalWindowFlags, int originalSystemUi);
+    void restore(Activity activity, int originalWindowFlags, int originalSystemUi);
 }
