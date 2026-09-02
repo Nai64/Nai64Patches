@@ -1,3 +1,9 @@
+## [1.3.0](https://github.com/Zanuaimi/Nai64Patches/compare/1.2.0...1.3.0) (2026-09-02)
+
+### New Features
+
+* harden runtime feature state ([1a1fcf4](https://github.com/Zanuaimi/Nai64Patches/commit/1a1fcf427a7b0448bb6bcb620b2bf2fb73079014))
+
 ## [1.2.0](https://github.com/Zanuaimi/Nai64Patches/compare/1.1.0...1.2.0) (2026-09-02)
 
 ### New Features
