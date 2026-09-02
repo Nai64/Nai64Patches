@@ -1,3 +1,9 @@
+## [1.2.0](https://github.com/Zanuaimi/Nai64Patches/compare/1.1.0...1.2.0) (2026-09-02)
+
+### New Features
+
+* complete runtime overlay foundation ([718bcb8](https://github.com/Zanuaimi/Nai64Patches/commit/718bcb8b2af8f15e00e47194bf0d8c33405b53e8))
+
 ## [1.1.0](https://github.com/Zanuaimi/Nai64Patches/compare/1.0.5...1.1.0) (2026-09-02)
 
 ### New Features
