@@ -19,10 +19,11 @@ private const val CONFIG_VERSION = "3"
 private const val MAX_TITLE_CHARACTERS = 80
 private const val MAX_DESCRIPTION_CHARACTERS = 500
 private const val DEFAULT_DESCRIPTION =
-    "Welcome to the Nai64Patches Universal Overlay Patch. This experimental in-app overlay " +
-        "contains optional statistic, activity, and future hook modules. More may be added in " +
-        "future updates. The idea and initial works of this Universal Overlay Patch are from " +
-        "Zanuaimi."
+    "Welcome! This is Nai64Patches Universal Overlay Patch Menu. This experimental overlay patch" +
+        "contains optional statistic, activity, and hook modules. More of them may be added in " +
+        "future updates. You will find modules below the description if you enabled some modules " +
+        "in this patch settings before patching this APK." +
+        "The idea and initial works of this Universal Overlay Patch are from Zanuaimi"
 
 private fun encode(value: String): String =
     Base64.getEncoder().withoutPadding().encodeToString(value.toByteArray(Charsets.UTF_8))
@@ -121,19 +122,20 @@ private fun injectMethod(owner: MutableClass, method: MutableMethod, config: Str
 
 @Suppress("unused")
 val universalOverlayPatch = bytecodePatch(
-    name = "Universal Overlay Patch (Special Patch, Experimental)",
+    name = "Universal Overlay Patch (SPECIAL PATCH, Experimental)",
     description =
-        "Adds a universal experimental in-app overlay for ordinary Android apps and game engines " +
-            "such as Unity and Godot. Modules provide runtime functionality inside the patched app: " +
+        "A universal overlay for any supported APK, like ordinary Android apps and games from engines " +
+            "such as Unity and Godot. This patch injects an overlay to patched APK. Modules provide runtime functionality inside the patched app: " +
             "Statistic modules can show phone System Time, approximate FPS, and App Session Time; " +
             "Activity modules can keep the screen awake, toggle fullscreen, or allow screenshots. " +
             "These actions are performed while the app is running, from the overlay menu, rather " +
             "than changing one specific APK's game or app logic. Hook modules, such as future " +
-            "runtime ad controls, are reserved for later releases. Modules are not included by " +
+            "runtime ads controls, are reserved for future releases. Modules are not included by " +
             "default; select the modules you want before patching, then activate them in the overlay. " +
             "The title, description, colors, button text, shape, size, opacity, position, statistic " +
-            "monitor placement, and repository action are customizable. The idea and initial works " +
-            "of this Universal Overlay Patch are from Zanuaimi.",
+            "monitor placement, and repository action are customizable in morphe patch settings " + 
+            " " + 
+            "The idea and initial works of this Universal Overlay Patch are from Zanuaimi",
     default = false,
 ) {
     // TODO(universal-overlay): this extension DEX is the architectural boundary. Do not move UI or
@@ -142,80 +144,80 @@ val universalOverlayPatch = bytecodePatch(
     dependsOn(StartupHooks.resolveRealApplicationPatch)
 
     val title by stringOption(
-        title = "General — Overlay title",
+        title = "General - Overlay title",
         default = "Nai64Patches Universal Overlay Patch",
         key = "runtimeOverlayTitle",
         description = "Title shown in the overlay menu. Limited to 80 characters.",
     )
     val descriptionText by stringOption(
-        title = "General — Overlay description",
+        title = "General - Overlay description",
         default = DEFAULT_DESCRIPTION,
         key = "runtimeOverlayDescription",
         description = "Description below the title. Limited to 500 characters.",
     )
     val repositoryText by stringOption(
-        title = "General — Repository button text",
+        title = "General - Repository button text",
         default = "Nai64 repository",
         key = "runtimeOverlayRepositoryText",
         description = "Text of the always-present repository button.",
     )
     val repositoryUrl by stringOption(
-        title = "General — Repository button URL",
+        title = "General - Repository button URL",
         default = "https://github.com/Nai64/Nai64Patches",
         key = "runtimeOverlayRepositoryUrl",
         description = "URL opened by the repository button.",
     )
     val backgroundColor by stringOption(
-        title = "General — Overlay background color",
+        title = "General - Overlay background color",
         default = "#CC101820",
         key = "runtimeOverlayBackgroundColor",
         description = "Overlay background as #RRGGBB or #AARRGGBB.",
     )
     val outlineColor by stringOption(
-        title = "General — Overlay outline color",
+        title = "General - Overlay outline color",
         default = "#FF55D6BE",
         key = "runtimeOverlayOutlineColor",
         description = "Overlay outline as #RRGGBB or #AARRGGBB.",
     )
     val buttonText by stringOption(
-        title = "General — Overlay button text",
+        title = "General - Overlay button text",
         default = "N",
         key = "runtimeOverlayButtonText",
         description = "Button text. Maximum three characters.",
     )
     val buttonTextColor by stringOption(
-        title = "General — Overlay button text color",
+        title = "General - Overlay button text color",
         default = "#FF000000",
         key = "runtimeOverlayButtonTextColor",
         description = "Button text color.",
     )
     val buttonBackgroundColor by stringOption(
-        title = "General — Overlay button background color",
+        title = "General - Overlay button background color",
         default = "#FFFFFFFF",
         key = "runtimeOverlayButtonBackgroundColor",
         description = "Button background color.",
     )
     val buttonShape by stringOption(
-        title = "General — Overlay button shape",
+        title = "General - Overlay button shape",
         default = "circle",
         key = "runtimeOverlayButtonShape",
         description = "Button shape.",
         values = linkedMapOf("Circle" to "circle", "Squircle" to "squircle", "Square" to "square"),
     )
     val buttonSizeDp by intOption(
-        title = "General — Overlay button size (dp)",
+        title = "General - Overlay button size (dp)",
         default = 56,
         key = "runtimeOverlayButtonSizeDp",
         description = "Button size in density-independent pixels.",
     )
     val buttonOpacity by intOption(
-        title = "General — Overlay button idle opacity (%)",
+        title = "General - Overlay button idle opacity (%)",
         default = 35,
         key = "runtimeOverlayButtonIdleOpacityPercent",
         description = "Idle opacity from 10 to 100 percent.",
     )
     val buttonPosition by stringOption(
-        title = "General — Overlay button position",
+        title = "General - Overlay button position",
         default = "topRight",
         key = "runtimeOverlayButtonPosition",
         description = "Initial floating button position.",
@@ -226,56 +228,56 @@ val universalOverlayPatch = bytecodePatch(
         ),
     )
     val activityOverride by stringOption(
-        title = "Advanced — Overlay Activity name override",
+        title = "Advanced - Overlay Activity name override",
         default = "",
         key = "runtimeOverlayActivityNameOverride",
         description = "Optional Activity fallback target.",
     )
     val activateStatisticsOnLaunch by booleanOption(
-        title = "Settings to Modules — Activate statistics on launch",
+        title = "Settings to Modules - Activate statistics on launch",
         default = false,
         key = "runtimeOverlayActivateStatisticsOnLaunch",
         description = "Start selected statistic modules as soon as the app launches. Disabled by default.",
     )
     val statisticMonitorPosition by stringOption(
-        title = "Settings to Modules — Statistic monitor position",
+        title = "Settings to Modules - Statistic monitor position",
         default = "bottom",
         key = "runtimeOverlayStatisticMonitorPosition",
-        description = "Show enabled statistic monitors above or below the overlay button.",
+        description = "Show enabled statistic monitors from statistic modules above or below the overlay button.",
         values = linkedMapOf("No stat monitors" to "none", "Above overlay button" to "top", "Below overlay button" to "bottom"),
     )
     val includeSystemTime by booleanOption(
-        title = "Statistic modules — System Time",
+        title = "Statistic modules - System Time",
         default = false,
         key = "runtimeOverlayIncludeSystemTime",
         description = "Include the phone system time statistic module.",
     )
     val includeFps by booleanOption(
-        title = "Statistic modules — FPS",
+        title = "Statistic modules - FPS",
         default = false,
         key = "runtimeOverlayIncludeFps",
         description = "Include the approximate display frame-rate statistic module.",
     )
     val includeSessionTime by booleanOption(
-        title = "Statistic modules — App Session Time",
+        title = "Statistic modules - App Session Time",
         default = false,
         key = "runtimeOverlayIncludeSessionTime",
         description = "Include the in-process overlay session timer statistic module.",
     )
     val includeKeepAwake by booleanOption(
-        title = "Activity modules — Keep screen awake",
+        title = "Activity modules - Keep screen awake",
         default = false,
         key = "runtimeOverlayIncludeKeepScreenAwake",
         description = "Include the keep-screen-awake activity module.",
     )
     val includeFullscreen by booleanOption(
-        title = "Activity modules — Fullscreen",
+        title = "Activity modules - Fullscreen",
         default = false,
         key = "runtimeOverlayIncludeFullscreen",
         description = "Include the fullscreen activity module.",
     )
     val includeScreenshots by booleanOption(
-        title = "Activity modules — Allow screenshots",
+        title = "Activity modules - Allow screenshots",
         default = false,
         key = "runtimeOverlayIncludeScreenshots",
         description = "Include the allow-screenshots activity module.",
