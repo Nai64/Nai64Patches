@@ -1,3 +1,9 @@
+## [1.5.0](https://github.com/Zanuaimi/Nai64Patches/compare/1.4.6...1.5.0) (2026-09-02)
+
+### New Features
+
+* support overlays across app activities ([6c86eb8](https://github.com/Zanuaimi/Nai64Patches/commit/6c86eb82c1037f4570ac628fc8006b562324a8e4))
+
 ## [1.4.6](https://github.com/Zanuaimi/Nai64Patches/compare/1.4.5...1.4.6) (2026-09-02)
 
 ### Bug Fixes
