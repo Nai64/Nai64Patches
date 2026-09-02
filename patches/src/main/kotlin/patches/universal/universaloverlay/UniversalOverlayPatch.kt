@@ -1,4 +1,4 @@
-package patches.universal.runtimeoverlay
+package patches.universal.universaloverlay
 
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.patch.booleanOption
@@ -14,14 +14,15 @@ import patches.universal.ui.StartupHooks
 import java.util.Base64
 import java.util.logging.Logger
 
-private const val RUNTIME_CLASS = "Lnai64/runtime/RuntimeOverlayRuntime;"
+private const val RUNTIME_CLASS = "Lnai64/universaloverlay/UniversalOverlayRuntime;"
 private const val CONFIG_VERSION = "2"
 private const val MAX_TITLE_CHARACTERS = 80
 private const val MAX_DESCRIPTION_CHARACTERS = 500
 private const val DEFAULT_DESCRIPTION =
-    "Welcome to Nai64Patches Runtime Controls Overlay. This experimental in-app overlay " +
-        "contains controls that may change parts of the app or game at runtime. More may be " +
-        "added in future updates."
+    "Welcome to the Nai64Patches Universal Overlay Patch. This experimental in-app overlay " +
+        "contains optional statistic, activity, and future hook modules. More may be added in " +
+        "future updates. The idea and initial works of this Universal Overlay Patch are from " +
+        "Zanuaimi."
 
 private fun encode(value: String): String =
     Base64.getEncoder().withoutPadding().encodeToString(value.toByteArray(Charsets.UTF_8))
@@ -80,7 +81,7 @@ private fun injectMethod(owner: MutableClass, method: MutableMethod, config: Str
     val originalReceiver = cloned.p0Register
     // The runtime API accepts the platform base type. The injected receiver may be any concrete
     // Activity subclass; using owner.type here would generate a method descriptor that does not
-    // exist in RuntimeOverlayRuntime and fail with NoSuchMethodError at launch.
+    // exist in UniversalOverlayRuntime and fail with NoSuchMethodError at launch.
     val type = if (application) "Landroid/app/Application;" else "Landroid/app/Activity;"
     val injectionIndex = if (application) {
         0
@@ -119,22 +120,27 @@ private fun injectMethod(owner: MutableClass, method: MutableMethod, config: Str
 }
 
 @Suppress("unused")
-val runtimeControlsOverlayPatch = bytecodePatch(
-    name = "Runtime Controls Overlay (Experimental)",
+val universalOverlayPatch = bytecodePatch(
+    name = "Universal Overlay Patch (Special Patch, Experimental)",
     description =
-        "Experimental in-app floating runtime controls overlay with a custom in-Activity UI, " +
-            "configurable title and description, optional runtime controls, mandatory repository " +
-            "action, draggable button, and close actions.",
+        "Adds a universal experimental in-app overlay for ordinary Android apps and game engines " +
+            "such as Unity and Godot. Available modules include Statistic modules (System Time, " +
+            "FPS, and App Session Time) and Activity modules (Keep Screen Awake, Fullscreen, and " +
+            "Allow Screenshots). Hook modules are reserved for future releases. Modules are not " +
+            "included by default; select the modules you want before patching. The overlay title, " +
+            "description, colors, button text, shape, size, opacity, position, and repository action " +
+            "are customizable. The idea and initial works of this Universal Overlay Patch are from " +
+            "Zanuaimi.",
     default = false,
 ) {
-    // TODO(runtime-overlay): this extension DEX is the architectural boundary. Do not move UI or
+    // TODO(universal-overlay): this extension DEX is the architectural boundary. Do not move UI or
     // feature implementation back into generated Smali.
     extendWith("extensions/extension.mpe")
     dependsOn(StartupHooks.resolveRealApplicationPatch)
 
     val title by stringOption(
         title = "Overlay title",
-        default = "Nai64Patches Runtime Controls Overlay",
+        default = "Nai64Patches Universal Overlay Patch",
         key = "runtimeOverlayTitle",
         description = "Title shown in the overlay menu. Limited to 80 characters.",
     )
@@ -223,27 +229,45 @@ val runtimeControlsOverlayPatch = bytecodePatch(
         description = "Optional Activity fallback target.",
     )
     val includeKeepAwake by booleanOption(
-        title = "Include keep screen awake control",
+        title = "Include keep screen awake module",
         default = false,
         key = "runtimeOverlayIncludeKeepScreenAwake",
-        description = "Include the keep-screen-awake control.",
+        description = "Include the keep-screen-awake activity module.",
     )
     val includeFullscreen by booleanOption(
-        title = "Include fullscreen control",
+        title = "Include fullscreen module",
         default = false,
         key = "runtimeOverlayIncludeFullscreen",
-        description = "Include the fullscreen control.",
+        description = "Include the fullscreen activity module.",
     )
     val includeScreenshots by booleanOption(
-        title = "Include allow screenshots control",
+        title = "Include allow screenshots module",
         default = false,
         key = "runtimeOverlayIncludeScreenshots",
-        description = "Include the allow-screenshots control.",
+        description = "Include the allow-screenshots activity module.",
+    )
+    val includeSystemTime by booleanOption(
+        title = "Include system time module",
+        default = false,
+        key = "runtimeOverlayIncludeSystemTime",
+        description = "Include the phone system time statistic module.",
+    )
+    val includeFps by booleanOption(
+        title = "Include FPS module",
+        default = false,
+        key = "runtimeOverlayIncludeFps",
+        description = "Include the approximate display frame-rate statistic module.",
+    )
+    val includeSessionTime by booleanOption(
+        title = "Include app session time module",
+        default = false,
+        key = "runtimeOverlayIncludeSessionTime",
+        description = "Include the in-process overlay session timer statistic module.",
     )
 
     execute {
         val logger = Logger.getLogger(this::class.java.name)
-        val titleValue = title.orEmpty().ifBlank { "Nai64Patches Runtime Controls Overlay" }
+        val titleValue = title.orEmpty().ifBlank { "Nai64Patches Universal Overlay Patch" }
             .take(MAX_TITLE_CHARACTERS)
         val descriptionValue = descriptionText.orEmpty().ifBlank { DEFAULT_DESCRIPTION }
             .take(MAX_DESCRIPTION_CHARACTERS)
@@ -269,11 +293,17 @@ val runtimeControlsOverlayPatch = bytecodePatch(
             backgroundValue, outlineValue, buttonText.orEmpty().trim().take(3).ifBlank { "N" },
             buttonTextColorValue, buttonBackgroundValue, shapeValue,
             sizeValue.toString(), opacityValue.toString(), positionValue,
-            listOf(if (includeKeepAwake == true) "keep" else null, if (includeFullscreen == true) "fullscreen" else null,
-                if (includeScreenshots == true) "screenshots" else null).filterNotNull().joinToString(","),
+            listOf(
+                if (includeSystemTime == true) "systemTime" else null,
+                if (includeFps == true) "fps" else null,
+                if (includeSessionTime == true) "sessionTime" else null,
+                if (includeKeepAwake == true) "keep" else null,
+                if (includeFullscreen == true) "fullscreen" else null,
+                if (includeScreenshots == true) "screenshots" else null,
+            ).filterNotNull().joinToString(","),
         ).joinToString("|") { encode(it) }
 
-        // TODO(runtime-overlay): Application.onCreate is the primary hook; the Activity path is
+        // TODO(universal-overlay): Application.onCreate is the primary hook; the Activity path is
         // only a compatibility fallback for APKs without a resolvable Application method.
         val appDescriptor = StartupHooks.resolvedApplicationDescriptor
         val appClass = appDescriptor?.let { mutableClassDefByOrNull(it) }
