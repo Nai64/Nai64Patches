@@ -1,3 +1,9 @@
+## [1.0.1](https://github.com/Zanuaimi/Nai64Patches/compare/1.0.0...1.0.1) (2026-09-02)
+
+### Bug Fixes
+
+* fix register ([a74e3a7](https://github.com/Zanuaimi/Nai64Patches/commit/a74e3a7f7340cfd42661497adb83d0532c65873e))
+
 ## 1.0.0 (2026-09-02)
 
 ### Bug Fixes
