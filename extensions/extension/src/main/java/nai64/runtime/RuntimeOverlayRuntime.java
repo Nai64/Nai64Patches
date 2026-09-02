@@ -14,7 +14,7 @@ import android.view.Window;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
-import android.widget.Switch;
+import android.widget.CheckBox;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -198,7 +198,7 @@ public final class RuntimeOverlayRuntime {
             menu.setPadding(dp(20), dp(18), dp(20), dp(12));
             menu.setBackground(RuntimeOverlayViews.background(config.background, config.outline, false));
             FrameLayout.LayoutParams panelParams = new FrameLayout.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT,
                     Gravity.CENTER);
             panelParams.setMargins(dp(20), dp(20), dp(20), dp(20));
             menu.setLayoutParams(panelParams);
@@ -286,7 +286,7 @@ public final class RuntimeOverlayRuntime {
                 return;
             }
             features.add(feature);
-            addSwitch(controls, feature.label(), initial, checked -> {
+            addControlRow(controls, feature, initial, checked -> {
                 try {
                     feature.setEnabled(activity, checked, originalWindowFlags, originalSystemUi);
                 } catch (RuntimeException ignored) {
@@ -295,15 +295,36 @@ public final class RuntimeOverlayRuntime {
             });
         }
 
-        private void addSwitch(LinearLayout parent, String label, boolean initial, final Toggle toggle) {
-            Switch control = new Switch(activity);
-            control.setText(label);
-            control.setTextSize(16);
-            control.setTextColor(config.outline);
+        private void addControlRow(LinearLayout parent, RuntimeOverlayFeature feature, boolean initial, final Toggle toggle) {
+            LinearLayout row = new LinearLayout(activity);
+            row.setOrientation(LinearLayout.HORIZONTAL);
+            row.setGravity(Gravity.CENTER_VERTICAL);
+            row.setPadding(0, dp(6), 0, dp(6));
+            row.setMinimumHeight(dp(64));
+
+            LinearLayout copy = new LinearLayout(activity);
+            copy.setOrientation(LinearLayout.VERTICAL);
+            TextView title = text(feature.label(), 16, config.outline);
+            title.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
+            copy.addView(title, new LinearLayout.LayoutParams(-1, -2));
+            TextView description = text(feature.description(), 13, config.outline);
+            description.setAlpha(.82f);
+            LinearLayout.LayoutParams descriptionParams = new LinearLayout.LayoutParams(-1, -2);
+            descriptionParams.topMargin = dp(2);
+            copy.addView(description, descriptionParams);
+            row.addView(copy, new LinearLayout.LayoutParams(0, -2, 1f));
+
+            CheckBox control = new CheckBox(activity);
             control.setChecked(initial);
-            control.setPadding(0, dp(6), 0, dp(6));
-            control.setOnCheckedChangeListener((button, checked) -> toggle.changed(checked));
-            parent.addView(control, new LinearLayout.LayoutParams(-1, -2));
+            control.setContentDescription(feature.label());
+            control.setOnCheckedChangeListener((button, checked) -> {
+                toggle.changed(checked);
+                Toast.makeText(activity, feature.label() + " is " + (checked ? "enabled" : "disabled"), Toast.LENGTH_SHORT).show();
+            });
+            row.addView(control, new LinearLayout.LayoutParams(-2, -2));
+            row.setClickable(true);
+            row.setOnClickListener(v -> control.setChecked(!control.isChecked()));
+            parent.addView(row, new LinearLayout.LayoutParams(-1, -2));
         }
 
         private TextView text(String value, float size, int color) {

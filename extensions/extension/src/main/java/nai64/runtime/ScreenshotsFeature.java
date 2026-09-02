@@ -6,6 +6,7 @@ import android.view.WindowManager;
 final class ScreenshotsFeature implements RuntimeOverlayFeature {
     private static final int FLAG_SECURE = WindowManager.LayoutParams.FLAG_SECURE;
     @Override public String label() { return "Allow screenshots"; }
+    @Override public String description() { return "Allow screenshots when the host Activity blocks them."; }
     @Override public boolean initiallyEnabled(Activity activity, int flags, int systemUi) { return (flags & FLAG_SECURE) == 0; }
     @Override public void setEnabled(Activity activity, boolean enabled, int flags, int systemUi) {
         if (enabled) activity.getWindow().clearFlags(FLAG_SECURE);

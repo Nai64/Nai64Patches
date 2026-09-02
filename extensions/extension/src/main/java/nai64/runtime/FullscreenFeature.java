@@ -12,6 +12,7 @@ final class FullscreenFeature implements RuntimeOverlayFeature {
             | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
             | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
     @Override public String label() { return "Fullscreen"; }
+    @Override public String description() { return "Hide system bars while preserving the Activity's original UI state."; }
     @Override public boolean initiallyEnabled(Activity activity, int flags, int systemUi) {
         return (systemUi & View.SYSTEM_UI_FLAG_FULLSCREEN) != 0;
     }
