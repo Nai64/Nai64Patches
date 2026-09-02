@@ -1,7 +1,7 @@
 {
-  "created_at": "2026-09-02T09:42:32",
-  "description": "## [1.4.4](https://github.com/Zanuaimi/Nai64Patches/compare/1.4.3...1.4.4) (2026-09-02)\n\n### Bug Fixes\n\n* use universal activity bridge descriptor ([0d9d758](https://github.com/Zanuaimi/Nai64Patches/commit/0d9d75821d60001bb916fe7ec71af36138faeec4))",
-  "download_url": "https://github.com/Zanuaimi/Nai64Patches/releases/download/1.4.4/patches-1.4.4.mpp",
+  "created_at": "2026-09-02T09:54:50",
+  "description": "## [1.4.5](https://github.com/Zanuaimi/Nai64Patches/compare/1.4.4...1.4.5) (2026-09-02)\n\n### Bug Fixes\n\n* initialize activity overlay after super ([92aaa18](https://github.com/Zanuaimi/Nai64Patches/commit/92aaa18f9923deb5243bd76ef67a970e72f6b320))",
+  "download_url": "https://github.com/Zanuaimi/Nai64Patches/releases/download/1.4.5/patches-1.4.5.mpp",
   "signature_download_url": "",
-  "version": "1.4.4"
+  "version": "1.4.5"
 }

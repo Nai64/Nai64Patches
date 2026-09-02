@@ -1,3 +1,9 @@
+## [1.4.5](https://github.com/Zanuaimi/Nai64Patches/compare/1.4.4...1.4.5) (2026-09-02)
+
+### Bug Fixes
+
+* initialize activity overlay after super ([92aaa18](https://github.com/Zanuaimi/Nai64Patches/commit/92aaa18f9923deb5243bd76ef67a970e72f6b320))
+
 ## [1.4.4](https://github.com/Zanuaimi/Nai64Patches/compare/1.4.3...1.4.4) (2026-09-02)
 
 ### Bug Fixes
