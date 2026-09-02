@@ -4,6 +4,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.widget.CheckBox;
 import android.widget.TextView;
+import java.util.List;
 
 /** Base for low-frequency statistic modules that update only while enabled. */
 public abstract class UniversalOverlayStatisticModule implements UniversalOverlayModule {
@@ -13,6 +14,7 @@ public abstract class UniversalOverlayStatisticModule implements UniversalOverla
     protected final Handler handler = new Handler(Looper.getMainLooper());
     protected TextView valueView;
     protected TextView monitorView;
+    protected List<TextView> monitorViews;
     private CheckBox control;
     protected boolean running;
     private boolean enabled;
@@ -47,6 +49,13 @@ public abstract class UniversalOverlayStatisticModule implements UniversalOverla
     public final void bindMonitor(TextView monitorView) {
         this.monitorView = monitorView;
     }
+
+    public final void bindMonitors(List<TextView> monitorViews) {
+        this.monitorViews = monitorViews;
+        this.monitorView = monitorViews == null || monitorViews.isEmpty() ? null : monitorViews.get(0);
+    }
+
+    public int monitorCount() { return 1; }
 
     public final boolean isEnabled() { return enabled; }
 
@@ -86,7 +95,11 @@ public abstract class UniversalOverlayStatisticModule implements UniversalOverla
         running = false;
         handler.removeCallbacks(sampler);
         if (valueView != null) valueView.setText("Disabled");
-        if (monitorView != null) monitorView.setText("");
+        if (monitorViews != null) {
+            for (TextView monitor : monitorViews) monitor.setText("");
+        } else {
+            setMonitorText("");
+        }
     }
 
     public final void setChecked(boolean checked) {
@@ -96,17 +109,36 @@ public abstract class UniversalOverlayStatisticModule implements UniversalOverla
     protected final void refresh() {
         String current = value();
         if (valueView != null) valueView.setText(current);
-        if (monitorView != null) monitorView.setText(monitorValue());
+        setMonitorText(monitorValue());
+        refreshMonitors();
     }
 
     /** Compact value used by the optional floating monitor. */
     protected String monitorValue() { return value(); }
+
+    protected String monitorValue(int index) { return monitorValue(); }
+
+    protected final void setMonitorText(String value) { setMonitorText(0, value); }
+
+    protected final void setMonitorText(int index, String value) {
+        if (monitorViews != null && index >= 0 && index < monitorViews.size()) {
+            monitorViews.get(index).setText(value);
+        } else if (index == 0 && monitorView != null) {
+            monitorView.setText(value);
+        }
+    }
+
+    private void refreshMonitors() {
+        if (monitorViews == null) return;
+        for (int i = 0; i < monitorViews.size(); i++) monitorViews.get(i).setText(monitorValue(i));
+    }
 
     protected final void disableAfterFailure() {
         running = false;
         enabled = false;
         handler.removeCallbacksAndMessages(null);
         if (valueView != null) valueView.setText("Unavailable");
-        if (monitorView != null) monitorView.setText("Unavailable");
+        if (monitorViews != null) for (TextView monitor : monitorViews) monitor.setText("Unavailable");
+        else if (monitorView != null) monitorView.setText("Unavailable");
     }
 }

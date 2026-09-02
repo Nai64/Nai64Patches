@@ -19,15 +19,30 @@ import android.widget.ScrollView;
 import android.widget.CheckBox;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.SeekBar;
+import android.widget.Spinner;
+import android.widget.ArrayAdapter;
 
 import nai64.universaloverlay.modules.FullscreenModule;
 import nai64.universaloverlay.modules.KeepAwakeModule;
 import nai64.universaloverlay.modules.ScreenshotsModule;
 import nai64.universaloverlay.modules.UniversalOverlayActivityModule;
+import nai64.universaloverlay.modules.UniversalOverlayHookModule;
+import nai64.universaloverlay.modules.UniversalOverlayModule;
 import nai64.universaloverlay.modules.UniversalOverlayStatisticModule;
 import nai64.universaloverlay.modules.FpsModule;
 import nai64.universaloverlay.modules.SessionTimeModule;
 import nai64.universaloverlay.modules.SystemTimeModule;
+import nai64.universaloverlay.modules.BatteryStatusModule;
+import nai64.universaloverlay.modules.AppMemoryModule;
+import nai64.universaloverlay.modules.NetworkStatusModule;
+import nai64.universaloverlay.modules.DeviceInformationModule;
+import nai64.universaloverlay.modules.DeviceTemperatureModule;
+import nai64.universaloverlay.modules.AppBrightnessModule;
+import nai64.universaloverlay.modules.RotationModeModule;
+import nai64.universaloverlay.modules.AppAudioMuteModule;
+import nai64.universaloverlay.modules.DisableHapticsModule;
+import nai64.universaloverlay.modules.DisableAnimationsModule;
 
 import java.util.Map;
 import java.util.ArrayList;
@@ -50,10 +65,13 @@ public final class UniversalOverlayRuntime {
     private static Boolean fullscreenState;
     private static Boolean screenshotsState;
     private static final Map<String, Boolean> MODULE_STATES = new java.util.HashMap<>();
+    private static final Map<String, Boolean> HOOK_STATES = new java.util.HashMap<>();
     private static long sessionStartElapsed;
     private static boolean sharedButtonPositionInitialized;
     private static int sharedButtonX;
     private static int sharedButtonY;
+    private static Float appBrightnessState;
+    private static Integer rotationModeState;
 
     private UniversalOverlayRuntime() { }
 
@@ -137,9 +155,10 @@ public final class UniversalOverlayRuntime {
         private final LinearLayout panel;
         private final FrameLayout confirmationLayer;
         private final List<UniversalOverlayActivityModule> activityModules = new ArrayList<>();
+        private final List<UniversalOverlayHookModule> hookModules = new ArrayList<>();
         private final List<UniversalOverlayStatisticModule> statistics = new ArrayList<>();
         private final Map<String, CheckBox> featureControls = new java.util.HashMap<>();
-        private final Map<String, TextView> statisticMonitors = new java.util.HashMap<>();
+        private final Map<String, List<TextView>> statisticMonitors = new java.util.HashMap<>();
         private final int monitorWidth;
         private final int monitorHeight;
         private final int originalWindowFlags;
@@ -165,8 +184,9 @@ public final class UniversalOverlayRuntime {
             Paint monitorPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
             monitorPaint.setTextSize(dp(12));
             Paint.FontMetrics metrics = monitorPaint.getFontMetrics();
-            monitorWidth = (int) Math.ceil(monitorPaint.measureText("00:00:00")) + dp(24);
-            monitorHeight = (int) Math.ceil(metrics.bottom - metrics.top) + dp(12);
+            float widestMonitor = Math.max(monitorPaint.measureText("00:00:00"), monitorPaint.measureText("↓ 999.9 MB"));
+            monitorWidth = Math.round(((int) Math.ceil(widestMonitor) + dp(24)) * config.monitorScale);
+            monitorHeight = Math.round(((int) Math.ceil(metrics.bottom - metrics.top) + dp(12)) * config.monitorScale);
             floatingButton = createFloatingButton();
             menuLayer = new FrameLayout(activity);
             menuScrim = createMenuScrim();
@@ -228,7 +248,15 @@ public final class UniversalOverlayRuntime {
                     // A single incompatible Activity module must not prevent other modules or host cleanup.
                 }
             }
+            for (UniversalOverlayHookModule hook : hookModules) {
+                try {
+                    hook.restore(activity, originalWindowFlags, originalSystemUi);
+                } catch (RuntimeException ignored) {
+                    // Hook cleanup is independent from Activity module cleanup.
+                }
+            }
             activityModules.clear();
+            hookModules.clear();
             statistics.clear();
             featureControls.clear();
             statisticMonitors.clear();
@@ -262,20 +290,24 @@ public final class UniversalOverlayRuntime {
             return button;
         }
 
-        private void createStatisticMonitor(UniversalOverlayStatisticModule module) {
-            TextView monitor = text("", 12, config.outline);
-            monitor.setGravity(Gravity.CENTER);
-            monitor.setPadding(dp(6), 0, dp(6), 0);
-            monitor.setBackground(UniversalOverlayViews.background(config.background, config.outline, false));
-            monitor.setClickable(false);
-            monitor.setFocusable(false);
-            monitor.setFocusableInTouchMode(false);
-            monitor.setContentDescription(module.label());
-            monitor.setVisibility(View.GONE);
-            monitor.setOnTouchListener((v, event) -> false);
-            root.addView(monitor, new FrameLayout.LayoutParams(monitorWidth, monitorHeight));
-            statisticMonitors.put(module.key(), monitor);
-            module.bindMonitor(monitor);
+        private void createStatisticMonitors(UniversalOverlayStatisticModule module) {
+            List<TextView> monitors = new ArrayList<>();
+            for (int i = 0; i < module.monitorCount(); i++) {
+                TextView monitor = text("", 12, config.outline);
+                monitor.setGravity(Gravity.CENTER);
+                monitor.setPadding(dp(6), 0, dp(6), 0);
+                monitor.setBackground(UniversalOverlayViews.background(config.background, config.outline, false));
+                monitor.setClickable(false);
+                monitor.setFocusable(false);
+                monitor.setFocusableInTouchMode(false);
+                monitor.setContentDescription(module.label());
+                monitor.setVisibility(View.GONE);
+                monitor.setOnTouchListener((v, event) -> false);
+                root.addView(monitor, new FrameLayout.LayoutParams(monitorWidth, monitorHeight));
+                monitors.add(monitor);
+            }
+            statisticMonitors.put(module.key(), monitors);
+            module.bindMonitors(monitors);
         }
 
         private boolean shouldStatisticsRun() {
@@ -285,11 +317,13 @@ public final class UniversalOverlayRuntime {
         }
 
         private void updateStatisticMonitor(UniversalOverlayStatisticModule module) {
-            TextView monitor = statisticMonitors.get(module.key());
-            if (monitor == null) return;
-            monitor.setVisibility(config.statisticMonitorPosition != 0 && module.isEnabled()
-                    ? View.VISIBLE : View.GONE);
-            monitor.setAlpha(menuVisible ? 0f : config.opacity);
+            List<TextView> monitors = statisticMonitors.get(module.key());
+            if (monitors == null) return;
+            for (TextView monitor : monitors) {
+                monitor.setVisibility(config.statisticMonitorPosition != 0 && module.isEnabled()
+                        ? View.VISIBLE : View.GONE);
+                monitor.setAlpha(menuVisible ? 0f : config.opacity);
+            }
         }
 
         private void updateMonitorLayout() {
@@ -297,39 +331,53 @@ public final class UniversalOverlayRuntime {
             int buttonY = Math.round(floatingButton.getY());
             int count = 0;
             for (UniversalOverlayStatisticModule module : statistics) {
-                TextView monitor = statisticMonitors.get(module.key());
-                if (monitor.getVisibility() == View.VISIBLE) count++;
+                List<TextView> monitors = statisticMonitors.get(module.key());
+                if (monitors != null) for (TextView monitor : monitors) {
+                    if (monitor.getVisibility() == View.VISIBLE) count++;
+                }
             }
+            int columns = Math.max(1, config.monitorColumns);
             int spacing = dp(4);
-            int stackHeight = count * monitorHeight + Math.max(0, count - 1) * spacing;
+            int rows = (count + columns - 1) / columns;
+            int stackHeight = rows * monitorHeight + Math.max(0, rows - 1) * spacing;
             int monitorStartY = config.statisticMonitorPosition == 1
                     ? buttonY - spacing - stackHeight
                     : buttonY + floatingButton.getHeight() + spacing;
             monitorStartY = Math.max(0, Math.min(monitorStartY, Math.max(0, root.getHeight() - stackHeight)));
-            int monitorX = buttonX + (floatingButton.getWidth() - monitorWidth) / 2;
-            monitorX = Math.max(0, Math.min(monitorX, Math.max(0, root.getWidth() - monitorWidth)));
-            int y = monitorStartY;
+            int gridWidth = columns * monitorWidth + Math.max(0, columns - 1) * spacing;
+            int gridStartX = buttonX + (floatingButton.getWidth() - gridWidth) / 2;
+            gridStartX = Math.max(0, Math.min(gridStartX, Math.max(0, root.getWidth() - gridWidth)));
             // Follow the same stable order used by addModules: system time, FPS, session time.
+            int slot = 0;
             for (UniversalOverlayStatisticModule module : statistics) {
-                TextView monitor = statisticMonitors.get(module.key());
-                if (monitor.getVisibility() != View.VISIBLE) continue;
-                monitor.setX(monitorX);
-                monitor.setY(y);
-                y += monitorHeight + spacing;
+                List<TextView> monitors = statisticMonitors.get(module.key());
+                if (monitors == null) continue;
+                for (TextView monitor : monitors) {
+                    if (monitor.getVisibility() != View.VISIBLE) continue;
+                    int row = slot / columns;
+                    int column = slot % columns;
+                    int itemsInRow = Math.min(columns, count - row * columns);
+                    int rowWidth = itemsInRow * monitorWidth + Math.max(0, itemsInRow - 1) * spacing;
+                    int rowStartX = buttonX + (floatingButton.getWidth() - rowWidth) / 2;
+                    rowStartX = Math.max(0, Math.min(rowStartX, Math.max(0, root.getWidth() - rowWidth)));
+                    monitor.setX(rowStartX + column * (monitorWidth + spacing));
+                    monitor.setY(monitorStartY + row * (monitorHeight + spacing));
+                    slot++;
+                }
             }
         }
 
         private void setMonitorAlpha(float alpha) {
-            for (TextView monitor : statisticMonitors.values()) {
-                if (monitor.getVisibility() == View.VISIBLE) {
+            for (List<TextView> monitors : statisticMonitors.values()) {
+                for (TextView monitor : monitors) if (monitor.getVisibility() == View.VISIBLE) {
                     monitor.animate().alpha(alpha).setDuration(180).start();
                 }
             }
         }
 
         private void setMonitorAlphaImmediate(float alpha) {
-            for (TextView monitor : statisticMonitors.values()) {
-                if (monitor.getVisibility() == View.VISIBLE) {
+            for (List<TextView> monitors : statisticMonitors.values()) {
+                for (TextView monitor : monitors) if (monitor.getVisibility() == View.VISIBLE) {
                     monitor.animate().cancel();
                     monitor.setAlpha(alpha);
                 }
@@ -443,19 +491,60 @@ public final class UniversalOverlayRuntime {
         }
 
         private void addModules(LinearLayout modules) {
-            boolean hasStatistics = config.systemTime || config.fps || config.sessionTime;
-            boolean hasActivity = config.keepAwake || config.fullscreen || config.screenshots;
+            boolean hasStatistics = config.systemTime || config.fps || config.sessionTime
+                    || config.batteryStatus || config.appMemory || config.networkStatus
+                    || config.deviceInformation || config.deviceTemperature;
+            boolean hasActivity = config.keepAwake || config.fullscreen || config.screenshots
+                    || config.appBrightness || config.rotationMode || config.appAudioMute;
+            boolean hasHooks = config.disableHaptics || config.disableAnimations;
             if (hasStatistics) {
                 addSectionLabel(modules, "Statistic modules");
-                if (config.systemTime) addStatistic(modules, new SystemTimeModule());
-                if (config.fps) addStatistic(modules, new FpsModule());
-                if (config.sessionTime) addStatistic(modules, new SessionTimeModule(sessionStartElapsed));
+                if (config.systemTime) addStatisticSafely(modules, SystemTimeModule::new);
+                if (config.fps) addStatisticSafely(modules, FpsModule::new);
+                if (config.sessionTime) addStatisticSafely(modules, () -> new SessionTimeModule(sessionStartElapsed));
+                if (config.batteryStatus) addStatisticSafely(modules, () -> new BatteryStatusModule(activity));
+                if (config.appMemory) addStatisticSafely(modules, () -> new AppMemoryModule(activity));
+                if (config.networkStatus) addStatisticSafely(modules, () -> new NetworkStatusModule(activity));
+                if (config.deviceInformation) addStatisticSafely(modules, () -> new DeviceInformationModule(activity));
+                if (config.deviceTemperature) addStatisticSafely(modules, () -> new DeviceTemperatureModule(activity));
             }
             if (hasActivity) {
                 addSectionLabel(modules, "Activity modules");
-                if (config.fullscreen) addActivityModule(modules, new FullscreenModule());
-                if (config.keepAwake) addActivityModule(modules, new KeepAwakeModule());
-                if (config.screenshots) addActivityModule(modules, new ScreenshotsModule());
+                if (config.keepAwake) addActivityModuleSafely(modules, KeepAwakeModule::new);
+                if (config.fullscreen) addActivityModuleSafely(modules, FullscreenModule::new);
+                if (config.screenshots) addActivityModuleSafely(modules, ScreenshotsModule::new);
+                if (config.appBrightness) addActivityModuleSafely(modules, AppBrightnessModule::new);
+                if (config.rotationMode) addActivityModuleSafely(modules, RotationModeModule::new);
+                if (config.appAudioMute) addActivityModuleSafely(modules, AppAudioMuteModule::new);
+            }
+            if (hasHooks) {
+                addSectionLabel(modules, "Hook modules");
+                if (config.disableHaptics) addHookModuleSafely(modules, DisableHapticsModule::new);
+                if (config.disableAnimations) addHookModuleSafely(modules, DisableAnimationsModule::new);
+            }
+        }
+
+        private void addActivityModuleSafely(LinearLayout parent, ActivityModuleFactory factory) {
+            try {
+                addActivityModule(parent, factory.create());
+            } catch (RuntimeException ignored) {
+                // A module constructor or UI setup failure must not hide other modules.
+            }
+        }
+
+        private void addStatisticSafely(LinearLayout parent, StatisticModuleFactory factory) {
+            try {
+                addStatistic(parent, factory.create());
+            } catch (RuntimeException ignored) {
+                // A module constructor or UI setup failure must not hide other modules.
+            }
+        }
+
+        private void addHookModuleSafely(LinearLayout parent, HookModuleFactory factory) {
+            try {
+                addHookModule(parent, factory.create());
+            } catch (RuntimeException ignored) {
+                // A hook constructor or UI setup failure must not hide other modules.
             }
         }
 
@@ -469,6 +558,14 @@ public final class UniversalOverlayRuntime {
         }
 
         private void addActivityModule(LinearLayout controls, UniversalOverlayActivityModule feature) {
+            if (feature instanceof AppBrightnessModule) {
+                addBrightnessModule(controls, (AppBrightnessModule) feature);
+                return;
+            }
+            if (feature instanceof RotationModeModule) {
+                addRotationModule(controls, (RotationModeModule) feature);
+                return;
+            }
             final boolean initial;
             try {
                 Boolean remembered = rememberedState(feature.key());
@@ -492,6 +589,101 @@ public final class UniversalOverlayRuntime {
                     return false;
                 }
             });
+        }
+
+        private void addHookModule(LinearLayout controls, UniversalOverlayHookModule hook) {
+            final boolean initial;
+            try {
+                Boolean remembered = HOOK_STATES.get(hook.key());
+                initial = remembered != null ? remembered
+                        : hook.initiallyEnabled(activity, originalWindowFlags, originalSystemUi);
+                if (remembered != null && !hook.setEnabled(activity, remembered, originalWindowFlags, originalSystemUi)) {
+                    HOOK_STATES.put(hook.key(), false);
+                    return;
+                }
+            } catch (RuntimeException ignored) {
+                return;
+            }
+            hookModules.add(hook);
+            addControlRow(controls, hook, initial, checked -> {
+                try {
+                    boolean applied = hook.setEnabled(activity, checked, originalWindowFlags, originalSystemUi);
+                    HOOK_STATES.put(hook.key(), applied && checked);
+                    return applied;
+                } catch (RuntimeException ignored) {
+                    HOOK_STATES.put(hook.key(), false);
+                    return false;
+                }
+            });
+        }
+
+        private void addBrightnessModule(LinearLayout parent, AppBrightnessModule module) {
+            activityModules.add(module);
+            module.initiallyEnabled(activity, originalWindowFlags, originalSystemUi);
+            Float remembered = appBrightnessState;
+            if (remembered != null) module.apply(activity, remembered);
+            LinearLayout row = moduleRow(module.label(), module.description());
+            SeekBar slider = new SeekBar(activity);
+            slider.setMax(100);
+            slider.setProgress(Math.round((remembered == null ? module.current(activity) : remembered) * 100f));
+            slider.setContentDescription(module.label());
+            slider.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                @Override public void onProgressChanged(SeekBar bar, int progress, boolean fromUser) {
+                    try {
+                        float brightness = progress / 100f;
+                        appBrightnessState = brightness;
+                        module.apply(activity, brightness);
+                    }
+                    catch (RuntimeException ignored) { }
+                }
+                @Override public void onStartTrackingTouch(SeekBar bar) { }
+                @Override public void onStopTrackingTouch(SeekBar bar) { }
+            });
+            row.addView(slider, new LinearLayout.LayoutParams(-1, -2));
+            parent.addView(row, new LinearLayout.LayoutParams(-1, -2));
+        }
+
+        private void addRotationModule(LinearLayout parent, RotationModeModule module) {
+            activityModules.add(module);
+            module.initiallyEnabled(activity, originalWindowFlags, originalSystemUi);
+            Integer remembered = rotationModeState;
+            if (remembered != null) module.apply(activity, remembered);
+            LinearLayout row = moduleRow(module.label(), module.description());
+            Spinner spinner = new Spinner(activity);
+            String[] labels = {"System", "Portrait", "Landscape"};
+            spinner.setAdapter(new ArrayAdapter<>(activity, android.R.layout.simple_spinner_item, labels));
+            ((ArrayAdapter<?>) spinner.getAdapter()).setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            int current = remembered == null ? module.current(activity) : remembered;
+            spinner.setSelection(current == android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT ? 1
+                    : (current == android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE ? 2 : 0));
+            spinner.setContentDescription(module.label());
+            spinner.setOnItemSelectedListener(new android.widget.AdapterView.OnItemSelectedListener() {
+                @Override public void onItemSelected(android.widget.AdapterView<?> parentView, View view, int position, long id) {
+                    int mode = position == 1 ? android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+                            : (position == 2 ? android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+                            : android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
+                    try {
+                        module.apply(activity, mode);
+                        rotationModeState = mode;
+                    } catch (RuntimeException ignored) { }
+                }
+                @Override public void onNothingSelected(android.widget.AdapterView<?> parentView) { }
+            });
+            row.addView(spinner, new LinearLayout.LayoutParams(-1, -2));
+            parent.addView(row, new LinearLayout.LayoutParams(-1, -2));
+        }
+
+        private LinearLayout moduleRow(String label, String details) {
+            LinearLayout row = new LinearLayout(activity);
+            row.setOrientation(LinearLayout.VERTICAL);
+            row.setPadding(0, dp(6), 0, dp(6));
+            TextView title = text(label, 16, config.outline);
+            title.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
+            row.addView(title, new LinearLayout.LayoutParams(-1, -2));
+            TextView description = text(details, 13, config.outline);
+            description.setAlpha(.82f);
+            row.addView(description, new LinearLayout.LayoutParams(-1, -2));
+            return row;
         }
 
         private void addStatistic(LinearLayout parent, UniversalOverlayStatisticModule module) {
@@ -523,8 +715,14 @@ public final class UniversalOverlayRuntime {
             control.setChecked(remembered != null ? remembered : config.activateStatisticsOnLaunch);
             control.setContentDescription(label);
             module.bind(valueView, control);
-            createStatisticMonitor(module);
-            module.setEnabled(control.isChecked(), shouldStatisticsRun());
+            createStatisticMonitors(module);
+            boolean requested = control.isChecked();
+            boolean applied = module.setEnabled(requested, shouldStatisticsRun());
+            if (requested && !applied) {
+                control.setChecked(false);
+                rememberModuleState(key, false);
+                module.setChecked(false);
+            }
             updateStatisticMonitor(module);
             control.setOnCheckedChangeListener((button, checked) -> {
                 rememberModuleState(key, checked);
@@ -574,9 +772,23 @@ public final class UniversalOverlayRuntime {
                 }
                 updateStatisticMonitor(module);
             }
+            for (UniversalOverlayHookModule hook : hookModules) {
+                Boolean remembered = HOOK_STATES.get(hook.key());
+                if (remembered == null) continue;
+                try {
+                    if (!hook.setEnabled(activity, remembered, originalWindowFlags, originalSystemUi)) {
+                        HOOK_STATES.put(hook.key(), false);
+                        continue;
+                    }
+                    CheckBox control = featureControls.get(hook.key());
+                    if (control != null && control.isChecked() != remembered) control.setChecked(remembered);
+                } catch (RuntimeException ignored) {
+                    HOOK_STATES.put(hook.key(), false);
+                }
+            }
         }
 
-        private void addControlRow(LinearLayout parent, UniversalOverlayActivityModule feature, boolean initial, final Toggle toggle) {
+        private void addControlRow(LinearLayout parent, UniversalOverlayModule feature, boolean initial, final Toggle toggle) {
             LinearLayout row = new LinearLayout(activity);
             row.setOrientation(LinearLayout.HORIZONTAL);
             row.setGravity(Gravity.CENTER_VERTICAL);
@@ -743,6 +955,18 @@ public final class UniversalOverlayRuntime {
     }
 
     private interface Toggle { boolean changed(boolean checked); }
+
+    private interface ActivityModuleFactory {
+        UniversalOverlayActivityModule create();
+    }
+
+    private interface StatisticModuleFactory {
+        UniversalOverlayStatisticModule create();
+    }
+
+    private interface HookModuleFactory {
+        UniversalOverlayHookModule create();
+    }
 
     private static final class BoundedScrollView extends ScrollView {
         private final int maxHeight;

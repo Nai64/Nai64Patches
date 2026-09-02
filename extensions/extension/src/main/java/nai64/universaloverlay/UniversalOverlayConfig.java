@@ -5,12 +5,12 @@ import android.view.Gravity;
 
 /**
  * Decodes and validates overlay configuration inside the extension runtime.
- * The patch-building Kotlin code supplies version 3; older 14/15-field payloads remain supported.
+ * The patch-building Kotlin code supplies version 4; older 14/15/17-field payloads remain supported.
  */
 final class UniversalOverlayConfig {
     private static final String DEFAULT_DESCRIPTION =
             "Welcome to the Nai64Patches Universal Overlay Patch. This experimental in-app overlay " +
-            "contains optional statistic, activity, and future hook modules. More may be added in " +
+            "contains optional statistic, activity, and hook modules. More may be added in " +
             "future updates. The idea and initial works of this Universal Overlay Patch are from " +
             "Zanuaimi.";
     String title, description, repositoryText, repositoryUrl, buttonText;
@@ -19,17 +19,20 @@ final class UniversalOverlayConfig {
     int shape;
     boolean keepAwake, fullscreen, screenshots;
     boolean systemTime, fps, sessionTime;
+    boolean batteryStatus, appMemory, networkStatus, deviceInformation, deviceTemperature;
+    boolean appBrightness, rotationMode, appAudioMute, disableHaptics, disableAnimations;
     boolean activateStatisticsOnLaunch;
-    int statisticMonitorPosition;
+    int statisticMonitorPosition, monitorColumns;
+    float monitorScale;
 
     static UniversalOverlayConfig decode(String encoded) {
         UniversalOverlayConfig c = new UniversalOverlayConfig();
         String[] values = encoded == null ? new String[0] : encoded.split("\\|", -1);
-        // Version 2/3 prepends a version field. Keep accepting the original 14-field format so an
+        // Version 2/3/4 prepends a version field. Keep accepting the original 14-field format so an
         // older generated patch remains safe when paired with this newer extension.
-        String[] v = new String[17];
+        String[] v = new String[19];
         for (int i = 0; i < v.length; i++) v[i] = i < values.length ? decodePart(values[i]) : "";
-        int offset = ("2".equals(v[0]) || "3".equals(v[0])) ? 1 : 0;
+        int offset = ("2".equals(v[0]) || "3".equals(v[0]) || "4".equals(v[0])) ? 1 : 0;
         c.title = limit(field(v, offset, 0), 80, "Nai64Patches Universal Overlay Patch");
         c.description = limit(field(v, offset, 1), 500, DEFAULT_DESCRIPTION);
         c.repositoryText = empty(field(v, offset, 2), "Nai64 repository");
@@ -51,10 +54,22 @@ final class UniversalOverlayConfig {
         c.systemTime = hasToken(controls, "systemTime");
         c.fps = hasToken(controls, "fps");
         c.sessionTime = hasToken(controls, "sessionTime");
+        c.batteryStatus = hasToken(controls, "batteryStatus");
+        c.appMemory = hasToken(controls, "appMemory");
+        c.networkStatus = hasToken(controls, "networkStatus");
+        c.deviceInformation = hasToken(controls, "deviceInformation");
+        c.deviceTemperature = hasToken(controls, "deviceTemperature");
+        c.appBrightness = hasToken(controls, "appBrightness");
+        c.rotationMode = hasToken(controls, "rotationMode");
+        c.appAudioMute = hasToken(controls, "appAudioMute");
+        c.disableHaptics = hasToken(controls, "disableHaptics");
+        c.disableAnimations = hasToken(controls, "disableAnimations");
         c.activateStatisticsOnLaunch = "1".equals(field(v, offset, 14));
         String monitorPosition = field(v, offset, 15);
         c.statisticMonitorPosition = "top".equals(monitorPosition) ? 1
                 : ("bottom".equals(monitorPosition) ? 2 : 0);
+        c.monitorScale = floatValue(field(v, offset, 16), 1f, .5f, 2f);
+        c.monitorColumns = integer(field(v, offset, 17), 2, 1, 3);
         return c;
     }
 
@@ -77,6 +92,12 @@ final class UniversalOverlayConfig {
     private static String limit(String value, int max, String fallback) { String result = empty(value, fallback); return result.substring(0, Math.min(max, result.length())); }
     private static String validUrl(String value) { return value.startsWith("http://") || value.startsWith("https://") ? value : "https://github.com/Nai64/Nai64Patches"; }
     private static int integer(String value, int fallback, int min, int max) { try { return Math.max(min, Math.min(max, Integer.parseInt(value))); } catch (RuntimeException ignored) { return fallback; } }
+    private static float floatValue(String value, float fallback, float min, float max) {
+        try {
+            float parsed = Float.parseFloat(value);
+            return Float.isNaN(parsed) || Float.isInfinite(parsed) ? fallback : Math.max(min, Math.min(max, parsed));
+        } catch (RuntimeException ignored) { return fallback; }
+    }
     private static int color(String value, int fallback) {
         try {
             String v = value.startsWith("#") ? value.substring(1) : value;
