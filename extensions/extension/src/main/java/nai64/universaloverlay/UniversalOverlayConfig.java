@@ -5,7 +5,7 @@ import android.view.Gravity;
 
 /**
  * Decodes and validates overlay configuration inside the extension runtime.
- * The patch-building Kotlin code supplies version 2; legacy 14-field payloads remain supported.
+ * The patch-building Kotlin code supplies version 3; older 14/15-field payloads remain supported.
  */
 final class UniversalOverlayConfig {
     private static final String DEFAULT_DESCRIPTION =
@@ -19,15 +19,17 @@ final class UniversalOverlayConfig {
     int shape;
     boolean keepAwake, fullscreen, screenshots;
     boolean systemTime, fps, sessionTime;
+    boolean activateStatisticsOnLaunch;
+    int statisticMonitorPosition;
 
     static UniversalOverlayConfig decode(String encoded) {
         UniversalOverlayConfig c = new UniversalOverlayConfig();
         String[] values = encoded == null ? new String[0] : encoded.split("\\|", -1);
-        // Version 2 prepends a version field. Keep accepting the original 14-field format so an
+        // Version 2/3 prepends a version field. Keep accepting the original 14-field format so an
         // older generated patch remains safe when paired with this newer extension.
-        String[] v = new String[15];
+        String[] v = new String[17];
         for (int i = 0; i < v.length; i++) v[i] = i < values.length ? decodePart(values[i]) : "";
-        int offset = "2".equals(v[0]) ? 1 : 0;
+        int offset = ("2".equals(v[0]) || "3".equals(v[0])) ? 1 : 0;
         c.title = limit(field(v, offset, 0), 80, "Nai64Patches Universal Overlay Patch");
         c.description = limit(field(v, offset, 1), 500, DEFAULT_DESCRIPTION);
         c.repositoryText = empty(field(v, offset, 2), "Nai64 repository");
@@ -49,6 +51,10 @@ final class UniversalOverlayConfig {
         c.systemTime = hasToken(controls, "systemTime");
         c.fps = hasToken(controls, "fps");
         c.sessionTime = hasToken(controls, "sessionTime");
+        c.activateStatisticsOnLaunch = "1".equals(field(v, offset, 14));
+        String monitorPosition = field(v, offset, 15);
+        c.statisticMonitorPosition = "top".equals(monitorPosition) ? 1
+                : ("bottom".equals(monitorPosition) ? 2 : 0);
         return c;
     }
 
