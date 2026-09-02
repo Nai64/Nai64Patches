@@ -19,6 +19,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.WeakHashMap;
 
 /**
@@ -82,6 +84,7 @@ public final class RuntimeOverlayRuntime {
         private final View menuScrim;
         private final LinearLayout panel;
         private final FrameLayout confirmationLayer;
+        private final List<RuntimeOverlayFeature> features = new ArrayList<>();
         private final int originalWindowFlags;
         private final int originalSystemUi;
         private boolean menuVisible;
@@ -126,7 +129,19 @@ public final class RuntimeOverlayRuntime {
         }
 
         void detach() {
+            restoreFeatures();
             if (root.getParent() instanceof ViewGroup) ((ViewGroup) root.getParent()).removeView(root);
+        }
+
+        private void restoreFeatures() {
+            for (RuntimeOverlayFeature feature : features) {
+                try {
+                    feature.restore(activity, originalWindowFlags, originalSystemUi);
+                } catch (RuntimeException ignored) {
+                    // A single incompatible window must not prevent other features or host cleanup.
+                }
+            }
+            features.clear();
         }
 
         private FrameLayout.LayoutParams buttonParams() {
@@ -264,9 +279,20 @@ public final class RuntimeOverlayRuntime {
         }
 
         private void addFeature(LinearLayout controls, RuntimeOverlayFeature feature) {
-            addSwitch(controls, feature.label(),
-                    feature.initiallyEnabled(activity, originalWindowFlags, originalSystemUi),
-                    checked -> feature.setEnabled(activity, checked, originalWindowFlags, originalSystemUi));
+            final boolean initial;
+            try {
+                initial = feature.initiallyEnabled(activity, originalWindowFlags, originalSystemUi);
+            } catch (RuntimeException ignored) {
+                return;
+            }
+            features.add(feature);
+            addSwitch(controls, feature.label(), initial, checked -> {
+                try {
+                    feature.setEnabled(activity, checked, originalWindowFlags, originalSystemUi);
+                } catch (RuntimeException ignored) {
+                    // Feature controls are independent; a failure here must not crash the host.
+                }
+            });
         }
 
         private void addSwitch(LinearLayout parent, String label, boolean initial, final Toggle toggle) {
