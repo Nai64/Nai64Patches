@@ -3,14 +3,18 @@ package nai64.runtime;
 import android.app.Activity;
 import android.app.Application;
 import android.content.Intent;
+import android.graphics.PixelFormat;
 import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewParent;
 import android.view.Window;
+import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
@@ -51,14 +55,27 @@ public final class RuntimeOverlayRuntime {
     /** Compatibility fallback for APKs where Application.onCreate cannot be resolved. */
     public static synchronized void installActivity(Activity activity, String encodedConfig) {
         if (activity == null) return;
-        configuration = RuntimeOverlayConfig.decode(encodedConfig);
+        try {
+            Application application = activity.getApplication();
+            if (application != null) {
+                install(application, encodedConfig);
+            } else {
+                configuration = RuntimeOverlayConfig.decode(encodedConfig);
+            }
+        } catch (RuntimeException ignored) {
+            configuration = RuntimeOverlayConfig.decode(encodedConfig);
+        }
         showActivity(activity);
     }
 
     static synchronized void showActivity(Activity activity) {
         if (configuration == null) return;
         if (activity.isFinishing() || (android.os.Build.VERSION.SDK_INT >= 17 && activity.isDestroyed())) return;
-        if (CONTROLLERS.containsKey(activity)) return;
+        Controller existing = CONTROLLERS.get(activity);
+        if (existing != null) {
+            existing.promoteToWindowLayer();
+            return;
+        }
         Controller controller = null;
         try {
             controller = new Controller(activity, configuration);
@@ -93,6 +110,8 @@ public final class RuntimeOverlayRuntime {
         private boolean fullyClosed;
         private boolean attached;
         private boolean detached;
+        private boolean windowAttached;
+        private WindowManager windowManager;
         private float downX;
         private float downY;
         private float startX;
@@ -116,10 +135,7 @@ public final class RuntimeOverlayRuntime {
 
         void attach() {
             if (attached || detached) return;
-            FrameLayout.LayoutParams rootParams = new FrameLayout.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
             try {
-                activity.addContentView(root, rootParams);
                 root.addView(menuLayer, new FrameLayout.LayoutParams(
                         ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
                 menuLayer.addView(menuScrim, new FrameLayout.LayoutParams(
@@ -130,6 +146,9 @@ public final class RuntimeOverlayRuntime {
                         ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
                 menuLayer.setVisibility(View.GONE);
                 confirmationLayer.setVisibility(View.GONE);
+                if (!tryAttachWindowLayer()) {
+                    activity.addContentView(root, contentLayoutParams());
+                }
                 attached = true;
             } catch (RuntimeException failure) {
                 removeRoot();
@@ -146,11 +165,63 @@ public final class RuntimeOverlayRuntime {
 
         private void removeRoot() {
             try {
-                if (root.getParent() instanceof ViewGroup) ((ViewGroup) root.getParent()).removeView(root);
+                if (windowAttached && windowManager != null) {
+                    windowManager.removeViewImmediate(root);
+                } else if (root.getParent() instanceof ViewGroup) {
+                    ((ViewGroup) root.getParent()).removeView(root);
+                }
             } catch (RuntimeException ignored) {
                 // Cleanup must not propagate a host-specific view hierarchy failure.
             }
+            windowAttached = false;
+            windowManager = null;
             attached = false;
+        }
+
+        private FrameLayout.LayoutParams contentLayoutParams() {
+            return new FrameLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+        }
+
+        private boolean tryAttachWindowLayer() {
+            try {
+                Window window = activity.getWindow();
+                IBinder token = window.getDecorView().getWindowToken();
+                WindowManager manager = (WindowManager) activity.getSystemService(Activity.WINDOW_SERVICE);
+                if (token == null || manager == null) return false;
+                WindowManager.LayoutParams params = new WindowManager.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                        WindowManager.LayoutParams.TYPE_APPLICATION_PANEL,
+                        WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                                | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,
+                        PixelFormat.TRANSLUCENT);
+                params.token = token;
+                params.gravity = Gravity.TOP | Gravity.LEFT;
+                params.setTitle("Nai64 Runtime Overlay");
+                manager.addView(root, params);
+                windowManager = manager;
+                windowAttached = true;
+                return true;
+            } catch (RuntimeException ignored) {
+                return false;
+            }
+        }
+
+        void promoteToWindowLayer() {
+            if (!attached || detached || windowAttached) return;
+            ViewParent parent = root.getParent();
+            if (!(parent instanceof ViewGroup)) return;
+            ViewGroup contentParent = (ViewGroup) parent;
+            contentParent.removeView(root);
+            if (!tryAttachWindowLayer()) {
+                try {
+                    contentParent.addView(root, contentLayoutParams());
+                } catch (RuntimeException ignored) {
+                    // The content fallback was already removed; lifecycle cleanup will finish.
+                    attached = false;
+                }
+            }
         }
 
         private void restoreFeatures() {
