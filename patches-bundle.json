@@ -1,7 +1,7 @@
 {
-  "created_at": "2026-09-02T05:13:41",
-  "description": "## [1.0.2](https://github.com/Zanuaimi/Nai64Patches/compare/1.0.1...1.0.2) (2026-09-02)\n\n### Bug Fixes\n\n* Add labels ([9a29663](https://github.com/Zanuaimi/Nai64Patches/commit/9a29663ec9a995aa1db74839fbf09a2610eccc55))",
-  "download_url": "https://github.com/Zanuaimi/Nai64Patches/releases/download/1.0.2/patches-1.0.2.mpp",
+  "created_at": "2026-09-02T05:36:01",
+  "description": "## [1.0.3](https://github.com/Zanuaimi/Nai64Patches/compare/1.0.2...1.0.3) (2026-09-02)\n\n### Bug Fixes\n\n* correct runtime overlay bridge descriptor ([c356560](https://github.com/Zanuaimi/Nai64Patches/commit/c356560aa4414e97935a96b14cb645c9a4ce5678))",
+  "download_url": "https://github.com/Zanuaimi/Nai64Patches/releases/download/1.0.3/patches-1.0.3.mpp",
   "signature_download_url": "",
-  "version": "1.0.2"
+  "version": "1.0.3"
 }

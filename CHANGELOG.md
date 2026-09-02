@@ -1,3 +1,9 @@
+## [1.0.3](https://github.com/Zanuaimi/Nai64Patches/compare/1.0.2...1.0.3) (2026-09-02)
+
+### Bug Fixes
+
+* correct runtime overlay bridge descriptor ([c356560](https://github.com/Zanuaimi/Nai64Patches/commit/c356560aa4414e97935a96b14cb645c9a4ce5678))
+
 ## [1.0.2](https://github.com/Zanuaimi/Nai64Patches/compare/1.0.1...1.0.2) (2026-09-02)
 
 ### Bug Fixes
