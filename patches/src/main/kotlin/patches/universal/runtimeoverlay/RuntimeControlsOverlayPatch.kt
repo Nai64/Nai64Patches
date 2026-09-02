@@ -82,11 +82,30 @@ private fun injectMethod(owner: MutableClass, method: MutableMethod, config: Str
     // Activity subclass; using owner.type here would generate a method descriptor that does not
     // exist in RuntimeOverlayRuntime and fail with NoSuchMethodError at launch.
     val type = if (application) "Landroid/app/Application;" else "Landroid/app/Activity;"
+    val injectionIndex = if (application) {
+        0
+    } else {
+        // Activity views cannot be attached reliably until the framework superclass has completed
+        // onCreate. Place the fallback bridge after invoke-super so it works with AppCompat,
+        // Unity, Godot, and ordinary platform Activity subclasses.
+        val instructions = cloned.implementation?.instructions
+        val superIndex = instructions?.indexOfFirst {
+            val text = it.toString()
+            text.contains("invoke-super") && text.contains("->onCreate(")
+        } ?: -1
+        if (superIndex >= 0) {
+            superIndex + 1
+        } else {
+            // A non-standard Activity may omit invoke-super. Run at the end of onCreate so the
+            // host still has a chance to initialize its content before overlay attachment.
+            instructions?.indexOfLast { it.toString().contains("return-void") } ?: 0
+        }
+    }
     // Use the label-aware compiler entry point. Morphe Manager versions in the wild have
     // rejected range instructions through addInstructions even though the same Smali is valid
     // when compiled through addInstructionsWithLabels.
     cloned.addInstructionsWithLabels(
-        0,
+        injectionIndex,
         """
         move-object/from16 v$temporaryBase, v$originalReceiver
         const-string v${temporaryBase + 1}, "${StartupHooks.escapeSmali(config)}"
