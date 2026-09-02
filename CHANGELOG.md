@@ -1,3 +1,9 @@
+## [1.6.2](https://github.com/Zanuaimi/Nai64Patches/compare/1.6.1...1.6.2) (2026-09-02)
+
+### Bug Fixes
+
+* retry semantic release workflow ([1a4bd48](https://github.com/Zanuaimi/Nai64Patches/commit/1a4bd481e4ca67b7294221f774ed7061b396df6f))
+
 ## [1.6.1](https://github.com/Zanuaimi/Nai64Patches/compare/1.6.0...1.6.1) (2026-09-02)
 
 ### Bug Fixes
