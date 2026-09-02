@@ -66,6 +66,14 @@ public final class RuntimeOverlayRuntime {
             configuration = RuntimeOverlayConfig.decode(encodedConfig);
         }
         showActivity(activity);
+        try {
+            // The current Activity may already be inside onCreate when callbacks are registered,
+            // so it will not receive the first onActivityResumed event. Retry after the framework
+            // has attached the Activity window and issued its first layout pass.
+            activity.getWindow().getDecorView().post(() -> promoteActivity(activity));
+        } catch (RuntimeException ignored) {
+            // The normal lifecycle callback remains the fallback promotion path.
+        }
     }
 
     static synchronized void showActivity(Activity activity) {
@@ -86,6 +94,11 @@ public final class RuntimeOverlayRuntime {
             // Never let overlay setup failure crash the host application.
             CONTROLLERS.remove(activity);
         }
+    }
+
+    private static synchronized void promoteActivity(Activity activity) {
+        Controller controller = CONTROLLERS.get(activity);
+        if (controller != null) controller.promoteToWindowLayer();
     }
 
     static synchronized void removeActivity(Activity activity) {
@@ -112,6 +125,9 @@ public final class RuntimeOverlayRuntime {
         private boolean detached;
         private boolean windowAttached;
         private WindowManager windowManager;
+        private int windowX;
+        private int windowY;
+        private boolean windowPositionInitialized;
         private float downX;
         private float downY;
         private float startX;
@@ -186,25 +202,94 @@ public final class RuntimeOverlayRuntime {
         private boolean tryAttachWindowLayer() {
             try {
                 Window window = activity.getWindow();
-                IBinder token = window.getDecorView().getWindowToken();
+                IBinder token = window.getAttributes().token;
+                if (token == null) token = window.getDecorView().getWindowToken();
                 WindowManager manager = (WindowManager) activity.getSystemService(Activity.WINDOW_SERVICE);
                 if (token == null || manager == null) return false;
-                WindowManager.LayoutParams params = new WindowManager.LayoutParams(
-                        ViewGroup.LayoutParams.MATCH_PARENT,
-                        ViewGroup.LayoutParams.MATCH_PARENT,
-                        WindowManager.LayoutParams.TYPE_APPLICATION_PANEL,
-                        WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-                                | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,
-                        PixelFormat.TRANSLUCENT);
+                initializeWindowPosition();
+                floatingButton.setLayoutParams(windowButtonChildParams());
+                WindowManager.LayoutParams params = windowLayoutParams(
+                        menuVisible ? ViewGroup.LayoutParams.MATCH_PARENT : dp(config.buttonSize),
+                        menuVisible ? ViewGroup.LayoutParams.MATCH_PARENT : dp(config.buttonSize));
                 params.token = token;
-                params.gravity = Gravity.TOP | Gravity.LEFT;
-                params.setTitle("Nai64 Runtime Overlay");
                 manager.addView(root, params);
                 windowManager = manager;
                 windowAttached = true;
                 return true;
             } catch (RuntimeException ignored) {
+                floatingButton.setLayoutParams(buttonParams());
                 return false;
+            }
+        }
+
+        private WindowManager.LayoutParams windowLayoutParams(int width, int height) {
+            WindowManager.LayoutParams params = new WindowManager.LayoutParams(
+                        width,
+                        height,
+                        WindowManager.LayoutParams.TYPE_APPLICATION_PANEL,
+                        WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                                | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,
+                        PixelFormat.TRANSLUCENT);
+            params.gravity = Gravity.TOP | Gravity.LEFT;
+            params.x = width == ViewGroup.LayoutParams.MATCH_PARENT ? 0 : windowX;
+            params.y = height == ViewGroup.LayoutParams.MATCH_PARENT ? 0 : windowY;
+            params.setTitle("Nai64 Runtime Overlay");
+            return params;
+        }
+
+        private void initializeWindowPosition() {
+            if (windowPositionInitialized) return;
+            int width = activity.getResources().getDisplayMetrics().widthPixels;
+            int height = activity.getResources().getDisplayMetrics().heightPixels;
+            int size = dp(config.buttonSize);
+            int margin = dp(16);
+            int horizontal = config.gravity & Gravity.HORIZONTAL_GRAVITY_MASK;
+            int vertical = config.gravity & Gravity.VERTICAL_GRAVITY_MASK;
+            windowX = horizontal == Gravity.RIGHT ? Math.max(0, width - size - margin)
+                    : horizontal == Gravity.CENTER_HORIZONTAL ? Math.max(0, (width - size) / 2) : margin;
+            windowY = vertical == Gravity.BOTTOM ? Math.max(0, height - size - margin)
+                    : vertical == Gravity.CENTER_VERTICAL ? Math.max(0, (height - size) / 2) : margin;
+            windowPositionInitialized = true;
+        }
+
+        private FrameLayout.LayoutParams windowButtonChildParams() {
+            return new FrameLayout.LayoutParams(dp(config.buttonSize), dp(config.buttonSize));
+        }
+
+        private void updateWindowLayer(boolean menuOpen) {
+            if (!windowAttached || windowManager == null) return;
+            try {
+                if (menuOpen) {
+                    floatingButton.setLayoutParams(buttonParams());
+                    windowManager.updateViewLayout(root, windowLayoutParams(
+                            ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+                } else {
+                    int[] location = new int[2];
+                    floatingButton.getLocationOnScreen(location);
+                    windowX = Math.max(0, location[0]);
+                    windowY = Math.max(0, location[1]);
+                    floatingButton.setLayoutParams(windowButtonChildParams());
+                    windowManager.updateViewLayout(root, windowLayoutParams(dp(config.buttonSize), dp(config.buttonSize)));
+                }
+            } catch (RuntimeException ignored) {
+                moveToContentFallback();
+            }
+        }
+
+        private void moveToContentFallback() {
+            if (!windowAttached || windowManager == null || detached) return;
+            try {
+                windowManager.removeViewImmediate(root);
+            } catch (RuntimeException ignored) {
+                // Continue with the content fallback attempt.
+            }
+            windowAttached = false;
+            windowManager = null;
+            try {
+                floatingButton.setLayoutParams(buttonParams());
+                activity.addContentView(root, contentLayoutParams());
+            } catch (RuntimeException ignored) {
+                attached = false;
             }
         }
 
@@ -213,9 +298,16 @@ public final class RuntimeOverlayRuntime {
             ViewParent parent = root.getParent();
             if (!(parent instanceof ViewGroup)) return;
             ViewGroup contentParent = (ViewGroup) parent;
+            int[] location = new int[2];
+            root.getLocationOnScreen(location);
+            windowX = Math.max(0, location[0] + (int) floatingButton.getX());
+            windowY = Math.max(0, location[1] + (int) floatingButton.getY());
+            windowPositionInitialized = true;
             contentParent.removeView(root);
+            floatingButton.setLayoutParams(windowButtonChildParams());
             if (!tryAttachWindowLayer()) {
                 try {
+                    floatingButton.setLayoutParams(buttonParams());
                     contentParent.addView(root, contentLayoutParams());
                 } catch (RuntimeException ignored) {
                     // The content fallback was already removed; lifecycle cleanup will finish.
@@ -441,6 +533,7 @@ public final class RuntimeOverlayRuntime {
             if (fullyClosed) return;
             menuVisible = !menuVisible;
             if (menuVisible) {
+                updateWindowLayer(true);
                 menuLayer.setVisibility(View.VISIBLE);
                 menuScrim.animate().cancel();
                 menuScrim.setAlpha(0f);
@@ -460,7 +553,10 @@ public final class RuntimeOverlayRuntime {
         private void hideMenuLayer() {
             menuScrim.animate().cancel();
             menuScrim.animate().alpha(0f).setDuration(180).withEndAction(() -> {
-                if (!menuVisible) menuLayer.setVisibility(View.GONE);
+                if (!menuVisible) {
+                    menuLayer.setVisibility(View.GONE);
+                    updateWindowLayer(false);
+                }
             }).start();
         }
 
@@ -494,14 +590,30 @@ public final class RuntimeOverlayRuntime {
                 case MotionEvent.ACTION_DOWN:
                     downX = event.getRawX(); downY = event.getRawY();
                     startX = view.getX(); startY = view.getY(); dragged = false;
+                    if (windowAttached && !menuVisible) {
+                        startX = windowX;
+                        startY = windowY;
+                    }
                     return true;
                 case MotionEvent.ACTION_MOVE:
                     float dx = event.getRawX() - downX;
                     float dy = event.getRawY() - downY;
                     if (Math.abs(dx) > dp(5) || Math.abs(dy) > dp(5)) dragged = true;
                     if (dragged) {
-                        view.setX(clamp(startX + dx, 0, root.getWidth() - view.getWidth()));
-                        view.setY(clamp(startY + dy, 0, root.getHeight() - view.getHeight()));
+                        if (windowAttached && !menuVisible && windowManager != null) {
+                            int maxX = Math.max(0, activity.getResources().getDisplayMetrics().widthPixels - view.getWidth());
+                            int maxY = Math.max(0, activity.getResources().getDisplayMetrics().heightPixels - view.getHeight());
+                            windowX = (int) clamp(startX + dx, 0, maxX);
+                            windowY = (int) clamp(startY + dy, 0, maxY);
+                            try {
+                                windowManager.updateViewLayout(root, windowLayoutParams(view.getWidth(), view.getHeight()));
+                            } catch (RuntimeException ignored) {
+                                moveToContentFallback();
+                            }
+                        } else {
+                            view.setX(clamp(startX + dx, 0, root.getWidth() - view.getWidth()));
+                            view.setY(clamp(startY + dy, 0, root.getHeight() - view.getHeight()));
+                        }
                         // The idle state is intentionally translucent, but dragging must make
                         // the control fully visible so its position remains easy to track.
                         view.setAlpha(1f);
