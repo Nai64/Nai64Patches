@@ -1,3 +1,9 @@
+## [1.0.2](https://github.com/Zanuaimi/Nai64Patches/compare/1.0.1...1.0.2) (2026-09-02)
+
+### Bug Fixes
+
+* Add labels ([9a29663](https://github.com/Zanuaimi/Nai64Patches/commit/9a29663ec9a995aa1db74839fbf09a2610eccc55))
+
 ## [1.0.1](https://github.com/Zanuaimi/Nai64Patches/compare/1.0.0...1.0.1) (2026-09-02)
 
 ### Bug Fixes
