@@ -1,3 +1,9 @@
+## [1.0.4](https://github.com/Zanuaimi/Nai64Patches/compare/1.0.3...1.0.4) (2026-09-02)
+
+### Bug Fixes
+
+* resolve runtime overlay entry point ([c25decf](https://github.com/Zanuaimi/Nai64Patches/commit/c25decf1f9d353f8e25a771c752203e53392a5d2))
+
 ## [1.0.3](https://github.com/Zanuaimi/Nai64Patches/compare/1.0.2...1.0.3) (2026-09-02)
 
 ### Bug Fixes
