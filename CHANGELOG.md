@@ -1,3 +1,9 @@
+## [1.6.0](https://github.com/Zanuaimi/Nai64Patches/compare/1.5.3...1.6.0) (2026-09-02)
+
+### New Features
+
+* add statistic overlay monitors ([cbdd939](https://github.com/Zanuaimi/Nai64Patches/commit/cbdd93973689b0d1755d029863d498f7a96fb878))
+
 ## [1.5.3](https://github.com/Zanuaimi/Nai64Patches/compare/1.5.2...1.5.3) (2026-09-02)
 
 ### Bug Fixes

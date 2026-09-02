@@ -1,6 +1,6 @@
 {
   "NOTE": "Do NOT manually edit this file. This file is automatically updated when semantic release (release.yml) runs. Manually editing this file can break your releases and break third party tools that use this file.",
-  "version": "1.5.3",
+  "version": "1.6.0",
   "patches": [
     {
       "name": "Skip Consent Popup",
@@ -4667,6 +4667,28 @@
           "type": "kotlin.Boolean",
           "default": false,
           "values": null
+        },
+        {
+          "key": "runtimeOverlayActivateStatisticsOnLaunch",
+          "title": "Activate selected statistic modules on launch",
+          "description": "Start selected statistic modules as soon as the app launches. Disabled by default.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "runtimeOverlayStatisticMonitorPosition",
+          "title": "Statistic monitor position",
+          "description": "Show enabled statistic monitors above or below the overlay button.",
+          "required": false,
+          "type": "kotlin.String",
+          "default": "bottom",
+          "values": {
+            "No stat monitors": "none",
+            "Above overlay button": "top",
+            "Below overlay button": "bottom"
+          }
         }
       ]
     },
