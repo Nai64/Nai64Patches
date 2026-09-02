@@ -1,4 +1,4 @@
-package nai64.runtime;
+package nai64.universaloverlay;
 
 import android.graphics.Color;
 import android.view.Gravity;
@@ -7,26 +7,28 @@ import android.view.Gravity;
  * Decodes and validates overlay configuration inside the extension runtime.
  * The patch-building Kotlin code supplies version 2; legacy 14-field payloads remain supported.
  */
-final class RuntimeOverlayConfig {
+final class UniversalOverlayConfig {
     private static final String DEFAULT_DESCRIPTION =
-            "Welcome to Nai64Patches Runtime Controls Overlay. This experimental in-app overlay " +
-            "contains controls that may change parts of the app or game at runtime. More may be " +
-            "added in future updates.";
+            "Welcome to the Nai64Patches Universal Overlay Patch. This experimental in-app overlay " +
+            "contains optional statistic, activity, and future hook modules. More may be added in " +
+            "future updates. The idea and initial works of this Universal Overlay Patch are from " +
+            "Zanuaimi.";
     String title, description, repositoryText, repositoryUrl, buttonText;
     int background, outline, buttonTextColor, buttonBackground, buttonSize, gravity;
     float opacity;
     int shape;
     boolean keepAwake, fullscreen, screenshots;
+    boolean systemTime, fps, sessionTime;
 
-    static RuntimeOverlayConfig decode(String encoded) {
-        RuntimeOverlayConfig c = new RuntimeOverlayConfig();
+    static UniversalOverlayConfig decode(String encoded) {
+        UniversalOverlayConfig c = new UniversalOverlayConfig();
         String[] values = encoded == null ? new String[0] : encoded.split("\\|", -1);
         // Version 2 prepends a version field. Keep accepting the original 14-field format so an
         // older generated patch remains safe when paired with this newer extension.
         String[] v = new String[15];
         for (int i = 0; i < v.length; i++) v[i] = i < values.length ? decodePart(values[i]) : "";
         int offset = "2".equals(v[0]) ? 1 : 0;
-        c.title = limit(field(v, offset, 0), 80, "Nai64Patches Runtime Controls Overlay");
+        c.title = limit(field(v, offset, 0), 80, "Nai64Patches Universal Overlay Patch");
         c.description = limit(field(v, offset, 1), 500, DEFAULT_DESCRIPTION);
         c.repositoryText = empty(field(v, offset, 2), "Nai64 repository");
         c.repositoryUrl = validUrl(field(v, offset, 3));
@@ -41,10 +43,18 @@ final class RuntimeOverlayConfig {
         c.opacity = integer(field(v, offset, 11), 35, 10, 100) / 100f;
         c.gravity = gravity(field(v, offset, 12));
         String controls = field(v, offset, 13);
-        c.keepAwake = controls.contains("keep");
-        c.fullscreen = controls.contains("fullscreen");
-        c.screenshots = controls.contains("screenshots");
+        c.keepAwake = hasToken(controls, "keep");
+        c.fullscreen = hasToken(controls, "fullscreen");
+        c.screenshots = hasToken(controls, "screenshots");
+        c.systemTime = hasToken(controls, "systemTime");
+        c.fps = hasToken(controls, "fps");
+        c.sessionTime = hasToken(controls, "sessionTime");
         return c;
+    }
+
+    private static boolean hasToken(String values, String token) {
+        for (String value : values.split(",")) if (token.equals(value)) return true;
+        return false;
     }
 
     private static String field(String[] values, int offset, int index) {

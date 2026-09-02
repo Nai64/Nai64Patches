@@ -1,0 +1,50 @@
+package nai64.universaloverlay.modules;
+
+import android.view.Choreographer;
+
+/** Samples approximate display frame cadence only while the FPS row is visible. */
+public final class FpsModule extends UniversalOverlayStatisticModule {
+    private int frames;
+    private Choreographer.FrameCallback frameCallback;
+    public FpsModule() {
+        super("fps", "FPS", "Approximate display frame cadence observed by the overlay.");
+        frameCallback = frameTimeNanos -> {
+            try {
+                frames++;
+                if (running) Choreographer.getInstance().postFrameCallback(frameCallback);
+            } catch (RuntimeException ignored) {
+                disableAfterFailure();
+            }
+        };
+    }
+    @Override protected String value() { return "Measuring…"; }
+    @Override public void start() {
+        if (running || valueView == null) return;
+        running = true;
+        frames = 0;
+        refresh();
+        Choreographer.getInstance().postFrameCallback(frameCallback);
+        handler.postDelayed(this::sample, 1000);
+    }
+    private void sample() {
+        if (!running) return;
+        try {
+            int sample = frames;
+            frames = 0;
+            if (valueView != null) valueView.setText("~" + sample + " FPS");
+            handler.postDelayed(this::sample, 1000);
+        } catch (RuntimeException ignored) {
+            disableAfterFailure();
+        }
+    }
+    @Override public void stop() {
+        try {
+            running = false;
+            handler.removeCallbacksAndMessages(null);
+            Choreographer.getInstance().removeFrameCallback(frameCallback);
+            if (valueView != null) valueView.setText("Disabled");
+        } catch (RuntimeException ignored) {
+            disableAfterFailure();
+        }
+    }
+}

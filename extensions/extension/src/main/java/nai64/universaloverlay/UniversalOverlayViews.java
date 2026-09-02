@@ -1,12 +1,12 @@
-package nai64.runtime;
+package nai64.universaloverlay;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 
 /** Shared view construction and styling primitives for the overlay controller. */
-final class RuntimeOverlayViews {
-    private RuntimeOverlayViews() { }
+final class UniversalOverlayViews {
+    private UniversalOverlayViews() { }
     static GradientDrawable background(int color, int stroke, boolean circle) {
         GradientDrawable drawable = new GradientDrawable();
         drawable.setColor(color);

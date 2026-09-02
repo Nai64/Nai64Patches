@@ -1,4 +1,4 @@
-package nai64.runtime;
+package nai64.universaloverlay;
 
 import android.app.Activity;
 import android.app.Application;
@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
@@ -17,6 +18,15 @@ import android.widget.ScrollView;
 import android.widget.CheckBox;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import nai64.universaloverlay.modules.FullscreenModule;
+import nai64.universaloverlay.modules.KeepAwakeModule;
+import nai64.universaloverlay.modules.ScreenshotsModule;
+import nai64.universaloverlay.modules.UniversalOverlayActivityModule;
+import nai64.universaloverlay.modules.UniversalOverlayStatisticModule;
+import nai64.universaloverlay.modules.FpsModule;
+import nai64.universaloverlay.modules.SessionTimeModule;
+import nai64.universaloverlay.modules.SystemTimeModule;
 
 import java.util.Map;
 import java.util.ArrayList;
@@ -31,25 +41,28 @@ import java.util.WeakHashMap;
  * generated Smali methods. The implementation deliberately uses platform Views only so it can run
  * in ordinary Android apps, Unity/Godot hosts, and game Activities without AppCompat coupling.
  */
-public final class RuntimeOverlayRuntime {
+public final class UniversalOverlayRuntime {
     private static final Map<Activity, Controller> CONTROLLERS = new WeakHashMap<>();
     private static boolean callbacksRegistered;
-    private static RuntimeOverlayConfig configuration;
+    private static UniversalOverlayConfig configuration;
     private static Boolean keepAwakeState;
     private static Boolean fullscreenState;
     private static Boolean screenshotsState;
+    private static final Map<String, Boolean> MODULE_STATES = new java.util.HashMap<>();
+    private static long sessionStartElapsed;
     private static boolean sharedButtonPositionInitialized;
     private static int sharedButtonX;
     private static int sharedButtonY;
 
-    private RuntimeOverlayRuntime() { }
+    private UniversalOverlayRuntime() { }
 
     /** Primary entry point, called once from Application.onCreate(). */
     public static synchronized void install(Application application, String encodedConfig) {
         if (application == null) return;
-        configuration = RuntimeOverlayConfig.decode(encodedConfig);
+        configuration = UniversalOverlayConfig.decode(encodedConfig);
+        if (sessionStartElapsed == 0) sessionStartElapsed = SystemClock.elapsedRealtime();
         if (!callbacksRegistered) {
-            application.registerActivityLifecycleCallbacks(new RuntimeOverlayLifecycle());
+            application.registerActivityLifecycleCallbacks(new UniversalOverlayLifecycle());
             callbacksRegistered = true;
         }
     }
@@ -57,15 +70,16 @@ public final class RuntimeOverlayRuntime {
     /** Compatibility fallback for APKs where Application.onCreate cannot be resolved. */
     public static synchronized void installActivity(Activity activity, String encodedConfig) {
         if (activity == null) return;
+        if (sessionStartElapsed == 0) sessionStartElapsed = SystemClock.elapsedRealtime();
         try {
             Application application = activity.getApplication();
             if (application != null) {
                 install(application, encodedConfig);
             } else {
-                configuration = RuntimeOverlayConfig.decode(encodedConfig);
+                configuration = UniversalOverlayConfig.decode(encodedConfig);
             }
         } catch (RuntimeException ignored) {
-            configuration = RuntimeOverlayConfig.decode(encodedConfig);
+            configuration = UniversalOverlayConfig.decode(encodedConfig);
         }
         showActivity(activity);
     }
@@ -74,7 +88,10 @@ public final class RuntimeOverlayRuntime {
         if (configuration == null) return;
         if (activity.isFinishing() || (android.os.Build.VERSION.SDK_INT >= 17 && activity.isDestroyed())) return;
         Controller existing = CONTROLLERS.get(activity);
-        if (existing != null) return;
+        if (existing != null) {
+            existing.applyRememberedStates();
+            return;
+        }
         Controller controller = null;
         try {
             controller = new Controller(activity, configuration);
@@ -105,17 +122,22 @@ public final class RuntimeOverlayRuntime {
         else if ("screenshots".equals(key)) screenshotsState = enabled;
     }
 
+    private static Boolean rememberedModuleState(String key) { return MODULE_STATES.get(key); }
+    private static void rememberModuleState(String key, boolean enabled) { MODULE_STATES.put(key, enabled); }
+
     /** Owns all views and state for exactly one Activity. */
     private static final class Controller {
         private final Activity activity;
-        private final RuntimeOverlayConfig config;
+        private final UniversalOverlayConfig config;
         private final FrameLayout root;
         private final TextView floatingButton;
         private final FrameLayout menuLayer;
         private final View menuScrim;
         private final LinearLayout panel;
         private final FrameLayout confirmationLayer;
-        private final List<RuntimeOverlayFeature> features = new ArrayList<>();
+        private final List<UniversalOverlayActivityModule> activityModules = new ArrayList<>();
+        private final List<UniversalOverlayStatisticModule> statistics = new ArrayList<>();
+        private final Map<String, CheckBox> featureControls = new java.util.HashMap<>();
         private final int originalWindowFlags;
         private final int originalSystemUi;
         private boolean menuVisible;
@@ -128,7 +150,7 @@ public final class RuntimeOverlayRuntime {
         private float startY;
         private boolean dragged;
 
-        Controller(Activity activity, RuntimeOverlayConfig config) {
+        Controller(Activity activity, UniversalOverlayConfig config) {
             this.activity = activity;
             this.config = config;
             Window window = activity.getWindow();
@@ -167,7 +189,8 @@ public final class RuntimeOverlayRuntime {
         void detach() {
             if (detached) return;
             detached = true;
-            restoreFeatures();
+            for (UniversalOverlayStatisticModule module : statistics) module.stopSafely();
+            restoreActivityModules();
             removeRoot();
         }
 
@@ -187,15 +210,17 @@ public final class RuntimeOverlayRuntime {
                     ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
         }
 
-        private void restoreFeatures() {
-            for (RuntimeOverlayFeature feature : features) {
+        private void restoreActivityModules() {
+            for (UniversalOverlayActivityModule feature : activityModules) {
                 try {
                     feature.restore(activity, originalWindowFlags, originalSystemUi);
                 } catch (RuntimeException ignored) {
-                    // A single incompatible window must not prevent other features or host cleanup.
+                    // A single incompatible Activity module must not prevent other modules or host cleanup.
                 }
             }
-            features.clear();
+            activityModules.clear();
+            statistics.clear();
+            featureControls.clear();
         }
 
         private FrameLayout.LayoutParams buttonParams() {
@@ -220,7 +245,7 @@ public final class RuntimeOverlayRuntime {
             button.setGravity(Gravity.CENTER);
             button.setAlpha(config.opacity);
             button.setContentDescription(config.buttonText);
-            button.setBackground(RuntimeOverlayViews.background(config.buttonBackground, config.outline, config.shape == 1));
+            button.setBackground(UniversalOverlayViews.background(config.buttonBackground, config.outline, config.shape == 1));
             button.setOnClickListener(v -> toggleMenu());
             button.setOnTouchListener(this::onButtonTouch);
             return button;
@@ -255,7 +280,7 @@ public final class RuntimeOverlayRuntime {
             // Consume unused panel area without preventing its child controls from receiving taps.
             menu.setOnTouchListener((v, event) -> true);
             menu.setPadding(dp(20), dp(18), dp(20), dp(12));
-            menu.setBackground(RuntimeOverlayViews.background(config.background, config.outline, false));
+            menu.setBackground(UniversalOverlayViews.background(config.background, config.outline, false));
             FrameLayout.LayoutParams panelParams = new FrameLayout.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT,
                     Gravity.CENTER);
@@ -274,10 +299,10 @@ public final class RuntimeOverlayRuntime {
             int maxControlHeight = Math.min(dp(280), (int) (activity.getResources().getDisplayMetrics().heightPixels * .45f));
             ScrollView scroll = new BoundedScrollView(activity, maxControlHeight);
             scroll.setFillViewport(true);
-            LinearLayout controls = new LinearLayout(activity);
-            controls.setOrientation(LinearLayout.VERTICAL);
-            addControls(controls);
-            scroll.addView(controls, new ScrollView.LayoutParams(-1, -2));
+            LinearLayout modules = new LinearLayout(activity);
+            modules.setOrientation(LinearLayout.VERTICAL);
+            addModules(modules);
+            scroll.addView(modules, new ScrollView.LayoutParams(-1, -2));
             LinearLayout.LayoutParams scrollParams = new LinearLayout.LayoutParams(-1, -2);
             scrollParams.topMargin = dp(12);
             menu.addView(scroll, scrollParams);
@@ -302,7 +327,7 @@ public final class RuntimeOverlayRuntime {
             LinearLayout card = new LinearLayout(activity);
             card.setOrientation(LinearLayout.VERTICAL);
             card.setPadding(dp(20), dp(18), dp(20), dp(12));
-            card.setBackground(RuntimeOverlayViews.background(config.background, config.outline, false));
+            card.setBackground(UniversalOverlayViews.background(config.background, config.outline, false));
             card.setClickable(true);
             card.setOnClickListener(v -> { });
 
@@ -332,36 +357,135 @@ public final class RuntimeOverlayRuntime {
             return layer;
         }
 
-        private void addControls(LinearLayout controls) {
-            if (config.keepAwake) addFeature(controls, new KeepAwakeFeature());
-            if (config.fullscreen) addFeature(controls, new FullscreenFeature());
-            if (config.screenshots) addFeature(controls, new ScreenshotsFeature());
+        private void addModules(LinearLayout modules) {
+            boolean hasStatistics = config.systemTime || config.fps || config.sessionTime;
+            boolean hasActivity = config.keepAwake || config.fullscreen || config.screenshots;
+            if (hasStatistics) {
+                addSectionLabel(modules, "Statistic modules");
+                if (config.systemTime) addStatistic(modules, new SystemTimeModule());
+                if (config.fps) addStatistic(modules, new FpsModule());
+                if (config.sessionTime) addStatistic(modules, new SessionTimeModule(sessionStartElapsed));
+            }
+            if (hasActivity) {
+                addSectionLabel(modules, "Activity modules");
+                if (config.fullscreen) addActivityModule(modules, new FullscreenModule());
+                if (config.keepAwake) addActivityModule(modules, new KeepAwakeModule());
+                if (config.screenshots) addActivityModule(modules, new ScreenshotsModule());
+            }
         }
 
-        private void addFeature(LinearLayout controls, RuntimeOverlayFeature feature) {
+        private void addSectionLabel(LinearLayout parent, String label) {
+            TextView separator = text("—  " + label + "  —", 13, config.outline);
+            separator.setAlpha(.65f);
+            separator.setGravity(Gravity.CENTER);
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(-1, dp(32));
+            params.topMargin = dp(4);
+            parent.addView(separator, params);
+        }
+
+        private void addActivityModule(LinearLayout controls, UniversalOverlayActivityModule feature) {
             final boolean initial;
             try {
                 Boolean remembered = rememberedState(feature.key());
                 initial = remembered != null ? remembered
                         : feature.initiallyEnabled(activity, originalWindowFlags, originalSystemUi);
                 if (remembered != null) {
-                    feature.setEnabled(activity, remembered, originalWindowFlags, originalSystemUi);
+                    if (!feature.setEnabled(activity, remembered, originalWindowFlags, originalSystemUi)) return;
                 }
             } catch (RuntimeException ignored) {
                 return;
             }
-            features.add(feature);
+            activityModules.add(feature);
             addControlRow(controls, feature, initial, checked -> {
                 try {
-                    rememberState(feature.key(), checked);
-                    feature.setEnabled(activity, checked, originalWindowFlags, originalSystemUi);
+                    boolean applied = feature.setEnabled(activity, checked, originalWindowFlags, originalSystemUi);
+                    rememberState(feature.key(), applied && checked);
+                    return applied;
                 } catch (RuntimeException ignored) {
                     // Feature controls are independent; a failure here must not crash the host.
+                    rememberState(feature.key(), false);
+                    return false;
                 }
             });
         }
 
-        private void addControlRow(LinearLayout parent, RuntimeOverlayFeature feature, boolean initial, final Toggle toggle) {
+        private void addStatistic(LinearLayout parent, UniversalOverlayStatisticModule module) {
+            String key = module.key();
+            String label = module.label();
+            String description = module.description();
+            statistics.add(module);
+            LinearLayout row = new LinearLayout(activity);
+            row.setOrientation(LinearLayout.HORIZONTAL);
+            row.setGravity(Gravity.CENTER_VERTICAL);
+            row.setPadding(0, dp(6), 0, dp(6));
+            row.setMinimumHeight(dp(64));
+
+            LinearLayout copy = new LinearLayout(activity);
+            copy.setOrientation(LinearLayout.VERTICAL);
+            TextView title = text(label, 16, config.outline);
+            title.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
+            copy.addView(title, new LinearLayout.LayoutParams(-1, -2));
+            TextView details = text(description, 13, config.outline);
+            details.setAlpha(.82f);
+            copy.addView(details, new LinearLayout.LayoutParams(-1, -2));
+            TextView valueView = text("Disabled", 12, config.outline);
+            valueView.setAlpha(.72f);
+            copy.addView(valueView, new LinearLayout.LayoutParams(-1, -2));
+            row.addView(copy, new LinearLayout.LayoutParams(0, -2, 1f));
+
+            CheckBox control = new CheckBox(activity);
+            control.setChecked(Boolean.TRUE.equals(rememberedModuleState(key)));
+            control.setContentDescription(label);
+            module.bind(valueView, control);
+            module.setEnabled(control.isChecked(), false);
+            control.setOnCheckedChangeListener((button, checked) -> {
+                rememberModuleState(key, checked);
+                boolean applied = module.setEnabled(checked, menuVisible);
+                if (!applied && checked) {
+                    rememberModuleState(key, false);
+                    module.setChecked(false);
+                    Toast.makeText(activity, label + " could not be enabled", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(activity, label + " is " + (checked ? "enabled" : "disabled"), Toast.LENGTH_SHORT).show();
+                }
+            });
+            row.addView(control, new LinearLayout.LayoutParams(-2, -2));
+            row.setClickable(true);
+            row.setOnClickListener(v -> control.setChecked(!control.isChecked()));
+            parent.addView(row, new LinearLayout.LayoutParams(-1, -2));
+        }
+
+        private void applyRememberedStates() {
+            if (detached) return;
+            for (UniversalOverlayActivityModule feature : activityModules) {
+                Boolean remembered = rememberedState(feature.key());
+                if (remembered == null) continue;
+                try {
+                    CheckBox control = featureControls.get(feature.key());
+                    if (!feature.setEnabled(activity, remembered, originalWindowFlags, originalSystemUi)) {
+                        rememberState(feature.key(), false);
+                        if (control != null) control.setChecked(false);
+                        continue;
+                    }
+                    if (control != null && control.isChecked() != remembered) {
+                        control.setChecked(remembered);
+                    }
+                } catch (RuntimeException ignored) {
+                    // A failed feature must not prevent the remaining controls from syncing.
+                }
+            }
+            for (UniversalOverlayStatisticModule module : statistics) {
+                Boolean remembered = rememberedModuleState(module.key());
+                if (remembered == null) continue;
+                module.setChecked(remembered);
+                if (!module.setEnabled(remembered, menuVisible)) {
+                    rememberModuleState(module.key(), false);
+                    module.setChecked(false);
+                }
+            }
+        }
+
+        private void addControlRow(LinearLayout parent, UniversalOverlayActivityModule feature, boolean initial, final Toggle toggle) {
             LinearLayout row = new LinearLayout(activity);
             row.setOrientation(LinearLayout.HORIZONTAL);
             row.setGravity(Gravity.CENTER_VERTICAL);
@@ -383,10 +507,20 @@ public final class RuntimeOverlayRuntime {
             CheckBox control = new CheckBox(activity);
             control.setChecked(initial);
             control.setContentDescription(feature.label());
-            control.setOnCheckedChangeListener((button, checked) -> {
-                toggle.changed(checked);
-                Toast.makeText(activity, feature.label() + " is " + (checked ? "enabled" : "disabled"), Toast.LENGTH_SHORT).show();
-            });
+            final android.widget.CompoundButton.OnCheckedChangeListener[] listener = new android.widget.CompoundButton.OnCheckedChangeListener[1];
+            listener[0] = (button, checked) -> {
+                boolean applied = toggle.changed(checked);
+                if (!applied) {
+                    control.setOnCheckedChangeListener(null);
+                    control.setChecked(!checked);
+                    control.setOnCheckedChangeListener(listener[0]);
+                    Toast.makeText(activity, feature.label() + " could not be " + (checked ? "enabled" : "disabled"), Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(activity, feature.label() + " is " + (checked ? "enabled" : "disabled"), Toast.LENGTH_SHORT).show();
+                }
+            };
+            control.setOnCheckedChangeListener(listener[0]);
+            featureControls.put(feature.key(), control);
             row.addView(control, new LinearLayout.LayoutParams(-2, -2));
             row.setClickable(true);
             row.setOnClickListener(v -> control.setChecked(!control.isChecked()));
@@ -406,7 +540,7 @@ public final class RuntimeOverlayRuntime {
             action.setGravity(Gravity.CENTER);
             action.setContentDescription(label);
             action.setOnClickListener(listener);
-            action.setBackground(RuntimeOverlayViews.selectableBackground(activity));
+            action.setBackground(UniversalOverlayViews.selectableBackground(activity));
             LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(0, dp(48), 1f);
             row.addView(action, params);
         }
@@ -416,6 +550,13 @@ public final class RuntimeOverlayRuntime {
             menuVisible = !menuVisible;
             if (menuVisible) {
                 menuLayer.setVisibility(View.VISIBLE);
+                for (UniversalOverlayStatisticModule module : statistics) {
+                    if (module.isEnabled() && !module.startSafely()) {
+                        rememberModuleState(module.key(), false);
+                        module.setChecked(false);
+                        Toast.makeText(activity, module.label() + " is unavailable", Toast.LENGTH_SHORT).show();
+                    }
+                }
                 menuScrim.animate().cancel();
                 menuScrim.setAlpha(0f);
                 menuScrim.animate().alpha(1f).setDuration(180).start();
@@ -436,6 +577,7 @@ public final class RuntimeOverlayRuntime {
             menuScrim.animate().alpha(0f).setDuration(180).withEndAction(() -> {
                 if (!menuVisible) {
                     menuLayer.setVisibility(View.GONE);
+                    for (UniversalOverlayStatisticModule module : statistics) module.stopSafely();
                 }
             }).start();
         }
@@ -497,9 +639,10 @@ public final class RuntimeOverlayRuntime {
         }
 
         private int dp(int value) { return (int) (value * activity.getResources().getDisplayMetrics().density + .5f); }
+
     }
 
-    private interface Toggle { void changed(boolean checked); }
+    private interface Toggle { boolean changed(boolean checked); }
 
     private static final class BoundedScrollView extends ScrollView {
         private final int maxHeight;
