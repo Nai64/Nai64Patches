@@ -39,18 +39,19 @@ private fun validate(title: String, description: String, label: String, url: Str
 }
 
 private fun injectMethod(owner: MutableClass, method: MutableMethod, config: String, application: Boolean) {
-    // Reserve two registers above the original frame. The first holds the receiver copy and the
-    // second holds the encoded configuration; using v0 here could overwrite a host method local.
+    // Reserve a register above the original frame for the encoded configuration. Using v0 here
+    // could overwrite a host method local. Keep the invoke in the ordinary two-register form:
+    // Morphe Manager versions using the older inline compiler have rejected invoke-range syntax
+    // even though the instruction is valid Smali.
     val temporaryBase = method.implementation?.registerCount
         ?: error("Cannot inject into ${owner.type}->${method.name} without an implementation")
-    val cloned = method.cloneMutable(additionalRegisters = 2)
+    val cloned = method.cloneMutable(additionalRegisters = 1)
     val type = if (application) "Landroid/app/Application;" else owner.type
     cloned.addInstructions(
         0,
         """
-        move-object v$temporaryBase, p0
-        const-string v${temporaryBase + 1}, "${StartupHooks.escapeSmali(config)}"
-        invoke-static/range {v$temporaryBase .. v${temporaryBase + 1}}, $RUNTIME_CLASS->${if (application) "install" else "installActivity"}($type;Ljava/lang/String;)V
+        const-string v$temporaryBase, "${StartupHooks.escapeSmali(config)}"
+        invoke-static {p0, v$temporaryBase}, $RUNTIME_CLASS->${if (application) "install" else "installActivity"}($type;Ljava/lang/String;)V
         """.trimIndent(),
     )
     owner.methods.remove(method)
