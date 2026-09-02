@@ -1,3 +1,9 @@
+## [1.1.0](https://github.com/Zanuaimi/Nai64Patches/compare/1.0.5...1.1.0) (2026-09-02)
+
+### New Features
+
+* harden runtime overlay interactions ([a44a990](https://github.com/Zanuaimi/Nai64Patches/commit/a44a990e0421689f5b3be7dfb036ad412d043ee9))
+
 ## [1.0.5](https://github.com/Zanuaimi/Nai64Patches/compare/1.0.4...1.0.5) (2026-09-02)
 
 ### Bug Fixes

@@ -1,7 +1,7 @@
 {
-  "created_at": "2026-09-02T06:04:00",
-  "description": "## [1.0.5](https://github.com/Zanuaimi/Nai64Patches/compare/1.0.4...1.0.5) (2026-09-02)\n\n### Bug Fixes\n\n* preserve bridge parameter registers ([52efaec](https://github.com/Zanuaimi/Nai64Patches/commit/52efaec8e408162b25183acf17075d59a6e7863e))",
-  "download_url": "https://github.com/Zanuaimi/Nai64Patches/releases/download/1.0.5/patches-1.0.5.mpp",
+  "created_at": "2026-09-02T06:20:58",
+  "description": "## [1.1.0](https://github.com/Zanuaimi/Nai64Patches/compare/1.0.5...1.1.0) (2026-09-02)\n\n### New Features\n\n* harden runtime overlay interactions ([a44a990](https://github.com/Zanuaimi/Nai64Patches/commit/a44a990e0421689f5b3be7dfb036ad412d043ee9))",
+  "download_url": "https://github.com/Zanuaimi/Nai64Patches/releases/download/1.1.0/patches-1.1.0.mpp",
   "signature_download_url": "",
-  "version": "1.0.5"
+  "version": "1.1.0"
 }
