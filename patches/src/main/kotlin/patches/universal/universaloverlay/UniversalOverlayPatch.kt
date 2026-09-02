@@ -15,7 +15,7 @@ import java.util.Base64
 import java.util.logging.Logger
 
 private const val RUNTIME_CLASS = "Lnai64/universaloverlay/UniversalOverlayRuntime;"
-private const val CONFIG_VERSION = "3"
+private const val CONFIG_VERSION = "4"
 private const val MAX_TITLE_CHARACTERS = 80
 private const val MAX_DESCRIPTION_CHARACTERS = 500
 private const val DEFAULT_DESCRIPTION =
@@ -126,14 +126,17 @@ val universalOverlayPatch = bytecodePatch(
     description =
         "A universal overlay for any supported APK, like ordinary Android apps and games from engines " +
             "such as Unity and Godot. This patch injects an overlay to patched APK. Modules provide runtime functionality inside the patched app: " +
-            "Statistic modules can show phone System Time, approximate FPS, and App Session Time; " +
-            "Activity modules can keep the screen awake, toggle fullscreen, or allow screenshots. " +
+            "Statistic modules can show phone System Time, approximate FPS, App Session Time, battery, " +
+            "memory, network traffic, device information, and temperature; Activity modules can keep " +
+            "the screen awake, toggle fullscreen, allow screenshots, adjust app brightness, choose " +
+            "rotation mode, or mute app audio. " +
             "These actions are performed while the app is running, from the overlay menu, rather " +
-            "than changing one specific APK's game or app logic. Hook modules, such as future " +
-            "runtime ads controls, are reserved for future releases. Modules are not included by " +
+            "than changing one specific APK's game or app logic. Hook modules currently include " +
+            "best-effort haptic feedback and animation controls. Modules are not included by " +
             "default; select the modules you want before patching, then activate them in the overlay. " +
             "The title, description, colors, button text, shape, size, opacity, position, statistic " +
-            "monitor placement, and repository action are customizable in morphe patch settings " + 
+            "monitor placement, panel size, column count, and repository action are customizable in " +
+            "morphe patch settings " +
             " " + 
             "The idea and initial works of this Universal Overlay Patch are from Zanuaimi",
     default = false,
@@ -246,6 +249,20 @@ val universalOverlayPatch = bytecodePatch(
         description = "Show enabled statistic monitors from statistic modules above or below the overlay button.",
         values = linkedMapOf("No stat monitors" to "none", "Above overlay button" to "top", "Below overlay button" to "bottom"),
     )
+    val monitorScale by stringOption(
+        title = "Settings to Modules - Monitor panel size",
+        default = "1",
+        key = "runtimeOverlayMonitorScale",
+        description = "Size multiplier for statistic monitor panels.",
+        values = linkedMapOf("0.75x" to "0.75", "1x" to "1", "1.25x" to "1.25", "1.5x" to "1.5", "2x" to "2"),
+    )
+    val monitorColumns by stringOption(
+        title = "Settings to Modules - Monitor columns",
+        default = "2",
+        key = "runtimeOverlayMonitorColumns",
+        description = "Number of statistic monitor columns.",
+        values = linkedMapOf("1 column" to "1", "2 columns" to "2", "3 columns" to "3"),
+    )
     val includeSystemTime by booleanOption(
         title = "Statistic modules - System Time",
         default = false,
@@ -263,6 +280,36 @@ val universalOverlayPatch = bytecodePatch(
         default = false,
         key = "runtimeOverlayIncludeSessionTime",
         description = "Include the in-process overlay session timer statistic module.",
+    )
+    val includeBatteryStatus by booleanOption(
+        title = "Statistic modules - Battery Status",
+        default = false,
+        key = "runtimeOverlayIncludeBatteryStatus",
+        description = "Include the current battery percentage statistic module.",
+    )
+    val includeAppMemory by booleanOption(
+        title = "Statistic modules - App Memory Usage",
+        default = false,
+        key = "runtimeOverlayIncludeAppMemory",
+        description = "Include approximate memory used by the current app process.",
+    )
+    val includeNetworkStatus by booleanOption(
+        title = "Statistic modules - Network Status",
+        default = false,
+        key = "runtimeOverlayIncludeNetworkStatus",
+        description = "Include incoming and outgoing app network traffic monitors.",
+    )
+    val includeDeviceInformation by booleanOption(
+        title = "Statistic modules - Device Information",
+        default = false,
+        key = "runtimeOverlayIncludeDeviceInformation",
+        description = "Include read-only phone and Android device information.",
+    )
+    val includeDeviceTemperature by booleanOption(
+        title = "Statistic modules - Device Temperature",
+        default = false,
+        key = "runtimeOverlayIncludeDeviceTemperature",
+        description = "Include battery-reported temperature in Celsius and Fahrenheit.",
     )
     val includeKeepAwake by booleanOption(
         title = "Activity modules - Keep screen awake",
@@ -282,6 +329,36 @@ val universalOverlayPatch = bytecodePatch(
         key = "runtimeOverlayIncludeScreenshots",
         description = "Include the allow-screenshots activity module.",
     )
+    val includeAppBrightness by booleanOption(
+        title = "Activity modules - App brightness",
+        default = false,
+        key = "runtimeOverlayIncludeAppBrightness",
+        description = "Include a per-Activity brightness slider.",
+    )
+    val includeRotationMode by booleanOption(
+        title = "Activity modules - Rotation mode",
+        default = false,
+        key = "runtimeOverlayIncludeRotationMode",
+        description = "Include a per-Activity rotation mode selector.",
+    )
+    val includeAppAudioMute by booleanOption(
+        title = "Activity modules - App audio mute",
+        default = false,
+        key = "runtimeOverlayIncludeAppAudioMute",
+        description = "Include a best-effort app audio mute toggle.",
+    )
+    val includeDisableHaptics by booleanOption(
+        title = "Hook modules - Disable haptic feedback / vibrations",
+        default = false,
+        key = "runtimeOverlayIncludeDisableHaptics",
+        description = "Include a best-effort runtime haptic and vibration suppression module.",
+    )
+    val includeDisableAnimations by booleanOption(
+        title = "Hook modules - Disable app animations",
+        default = false,
+        key = "runtimeOverlayIncludeDisableAnimations",
+        description = "Include a best-effort runtime animation suppression module.",
+    )
 
     execute {
         val logger = Logger.getLogger(this::class.java.name)
@@ -300,12 +377,16 @@ val universalOverlayPatch = bytecodePatch(
         val buttonTextColorValue = buttonTextColor.orEmpty().ifBlank { "#FF000000" }
         val buttonBackgroundValue = buttonBackgroundColor.orEmpty().ifBlank { "#FFFFFFFF" }
         val monitorPositionValue = statisticMonitorPosition.orEmpty().ifBlank { "bottom" }
+        val monitorScaleValue = monitorScale.orEmpty().ifBlank { "1" }
+        val monitorColumnsValue = monitorColumns.orEmpty().ifBlank { "2" }
         validate(
             titleValue, descriptionValue, labelValue, urlValue,
             backgroundValue, outlineValue, buttonTextColorValue, buttonBackgroundValue,
             shapeValue, positionValue, sizeValue, opacityValue,
         )
         check(monitorPositionValue in setOf("none", "top", "bottom"))
+        check(monitorScaleValue.toFloatOrNull() in listOf(.75f, 1f, 1.25f, 1.5f, 2f))
+        check(monitorColumnsValue in setOf("1", "2", "3"))
         check(buttonText.orEmpty().trim().length <= 3)
 
         val config = listOf(
@@ -317,12 +398,24 @@ val universalOverlayPatch = bytecodePatch(
                 if (includeSystemTime == true) "systemTime" else null,
                 if (includeFps == true) "fps" else null,
                 if (includeSessionTime == true) "sessionTime" else null,
+                if (includeBatteryStatus == true) "batteryStatus" else null,
+                if (includeAppMemory == true) "appMemory" else null,
+                if (includeNetworkStatus == true) "networkStatus" else null,
+                if (includeDeviceInformation == true) "deviceInformation" else null,
+                if (includeDeviceTemperature == true) "deviceTemperature" else null,
                 if (includeKeepAwake == true) "keep" else null,
                 if (includeFullscreen == true) "fullscreen" else null,
                 if (includeScreenshots == true) "screenshots" else null,
+                if (includeAppBrightness == true) "appBrightness" else null,
+                if (includeRotationMode == true) "rotationMode" else null,
+                if (includeAppAudioMute == true) "appAudioMute" else null,
+                if (includeDisableHaptics == true) "disableHaptics" else null,
+                if (includeDisableAnimations == true) "disableAnimations" else null,
             ).filterNotNull().joinToString(","),
             if (activateStatisticsOnLaunch == true) "1" else "0",
             monitorPositionValue,
+            monitorScaleValue,
+            monitorColumnsValue,
         ).joinToString("|") { encode(it) }
 
         // TODO(universal-overlay): Application.onCreate is the primary hook; the Activity path is
