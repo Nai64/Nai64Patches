@@ -15,7 +15,7 @@ import java.util.Base64
 import java.util.logging.Logger
 
 private const val RUNTIME_CLASS = "Lnai64/universaloverlay/UniversalOverlayRuntime;"
-private const val CONFIG_VERSION = "2"
+private const val CONFIG_VERSION = "3"
 private const val MAX_TITLE_CHARACTERS = 80
 private const val MAX_DESCRIPTION_CHARACTERS = 500
 private const val DEFAULT_DESCRIPTION =
@@ -264,6 +264,19 @@ val universalOverlayPatch = bytecodePatch(
         key = "runtimeOverlayIncludeSessionTime",
         description = "Include the in-process overlay session timer statistic module.",
     )
+    val activateStatisticsOnLaunch by booleanOption(
+        title = "Activate selected statistic modules on launch",
+        default = false,
+        key = "runtimeOverlayActivateStatisticsOnLaunch",
+        description = "Start selected statistic modules as soon as the app launches. Disabled by default.",
+    )
+    val statisticMonitorPosition by stringOption(
+        title = "Statistic monitor position",
+        default = "bottom",
+        key = "runtimeOverlayStatisticMonitorPosition",
+        description = "Show enabled statistic monitors above or below the overlay button.",
+        values = linkedMapOf("No stat monitors" to "none", "Above overlay button" to "top", "Below overlay button" to "bottom"),
+    )
 
     execute {
         val logger = Logger.getLogger(this::class.java.name)
@@ -281,11 +294,13 @@ val universalOverlayPatch = bytecodePatch(
         val outlineValue = outlineColor.orEmpty().ifBlank { "#FF55D6BE" }
         val buttonTextColorValue = buttonTextColor.orEmpty().ifBlank { "#FF000000" }
         val buttonBackgroundValue = buttonBackgroundColor.orEmpty().ifBlank { "#FFFFFFFF" }
+        val monitorPositionValue = statisticMonitorPosition.orEmpty().ifBlank { "bottom" }
         validate(
             titleValue, descriptionValue, labelValue, urlValue,
             backgroundValue, outlineValue, buttonTextColorValue, buttonBackgroundValue,
             shapeValue, positionValue, sizeValue, opacityValue,
         )
+        check(monitorPositionValue in setOf("none", "top", "bottom"))
         check(buttonText.orEmpty().trim().length <= 3)
 
         val config = listOf(
@@ -301,6 +316,8 @@ val universalOverlayPatch = bytecodePatch(
                 if (includeFullscreen == true) "fullscreen" else null,
                 if (includeScreenshots == true) "screenshots" else null,
             ).filterNotNull().joinToString(","),
+            if (activateStatisticsOnLaunch == true) "1" else "0",
+            monitorPositionValue,
         ).joinToString("|") { encode(it) }
 
         // TODO(universal-overlay): Application.onCreate is the primary hook; the Activity path is

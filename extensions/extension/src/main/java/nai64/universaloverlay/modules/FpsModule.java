@@ -31,7 +31,9 @@ public final class FpsModule extends UniversalOverlayStatisticModule {
         try {
             int sample = frames;
             frames = 0;
-            if (valueView != null) valueView.setText("~" + sample + " FPS");
+            String display = "~" + sample + " FPS";
+            if (valueView != null) valueView.setText(display);
+            if (monitorView != null) monitorView.setText(display);
             handler.postDelayed(this::sample, 1000);
         } catch (RuntimeException ignored) {
             disableAfterFailure();

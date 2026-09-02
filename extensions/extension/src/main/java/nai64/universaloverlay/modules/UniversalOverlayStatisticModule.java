@@ -5,13 +5,14 @@ import android.os.Looper;
 import android.widget.CheckBox;
 import android.widget.TextView;
 
-/** Base for low-frequency statistic modules that only update while visible and enabled. */
+/** Base for low-frequency statistic modules that update only while enabled. */
 public abstract class UniversalOverlayStatisticModule implements UniversalOverlayModule {
     private final String key;
     private final String label;
     private final String description;
     protected final Handler handler = new Handler(Looper.getMainLooper());
     protected TextView valueView;
+    protected TextView monitorView;
     private CheckBox control;
     protected boolean running;
     private boolean enabled;
@@ -41,6 +42,10 @@ public abstract class UniversalOverlayStatisticModule implements UniversalOverla
     public final void bind(TextView valueView, CheckBox control) {
         this.valueView = valueView;
         this.control = control;
+    }
+
+    public final void bindMonitor(TextView monitorView) {
+        this.monitorView = monitorView;
     }
 
     public final boolean isEnabled() { return enabled; }
@@ -81,6 +86,7 @@ public abstract class UniversalOverlayStatisticModule implements UniversalOverla
         running = false;
         handler.removeCallbacks(sampler);
         if (valueView != null) valueView.setText("Disabled");
+        if (monitorView != null) monitorView.setText("");
     }
 
     public final void setChecked(boolean checked) {
@@ -88,13 +94,19 @@ public abstract class UniversalOverlayStatisticModule implements UniversalOverla
     }
 
     protected final void refresh() {
-        if (valueView != null) valueView.setText(value());
+        String current = value();
+        if (valueView != null) valueView.setText(current);
+        if (monitorView != null) monitorView.setText(monitorValue());
     }
+
+    /** Compact value used by the optional floating monitor. */
+    protected String monitorValue() { return value(); }
 
     protected final void disableAfterFailure() {
         running = false;
         enabled = false;
         handler.removeCallbacksAndMessages(null);
         if (valueView != null) valueView.setText("Unavailable");
+        if (monitorView != null) monitorView.setText("Unavailable");
     }
 }

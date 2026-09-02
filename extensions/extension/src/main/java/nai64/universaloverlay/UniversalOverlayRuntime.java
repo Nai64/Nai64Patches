@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.Application;
 import android.content.Intent;
 import android.graphics.Typeface;
+import android.graphics.Paint;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.SystemClock;
@@ -138,6 +139,9 @@ public final class UniversalOverlayRuntime {
         private final List<UniversalOverlayActivityModule> activityModules = new ArrayList<>();
         private final List<UniversalOverlayStatisticModule> statistics = new ArrayList<>();
         private final Map<String, CheckBox> featureControls = new java.util.HashMap<>();
+        private final Map<String, TextView> statisticMonitors = new java.util.HashMap<>();
+        private final int monitorWidth;
+        private final int monitorHeight;
         private final int originalWindowFlags;
         private final int originalSystemUi;
         private boolean menuVisible;
@@ -158,6 +162,11 @@ public final class UniversalOverlayRuntime {
             originalSystemUi = window.getDecorView().getSystemUiVisibility();
             root = new FrameLayout(activity);
             root.setClipChildren(false);
+            Paint monitorPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+            monitorPaint.setTextSize(dp(12));
+            Paint.FontMetrics metrics = monitorPaint.getFontMetrics();
+            monitorWidth = (int) Math.ceil(monitorPaint.measureText("00:00:00")) + dp(24);
+            monitorHeight = (int) Math.ceil(metrics.bottom - metrics.top) + dp(12);
             floatingButton = createFloatingButton();
             menuLayer = new FrameLayout(activity);
             menuScrim = createMenuScrim();
@@ -180,6 +189,7 @@ public final class UniversalOverlayRuntime {
                 confirmationLayer.setVisibility(View.GONE);
                 activity.addContentView(root, contentLayoutParams());
                 attached = true;
+                root.post(this::updateMonitorLayout);
             } catch (RuntimeException failure) {
                 removeRoot();
                 throw failure;
@@ -221,6 +231,7 @@ public final class UniversalOverlayRuntime {
             activityModules.clear();
             statistics.clear();
             featureControls.clear();
+            statisticMonitors.clear();
         }
 
         private FrameLayout.LayoutParams buttonParams() {
@@ -249,6 +260,68 @@ public final class UniversalOverlayRuntime {
             button.setOnClickListener(v -> toggleMenu());
             button.setOnTouchListener(this::onButtonTouch);
             return button;
+        }
+
+        private void createStatisticMonitor(UniversalOverlayStatisticModule module) {
+            TextView monitor = text("", 12, config.outline);
+            monitor.setGravity(Gravity.CENTER);
+            monitor.setPadding(dp(6), 0, dp(6), 0);
+            monitor.setBackground(UniversalOverlayViews.background(config.background, config.outline, false));
+            monitor.setClickable(false);
+            monitor.setFocusable(false);
+            monitor.setFocusableInTouchMode(false);
+            monitor.setContentDescription(module.label());
+            monitor.setVisibility(View.GONE);
+            monitor.setOnTouchListener((v, event) -> false);
+            root.addView(monitor, new FrameLayout.LayoutParams(monitorWidth, monitorHeight));
+            statisticMonitors.put(module.key(), monitor);
+            module.bindMonitor(monitor);
+        }
+
+        private boolean shouldStatisticsRun() {
+            // Statistic monitors remain useful after the menu closes. Their own enabled state
+            // controls whether sampling runs, so disabled modules remain resource-free.
+            return true;
+        }
+
+        private void updateStatisticMonitor(UniversalOverlayStatisticModule module) {
+            TextView monitor = statisticMonitors.get(module.key());
+            if (monitor == null) return;
+            monitor.setVisibility(config.statisticMonitorPosition != 0 && module.isEnabled()
+                    ? View.VISIBLE : View.GONE);
+            monitor.setAlpha(menuVisible ? 0f : config.opacity);
+        }
+
+        private void updateMonitorLayout() {
+            int buttonX = Math.round(floatingButton.getX());
+            int buttonY = Math.round(floatingButton.getY());
+            int count = 0;
+            for (TextView monitor : statisticMonitors.values()) {
+                if (monitor.getVisibility() == View.VISIBLE) count++;
+            }
+            int spacing = dp(4);
+            int stackHeight = count * monitorHeight + Math.max(0, count - 1) * spacing;
+            int monitorStartY = config.statisticMonitorPosition == 1
+                    ? buttonY - spacing - stackHeight
+                    : buttonY + floatingButton.getHeight() + spacing;
+            monitorStartY = Math.max(0, Math.min(monitorStartY, Math.max(0, root.getHeight() - stackHeight)));
+            int monitorX = buttonX + (floatingButton.getWidth() - monitorWidth) / 2;
+            monitorX = Math.max(0, Math.min(monitorX, Math.max(0, root.getWidth() - monitorWidth)));
+            int y = monitorStartY;
+            for (TextView monitor : statisticMonitors.values()) {
+                if (monitor.getVisibility() != View.VISIBLE) continue;
+                monitor.setX(monitorX);
+                monitor.setY(y);
+                y += monitorHeight + spacing;
+            }
+        }
+
+        private void setMonitorAlpha(float alpha) {
+            for (TextView monitor : statisticMonitors.values()) {
+                if (monitor.getVisibility() == View.VISIBLE) {
+                    monitor.animate().alpha(alpha).setDuration(180).start();
+                }
+            }
         }
 
         private FrameLayout createMenuLayer() {
@@ -434,18 +507,23 @@ public final class UniversalOverlayRuntime {
             row.addView(copy, new LinearLayout.LayoutParams(0, -2, 1f));
 
             CheckBox control = new CheckBox(activity);
-            control.setChecked(Boolean.TRUE.equals(rememberedModuleState(key)));
+            Boolean remembered = rememberedModuleState(key);
+            control.setChecked(remembered != null ? remembered : config.activateStatisticsOnLaunch);
             control.setContentDescription(label);
             module.bind(valueView, control);
-            module.setEnabled(control.isChecked(), false);
+            createStatisticMonitor(module);
+            module.setEnabled(control.isChecked(), shouldStatisticsRun());
+            updateStatisticMonitor(module);
             control.setOnCheckedChangeListener((button, checked) -> {
                 rememberModuleState(key, checked);
-                boolean applied = module.setEnabled(checked, menuVisible);
+                boolean applied = module.setEnabled(checked, shouldStatisticsRun());
                 if (!applied && checked) {
                     rememberModuleState(key, false);
                     module.setChecked(false);
                     Toast.makeText(activity, label + " could not be enabled", Toast.LENGTH_SHORT).show();
                 } else {
+                    updateStatisticMonitor(module);
+                    root.post(this::updateMonitorLayout);
                     Toast.makeText(activity, label + " is " + (checked ? "enabled" : "disabled"), Toast.LENGTH_SHORT).show();
                 }
             });
@@ -478,10 +556,11 @@ public final class UniversalOverlayRuntime {
                 Boolean remembered = rememberedModuleState(module.key());
                 if (remembered == null) continue;
                 module.setChecked(remembered);
-                if (!module.setEnabled(remembered, menuVisible)) {
+                if (!module.setEnabled(remembered, shouldStatisticsRun())) {
                     rememberModuleState(module.key(), false);
                     module.setChecked(false);
                 }
+                updateStatisticMonitor(module);
             }
         }
 
@@ -556,6 +635,7 @@ public final class UniversalOverlayRuntime {
                         module.setChecked(false);
                         Toast.makeText(activity, module.label() + " is unavailable", Toast.LENGTH_SHORT).show();
                     }
+                    updateStatisticMonitor(module);
                 }
                 menuScrim.animate().cancel();
                 menuScrim.setAlpha(0f);
@@ -564,12 +644,16 @@ public final class UniversalOverlayRuntime {
                 hideMenuLayer();
             }
             floatingButton.animate().alpha(menuVisible ? 0f : config.opacity).setDuration(180).start();
+            setMonitorAlpha(menuVisible ? 0f : config.opacity);
+            root.post(this::updateMonitorLayout);
         }
 
         private void closeMenu() {
             menuVisible = false;
             hideMenuLayer();
             floatingButton.animate().alpha(config.opacity).setDuration(180).start();
+            setMonitorAlpha(config.opacity);
+            root.post(this::updateMonitorLayout);
         }
 
         private void hideMenuLayer() {
@@ -577,7 +661,7 @@ public final class UniversalOverlayRuntime {
             menuScrim.animate().alpha(0f).setDuration(180).withEndAction(() -> {
                 if (!menuVisible) {
                     menuLayer.setVisibility(View.GONE);
-                    for (UniversalOverlayStatisticModule module : statistics) module.stopSafely();
+                    for (UniversalOverlayStatisticModule module : statistics) updateStatisticMonitor(module);
                 }
             }).start();
         }
@@ -623,6 +707,8 @@ public final class UniversalOverlayRuntime {
                         // The idle state is intentionally translucent, but dragging must make
                         // the control fully visible so its position remains easy to track.
                         view.setAlpha(1f);
+                        setMonitorAlpha(1f);
+                        updateMonitorLayout();
                     }
                     return true;
                 case MotionEvent.ACTION_UP:
@@ -632,6 +718,8 @@ public final class UniversalOverlayRuntime {
                         sharedButtonX = Math.max(0, (int) view.getX());
                         sharedButtonY = Math.max(0, (int) view.getY());
                         view.animate().alpha(config.opacity).setDuration(180).start();
+                        setMonitorAlpha(config.opacity);
+                        updateMonitorLayout();
                     }
                     return true;
                 default: return true;

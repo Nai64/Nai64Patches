@@ -10,4 +10,7 @@ public final class SystemTimeModule extends UniversalOverlayStatisticModule {
     @Override protected String value() {
         return new SimpleDateFormat("dd MMM yyyy | HH:mm:ss | hh:mm:ss a", Locale.getDefault()).format(new Date());
     }
+    @Override protected String monitorValue() {
+        return new SimpleDateFormat("HH:mm", Locale.getDefault()).format(new Date());
+    }
 }
