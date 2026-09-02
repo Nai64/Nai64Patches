@@ -56,15 +56,17 @@ public final class RuntimeOverlayRuntime {
     }
 
     static synchronized void showActivity(Activity activity) {
+        if (configuration == null) return;
         if (activity.isFinishing() || (android.os.Build.VERSION.SDK_INT >= 17 && activity.isDestroyed())) return;
         if (CONTROLLERS.containsKey(activity)) return;
+        Controller controller = null;
         try {
-            Controller controller = new Controller(activity, configuration);
+            controller = new Controller(activity, configuration);
             CONTROLLERS.put(activity, controller);
             controller.attach();
         } catch (RuntimeException ignored) {
-            // TODO(runtime-overlay): replace this broad runtime guard with narrow diagnostics after
-            // the first APK compatibility matrix is available. Never let overlay failure crash host apps.
+            if (controller != null) controller.detach();
+            // Never let overlay setup failure crash the host application.
             CONTROLLERS.remove(activity);
         }
     }
@@ -89,6 +91,8 @@ public final class RuntimeOverlayRuntime {
         private final int originalSystemUi;
         private boolean menuVisible;
         private boolean fullyClosed;
+        private boolean attached;
+        private boolean detached;
         private float downX;
         private float downY;
         private float startX;
@@ -111,26 +115,42 @@ public final class RuntimeOverlayRuntime {
         }
 
         void attach() {
-            // TODO(runtime-overlay): verify this attachment strategy against SurfaceView and
-            // immersive-mode hosts before adding more rendering-specific behavior.
+            if (attached || detached) return;
             FrameLayout.LayoutParams rootParams = new FrameLayout.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
-            activity.addContentView(root, rootParams);
-            root.addView(menuLayer, new FrameLayout.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-            menuLayer.addView(menuScrim, new FrameLayout.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-            menuLayer.addView(panel, panel.getLayoutParams());
-            root.addView(floatingButton, buttonParams());
-            root.addView(confirmationLayer, new FrameLayout.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-            menuLayer.setVisibility(View.GONE);
-            confirmationLayer.setVisibility(View.GONE);
+            try {
+                activity.addContentView(root, rootParams);
+                root.addView(menuLayer, new FrameLayout.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+                menuLayer.addView(menuScrim, new FrameLayout.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+                menuLayer.addView(panel, panel.getLayoutParams());
+                root.addView(floatingButton, buttonParams());
+                root.addView(confirmationLayer, new FrameLayout.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+                menuLayer.setVisibility(View.GONE);
+                confirmationLayer.setVisibility(View.GONE);
+                attached = true;
+            } catch (RuntimeException failure) {
+                removeRoot();
+                throw failure;
+            }
         }
 
         void detach() {
+            if (detached) return;
+            detached = true;
             restoreFeatures();
-            if (root.getParent() instanceof ViewGroup) ((ViewGroup) root.getParent()).removeView(root);
+            removeRoot();
+        }
+
+        private void removeRoot() {
+            try {
+                if (root.getParent() instanceof ViewGroup) ((ViewGroup) root.getParent()).removeView(root);
+            } catch (RuntimeException ignored) {
+                // Cleanup must not propagate a host-specific view hierarchy failure.
+            }
+            attached = false;
         }
 
         private void restoreFeatures() {
