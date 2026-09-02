@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.view.View;
 
 final class FullscreenFeature implements RuntimeOverlayFeature {
+    @Override public String key() { return "fullscreen"; }
     private static final int FULLSCREEN_FLAGS = View.SYSTEM_UI_FLAG_LOW_PROFILE
             | View.SYSTEM_UI_FLAG_FULLSCREEN
             | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION

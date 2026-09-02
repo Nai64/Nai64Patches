@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.view.WindowManager;
 
 final class KeepAwakeFeature implements RuntimeOverlayFeature {
+    @Override public String key() { return "keepAwake"; }
     private static final int FLAG_KEEP_SCREEN_ON = WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON;
     @Override public String label() { return "Keep screen awake"; }
     @Override public String description() { return "Prevent the screen from turning off while this Activity is visible."; }
