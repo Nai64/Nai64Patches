@@ -1,3 +1,9 @@
+## [1.6.1](https://github.com/Zanuaimi/Nai64Patches/compare/1.6.0...1.6.1) (2026-09-02)
+
+### Bug Fixes
+
+* refine statistic monitor display ([edf2576](https://github.com/Zanuaimi/Nai64Patches/commit/edf2576a8b163482ac3e9e0f0431132c1715879c))
+
 ## [1.6.0](https://github.com/Zanuaimi/Nai64Patches/compare/1.5.3...1.6.0) (2026-09-02)
 
 ### New Features
