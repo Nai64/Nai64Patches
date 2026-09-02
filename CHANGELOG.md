@@ -1,3 +1,17 @@
+## [1.7.0](https://github.com/Zanuaimi/Nai64Patches/compare/1.6.3...1.7.0) (2026-09-02)
+
+### Bug Fixes
+
+* merge statistic toggle compilation fix ([32017b8](https://github.com/Zanuaimi/Nai64Patches/commit/32017b8380b3b69b4d916e4378cacdcc91d3ce97))
+* resolve statistic toggle compilation error ([8aac4e7](https://github.com/Zanuaimi/Nai64Patches/commit/8aac4e771b0e5b683c2597de28a1374115b10d6c))
+* restore original haptic view state ([f6e7912](https://github.com/Zanuaimi/Nai64Patches/commit/f6e79129511e022da731d8682f487e4c9078a98b))
+
+### New Features
+
+* add universal overlay modules ([8966468](https://github.com/Zanuaimi/Nai64Patches/commit/8966468da0687341119cac4cd6b4327e997b179d))
+* merge haptic restoration fix ([52c7328](https://github.com/Zanuaimi/Nai64Patches/commit/52c73285476dac44b6047d4c69ef58ba1a82df58))
+* merge universal overlay modules ([032ab15](https://github.com/Zanuaimi/Nai64Patches/commit/032ab15be9e6924d1d390183b3642ba367766e81))
+
 ## [1.6.3](https://github.com/Zanuaimi/Nai64Patches/compare/1.6.2...1.6.3) (2026-09-02)
 
 ### Bug Fixes

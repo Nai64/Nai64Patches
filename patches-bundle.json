@@ -1,7 +1,7 @@
 {
-  "created_at": "2026-09-02T18:55:50",
-  "description": "## [1.6.3](https://github.com/Zanuaimi/Nai64Patches/compare/1.6.2...1.6.3) (2026-09-02)\n\n### Bug Fixes\n\n* retry semantic release workflow ([4ca241b](https://github.com/Zanuaimi/Nai64Patches/commit/4ca241b8235ec8f6759a9ef8b71930ec799eefae))",
-  "download_url": "https://github.com/Zanuaimi/Nai64Patches/releases/download/1.6.3/patches-1.6.3.mpp",
+  "created_at": "2026-09-02T20:36:28",
+  "description": "## [1.7.0](https://github.com/Zanuaimi/Nai64Patches/compare/1.6.3...1.7.0) (2026-09-02)\n\n### Bug Fixes\n\n* merge statistic toggle compilation fix ([32017b8](https://github.com/Zanuaimi/Nai64Patches/commit/32017b8380b3b69b4d916e4378cacdcc91d3ce97))\n* resolve statistic toggle compilation error ([8aac4e7](https://github.com/Zanuaimi/Nai64Patches/commit/8aac4e771b0e5b683c2597de28a1374115b10d6c))\n* restore original haptic view state ([f6e7912](https://github.com/Zanuaimi/Nai64Patches/commit/f6e79129511e022da731d8682f487e4c9078a98b))\n\n### New Features\n\n* add universal overlay modules ([8966468](https://github.com/Zanuaimi/Nai64Patches/commit/8966468da0687341119cac4cd6b4327e997b179d))\n* merge haptic restoration fix ([52c7328](https://github.com/Zanuaimi/Nai64Patches/commit/52c73285476dac44b6047d4c69ef58ba1a82df58))\n* merge universal overlay modules ([032ab15](https://github.com/Zanuaimi/Nai64Patches/commit/032ab15be9e6924d1d390183b3642ba367766e81))",
+  "download_url": "https://github.com/Zanuaimi/Nai64Patches/releases/download/1.7.0/patches-1.7.0.mpp",
   "signature_download_url": "",
-  "version": "1.6.3"
+  "version": "1.7.0"
 }

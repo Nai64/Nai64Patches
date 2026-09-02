@@ -1,6 +1,6 @@
 {
   "NOTE": "Do NOT manually edit this file. This file is automatically updated when semantic release (release.yml) runs. Manually editing this file can break your releases and break third party tools that use this file.",
-  "version": "1.6.3",
+  "version": "1.7.0",
   "patches": [
     {
       "name": "Skip Consent Popup",
@@ -4468,7 +4468,7 @@
     },
     {
       "name": "Universal Overlay Patch (SPECIAL PATCH, Experimental)",
-      "description": "A universal overlay for any supported APK, like ordinary Android apps and games from engines such as Unity and Godot. This patch injects an overlay to patched APK. Modules provide runtime functionality inside the patched app: Statistic modules can show phone System Time, approximate FPS, and App Session Time; Activity modules can keep the screen awake, toggle fullscreen, or allow screenshots. These actions are performed while the app is running, from the overlay menu, rather than changing one specific APK's game or app logic. Hook modules, such as future runtime ads controls, are reserved for future releases. Modules are not included by default; select the modules you want before patching, then activate them in the overlay. The title, description, colors, button text, shape, size, opacity, position, statistic monitor placement, and repository action are customizable in morphe patch settings  The idea and initial works of this Universal Overlay Patch are from Zanuaimi",
+      "description": "A universal overlay for any supported APK, like ordinary Android apps and games from engines such as Unity and Godot. This patch injects an overlay to patched APK. Modules provide runtime functionality inside the patched app: Statistic modules can show phone System Time, approximate FPS, App Session Time, battery, memory, network traffic, device information, and temperature; Activity modules can keep the screen awake, toggle fullscreen, allow screenshots, adjust app brightness, choose rotation mode, or mute app audio. These actions are performed while the app is running, from the overlay menu, rather than changing one specific APK's game or app logic. Hook modules currently include best-effort haptic feedback and animation controls. Modules are not included by default; select the modules you want before patching, then activate them in the overlay. The title, description, colors, button text, shape, size, opacity, position, statistic monitor placement, panel size, column count, and repository action are customizable in morphe patch settings  The idea and initial works of this Universal Overlay Patch are from Zanuaimi",
       "default": false,
       "dependencies": [
         "ResourcePatch"
@@ -4637,6 +4637,34 @@
           }
         },
         {
+          "key": "runtimeOverlayMonitorScale",
+          "title": "Settings to Modules - Monitor panel size",
+          "description": "Size multiplier for statistic monitor panels.",
+          "required": false,
+          "type": "kotlin.String",
+          "default": "1",
+          "values": {
+            "0.75x": "0.75",
+            "1x": "1",
+            "1.25x": "1.25",
+            "1.5x": "1.5",
+            "2x": "2"
+          }
+        },
+        {
+          "key": "runtimeOverlayMonitorColumns",
+          "title": "Settings to Modules - Monitor columns",
+          "description": "Number of statistic monitor columns.",
+          "required": false,
+          "type": "kotlin.String",
+          "default": "2",
+          "values": {
+            "1 column": "1",
+            "2 columns": "2",
+            "3 columns": "3"
+          }
+        },
+        {
           "key": "runtimeOverlayIncludeSystemTime",
           "title": "Statistic modules - System Time",
           "description": "Include the phone system time statistic module.",
@@ -4664,6 +4692,51 @@
           "values": null
         },
         {
+          "key": "runtimeOverlayIncludeBatteryStatus",
+          "title": "Statistic modules - Battery Status",
+          "description": "Include the current battery percentage statistic module.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "runtimeOverlayIncludeAppMemory",
+          "title": "Statistic modules - App Memory Usage",
+          "description": "Include approximate memory used by the current app process.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "runtimeOverlayIncludeNetworkStatus",
+          "title": "Statistic modules - Network Status",
+          "description": "Include incoming and outgoing app network traffic monitors.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "runtimeOverlayIncludeDeviceInformation",
+          "title": "Statistic modules - Device Information",
+          "description": "Include read-only phone and Android device information.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "runtimeOverlayIncludeDeviceTemperature",
+          "title": "Statistic modules - Device Temperature",
+          "description": "Include battery-reported temperature in Celsius and Fahrenheit.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
           "key": "runtimeOverlayIncludeKeepScreenAwake",
           "title": "Activity modules - Keep screen awake",
           "description": "Include the keep-screen-awake activity module.",
@@ -4685,6 +4758,51 @@
           "key": "runtimeOverlayIncludeScreenshots",
           "title": "Activity modules - Allow screenshots",
           "description": "Include the allow-screenshots activity module.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "runtimeOverlayIncludeAppBrightness",
+          "title": "Activity modules - App brightness",
+          "description": "Include a per-Activity brightness slider.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "runtimeOverlayIncludeRotationMode",
+          "title": "Activity modules - Rotation mode",
+          "description": "Include a per-Activity rotation mode selector.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "runtimeOverlayIncludeAppAudioMute",
+          "title": "Activity modules - App audio mute",
+          "description": "Include a best-effort app audio mute toggle.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "runtimeOverlayIncludeDisableHaptics",
+          "title": "Hook modules - Disable haptic feedback / vibrations",
+          "description": "Include a best-effort runtime haptic and vibration suppression module.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "runtimeOverlayIncludeDisableAnimations",
+          "title": "Hook modules - Disable app animations",
+          "description": "Include a best-effort runtime animation suppression module.",
           "required": false,
           "type": "kotlin.Boolean",
           "default": false,
