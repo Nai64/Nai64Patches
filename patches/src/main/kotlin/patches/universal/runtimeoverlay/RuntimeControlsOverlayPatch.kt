@@ -1,6 +1,6 @@
 package patches.universal.runtimeoverlay
 
-import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
+import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.patch.booleanOption
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.patch.intOption
@@ -56,7 +56,10 @@ private fun injectMethod(owner: MutableClass, method: MutableMethod, config: Str
     val cloned = method.cloneMutable(additionalRegisters = 2)
     val originalReceiver = cloned.p0Register
     val type = if (application) "Landroid/app/Application;" else owner.type
-    cloned.addInstructions(
+    // Use the label-aware compiler entry point. Morphe Manager versions in the wild have
+    // rejected range instructions through addInstructions even though the same Smali is valid
+    // when compiled through addInstructionsWithLabels.
+    cloned.addInstructionsWithLabels(
         0,
         """
         move-object/from16 v$temporaryBase, v$originalReceiver
