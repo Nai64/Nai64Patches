@@ -98,7 +98,9 @@ private fun injectMethod(owner: MutableClass, method: MutableMethod, config: Str
         } else {
             // A non-standard Activity may omit invoke-super. Run at the end of onCreate so the
             // host still has a chance to initialize its content before overlay attachment.
-            instructions?.indexOfLast { it.toString().contains("return-void") } ?: 0
+            // Use the final existing instruction rather than relying on return-void text: some
+            // dex instruction proxy implementations do not expose that text consistently.
+            maxOf(0, (instructions?.size ?: 0) - 1)
         }
     }
     // Use the label-aware compiler entry point. Morphe Manager versions in the wild have
