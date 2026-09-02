@@ -8,6 +8,7 @@ import app.morphe.patcher.patch.stringOption
 import app.morphe.patcher.util.proxy.mutableTypes.MutableClass
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import patches.universal.ads.util.cloneMutable
+import patches.universal.ads.util.numberOfParameterRegisters
 import patches.universal.ads.util.p0Register
 import patches.universal.ui.StartupHooks
 import patches.universal.ui.findApplicationOnCreate
@@ -53,7 +54,10 @@ private fun injectMethod(owner: MutableClass, method: MutableMethod, config: Str
      */
     val temporaryBase = method.implementation?.registerCount
         ?: error("Cannot inject into ${owner.type}->${method.name} without an implementation")
-    val cloned = method.cloneMutable(additionalRegisters = 2)
+    // cloneMutable shifts parameters upward by the number of added registers. Reserve those
+    // parameter slots first, then reserve two registers for the receiver and configuration so
+    // neither temporary can alias p0/p1 after cloning.
+    val cloned = method.cloneMutable(additionalRegisters = method.numberOfParameterRegisters + 2)
     val originalReceiver = cloned.p0Register
     val type = if (application) "Landroid/app/Application;" else owner.type
     // Use the label-aware compiler entry point. Morphe Manager versions in the wild have
