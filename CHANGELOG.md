@@ -1,3 +1,9 @@
+## [1.4.1](https://github.com/Zanuaimi/Nai64Patches/compare/1.4.0...1.4.1) (2026-09-02)
+
+### Bug Fixes
+
+* constrain runtime overlay menu ([751c901](https://github.com/Zanuaimi/Nai64Patches/commit/751c9014f68b50cefd3ca694bc89ece32921d499))
+
 ## [1.4.0](https://github.com/Zanuaimi/Nai64Patches/compare/1.3.0...1.4.0) (2026-09-02)
 
 ### New Features
