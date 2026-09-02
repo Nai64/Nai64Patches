@@ -1,6 +1,6 @@
 {
   "NOTE": "Do NOT manually edit this file. This file is automatically updated when semantic release (release.yml) runs. Manually editing this file can break your releases and break third party tools that use this file.",
-  "version": "1.6.2",
+  "version": "1.6.3",
   "patches": [
     {
       "name": "Skip Consent Popup",
@@ -4467,8 +4467,8 @@
       "options": []
     },
     {
-      "name": "Universal Overlay Patch (Special Patch, Experimental)",
-      "description": "Adds a universal experimental in-app overlay for ordinary Android apps and game engines such as Unity and Godot. Modules provide runtime functionality inside the patched app: Statistic modules can show phone System Time, approximate FPS, and App Session Time; Activity modules can keep the screen awake, toggle fullscreen, or allow screenshots. These actions are performed while the app is running, from the overlay menu, rather than changing one specific APK's game or app logic. Hook modules, such as future runtime ad controls, are reserved for later releases. Modules are not included by default; select the modules you want before patching, then activate them in the overlay. The title, description, colors, button text, shape, size, opacity, position, statistic monitor placement, and repository action are customizable. The idea and initial works of this Universal Overlay Patch are from Zanuaimi.",
+      "name": "Universal Overlay Patch (SPECIAL PATCH, Experimental)",
+      "description": "A universal overlay for any supported APK, like ordinary Android apps and games from engines such as Unity and Godot. This patch injects an overlay to patched APK. Modules provide runtime functionality inside the patched app: Statistic modules can show phone System Time, approximate FPS, and App Session Time; Activity modules can keep the screen awake, toggle fullscreen, or allow screenshots. These actions are performed while the app is running, from the overlay menu, rather than changing one specific APK's game or app logic. Hook modules, such as future runtime ads controls, are reserved for future releases. Modules are not included by default; select the modules you want before patching, then activate them in the overlay. The title, description, colors, button text, shape, size, opacity, position, statistic monitor placement, and repository action are customizable in morphe patch settings  The idea and initial works of this Universal Overlay Patch are from Zanuaimi",
       "default": false,
       "dependencies": [
         "ResourcePatch"
@@ -4477,7 +4477,7 @@
       "options": [
         {
           "key": "runtimeOverlayTitle",
-          "title": "General — Overlay title",
+          "title": "General - Overlay title",
           "description": "Title shown in the overlay menu. Limited to 80 characters.",
           "required": false,
           "type": "kotlin.String",
@@ -4486,16 +4486,16 @@
         },
         {
           "key": "runtimeOverlayDescription",
-          "title": "General — Overlay description",
+          "title": "General - Overlay description",
           "description": "Description below the title. Limited to 500 characters.",
           "required": false,
           "type": "kotlin.String",
-          "default": "Welcome to the Nai64Patches Universal Overlay Patch. This experimental in-app overlay contains optional statistic, activity, and future hook modules. More may be added in future updates. The idea and initial works of this Universal Overlay Patch are from Zanuaimi.",
+          "default": "Welcome! This is Nai64Patches Universal Overlay Patch Menu. This experimental overlay patchcontains optional statistic, activity, and hook modules. More of them may be added in future updates. You will find modules below the description if you enabled some modules in this patch settings before patching this APK.The idea and initial works of this Universal Overlay Patch are from Zanuaimi",
           "values": null
         },
         {
           "key": "runtimeOverlayRepositoryText",
-          "title": "General — Repository button text",
+          "title": "General - Repository button text",
           "description": "Text of the always-present repository button.",
           "required": false,
           "type": "kotlin.String",
@@ -4504,7 +4504,7 @@
         },
         {
           "key": "runtimeOverlayRepositoryUrl",
-          "title": "General — Repository button URL",
+          "title": "General - Repository button URL",
           "description": "URL opened by the repository button.",
           "required": false,
           "type": "kotlin.String",
@@ -4513,7 +4513,7 @@
         },
         {
           "key": "runtimeOverlayBackgroundColor",
-          "title": "General — Overlay background color",
+          "title": "General - Overlay background color",
           "description": "Overlay background as #RRGGBB or #AARRGGBB.",
           "required": false,
           "type": "kotlin.String",
@@ -4522,7 +4522,7 @@
         },
         {
           "key": "runtimeOverlayOutlineColor",
-          "title": "General — Overlay outline color",
+          "title": "General - Overlay outline color",
           "description": "Overlay outline as #RRGGBB or #AARRGGBB.",
           "required": false,
           "type": "kotlin.String",
@@ -4531,7 +4531,7 @@
         },
         {
           "key": "runtimeOverlayButtonText",
-          "title": "General — Overlay button text",
+          "title": "General - Overlay button text",
           "description": "Button text. Maximum three characters.",
           "required": false,
           "type": "kotlin.String",
@@ -4540,7 +4540,7 @@
         },
         {
           "key": "runtimeOverlayButtonTextColor",
-          "title": "General — Overlay button text color",
+          "title": "General - Overlay button text color",
           "description": "Button text color.",
           "required": false,
           "type": "kotlin.String",
@@ -4549,7 +4549,7 @@
         },
         {
           "key": "runtimeOverlayButtonBackgroundColor",
-          "title": "General — Overlay button background color",
+          "title": "General - Overlay button background color",
           "description": "Button background color.",
           "required": false,
           "type": "kotlin.String",
@@ -4558,7 +4558,7 @@
         },
         {
           "key": "runtimeOverlayButtonShape",
-          "title": "General — Overlay button shape",
+          "title": "General - Overlay button shape",
           "description": "Button shape.",
           "required": false,
           "type": "kotlin.String",
@@ -4571,7 +4571,7 @@
         },
         {
           "key": "runtimeOverlayButtonSizeDp",
-          "title": "General — Overlay button size (dp)",
+          "title": "General - Overlay button size (dp)",
           "description": "Button size in density-independent pixels.",
           "required": false,
           "type": "kotlin.Int",
@@ -4580,7 +4580,7 @@
         },
         {
           "key": "runtimeOverlayButtonIdleOpacityPercent",
-          "title": "General — Overlay button idle opacity (%)",
+          "title": "General - Overlay button idle opacity (%)",
           "description": "Idle opacity from 10 to 100 percent.",
           "required": false,
           "type": "kotlin.Int",
@@ -4589,7 +4589,7 @@
         },
         {
           "key": "runtimeOverlayButtonPosition",
-          "title": "General — Overlay button position",
+          "title": "General - Overlay button position",
           "description": "Initial floating button position.",
           "required": false,
           "type": "kotlin.String",
@@ -4607,7 +4607,7 @@
         },
         {
           "key": "runtimeOverlayActivityNameOverride",
-          "title": "Advanced — Overlay Activity name override",
+          "title": "Advanced - Overlay Activity name override",
           "description": "Optional Activity fallback target.",
           "required": false,
           "type": "kotlin.String",
@@ -4616,7 +4616,7 @@
         },
         {
           "key": "runtimeOverlayActivateStatisticsOnLaunch",
-          "title": "Settings to Modules — Activate statistics on launch",
+          "title": "Settings to Modules - Activate statistics on launch",
           "description": "Start selected statistic modules as soon as the app launches. Disabled by default.",
           "required": false,
           "type": "kotlin.Boolean",
@@ -4625,8 +4625,8 @@
         },
         {
           "key": "runtimeOverlayStatisticMonitorPosition",
-          "title": "Settings to Modules — Statistic monitor position",
-          "description": "Show enabled statistic monitors above or below the overlay button.",
+          "title": "Settings to Modules - Statistic monitor position",
+          "description": "Show enabled statistic monitors from statistic modules above or below the overlay button.",
           "required": false,
           "type": "kotlin.String",
           "default": "bottom",
@@ -4638,7 +4638,7 @@
         },
         {
           "key": "runtimeOverlayIncludeSystemTime",
-          "title": "Statistic modules — System Time",
+          "title": "Statistic modules - System Time",
           "description": "Include the phone system time statistic module.",
           "required": false,
           "type": "kotlin.Boolean",
@@ -4647,7 +4647,7 @@
         },
         {
           "key": "runtimeOverlayIncludeFps",
-          "title": "Statistic modules — FPS",
+          "title": "Statistic modules - FPS",
           "description": "Include the approximate display frame-rate statistic module.",
           "required": false,
           "type": "kotlin.Boolean",
@@ -4656,7 +4656,7 @@
         },
         {
           "key": "runtimeOverlayIncludeSessionTime",
-          "title": "Statistic modules — App Session Time",
+          "title": "Statistic modules - App Session Time",
           "description": "Include the in-process overlay session timer statistic module.",
           "required": false,
           "type": "kotlin.Boolean",
@@ -4665,7 +4665,7 @@
         },
         {
           "key": "runtimeOverlayIncludeKeepScreenAwake",
-          "title": "Activity modules — Keep screen awake",
+          "title": "Activity modules - Keep screen awake",
           "description": "Include the keep-screen-awake activity module.",
           "required": false,
           "type": "kotlin.Boolean",
@@ -4674,7 +4674,7 @@
         },
         {
           "key": "runtimeOverlayIncludeFullscreen",
-          "title": "Activity modules — Fullscreen",
+          "title": "Activity modules - Fullscreen",
           "description": "Include the fullscreen activity module.",
           "required": false,
           "type": "kotlin.Boolean",
@@ -4683,7 +4683,7 @@
         },
         {
           "key": "runtimeOverlayIncludeScreenshots",
-          "title": "Activity modules — Allow screenshots",
+          "title": "Activity modules - Allow screenshots",
           "description": "Include the allow-screenshots activity module.",
           "required": false,
           "type": "kotlin.Boolean",
