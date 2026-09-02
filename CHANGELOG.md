@@ -1,3 +1,9 @@
+## [1.0.5](https://github.com/Zanuaimi/Nai64Patches/compare/1.0.4...1.0.5) (2026-09-02)
+
+### Bug Fixes
+
+* preserve bridge parameter registers ([52efaec](https://github.com/Zanuaimi/Nai64Patches/commit/52efaec8e408162b25183acf17075d59a6e7863e))
+
 ## [1.0.4](https://github.com/Zanuaimi/Nai64Patches/compare/1.0.3...1.0.4) (2026-09-02)
 
 ### Bug Fixes
