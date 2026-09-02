@@ -20,7 +20,7 @@ val unlockPlaybackSpeedPatch = bytecodePatch(
             setOf("R1"),
             true,
         )
-        // Genre.isSpokenWord is the underlying check R1 delegates to — also fold in case R1 is inlined
+        // Genre.isSpokenWord is the underlying check R1 delegates to - also fold in case R1 is inlined
         patched += foldBooleanGetterConst(
             "Lcom/bandcamp/fanapp/model/Genre;",
             setOf("isSpokenWord"),

@@ -111,7 +111,7 @@ val amoledThemePatch = resourcePatch(
             return v.matches(Regex("^#([0-9a-fA-F]{3}|[0-9a-fA-F]{4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$"))
         }
 
-        // 1) Style pass – values*/ night dirs + values-night colors.xml
+        // 1) Style pass  -  values*/ night dirs + values-night colors.xml
         resDir.walkTopDown()
             .filter { it.isFile && it.extension.equals("xml", ignoreCase = true) }
             .filter { it.parentFile?.name?.startsWith("values", ignoreCase = true) == true }

@@ -35,7 +35,7 @@ val spoofFixedLocationPatch = bytecodePatch(
         val lat = latStr.toDoubleOrNull()
         val lon = lonStr.toDoubleOrNull()
         if (lat == null || lon == null) {
-            logger.warning("Invalid coordinates lat=$latStr lon=$lonStr — expected decimal numbers. No changes applied.")
+            logger.warning("Invalid coordinates lat=$latStr lon=$lonStr  -  expected decimal numbers. No changes applied.")
             return@execute
         }
         // Use raw IEEE 754 bits for const-wide
