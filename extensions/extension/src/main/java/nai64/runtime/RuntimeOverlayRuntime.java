@@ -178,7 +178,7 @@ public final class RuntimeOverlayRuntime {
 
         private View createMenuScrim() {
             View scrim = new View(activity);
-            scrim.setBackgroundColor(0x99000000);
+            scrim.setBackgroundColor(0x55000000);
             scrim.setClickable(true);
             scrim.setFocusable(true);
             scrim.setOnClickListener(v -> closeMenu());
@@ -198,7 +198,7 @@ public final class RuntimeOverlayRuntime {
             menu.setPadding(dp(20), dp(18), dp(20), dp(12));
             menu.setBackground(RuntimeOverlayViews.background(config.background, config.outline, false));
             FrameLayout.LayoutParams panelParams = new FrameLayout.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT,
                     Gravity.CENTER);
             panelParams.setMargins(dp(20), dp(20), dp(20), dp(20));
             menu.setLayoutParams(panelParams);
@@ -212,13 +212,14 @@ public final class RuntimeOverlayRuntime {
             descriptionParams.topMargin = dp(8);
             menu.addView(description, descriptionParams);
 
-            ScrollView scroll = new ScrollView(activity);
+            int maxControlHeight = Math.min(dp(280), (int) (activity.getResources().getDisplayMetrics().heightPixels * .45f));
+            ScrollView scroll = new BoundedScrollView(activity, maxControlHeight);
             scroll.setFillViewport(true);
             LinearLayout controls = new LinearLayout(activity);
             controls.setOrientation(LinearLayout.VERTICAL);
             addControls(controls);
             scroll.addView(controls, new ScrollView.LayoutParams(-1, -2));
-            LinearLayout.LayoutParams scrollParams = new LinearLayout.LayoutParams(-1, 0, 1f);
+            LinearLayout.LayoutParams scrollParams = new LinearLayout.LayoutParams(-1, -2);
             scrollParams.topMargin = dp(12);
             menu.addView(scroll, scrollParams);
 
@@ -427,6 +428,20 @@ public final class RuntimeOverlayRuntime {
     }
 
     private interface Toggle { void changed(boolean checked); }
+
+    private static final class BoundedScrollView extends ScrollView {
+        private final int maxHeight;
+
+        BoundedScrollView(android.content.Context context, int maxHeight) {
+            super(context);
+            this.maxHeight = maxHeight;
+        }
+
+        @Override protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+            super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+            setMeasuredDimension(getMeasuredWidth(), Math.min(getMeasuredHeight(), maxHeight));
+        }
+    }
 
     private static float clamp(float value, float min, float max) { return Math.max(min, Math.min(value, max)); }
 
