@@ -726,8 +726,8 @@ public final class UniversalOverlayRuntime {
             updateStatisticMonitor(module);
             control.setOnCheckedChangeListener((button, checked) -> {
                 rememberModuleState(key, checked);
-                boolean applied = module.setEnabled(checked, shouldStatisticsRun());
-                if (!applied && checked) {
+                boolean toggleApplied = module.setEnabled(checked, shouldStatisticsRun());
+                if (!toggleApplied && checked) {
                     rememberModuleState(key, false);
                     module.setChecked(false);
                     Toast.makeText(activity, label + " could not be enabled", Toast.LENGTH_SHORT).show();
