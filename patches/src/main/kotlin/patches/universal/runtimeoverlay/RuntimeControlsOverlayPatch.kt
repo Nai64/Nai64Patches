@@ -8,6 +8,7 @@ import app.morphe.patcher.patch.stringOption
 import app.morphe.patcher.util.proxy.mutableTypes.MutableClass
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import patches.universal.ads.util.cloneMutable
+import patches.universal.ads.util.p0Register
 import patches.universal.ui.StartupHooks
 import patches.universal.ui.findApplicationOnCreate
 import java.util.Base64
@@ -39,19 +40,28 @@ private fun validate(title: String, description: String, label: String, url: Str
 }
 
 private fun injectMethod(owner: MutableClass, method: MutableMethod, config: String, application: Boolean) {
-    // Reserve a register above the original frame for the encoded configuration. Using v0 here
-    // could overwrite a host method local. Keep the invoke in the ordinary two-register form:
-    // Morphe Manager versions using the older inline compiler have rejected invoke-range syntax
-    // even though the instruction is valid Smali.
+    /*
+     * Keep the injected bridge independent of the target method's register layout. cloneMutable
+     * moves the original parameters into the expanded register frame, leaving the registers at
+     * the old registerCount free for our temporaries. Copy the receiver into the first temporary
+     * and place the configuration immediately after it so the bridge can use invoke-static/range.
+     *
+     * An ordinary invoke-static has a five-register, four-bit register-list encoding. It can
+     * therefore fail when a Unity or other game Activity has a large register frame and the new
+     * temporary register is above v15. The range form is valid in the supported Morphe inline
+     * compiler and addresses the high registers safely.
+     */
     val temporaryBase = method.implementation?.registerCount
         ?: error("Cannot inject into ${owner.type}->${method.name} without an implementation")
-    val cloned = method.cloneMutable(additionalRegisters = 1)
+    val cloned = method.cloneMutable(additionalRegisters = 2)
+    val originalReceiver = cloned.p0Register
     val type = if (application) "Landroid/app/Application;" else owner.type
     cloned.addInstructions(
         0,
         """
-        const-string v$temporaryBase, "${StartupHooks.escapeSmali(config)}"
-        invoke-static {p0, v$temporaryBase}, $RUNTIME_CLASS->${if (application) "install" else "installActivity"}($type;Ljava/lang/String;)V
+        move-object/from16 v$temporaryBase, v$originalReceiver
+        const-string v${temporaryBase + 1}, "${StartupHooks.escapeSmali(config)}"
+        invoke-static/range {v$temporaryBase .. v${temporaryBase + 1}}, $RUNTIME_CLASS->${if (application) "install" else "installActivity"}($type;Ljava/lang/String;)V
         """.trimIndent(),
     )
     owner.methods.remove(method)
