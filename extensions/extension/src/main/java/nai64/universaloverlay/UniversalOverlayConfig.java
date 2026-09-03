@@ -89,7 +89,7 @@ final class UniversalOverlayConfig {
         c.iconOutlineColor = color(customizationFormat ? field(v, offset, 23) : "", c.outline);
         c.iconType = customizationFormat && "image".equals(field(v, offset, 24)) ? "image" : "legacy";
         c.iconBold = !customizationFormat || "1".equals(field(v, offset, 25));
-        c.iconBackground2 = color(customizationFormat ? field(v, offset, 26) : "", 0xFF174A2E);
+        c.iconBackground2 = color(customizationFormat ? field(v, offset, 26) : "", 0xFF2E8B57);
         c.iconGradientAngle = customizationFormat ? integer(field(v, offset, 27), 30, 0, 360) : 30;
         c.customIconImage = customizationFormat ? field(v, offset, 28) : "";
         return c;

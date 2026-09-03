@@ -218,3 +218,5 @@ Before submitting changes:
 - run git diff --check;
 - test at least one ordinary app, one game, and one multi-Activity app when practical;
 - use a semantic feat:, fix:, or chore: commit so semantic release can recognize it.
+
+The idea and initial works of Universal Overlay Patch are from Zanuaimi / Noobite.
