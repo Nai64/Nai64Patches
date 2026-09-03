@@ -184,11 +184,23 @@ val universalOverlayPatch = bytecodePatch(
         key = "runtimeOverlayOutlineColor",
         description = "Overlay outline as #RRGGBB or #AARRGGBB.",
     )
+    val outlineWidth by intOption(
+        title = "UI - Menu outline width (dp)",
+        default = 2,
+        key = "runtimeOverlayOutlineWidthDp",
+        description = "Width of the menu, monitor, and confirmation outlines, from 1 to 8dp.",
+    )
     val buttonText by stringOption(
         title = "UI - Legacy icon text",
         default = "N64",
         key = "runtimeOverlayButtonText",
         description = "Text shown by the legacy icon. Maximum three characters.",
+    )
+    val iconBold by booleanOption(
+        title = "UI - Legacy icon bold text",
+        default = true,
+        key = "runtimeOverlayIconBold",
+        description = "Use bold text in the legacy icon. Enabled by default.",
     )
     val buttonTextColor by stringOption(
         title = "UI - Legacy icon text color",
@@ -207,6 +219,12 @@ val universalOverlayPatch = bytecodePatch(
         default = "#00AF7C",
         key = "runtimeOverlayIconBackgroundColor2",
         description = "Second color of the legacy icon gradient. Background 1 is the existing overlay button background color.",
+    )
+    val iconGradientAngle by intOption(
+        title = "UI - Legacy icon gradient angle (degrees)",
+        default = 30,
+        key = "runtimeOverlayIconGradientAngle",
+        description = "Gradient direction: 0 degrees runs top to bottom, 90 runs left to right, and 30 runs diagonally down and right. Values wrap through 360 degrees.",
     )
     val iconOutline by booleanOption(
         title = "UI - Icon outline",
@@ -232,24 +250,6 @@ val universalOverlayPatch = bytecodePatch(
         default = "",
         key = "runtimeOverlayCustomIconImage",
         description = "Select Custom image icon in UI - Icon type for this image input to be used. Use a trusted Base64 image encoder, such as https://base64.guru/converter/encode/image: choose a square PNG or JPEG, ideally 128x128 or 256x256 pixels, copy its encoded result, then paste it here instead of a file path. Example format: data:image/png;base64,<your encoded image data>. Transparent images are supported and other sizes are scaled proportionally. Leave blank to use the legacy icon; invalid or missing input falls back with a one-time launch notice.",
-    )
-    val iconBold by booleanOption(
-        title = "UI - Legacy icon bold text",
-        default = true,
-        key = "runtimeOverlayIconBold",
-        description = "Use bold text in the legacy icon. Enabled by default.",
-    )
-    val iconGradientAngle by intOption(
-        title = "UI - Legacy icon gradient angle (degrees)",
-        default = 30,
-        key = "runtimeOverlayIconGradientAngle",
-        description = "Gradient direction: 0 degrees runs top to bottom, 90 runs left to right, and 30 runs diagonally down and right. Values wrap through 360 degrees.",
-    )
-    val outlineWidth by intOption(
-        title = "UI - Menu outline width (dp)",
-        default = 2,
-        key = "runtimeOverlayOutlineWidthDp",
-        description = "Width of the menu, monitor, and confirmation outlines, from 1 to 8dp.",
     )
     val buttonShape by stringOption(
         title = "UI - Overlay button shape",
