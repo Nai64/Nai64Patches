@@ -1,16 +1,8 @@
-## [1.11.0](https://github.com/Zanuaimi/Nai64Patches/compare/1.10.0...1.11.0) (2026-09-03)
+## [1.43.1](https://github.com/Nai64/Nai64Patches/compare/1.43.0...1.43.1) (2026-09-03)
 
 ### Bug Fixes
 
-* add MADS and ironSourceAds wrapper instant reward ([f8882da](https://github.com/Zanuaimi/Nai64Patches/commit/f8882da3a40128c8e876ef3a028d460c50f110e8))
-* ads free rewards version default and wiring ([6341d32](https://github.com/Zanuaimi/Nai64Patches/commit/6341d325c033122731a3092df05a70bab09e8cdc))
-* expand relative component names in change package name ([f176650](https://github.com/Zanuaimi/Nai64Patches/commit/f176650a0938aa4c869e5c1c502f4fddb1ce4a9d))
-* skip unknown attrs in amoled theme to prevent encode crash ([03ee190](https://github.com/Zanuaimi/Nai64Patches/commit/03ee1904191e1cb99f942e4471733d4f71bfd7bc))
-
-### New Features
-
-* fake purchase callbacks and Purchase getter spoofs in free IAP ([731ec56](https://github.com/Zanuaimi/Nai64Patches/commit/731ec56cf5ad4ffc2ceebfea049dc219820e8248))
-* new custom startup sound patch ([a5a40dc](https://github.com/Zanuaimi/Nai64Patches/commit/a5a40dcb93df937862105791d12b48148444d1fc))
+* cover React Native AsyncStorage and billing bridges in unlock premium ([2738ad1](https://github.com/Nai64/Nai64Patches/commit/2738ad1a0863aae45c693f013d912d6a2a2aae5d))
 
 ## [1.43.0](https://github.com/Nai64/Nai64Patches/compare/1.42.0...1.43.0) (2026-09-03)
 
