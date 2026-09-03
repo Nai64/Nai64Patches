@@ -83,3 +83,5 @@ Keep the runtime fallback safe when a setting is missing or malformed.
 - New UI uses the overlay context and configured colors, not the host Activity theme.
 - Lifecycle, recreation, fully-close, and multi-Activity behavior remain isolated.
 - Use a semantic commit such as feat: add ..., fix: handle ..., or chore: ....
+
+The idea and initial works of Universal Overlay Patch are from Zanuaimi / Noobite.

@@ -235,7 +235,7 @@ val universalOverlayPatch = bytecodePatch(
     )
     val iconBackground2 by stringOption(
         title = "UI - Legacy icon background 2",
-        default = "#FF174A2E",
+        default = "#FF2E8B57",
         key = "runtimeOverlayIconBackgroundColor2",
         description = "Second color of the legacy icon gradient. Background 1 is the existing overlay button background color.",
     )
@@ -450,7 +450,7 @@ val universalOverlayPatch = bytecodePatch(
         val outlineWidthValue = (outlineWidth ?: 1).coerceIn(1, 8)
         val iconOutlineColorValue = iconOutlineColor.orEmpty().ifBlank { outlineValue }
         val iconTypeValue = iconType.orEmpty().ifBlank { "legacy" }
-        val iconBackground2Value = iconBackground2.orEmpty().ifBlank { "#FF174A2E" }
+        val iconBackground2Value = iconBackground2.orEmpty().ifBlank { "#FF2E8B57" }
         val iconGradientAngleValue = ((iconGradientAngle ?: 30) % 361 + 361) % 361
         val customIconImageValue = customIconImage.orEmpty().trim()
         val monitorPositionValue = statisticMonitorPosition.orEmpty().ifBlank { "bottom" }
