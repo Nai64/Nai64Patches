@@ -3,6 +3,7 @@ package nai64.universaloverlay;
 import android.app.Activity;
 import android.app.Application;
 import android.content.Intent;
+import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.Paint;
 import android.net.Uri;
