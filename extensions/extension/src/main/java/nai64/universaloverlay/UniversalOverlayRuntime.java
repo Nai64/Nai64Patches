@@ -513,7 +513,8 @@ public final class UniversalOverlayRuntime {
             descriptionParams.topMargin = dp(8);
             menu.addView(description, descriptionParams);
 
-            int maxControlHeight = Math.min(dp(280), (int) (activity.getResources().getDisplayMetrics().heightPixels * .45f));
+            int maxControlHeight = Math.max(dp(120), Math.min(dp(280),
+                    (int) (activity.getResources().getDisplayMetrics().heightPixels * .45f)) - dp(8));
             ScrollView scroll = new BoundedScrollView(activity, maxControlHeight);
             scroll.setFillViewport(true);
             LinearLayout modules = new LinearLayout(activity);
@@ -737,8 +738,25 @@ public final class UniversalOverlayRuntime {
             LinearLayout row = moduleRow(module.label(), module.description());
             Spinner spinner = new Spinner(activity);
             String[] labels = {"System", "Portrait", "Landscape"};
-            spinner.setAdapter(new ArrayAdapter<>(activity, android.R.layout.simple_spinner_item, labels));
-            ((ArrayAdapter<?>) spinner.getAdapter()).setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            ArrayAdapter<String> adapter = new ArrayAdapter<String>(activity, android.R.layout.simple_spinner_item, labels) {
+                @Override public View getView(int position, View convertView, android.view.ViewGroup parentView) {
+                    TextView view = (TextView) super.getView(position, convertView, parentView);
+                    view.setTextColor(config.outline);
+                    return view;
+                }
+                @Override public View getDropDownView(int position, View convertView, android.view.ViewGroup parentView) {
+                    TextView view = (TextView) super.getDropDownView(position, convertView, parentView);
+                    view.setTextColor(config.outline);
+                    view.setBackgroundColor(config.background);
+                    return view;
+                }
+            };
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            spinner.setAdapter(adapter);
+            spinner.setBackground(UniversalOverlayViews.background(config.background, config.outline, false));
+            if (android.os.Build.VERSION.SDK_INT >= 16) {
+                spinner.setPopupBackgroundDrawable(UniversalOverlayViews.background(config.background, config.outline, false));
+            }
             int current = remembered == null ? module.current(activity) : remembered;
             spinner.setSelection(current == android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT ? 1
                     : (current == android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE ? 2 : 0));
@@ -962,7 +980,7 @@ public final class UniversalOverlayRuntime {
             action.setContentDescription(label);
             action.setOnClickListener(listener);
             action.setBackground(UniversalOverlayViews.selectableBackground(activity));
-            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(0, dp(48), 1f);
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(0, dp(56), 1f);
             row.addView(action, params);
         }
 
