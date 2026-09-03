@@ -3,6 +3,7 @@ package patches.universal.universaloverlay
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.patch.booleanOption
 import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.imageOption
 import app.morphe.patcher.patch.intOption
 import app.morphe.patcher.patch.stringOption
 import app.morphe.patcher.util.proxy.mutableTypes.MutableClass
@@ -19,7 +20,7 @@ import java.util.Base64
 import java.util.logging.Logger
 
 private const val RUNTIME_CLASS = "Lnai64/universaloverlay/UniversalOverlayRuntime;"
-private const val CONFIG_VERSION = "9"
+private const val CONFIG_VERSION = "10"
 private const val MAX_CUSTOM_ICON_BYTES = 1024 * 1024
 private const val MAX_TITLE_CHARACTERS = 80
 private const val MAX_DESCRIPTION_CHARACTERS = 500
@@ -98,7 +99,6 @@ private fun validate(
     buttonBackground: String,
     outlineWidth: Int,
     iconOutlineColor: String,
-    iconType: String,
     iconBackground2: String,
     iconGradientAngle: Int,
     shape: String,
@@ -115,7 +115,6 @@ private fun validate(
     check(validColor(buttonTextColor) && validColor(buttonBackground))
     check(outlineWidth in 1..8)
     check(validColor(iconOutlineColor) && validColor(iconBackground2))
-    check(iconType in setOf("legacy", "image"))
     check(iconGradientAngle in 0..360)
     check(shape in setOf("circle", "squircle", "square"))
     check(position in setOf("topLeft", "topMiddle", "topRight", "centerLeft", "centerRight", "bottomLeft", "bottomMiddle", "bottomRight"))
@@ -190,8 +189,9 @@ val universalOverlayPatch = bytecodePatch(
         fullscreen, app brightness, and haptic controls. Modules are excluded and disabled by default;
         select them in Morphe settings before patching. Statistic modules show information, Activity modules
         control the current Activity, and Hook modules control internal app behavior, such as disabling
-        animations, through best-effort runtime changes. Custom icons support Base64 data, local image
-        paths, and HTTP(S) URLs. This is experimental and may not work on all apps.
+        animations, through best-effort runtime changes. A valid custom image automatically replaces the
+        legacy icon; empty or invalid image input falls back to the legacy icon. Custom images support
+        Base64 data, local image paths, and HTTP(S) URLs. This is experimental and may not work on all apps.
 
         The idea and initial works of this Universal Overlay Patch are from Zanuaimi / Noobite.
     """.trimIndent(),
@@ -298,18 +298,13 @@ val universalOverlayPatch = bytecodePatch(
         key = "runtimeOverlayIconOutlineColor",
         description = "Color used only when the icon outline is enabled.",
     )
-    val iconType by stringOption(
-        title = "UI - Icon type",
-        default = "legacy",
-        key = "runtimeOverlayIconType",
-        description = "Legacy icon uses up to three bold text characters and an optional gradient background. Custom image replaces it and supports transparent images from Base64, local paths, or HTTP(S) URLs. Invalid or missing images fall back to the legacy icon.",
-        values = linkedMapOf("Legacy text icon" to "legacy", "Custom image icon" to "image"),
-    )
-    val customIconImage by stringOption(
+    val customIconImage by imageOption(
         title = "UI - Custom image icon",
         default = "",
         key = "runtimeOverlayCustomIconImage",
-        description = "Select Custom image icon in UI - Icon type. Supported input: Base64 data, data:image/...;base64,..., a local image path, or an HTTP(S) image URL. Use a trusted Base64 encoder such as https://base64.guru/converter/encode/image. Prefer a transparent square PNG or JPEG around 128x128 or 256x256 pixels. Example: data:image/png;base64,<your encoded image data>. Images are embedded during patching and scaled proportionally. Leave blank or use invalid input to fall back to the legacy icon with a one-time launch notice.",
+        allowedExtensions = listOf("png", "jpg", "jpeg", "webp"),
+        recommendedSize = app.morphe.patcher.patch.ImageSize(128, 128),
+        description = "A valid image automatically replaces the legacy icon, including its outline. Supported input: an image file, Base64 data, data:image/...;base64,..., a local image path, or an HTTP(S) image URL. Use a trusted Base64 encoder such as https://base64.guru/converter/encode/image. Prefer a transparent square PNG or JPEG around 128x128 or 256x256 pixels. Example: data:image/png;base64,<your encoded image data>. Images are embedded during patching and scaled proportionally. Leave blank or use invalid input to fall back to the legacy icon with a one-time launch notice.",
     )
     val buttonShape by stringOption(
         title = "UI - Overlay button shape",
@@ -516,13 +511,16 @@ val universalOverlayPatch = bytecodePatch(
         val buttonBackgroundValue = buttonBackgroundColor.orEmpty().ifBlank { "#000083" }
         val outlineWidthValue = (outlineWidth ?: 1).coerceIn(1, 8)
         val iconOutlineColorValue = iconOutlineColor.orEmpty().ifBlank { "#FFFFFFFF" }
-        val iconTypeValue = iconType.orEmpty().ifBlank { "legacy" }
         val iconBackground2Value = iconBackground2.orEmpty().ifBlank { "#00AF7C" }
         val iconGradientAngleValue = ((iconGradientAngle ?: 30) % 361 + 361) % 361
-        val customIconImageValue = if (iconTypeValue == "image") {
-            resolveCustomIconImage(customIconImage.orEmpty().trim(), logger)
+        val customIconSourceValue = customIconImage.orEmpty().trim()
+        val resolvedCustomIconImage = resolveCustomIconImage(customIconSourceValue, logger)
+        // Keep invalid non-empty input distinguishable from an intentionally blank field so the
+        // runtime can use the legacy icon and show its one-time fallback notice.
+        val customIconImageValue = if (customIconSourceValue.isNotBlank() && resolvedCustomIconImage.isBlank()) {
+            "invalid"
         } else {
-            ""
+            resolvedCustomIconImage
         }
         val monitorPositionValue = statisticMonitorPosition.orEmpty().ifBlank { "bottom" }
         val monitorScaleValue = monitorScale.orEmpty().ifBlank { "1" }
@@ -532,7 +530,7 @@ val universalOverlayPatch = bytecodePatch(
         validate(
             titleValue, descriptionValue, labelValue, urlValue,
             backgroundValue, outlineValue, buttonTextColorValue, buttonBackgroundValue,
-            outlineWidthValue, iconOutlineColorValue, iconTypeValue, iconBackground2Value,
+            outlineWidthValue, iconOutlineColorValue, iconBackground2Value,
             iconGradientAngleValue,
             shapeValue, positionValue, sizeValue, opacityValue,
         )
@@ -576,7 +574,6 @@ val universalOverlayPatch = bytecodePatch(
             outlineWidthValue.toString(),
             if (iconOutline == true) "1" else "0",
             iconOutlineColorValue,
-            iconTypeValue,
             if (iconBold != false) "1" else "0",
             iconBackground2Value,
             iconGradientAngleValue.toString(),

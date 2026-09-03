@@ -5,7 +5,7 @@ import android.view.Gravity;
 
 /**
  * Decodes and validates overlay configuration inside the extension runtime.
- * The patch-building Kotlin code supplies version 9; older payloads remain supported.
+ * The patch-building Kotlin code supplies version 10; older payloads remain supported.
  */
 final class UniversalOverlayConfig {
     private static final String DEFAULT_DESCRIPTION =
@@ -34,11 +34,11 @@ final class UniversalOverlayConfig {
     static UniversalOverlayConfig decode(String encoded) {
         UniversalOverlayConfig c = new UniversalOverlayConfig();
         String[] values = encoded == null ? new String[0] : encoded.split("\\|", -1);
-        // Version 2/3/4/5/6/7/8/9 prepends a version field. Keep accepting the original 14-field format so an
+        // Version 2/3/4/5/6/7/8/9/10 prepends a version field. Keep accepting the original 14-field format so an
         // older generated patch remains safe when paired with this newer extension.
         String[] v = new String[33];
         for (int i = 0; i < v.length; i++) v[i] = i < values.length ? decodePart(values[i]) : "";
-        int offset = ("2".equals(v[0]) || "3".equals(v[0]) || "4".equals(v[0]) || "5".equals(v[0]) || "6".equals(v[0]) || "7".equals(v[0]) || "8".equals(v[0]) || "9".equals(v[0])) ? 1 : 0;
+        int offset = ("2".equals(v[0]) || "3".equals(v[0]) || "4".equals(v[0]) || "5".equals(v[0]) || "6".equals(v[0]) || "7".equals(v[0]) || "8".equals(v[0]) || "9".equals(v[0]) || "10".equals(v[0])) ? 1 : 0;
         c.title = limit(field(v, offset, 0), 80, "Nai64Patches Universal Overlay Patch");
         c.description = limit(field(v, offset, 1), 500, DEFAULT_DESCRIPTION);
         c.repositoryText = empty(field(v, offset, 2), "Nai64 repository");
@@ -71,7 +71,7 @@ final class UniversalOverlayConfig {
         c.disableHaptics = hasToken(controls, "disableHaptics");
         c.disableAnimations = hasToken(controls, "disableAnimations");
         c.activateStatisticsOnLaunch = "1".equals(field(v, offset, 14));
-        boolean currentFormat = "5".equals(v[0]) || "6".equals(v[0]) || "7".equals(v[0]) || "8".equals(v[0]) || "9".equals(v[0]);
+        boolean currentFormat = "5".equals(v[0]) || "6".equals(v[0]) || "7".equals(v[0]) || "8".equals(v[0]) || "9".equals(v[0]) || "10".equals(v[0]);
         c.enableMonitorsOnLaunch = currentFormat && "1".equals(field(v, offset, 15));
         int monitorPositionIndex = currentFormat ? 16 : 15;
         int monitorScaleIndex = currentFormat ? 17 : 16;
@@ -81,23 +81,33 @@ final class UniversalOverlayConfig {
                 : ("bottom".equals(monitorPosition) ? 2 : 0);
         c.monitorScale = floatValue(field(v, offset, monitorScaleIndex), 1f, .5f, 2f);
         c.monitorColumns = integer(field(v, offset, monitorColumnsIndex), 2, 1, 3);
-        boolean extendedFormat = "6".equals(v[0]) || "7".equals(v[0]) || "8".equals(v[0]) || "9".equals(v[0]);
+        boolean extendedFormat = "6".equals(v[0]) || "7".equals(v[0]) || "8".equals(v[0]) || "9".equals(v[0]) || "10".equals(v[0]);
         c.temperatureFormat = extendedFormat && "fahrenheit".equals(field(v, offset, 19)) ? "fahrenheit"
                 : (extendedFormat && "kelvin".equals(field(v, offset, 19)) ? "kelvin" : "celsius");
         c.timeFormat = extendedFormat && "24".equals(field(v, offset, 20)) ? "24" : "12";
-        boolean customizationFormat = "7".equals(v[0]) || "8".equals(v[0]) || "9".equals(v[0]);
+        boolean customizationFormat = "7".equals(v[0]) || "8".equals(v[0]) || "9".equals(v[0]) || "10".equals(v[0]);
+        boolean automaticIconFormat = "10".equals(v[0]);
         c.outlineWidth = customizationFormat ? integer(field(v, offset, 21), 1, 1, 8) : 1;
         c.iconOutline = customizationFormat && "1".equals(field(v, offset, 22));
         c.iconOutlineColor = color(customizationFormat ? field(v, offset, 23) : "", c.outline);
-        c.iconType = customizationFormat && "image".equals(field(v, offset, 24)) ? "image" : "legacy";
-        c.iconBold = !customizationFormat || "1".equals(field(v, offset, 25));
-        c.iconBackground2 = color(customizationFormat ? field(v, offset, 26) : "", 0xFF00AF7C);
-        c.iconGradientAngle = customizationFormat ? integer(field(v, offset, 27), 30, 0, 360) : 30;
-        c.customIconImage = customizationFormat ? field(v, offset, 28) : "";
+        int iconBoldIndex = automaticIconFormat ? 24 : 25;
+        int iconBackgroundIndex = automaticIconFormat ? 25 : 26;
+        int iconGradientIndex = automaticIconFormat ? 26 : 27;
+        int customIconIndex = automaticIconFormat ? 27 : 28;
+        int dragDurationIndex = automaticIconFormat ? 28 : 29;
+        int gradientToggleIndex = automaticIconFormat ? 29 : 30;
+        c.iconBold = !customizationFormat || "1".equals(field(v, offset, iconBoldIndex));
+        c.iconBackground2 = color(customizationFormat ? field(v, offset, iconBackgroundIndex) : "", 0xFF00AF7C);
+        c.iconGradientAngle = customizationFormat ? integer(field(v, offset, iconGradientIndex), 30, 0, 360) : 30;
+        c.customIconImage = customizationFormat ? field(v, offset, customIconIndex) : "";
+        c.iconType = c.customIconImage.isEmpty() ? "legacy" : "image";
         c.dragVisibilityDurationSeconds = customizationFormat
-                ? integer(field(v, offset, 29), 2, 1, 10) : 2;
-        // v8 had no gradient switch, so it retains the historical blended-icon behavior.
-        c.gradientBackground = !"9".equals(v[0]) || "1".equals(field(v, offset, 30));
+                ? integer(field(v, offset, dragDurationIndex), 2, 1, 10) : 2;
+        // v8 had no gradient toggle, v9 stores the legacy-format toggle, and v10 stores the
+        // automatic-icon-format toggle after the image payload.
+        c.gradientBackground = automaticIconFormat
+                ? "1".equals(field(v, offset, gradientToggleIndex))
+                : (!"9".equals(v[0]) || "1".equals(field(v, offset, gradientToggleIndex)));
         return c;
     }
 
