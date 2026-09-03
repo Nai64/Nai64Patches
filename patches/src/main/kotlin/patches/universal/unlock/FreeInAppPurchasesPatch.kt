@@ -85,10 +85,9 @@ val freeInAppPurchasesPatch = bytecodePatch(
             it.addInstructions(0, "return-void")
         }
 
-        // onPurchasesUpdated -> suppress recursion, just return OK without self-invoke
-        patchAll(Fingerprint(name = "onPurchasesUpdated"), "onPurchasesUpdated") {
-            it.addInstructions(0, "return-void")
-        }
+        // onPurchasesUpdated is intentionally left intact: the game grants items in its
+        // own listener, so suppressing it would prevent granting. Fake purchases are
+        // delivered via queryPurchasesAsync / launchBillingFlow callbacks below.
 
         // getBuyIntent -> OK bundle (legacy AIDL v5/v7)
         patchAll(Fingerprint(name = "getBuyIntent", returnType = "Landroid/os/Bundle;"), "getBuyIntent") {
@@ -110,10 +109,54 @@ val freeInAppPurchasesPatch = bytecodePatch(
             else if (it.returnType == "Z") it.addInstructions(0, "const/4 v0, 0x1\nreturn v0")
         }
 
-        // getPurchases / queryPurchases -> empty list or empty bundle
+        // getPurchases / queryPurchases -> empty list or empty bundle,
+        // or fire listener callback with a fake PURCHASED purchase (startup/resume grant path)
         for (qn in listOf("getPurchases", "queryPurchases", "queryPurchasesAsync", "queryPurchaseHistory", "queryPurchaseHistoryAsync", "queryPurchasesHistory")) {
             patchAll(Fingerprint(name = qn, custom = { m, c -> c.type.contains("BillingClient") || m.definingClass.contains("billing") || c.type.lowercase().contains("billing") }), qn) {
-                when {
+                val listenerIdx = it.parameterTypes.indexOfFirst { p -> p.contains("PurchasesResponseListener") || p.contains("PurchaseHistoryResponseListener") }
+                if (listenerIdx >= 0 && it.returnType == "V") {
+                    val isHistory = it.parameterTypes[listenerIdx].contains("History")
+                    val listenerReg = "p${listenerIdx + 1}"
+                    if (isHistory) {
+                        it.addInstructions(0, """
+                            invoke-static {}, Lcom/android/billingclient/api/BillingResult;->newBuilder()Lcom/android/billingclient/api/BillingResult${'$'}Builder;
+                            move-result-object v0
+                            const/4 v1, 0x0
+                            invoke-virtual {v0, v1}, Lcom/android/billingclient/api/BillingResult${'$'}Builder;->setResponseCode(I)Lcom/android/billingclient/api/BillingResult${'$'}Builder;
+                            move-result-object v0
+                            invoke-virtual {v0}, Lcom/android/billingclient/api/BillingResult${'$'}Builder;->build()Lcom/android/billingclient/api/BillingResult;
+                            move-result-object v0
+                            const-string v1, "{\"productId\":\"morphe_fake\",\"purchaseToken\":\"morphe_fake\",\"purchaseTime\":0,\"quantity\":1}"
+                            const-string v2, "morphe_fake"
+                            new-instance v3, Lcom/android/billingclient/api/PurchaseHistoryRecord;
+                            invoke-direct {v3, v1, v2}, Lcom/android/billingclient/api/PurchaseHistoryRecord;-><init>(Ljava/lang/String;Ljava/lang/String;)V
+                            new-instance v1, Ljava/util/ArrayList;
+                            invoke-direct {v1}, Ljava/util/ArrayList;-><init>()V
+                            invoke-virtual {v1, v3}, Ljava/util/ArrayList;->add(Ljava/lang/Object;)Z
+                            move-object v3, $listenerReg
+                            invoke-interface {v3, v0, v1}, Lcom/android/billingclient/api/PurchaseHistoryResponseListener;->onPurchaseHistoryResponse(Lcom/android/billingclient/api/BillingResult;Ljava/util/List;)V
+                            return-void
+                        """.trimIndent())
+                    } else {
+                        it.addInstructions(0, """
+                            invoke-static {}, Lcom/android/billingclient/api/BillingResult;->newBuilder()Lcom/android/billingclient/api/BillingResult${'$'}Builder;
+                            move-result-object v0
+                            const/4 v1, 0x0
+                            invoke-virtual {v0, v1}, Lcom/android/billingclient/api/BillingResult${'$'}Builder;->setResponseCode(I)Lcom/android/billingclient/api/BillingResult${'$'}Builder;
+                            move-result-object v0
+                            const-string v1, "{\"orderId\":\"morphe_fake\",\"packageName\":\"morphe_fake\",\"productId\":\"morphe_fake\",\"purchaseTime\":0,\"purchaseState\":1,\"purchaseToken\":\"morphe_fake\",\"quantity\":1,\"acknowledged\":true}"
+                            const-string v2, "morphe_fake"
+                            new-instance v3, Lcom/android/billingclient/api/Purchase;
+                            invoke-direct {v3, v1, v2}, Lcom/android/billingclient/api/Purchase;-><init>(Ljava/lang/String;Ljava/lang/String;)V
+                            new-instance v1, Ljava/util/ArrayList;
+                            invoke-direct {v1}, Ljava/util/ArrayList;-><init>()V
+                            invoke-virtual {v1, v3}, Ljava/util/ArrayList;->add(Ljava/lang/Object;)Z
+                            move-object v3, $listenerReg
+                            invoke-interface {v3, v0, v1}, Lcom/android/billingclient/api/PurchasesResponseListener;->onQueryPurchasesResponse(Lcom/android/billingclient/api/BillingResult;Ljava/util/List;)V
+                            return-void
+                        """.trimIndent())
+                    }
+                } else when {
                     it.returnType.contains("List") -> it.addInstructions(0, "invoke-static {}, Ljava/util/Collections;->emptyList()Ljava/util/List;\nmove-result-object v0\nreturn-object v0")
                     it.returnType == "Landroid/os/Bundle;" -> it.addInstructions(0, """
                         new-instance v0, Landroid/os/Bundle;
@@ -153,10 +196,29 @@ val freeInAppPurchasesPatch = bytecodePatch(
             }
         }
 
-        // consumePurchase / consumeAsync -> always succeed
+        // consumePurchase / consumeAsync -> fire listener callback with OK, else spoof return
         for (cn in listOf("consumePurchase", "consumeAsync", "consumePurchaseAsync")) {
             patchAll(Fingerprint(name = cn), cn) {
-                when {
+                val listenerIdx = it.parameterTypes.indexOfFirst { p -> p.contains("ConsumeResponseListener") }
+                if (listenerIdx == 1 && it.parameterTypes.size == 2 && it.parameterTypes[0].contains("ConsumeParams") && it.returnType == "V") {
+                    val listenerReg = "p${listenerIdx + 1}"
+                    // params are (ConsumeParams, ConsumeResponseListener); token is first param -> p1
+                    it.addInstructions(0, """
+                        invoke-static {}, Lcom/android/billingclient/api/BillingResult;->newBuilder()Lcom/android/billingclient/api/BillingResult${'$'}Builder;
+                        move-result-object v0
+                        const/4 v1, 0x0
+                        invoke-virtual {v0, v1}, Lcom/android/billingclient/api/BillingResult${'$'}Builder;->setResponseCode(I)Lcom/android/billingclient/api/BillingResult${'$'}Builder;
+                        move-result-object v0
+                        invoke-virtual {v0}, Lcom/android/billingclient/api/BillingResult${'$'}Builder;->build()Lcom/android/billingclient/api/BillingResult;
+                        move-result-object v0
+                        move-object v1, p1
+                        invoke-virtual {v1}, Lcom/android/billingclient/api/ConsumeParams;->getPurchaseToken()Ljava/lang/String;
+                        move-result-object v1
+                        move-object v2, $listenerReg
+                        invoke-interface {v2, v0, v1}, Lcom/android/billingclient/api/ConsumeResponseListener;->onConsumeResponse(Lcom/android/billingclient/api/BillingResult;Ljava/lang/String;)V
+                        return-void
+                    """.trimIndent())
+                } else when {
                     it.returnType.contains("BillingResult") -> it.addInstructions(0, okBillingResult)
                     it.returnType == "Landroid/os/Bundle;" -> it.addInstructions(0, """
                         new-instance v0, Landroid/os/Bundle;
@@ -174,7 +236,22 @@ val freeInAppPurchasesPatch = bytecodePatch(
         }
 
         patchAll(Fingerprint(name = "acknowledgePurchase"), "acknowledgePurchase") {
-            when {
+            val listenerIdx = it.parameterTypes.indexOfFirst { p -> p.contains("AcknowledgePurchaseResponseListener") }
+            if (listenerIdx == 1 && it.parameterTypes.size == 2 && it.parameterTypes[0].contains("AcknowledgePurchaseParams") && it.returnType == "V") {
+                val listenerReg = "p${listenerIdx + 1}"
+                it.addInstructions(0, """
+                    invoke-static {}, Lcom/android/billingclient/api/BillingResult;->newBuilder()Lcom/android/billingclient/api/BillingResult${'$'}Builder;
+                    move-result-object v0
+                    const/4 v1, 0x0
+                    invoke-virtual {v0, v1}, Lcom/android/billingclient/api/BillingResult${'$'}Builder;->setResponseCode(I)Lcom/android/billingclient/api/BillingResult${'$'}Builder;
+                    move-result-object v0
+                    invoke-virtual {v0}, Lcom/android/billingclient/api/BillingResult${'$'}Builder;->build()Lcom/android/billingclient/api/BillingResult;
+                    move-result-object v0
+                    move-object v1, $listenerReg
+                    invoke-interface {v1, v0}, Lcom/android/billingclient/api/AcknowledgePurchaseResponseListener;->onAcknowledgePurchaseResponse(Lcom/android/billingclient/api/BillingResult;)V
+                    return-void
+                """.trimIndent())
+            } else when {
                 it.returnType.contains("BillingResult") -> it.addInstructions(0, okBillingResult)
                 it.returnType == "I" -> it.addInstructions(0, "const/4 v0, 0x0\nreturn v0")
                 else -> it.addInstructions(0, "return-void")
@@ -204,6 +281,29 @@ val freeInAppPurchasesPatch = bytecodePatch(
         // getOriginalJson -> fake json
         patchAll(Fingerprint(name = "getOriginalJson", returnType = "Ljava/lang/String;"), "getOriginalJson") {
             it.addInstructions(0, "const-string v0, \"{\\\"productId\\\":\\\"morphe_fake\\\",\\\"purchaseToken\\\":\\\"fake\\\"}\"\nreturn-object v0")
+        }
+
+        // Purchase state getters -> look owned/valid (scoped to billing/purchase classes only;
+        // ProductDetails identity like getProductId is deliberately NOT spoofed so SKU lookup keeps working)
+        patchAll(Fingerprint(name = "getPurchaseState", returnType = "I", custom = { _, c -> val t = c.type.lowercase(); t.contains("billing") || t.contains("purchase") }), "Purchase.getPurchaseState") {
+            it.addInstructions(0, "const/4 v0, 0x1\nreturn v0")
+        }
+        patchAll(Fingerprint(name = "isAcknowledged", returnType = "Z", custom = { _, c -> val t = c.type.lowercase(); t.contains("billing") || t.contains("purchase") }), "Purchase.isAcknowledged") {
+            it.addInstructions(0, "const/4 v0, 0x1\nreturn v0")
+        }
+        patchAll(Fingerprint(name = "getQuantity", returnType = "I", custom = { _, c -> val t = c.type.lowercase(); t.contains("billing") || t.contains("purchase") }), "Purchase.getQuantity") {
+            it.addInstructions(0, "const/4 v0, 0x1\nreturn v0")
+        }
+        for (ps in listOf("getPurchaseToken", "getOrderId", "getSignature")) {
+            patchAll(Fingerprint(name = ps, returnType = "Ljava/lang/String;", custom = { _, c -> val t = c.type.lowercase(); t.contains("billing") || t.contains("purchase") }), "Purchase.$ps") {
+                if (it.parameterTypes.isEmpty()) it.addInstructions(0, "const-string v0, \"morphe_fake\"\nreturn-object v0")
+            }
+        }
+        patchAll(Fingerprint(name = "getProducts", custom = { m, c -> m.returnType.contains("List") && (c.type.lowercase().contains("billing") || c.type.lowercase().contains("purchase")) }), "Purchase.getProducts") {
+            it.addInstructions(0, "const-string v0, \"morphe_fake\"\ninvoke-static {v0}, Ljava/util/Collections;->singletonList(Ljava/lang/Object;)Ljava/util/List;\nmove-result-object v0\nreturn-object v0")
+        }
+        patchAll(Fingerprint(name = "getSkus", custom = { m, c -> m.returnType.contains("List") && (c.type.lowercase().contains("billing") || c.type.lowercase().contains("purchase")) }), "Purchase.getSkus") {
+            it.addInstructions(0, "const-string v0, \"morphe_fake\"\ninvoke-static {v0}, Ljava/util/Collections;->singletonList(Ljava/lang/Object;)Ljava/util/List;\nmove-result-object v0\nreturn-object v0")
         }
 
         patchAll(Fingerprint(name = "isFeatureSupported"), "isFeatureSupported") {
