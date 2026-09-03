@@ -6,7 +6,7 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val fakeInstallSourcePlayPatch = bytecodePatch(
-    name = "Fake Play Store Install Source",
+    name = "Fake Store Install Source",
     description = "Fakes the install source.",
     default = false,
 ) {

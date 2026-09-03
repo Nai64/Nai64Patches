@@ -103,6 +103,33 @@ val amoledThemePatch = resourcePatch(
         var updatedColorStateLists = 0
         var updatedDrawables = 0
 
+        // Collect app-namespace attribute names the resource encoder can resolve.
+        // Framework android: attrs are always safe; bare names (surface, colorSurface, ...)
+        // only resolve if declared in attrs.xml or already used in a style. Adding an
+        // unknown <item name> crashes encoding with "Unknown attribute name" (#66).
+        val knownAppAttrs = mutableSetOf<String>()
+        resDir.walkTopDown()
+            .filter { it.isFile && it.extension.equals("xml", ignoreCase = true) }
+            .filter { it.parentFile?.name?.startsWith("values", ignoreCase = true) == true }
+            .forEach { file ->
+                runCatching {
+                    val doc = javax.xml.parsers.DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(file)
+                    doc.documentElement.normalize()
+                    val attrs = doc.getElementsByTagName("attr")
+                    for (i in 0 until attrs.length) {
+                        val a = attrs.item(i) as? Element ?: continue
+                        a.getAttribute("name")?.takeIf { it.isNotEmpty() }?.let { knownAppAttrs.add(it) }
+                    }
+                    val items = doc.getElementsByTagName("item")
+                    for (i in 0 until items.length) {
+                        val it = items.item(i) as? Element ?: continue
+                        val n = it.getAttribute("name") ?: continue
+                        if (n.isNotEmpty() && !n.startsWith("android:")) knownAppAttrs.add(n)
+                    }
+                }
+            }
+        val skippedAttrs = mutableSetOf<String>()
+
         // Helper to check if value is a color we should replace (dark grey, not accent, not transparent)
         fun shouldReplaceColor(value: String): Boolean {
             val v = value.trim()
@@ -178,15 +205,27 @@ val amoledThemePatch = resourcePatch(
                                 if (!hasTarget) continue
                             }
 
+                            var styleChanged = false
                             for (attribute in targets) {
+                                if (!attribute.startsWith("android:") && attribute !in knownAppAttrs) {
+                                    skippedAttrs.add(attribute)
+                                    continue
+                                }
                                 ensureThemeItem(doc, style, attribute, amoled)
+                                styleChanged = true
                             }
                             // Auto-fix text contrast: ensure onSurface stays light on pure black
                             if (blackenSurfaces == true) {
-                                ensureThemeItem(doc, style, "colorOnSurface", "#FFFFFFFF")
-                                ensureThemeItem(doc, style, "android:colorOnSurface", "#FFFFFFFF")
+                                for (textAttr in listOf("colorOnSurface", "android:colorOnSurface")) {
+                                    if (!textAttr.startsWith("android:") && textAttr !in knownAppAttrs) {
+                                        skippedAttrs.add(textAttr)
+                                        continue
+                                    }
+                                    ensureThemeItem(doc, style, textAttr, "#FFFFFFFF")
+                                    styleChanged = true
+                                }
                             }
-                            changed = true
+                            if (styleChanged) changed = true
                         }
                         if (changed) updatedStyles++
                     }
@@ -245,6 +284,9 @@ val amoledThemePatch = resourcePatch(
                 }.onFailure { logger.warning("Could not parse $relativePath: ${it.message}") }
             }
 
+        if (skippedAttrs.isNotEmpty()) {
+            logger.info("Skipped ${skippedAttrs.size} unknown attribute(s) not declared by this app: ${skippedAttrs.sorted().joinToString(", ")}")
+        }
         if (updatedStyles > 0 || updatedColors > 0 || updatedColorStateLists > 0 || updatedDrawables > 0) {
             logger.info("Applied AMOLED $amoled to $updatedStyles dark theme style(s), $updatedColors night color file(s), $updatedColorStateLists ColorStateList(s), $updatedDrawables drawable(s)")
         } else {

@@ -349,6 +349,16 @@ internal object InMobiInterstitialShowFingerprint : Fingerprint(
     strings = listOf("com.inmobi", "IMInterstitial"),
 )
 
+internal object InMobiRewardedShowFingerprint : Fingerprint(
+    returnType = "V",
+    strings = listOf("com.inmobi", "InMobiInterstitial", "Rewarded"),
+)
+
+internal object InMobiIsReadyFingerprint : Fingerprint(
+    returnType = "Z",
+    strings = listOf("com.inmobi", "isReady"),
+)
+
 internal object MintegralInterstitialShowFingerprint : Fingerprint(
     returnType = "V",
     strings = listOf("com.mintegral", "MTGInterstitial"),
@@ -784,6 +794,55 @@ internal object IronSourceLevelPlayFullScreenShowAdFingerprint : Fingerprint(
     returnType = "V",
     parameters = listOf(
         "Landroid/app/Activity;",
+        "Ljava/lang/String;",
+    ),
+)
+
+internal object IronSourceAdsRewardedShowFingerprint : Fingerprint(
+    returnType = "V",
+    strings = listOf("com.unity3d.ironsourceads", "IronSourceAds"),
+)
+
+// Precise ironSourceAds Unity wrapper (com.unity3d.ironsourceads.rewarded.RewardedAd).
+// The strings-based fingerprint above misses versions whose show() body holds
+// neither constant.
+internal object IronSourceAdsRewardedShowPreciseFingerprint : Fingerprint(
+    definingClass = "Lcom/unity3d/ironsourceads/rewarded/RewardedAd;",
+    name = "show",
+    returnType = "V",
+    parameters = listOf("Landroid/app/Activity;"),
+)
+
+internal object IronSourceAdsRewardedIsReadyPreciseFingerprint : Fingerprint(
+    definingClass = "Lcom/unity3d/ironsourceads/rewarded/RewardedAd;",
+    name = "isReadyToShow",
+    returnType = "Z",
+    parameters = emptyList(),
+)
+
+// -- Miniclip MADS mediation (madsunityplugin + madsandroidsdk, Kotlin, unobfuscated) --
+
+internal object MadsWrapperShowAdFingerprint : Fingerprint(
+    definingClass = "Lcom/miniclip/madsunityplugin/MAdsAdsManagementWrapper;",
+    name = "showAd",
+    returnType = "Z",
+    parameters = listOf("I", "Ljava/lang/String;", "Ljava/util/HashMap;"),
+)
+
+internal object MadsWrapperIsReadyFingerprint : Fingerprint(
+    definingClass = "Lcom/miniclip/madsunityplugin/MAdsAdsManagementWrapper;",
+    name = "isReady",
+    returnType = "Z",
+    parameters = listOf("I"),
+)
+
+internal object MadsRvHandlerOnRewardedFingerprint : Fingerprint(
+    definingClass = "Lcom/miniclip/madsandroidsdk/base/adunit/RewardedVideosAdHandler;",
+    name = "onAdRewarded",
+    returnType = "V",
+    parameters = listOf(
+        "Lcom/miniclip/madsandroidsdk/base/MediationAdInfo;",
+        "Lcom/miniclip/madsandroidsdk/base/Reward;",
         "Ljava/lang/String;",
     ),
 )

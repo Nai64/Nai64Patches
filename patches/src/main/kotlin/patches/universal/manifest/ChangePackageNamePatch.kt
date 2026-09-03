@@ -35,6 +35,12 @@ val changePackageNamePatch = resourcePatch(
         title = "Update permissions",
         description = "Rewrite custom permission android:name that starts with the old package (e.g. C2D_MESSAGE) to the new package.",
     )
+    val updateComponents by booleanOption(
+        key = "updateComponents",
+        default = true,
+        title = "Update components",
+        description = "Expand relative activity/service/receiver/provider names to the original package so components keep resolving after the rename.",
+    )
 
     execute {
         val logger = Logger.getLogger(this::class.java.name)
@@ -145,7 +151,59 @@ val changePackageNamePatch = resourcePatch(
                 if (permsPatched > 0) logger.info("Updated $permsPatched permission entries")
             }
 
-            logger.info("Change Package Name finished: $original -> $newPackage (providers=$providersPatched, perms=$permsPatched)")
+            var componentsPatched = 0
+            if (updateComponents == true) {
+                // Relative component names (".MainActivity" or bare "MainActivity") resolve
+                // against the manifest package. After the rename they would point at the
+                // new package where no such class exists, so expand them to the original
+                // package. Fully-qualified names already point at real classes: leave them.
+                fun expand(name: String): String? {
+                    if (name.isEmpty()) return null
+                    return when {
+                        name.startsWith(".") -> original + name
+                        !name.contains(".") -> "$original.$name"
+                        else -> null
+                    }
+                }
+                for (tag in listOf("activity", "activity-alias", "service", "receiver", "provider")) {
+                    val nodes = manifest.getElementsByTagName(tag)
+                    for (i in 0 until nodes.length) {
+                        val el = nodes.item(i) as? org.w3c.dom.Element ?: continue
+                        val name = el.getAttributeNS(NS_ANDROID, "name").takeIf { it.isNotEmpty() }
+                            ?: el.getAttribute("android:name").takeIf { it.isNotEmpty() } ?: continue
+                        expand(name)?.let { expanded ->
+                            el.setAttributeNS(NS_ANDROID, "android:name", expanded)
+                            componentsPatched++
+                        }
+                        if (tag == "activity-alias") {
+                            val target = el.getAttributeNS(NS_ANDROID, "targetActivity").takeIf { it.isNotEmpty() }
+                                ?: el.getAttribute("android:targetActivity").takeIf { it.isNotEmpty() }
+                            if (target != null) {
+                                expand(target)?.let { expanded ->
+                                    el.setAttributeNS(NS_ANDROID, "android:targetActivity", expanded)
+                                    componentsPatched++
+                                }
+                            }
+                        }
+                    }
+                }
+                // Class references in <meta-data android:value> (e.g. androidx.startup
+                // InitializationProvider entries like ".androidx.lifecycle.ProcessLifecycleInitializer")
+                // resolve against the package too. Only leading-dot values are unambiguous
+                // class refs; anything else is left alone.
+                val metaDatas = manifest.getElementsByTagName("meta-data")
+                for (i in 0 until metaDatas.length) {
+                    val el = metaDatas.item(i) as? org.w3c.dom.Element ?: continue
+                    val value = el.getAttributeNS(NS_ANDROID, "value").takeIf { it.isNotEmpty() }
+                        ?: el.getAttribute("android:value").takeIf { it.isNotEmpty() } ?: continue
+                    if (!value.startsWith(".")) continue
+                    el.setAttributeNS(NS_ANDROID, "android:value", original + value)
+                    componentsPatched++
+                }
+                if (componentsPatched > 0) logger.info("Expanded $componentsPatched relative component name(s) to $original")
+            }
+
+            logger.info("Change Package Name finished: $original -> $newPackage (providers=$providersPatched, perms=$permsPatched, components=$componentsPatched)")
         }
     }
 }
