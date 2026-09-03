@@ -1,6 +1,6 @@
 {
   "NOTE": "Do NOT manually edit this file. This file is automatically updated when semantic release (release.yml) runs. Manually editing this file can break your releases and break third party tools that use this file.",
-  "version": "1.42.0",
+  "version": "1.43.0",
   "patches": [
     {
       "name": "Skip Consent Popup",
@@ -1159,10 +1159,10 @@
         {
           "key": "patchVersion",
           "title": "Patch version",
-          "description": "Choose the implementation to use. Each version is a snapshot  -  newer ones support more networks. If the latest does not work for your app, try an older version.",
+          "description": "Choose the implementation to use. Each version is a snapshot - newer ones support more networks. If the latest does not work for your app, try an older version.",
           "required": false,
           "type": "kotlin.String",
-          "default": "1.32.0",
+          "default": "1.41.0",
           "values": {
             "1.41.0": "1.41.0",
             "1.40.0": "1.40.0",
@@ -1637,6 +1637,15 @@
           "type": "kotlin.Boolean",
           "default": true,
           "values": null
+        },
+        {
+          "key": "updateComponents",
+          "title": "Update components",
+          "description": "Expand relative activity/service/receiver/provider names to the original package so components keep resolving after the rename.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": true,
+          "values": null
         }
       ]
     },
@@ -1715,6 +1724,36 @@
           "required": false,
           "type": "kotlin.Boolean",
           "default": false,
+          "values": null
+        }
+      ]
+    },
+    {
+      "name": "Custom Startup Sound",
+      "description": "Plays a custom sound once when the app starts.",
+      "default": false,
+      "dependencies": [
+        "ResourcePatch",
+        "ResourcePatch"
+      ],
+      "compatiblePackages": null,
+      "options": [
+        {
+          "key": "startupSoundSource",
+          "title": "Sound source",
+          "description": "Audio source: an http(s) URL, a local file path, or base64 (optionally prefixed with 'data:audio/mp3;base64,'). Keep short (<1 MB).",
+          "required": false,
+          "type": "kotlin.String",
+          "default": "",
+          "values": null
+        },
+        {
+          "key": "startupSoundVolume",
+          "title": "Volume (%)",
+          "description": "Playback volume 0-100.",
+          "required": false,
+          "type": "kotlin.Int",
+          "default": 100,
           "values": null
         }
       ]
@@ -2733,30 +2772,6 @@
       ]
     },
     {
-      "name": "Fake Play Store Install Source",
-      "description": "Fakes the install source.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": [
-        {
-          "key": "installerPackage",
-          "title": "Installer package",
-          "description": "Package name to report as installer.",
-          "required": false,
-          "type": "kotlin.String",
-          "default": "com.android.vending",
-          "values": {
-            "Play Store": "com.android.vending",
-            "Galaxy Store": "com.sec.android.app.samsungapps",
-            "Amazon Appstore": "com.amazon.venezia",
-            "Huawei AppGallery": "com.huawei.appmarket",
-            "Custom (use text)": "com.android.vending"
-          }
-        }
-      ]
-    },
-    {
       "name": "Fake Pointer Location",
       "description": "Reports pointer location as disabled via Settings so apps that check it stop doing so.",
       "default": false,
@@ -2868,6 +2883,30 @@
           "type": "kotlin.Int",
           "default": 128,
           "values": null
+        }
+      ]
+    },
+    {
+      "name": "Fake Store Install Source",
+      "description": "Fakes the install source.",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": [
+        {
+          "key": "installerPackage",
+          "title": "Installer package",
+          "description": "Package name to report as installer.",
+          "required": false,
+          "type": "kotlin.String",
+          "default": "com.android.vending",
+          "values": {
+            "Play Store": "com.android.vending",
+            "Galaxy Store": "com.sec.android.app.samsungapps",
+            "Amazon Appstore": "com.amazon.venezia",
+            "Huawei AppGallery": "com.huawei.appmarket",
+            "Custom (use text)": "com.android.vending"
+          }
         }
       ]
     },
