@@ -1,6 +1,6 @@
 {
   "NOTE": "Do NOT manually edit this file. This file is automatically updated when semantic release (release.yml) runs. Manually editing this file can break your releases and break third party tools that use this file.",
-  "version": "1.8.0",
+  "version": "1.8.1",
   "patches": [
     {
       "name": "Skip Consent Popup",
@@ -4671,6 +4671,31 @@
             "1 column": "1",
             "2 columns": "2",
             "3 columns": "3"
+          }
+        },
+        {
+          "key": "runtimeOverlayTemperatureFormat",
+          "title": "Settings to Modules - Temperature stat format",
+          "description": "Temperature unit used by the Device Temperature menu value and monitor.",
+          "required": false,
+          "type": "kotlin.String",
+          "default": "celsius",
+          "values": {
+            "Celsius": "celsius",
+            "Fahrenheit": "fahrenheit",
+            "Kelvin": "kelvin"
+          }
+        },
+        {
+          "key": "runtimeOverlayTimeFormat",
+          "title": "Settings to Modules - System time format",
+          "description": "Clock format used by the System Time menu value and monitor. Timezone is shown in the menu value.",
+          "required": false,
+          "type": "kotlin.String",
+          "default": "12",
+          "values": {
+            "12-hour clock": "12",
+            "24-hour clock": "24"
           }
         },
         {
