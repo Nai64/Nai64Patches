@@ -349,6 +349,16 @@ internal object InMobiInterstitialShowFingerprint : Fingerprint(
     strings = listOf("com.inmobi", "IMInterstitial"),
 )
 
+internal object InMobiRewardedShowFingerprint : Fingerprint(
+    returnType = "V",
+    strings = listOf("com.inmobi", "InMobiInterstitial", "Rewarded"),
+)
+
+internal object InMobiIsReadyFingerprint : Fingerprint(
+    returnType = "Z",
+    strings = listOf("com.inmobi", "isReady"),
+)
+
 internal object MintegralInterstitialShowFingerprint : Fingerprint(
     returnType = "V",
     strings = listOf("com.mintegral", "MTGInterstitial"),
@@ -786,6 +796,11 @@ internal object IronSourceLevelPlayFullScreenShowAdFingerprint : Fingerprint(
         "Landroid/app/Activity;",
         "Ljava/lang/String;",
     ),
+)
+
+internal object IronSourceAdsRewardedShowFingerprint : Fingerprint(
+    returnType = "V",
+    strings = listOf("com.unity3d.ironsourceads", "IronSourceAds"),
 )
 
 // -- Play In-app Updates --

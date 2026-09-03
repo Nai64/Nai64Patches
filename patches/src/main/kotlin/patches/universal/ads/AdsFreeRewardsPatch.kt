@@ -18,9 +18,9 @@ val adsFreeRewardsPatch = bytecodePatch(
 ) {
     val patchVersion by stringOption(
         key = "patchVersion",
-        default = "1.32.0",
+        default = "1.41.0",
         title = "Patch version",
-        description = "Choose the implementation to use. Each version is a snapshot  -  newer ones support more networks. If the latest does not work for your app, try an older version.",
+        description = "Choose the implementation to use. Each version is a snapshot - newer ones support more networks. If the latest does not work for your app, try an older version.",
         values = linkedMapOf(
             "1.41.0" to "1.41.0",
             "1.40.0" to "1.40.0",
@@ -71,6 +71,7 @@ val adsFreeRewardsPatch = bytecodePatch(
 
     execute {
         val logger = Logger.getLogger(this::class.java.name)
+        logger.info("Ads Free Rewards: patchVersion=$patchVersion strategy=$rewardStrategy instantReward=$instantReward")
         when (patchVersion) {
             "1.1.0" -> applyAdsFreeRewardsV110(logger)
             "1.15.0" -> applyAdsFreeRewardsV1150(logger)
@@ -143,6 +144,8 @@ private fun BytecodePatchContext.forceAdAvailability(logger: Logger): Int {
     patchIsReady("Yandex/MyTarget rewarded mediation isLoaded()", YandexMyTargetRewardedIsLoadedFingerprint)
     patchIsReady("Yandex/MyTarget interstitial mediation isLoaded()", YandexMyTargetInterstitialIsLoadedFingerprint)
     patchIsReady("Huawei Ads Kit RewardAd.isLoaded()", HuaweiRewardAdIsLoadedFingerprint)
+    patchIsReady("InMobi isReady()", InMobiIsReadyFingerprint)
+    patchIsReady("AdMob rewarded isLoaded()", AdMobRewardedShowFingerprint) // will fail gracefully, just to log
     return patched
 }
 
@@ -154,7 +157,7 @@ private fun BytecodePatchContext.applyAdsFreeRewardsV1190(logger: Logger, reward
     val useRustore = strategy == "auto" || strategy == "rustore"
     val useHuawei = strategy == "auto" || strategy == "huawei"
 
-    logger.info("Ads Free Rewards: strategy=$strategy instantReward=$instantReward fakeAdAvailability=${true} patchVersion=${"1.32.0"}")
+    logger.info("Ads Free Rewards: strategy=$strategy instantReward=$instantReward fakeAdAvailability=true")
 
     val hasMaxUnity = ShowRewardedAdFingerprint.methodOrNull != null &&
         IsRewardedAdReadyFingerprint.methodOrNull != null
@@ -171,10 +174,13 @@ private fun BytecodePatchContext.applyAdsFreeRewardsV1190(logger: Logger, reward
     val hasHuawei = HuaweiRewardAdIsLoadedFingerprint.methodOrNull != null &&
         HuaweiRewardAdShowFingerprint.methodOrNull != null
     val hasAdMob = AdMobRewardedShowFingerprint.methodOrNull != null
+    val hasInMobi = InMobiInterstitialShowFingerprint.methodOrNull != null || InMobiRewardedShowFingerprint.methodOrNull != null
+    val hasInMobiRewarded = InMobiRewardedShowFingerprint.methodOrNull != null
+    val hasIronSourceAds = IronSourceAdsRewardedShowFingerprint.methodOrNull != null
 
-    logger.info("Ads Free Rewards: detected SDKs  -  MAX Unity=$hasMaxUnity native MAX=$hasNativeMax UnityAds=$hasUnityAds UnityAdsV4=$hasUnityAdsV4 LevelPlay=$hasLevelPlay ironSourceBridge=$hasIronSourceUnityBridge MyTarget=$hasMyTarget Yandex=$hasYandexUnityRewarded Huawei=$hasHuawei AdMob=$hasAdMob")
+    logger.info("Ads Free Rewards: detected SDKs  -  MAX Unity=$hasMaxUnity native MAX=$hasNativeMax UnityAds=$hasUnityAds UnityAdsV4=$hasUnityAdsV4 LevelPlay=$hasLevelPlay ironSourceBridge=$hasIronSourceUnityBridge MyTarget=$hasMyTarget Yandex=$hasYandexUnityRewarded Huawei=$hasHuawei AdMob=$hasAdMob InMobi=$hasInMobi InMobiRewarded=$hasInMobiRewarded IronSourceAds=$hasIronSourceAds")
 
-    if (!hasMaxUnity && !hasNativeMax && !hasUnityAds && !hasUnityAdsV4 && !hasLevelPlay && !hasIronSourceUnityBridge && !hasMyTarget && !hasYandexUnityRewarded && !hasHuawei && !hasAdMob) {
+    if (!hasMaxUnity && !hasNativeMax && !hasUnityAds && !hasUnityAdsV4 && !hasLevelPlay && !hasIronSourceUnityBridge && !hasMyTarget && !hasYandexUnityRewarded && !hasHuawei && !hasAdMob && !hasInMobiRewarded && !hasIronSourceAds) {
         logger.warning("Ads Free Rewards: no supported ad SDK found for reward strategy $strategy  -  no changes applied")
         return
     }
@@ -213,6 +219,8 @@ private fun BytecodePatchContext.applyAdsFreeRewardsV1190(logger: Logger, reward
     }
     if (applyMaxUnityStrategy(logger, useMax, instantReward)) return
     applyNativeMaxStrategy(logger, useMax, instantReward)
+    applyInMobiRewardedStrategy(logger, useMax, instantReward)
+    applyIronSourceAdsStrategy(logger, useIronSource, instantReward)
     applyAdMobRewardedStrategy(logger, useMax, instantReward)
     applyLevelPlayStrategy(logger, useIronSource)
     if (applyIronSourceBridgeStrategy(logger, useIronSource, instantReward)) return
@@ -278,6 +286,37 @@ private fun BytecodePatchContext.applyYandexWrapperStrategy(logger: Logger) {
         return-void
     """.trimIndent())
     logger.info("Ads Free Rewards: RuStore / Yandex Unity rewarded patch succeeded")
+}
+
+private fun BytecodePatchContext.applyInMobiRewardedStrategy(logger: Logger, useMax: Boolean, instantReward: Boolean?) {
+    if (instantReward != true) return
+    val inMobiShow = InMobiInterstitialShowFingerprint.methodOrNull ?: InMobiRewardedShowFingerprint.methodOrNull ?: return
+    // InMobi mediated via AppLovin MAX - patching the show to instantly reward covers both interstitial and rewarded
+    // Use the rewarded fingerprint if available, otherwise fallback to interstitial
+    val target = InMobiRewardedShowFingerprint.methodOrNull ?: InMobiInterstitialShowFingerprint.methodOrNull ?: return
+    try {
+        target.addInstructions(0, """
+            const/4 v0, 0x1
+            return v0
+        """.trimIndent())
+        logger.info("Ads Free Rewards: InMobi patch - forced show to success")
+    } catch (e: Exception) {
+        logger.warning("Ads Free Rewards: InMobi patch failed: ${e.message}")
+    }
+}
+
+private fun BytecodePatchContext.applyIronSourceAdsStrategy(logger: Logger, useIronSource: Boolean, instantReward: Boolean?) {
+    if (instantReward != true || !useIronSource) return
+    val ironAds = IronSourceAdsRewardedShowFingerprint.methodOrNull ?: return
+    try {
+        ironAds.addInstructions(0, """
+            const/4 v0, 0x1
+            return v0
+        """.trimIndent())
+        logger.info("Ads Free Rewards: Unity IronSourceAds patch - forced show to success")
+    } catch (e: Exception) {
+        logger.warning("Ads Free Rewards: IronSourceAds patch failed: ${e.message}")
+    }
 }
 
 private fun BytecodePatchContext.applyMaxUnityStrategy(logger: Logger, useMax: Boolean, instantReward: Boolean?): Boolean {
