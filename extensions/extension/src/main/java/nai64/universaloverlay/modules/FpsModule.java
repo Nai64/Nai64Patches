@@ -7,7 +7,7 @@ public final class FpsModule extends UniversalOverlayStatisticModule {
     private int frames;
     private Choreographer.FrameCallback frameCallback;
     public FpsModule() {
-        super("fps", "FPS", "Approximate display frame cadence observed by the overlay.");
+        super("fps", "FPS", "Approximate display frame cadence. Monitor short name: FPS.");
         frameCallback = frameTimeNanos -> {
             try {
                 frames++;
@@ -31,7 +31,7 @@ public final class FpsModule extends UniversalOverlayStatisticModule {
         try {
             int sample = frames;
             frames = 0;
-            String display = "~" + sample + " FPS";
+            String display = "FPS: ~" + sample;
             if (valueView != null) valueView.setText(display);
             if (monitorView != null) monitorView.setText(display);
             handler.postDelayed(this::sample, 1000);

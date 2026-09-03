@@ -65,6 +65,7 @@ public final class UniversalOverlayRuntime {
     private static Boolean fullscreenState;
     private static Boolean screenshotsState;
     private static final Map<String, Boolean> MODULE_STATES = new java.util.HashMap<>();
+    private static final Map<String, Boolean> MONITOR_STATES = new java.util.HashMap<>();
     private static final Map<String, Boolean> HOOK_STATES = new java.util.HashMap<>();
     private static long sessionStartElapsed;
     private static boolean sharedButtonPositionInitialized;
@@ -154,6 +155,7 @@ public final class UniversalOverlayRuntime {
         private final View menuScrim;
         private final LinearLayout panel;
         private final FrameLayout confirmationLayer;
+        private final View brightnessDimLayer;
         private final List<UniversalOverlayActivityModule> activityModules = new ArrayList<>();
         private final List<UniversalOverlayHookModule> hookModules = new ArrayList<>();
         private final List<UniversalOverlayStatisticModule> statistics = new ArrayList<>();
@@ -181,10 +183,23 @@ public final class UniversalOverlayRuntime {
             originalSystemUi = window.getDecorView().getSystemUiVisibility();
             root = new FrameLayout(activity);
             root.setClipChildren(false);
+            brightnessDimLayer = new View(activity);
+            brightnessDimLayer.setBackgroundColor(Color.BLACK);
+            brightnessDimLayer.setClickable(false);
+            brightnessDimLayer.setFocusable(false);
+            brightnessDimLayer.setAlpha(0f);
+            brightnessDimLayer.setOnTouchListener((v, event) -> false);
+            root.addView(brightnessDimLayer, new FrameLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
             Paint monitorPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
             monitorPaint.setTextSize(dp(12));
             Paint.FontMetrics metrics = monitorPaint.getFontMetrics();
-            float widestMonitor = Math.max(monitorPaint.measureText("00:00:00"), monitorPaint.measureText("↓ 999.9 MB"));
+            String[] monitorExamples = {
+                    "ST: 00 : 00", "FPS: ~999", "AST: 00:00:00", "BAT: 100%", "MEM: 9999 MB",
+                    "↓IT: 999.9 MB", "↑OT: 999.9 MB", "TMP: 99.9 C | 211.8 F",
+            };
+            float widestMonitor = 0f;
+            for (String example : monitorExamples) widestMonitor = Math.max(widestMonitor, monitorPaint.measureText(example));
             monitorWidth = Math.round(((int) Math.ceil(widestMonitor) + dp(24)) * config.monitorScale);
             monitorHeight = Math.round(((int) Math.ceil(metrics.bottom - metrics.top) + dp(12)) * config.monitorScale);
             floatingButton = createFloatingButton();
@@ -320,7 +335,8 @@ public final class UniversalOverlayRuntime {
             List<TextView> monitors = statisticMonitors.get(module.key());
             if (monitors == null) return;
             for (TextView monitor : monitors) {
-                monitor.setVisibility(config.statisticMonitorPosition != 0 && module.isEnabled()
+                monitor.setVisibility(config.statisticMonitorPosition != 0
+                        && module.isMonitorEnabled() && module.isEnabled()
                         ? View.VISIBLE : View.GONE);
                 monitor.setAlpha(menuVisible ? 0f : config.opacity);
             }
@@ -347,7 +363,7 @@ public final class UniversalOverlayRuntime {
             int gridWidth = columns * monitorWidth + Math.max(0, columns - 1) * spacing;
             int gridStartX = buttonX + (floatingButton.getWidth() - gridWidth) / 2;
             gridStartX = Math.max(0, Math.min(gridStartX, Math.max(0, root.getWidth() - gridWidth)));
-            // Follow the same stable order used by addModules: system time, FPS, session time.
+            // Follow the same stable order used by addModules.
             int slot = 0;
             for (UniversalOverlayStatisticModule module : statistics) {
                 List<TextView> monitors = statisticMonitors.get(module.key());
@@ -499,14 +515,14 @@ public final class UniversalOverlayRuntime {
             boolean hasHooks = config.disableHaptics || config.disableAnimations;
             if (hasStatistics) {
                 addSectionLabel(modules, "Statistic modules");
-                if (config.systemTime) addStatisticSafely(modules, SystemTimeModule::new);
+                if (config.deviceInformation) addStatisticSafely(modules, () -> new DeviceInformationModule(activity));
                 if (config.fps) addStatisticSafely(modules, FpsModule::new);
+                if (config.deviceTemperature) addStatisticSafely(modules, () -> new DeviceTemperatureModule(activity));
+                if (config.systemTime) addStatisticSafely(modules, SystemTimeModule::new);
                 if (config.sessionTime) addStatisticSafely(modules, () -> new SessionTimeModule(sessionStartElapsed));
                 if (config.batteryStatus) addStatisticSafely(modules, () -> new BatteryStatusModule(activity));
                 if (config.appMemory) addStatisticSafely(modules, () -> new AppMemoryModule(activity));
                 if (config.networkStatus) addStatisticSafely(modules, () -> new NetworkStatusModule(activity));
-                if (config.deviceInformation) addStatisticSafely(modules, () -> new DeviceInformationModule(activity));
-                if (config.deviceTemperature) addStatisticSafely(modules, () -> new DeviceTemperatureModule(activity));
             }
             if (hasActivity) {
                 addSectionLabel(modules, "Activity modules");
@@ -620,11 +636,13 @@ public final class UniversalOverlayRuntime {
         private void addBrightnessModule(LinearLayout parent, AppBrightnessModule module) {
             activityModules.add(module);
             module.initiallyEnabled(activity, originalWindowFlags, originalSystemUi);
+            module.bindDimLayer(brightnessDimLayer);
             Float remembered = appBrightnessState;
             if (remembered != null) module.apply(activity, remembered);
             LinearLayout row = moduleRow(module.label(), module.description());
             SeekBar slider = new SeekBar(activity);
             slider.setMax(100);
+            slider.setLayoutDirection(View.LAYOUT_DIRECTION_LTR);
             slider.setProgress(Math.round((remembered == null ? module.current(activity) : remembered) * 100f));
             slider.setContentDescription(module.label());
             slider.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -710,10 +728,30 @@ public final class UniversalOverlayRuntime {
             copy.addView(valueView, new LinearLayout.LayoutParams(-1, -2));
             row.addView(copy, new LinearLayout.LayoutParams(0, -2, 1f));
 
+            CheckBox monitorControl = null;
+            if (module.monitorCount() > 0) {
+                monitorControl = new CheckBox(activity);
+                Boolean rememberedMonitor = MONITOR_STATES.get(key);
+                monitorControl.setChecked(rememberedMonitor != null ? rememberedMonitor : config.enableMonitorsOnLaunch);
+                monitorControl.setText("Monitor");
+                monitorControl.setContentDescription(label + " monitor");
+                module.setMonitorEnabled(monitorControl.isChecked());
+                monitorControl.setOnCheckedChangeListener((button, checked) -> {
+                    MONITOR_STATES.put(key, checked);
+                    module.setMonitorEnabled(checked);
+                    updateStatisticMonitor(module);
+                    root.post(this::updateMonitorLayout);
+                    Toast.makeText(activity, label + " monitor is " + (checked ? "enabled" : "disabled"), Toast.LENGTH_SHORT).show();
+                });
+            } else {
+                module.setMonitorEnabled(false);
+            }
+
             CheckBox control = new CheckBox(activity);
             Boolean remembered = rememberedModuleState(key);
             control.setChecked(remembered != null ? remembered : config.activateStatisticsOnLaunch);
-            control.setContentDescription(label);
+            control.setText("Active");
+            control.setContentDescription(label + " active");
             module.bind(valueView, control);
             createStatisticMonitors(module);
             boolean requested = control.isChecked();
@@ -737,9 +775,8 @@ public final class UniversalOverlayRuntime {
                     Toast.makeText(activity, label + " is " + (checked ? "enabled" : "disabled"), Toast.LENGTH_SHORT).show();
                 }
             });
+            if (monitorControl != null) row.addView(monitorControl, new LinearLayout.LayoutParams(-2, -2));
             row.addView(control, new LinearLayout.LayoutParams(-2, -2));
-            row.setClickable(true);
-            row.setOnClickListener(v -> control.setChecked(!control.isChecked()));
             parent.addView(row, new LinearLayout.LayoutParams(-1, -2));
         }
 
@@ -763,6 +800,8 @@ public final class UniversalOverlayRuntime {
                 }
             }
             for (UniversalOverlayStatisticModule module : statistics) {
+                Boolean rememberedMonitor = MONITOR_STATES.get(module.key());
+                if (rememberedMonitor != null) module.setMonitorEnabled(rememberedMonitor);
                 Boolean remembered = rememberedModuleState(module.key());
                 if (remembered == null) continue;
                 module.setChecked(remembered);

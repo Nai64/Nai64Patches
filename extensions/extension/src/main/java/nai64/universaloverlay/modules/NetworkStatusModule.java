@@ -13,19 +13,19 @@ public final class NetworkStatusModule extends UniversalOverlayStatisticModule {
     private long txRate;
 
     public NetworkStatusModule(Activity activity) {
-        super("networkStatus", "Network status", "Approximate app network traffic between samples.");
+        super("networkStatus", "Network status", "Approximate app network traffic between samples. Monitor short names: ↓IT incoming, ↑OT outgoing.");
         uid = activity.getApplicationInfo().uid;
     }
     @Override public int monitorCount() { return 2; }
     @Override protected String value() {
         sampleTraffic();
-        return "↓ " + format(rxRate) + " | ↑ " + format(txRate);
+        return "↓IT: " + format(rxRate) + " | ↑OT: " + format(txRate);
     }
     @Override protected String monitorValue() {
-        return "↓ " + format(rxRate) + " | ↑ " + format(txRate);
+        return "↓IT: " + format(rxRate) + " | ↑OT: " + format(txRate);
     }
     @Override protected String monitorValue(int index) {
-        return (index == 0 ? "↓ " : "↑ ") + format(index == 0 ? rxRate : txRate);
+        return (index == 0 ? "↓IT: " : "↑OT: ") + format(index == 0 ? rxRate : txRate);
     }
     private void sampleTraffic() {
         long rx = TrafficStats.getUidRxBytes(uid);

@@ -18,6 +18,7 @@ public abstract class UniversalOverlayStatisticModule implements UniversalOverla
     private CheckBox control;
     protected boolean running;
     private boolean enabled;
+    private boolean monitorEnabled;
     private final Runnable sampler = this::sample;
 
     private void sample() {
@@ -58,6 +59,9 @@ public abstract class UniversalOverlayStatisticModule implements UniversalOverla
     public int monitorCount() { return 1; }
 
     public final boolean isEnabled() { return enabled; }
+    public final boolean isMonitorEnabled() { return monitorEnabled; }
+
+    public final void setMonitorEnabled(boolean enabled) { monitorEnabled = enabled; }
 
     public final boolean setEnabled(boolean enabled, boolean menuVisible) {
         this.enabled = enabled;
@@ -96,9 +100,9 @@ public abstract class UniversalOverlayStatisticModule implements UniversalOverla
         handler.removeCallbacks(sampler);
         if (valueView != null) valueView.setText("Disabled");
         if (monitorViews != null) {
-            for (TextView monitor : monitorViews) monitor.setText("");
+            for (TextView monitor : monitorViews) monitor.setText("Disabled");
         } else {
-            setMonitorText("");
+            setMonitorText("Disabled");
         }
     }
 

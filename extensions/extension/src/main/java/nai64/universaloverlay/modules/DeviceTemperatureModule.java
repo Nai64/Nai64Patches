@@ -9,9 +9,10 @@ import java.util.Locale;
 public final class DeviceTemperatureModule extends UniversalOverlayStatisticModule {
     private final Activity activity;
     public DeviceTemperatureModule(Activity activity) {
-        super("deviceTemperature", "Device temperature", "Battery-reported device temperature in Celsius and Fahrenheit.");
+        super("deviceTemperature", "Device temperature", "Battery-reported temperature in Celsius and Fahrenheit. Monitor short name: TMP.");
         this.activity = activity;
     }
+    @Override protected String monitorValue() { return "TMP: " + value(); }
     @Override protected String value() {
         Intent battery = activity.registerReceiver(null, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
         if (battery == null) return "Unavailable";
