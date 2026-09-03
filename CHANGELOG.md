@@ -1,3 +1,9 @@
+## [1.8.2](https://github.com/Zanuaimi/Nai64Patches/compare/1.8.1...1.8.2) (2026-09-03)
+
+### Bug Fixes
+
+* polish landscape overlay controls ([d0bd4ae](https://github.com/Zanuaimi/Nai64Patches/commit/d0bd4aefea621a52b7e3c30b9c767436b138070c))
+
 ## [1.8.1](https://github.com/Zanuaimi/Nai64Patches/compare/1.8.0...1.8.1) (2026-09-03)
 
 ### Bug Fixes

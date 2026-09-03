@@ -1,7 +1,7 @@
 {
-  "created_at": "2026-09-03T11:15:30",
-  "description": "## [1.8.1](https://github.com/Zanuaimi/Nai64Patches/compare/1.8.0...1.8.1) (2026-09-03)\n\n### Bug Fixes\n\n* merge statistic update efficiency fix ([20d10da](https://github.com/Zanuaimi/Nai64Patches/commit/20d10dafa1d1e42b68a2a4e178199e89da932f77))\n* separate menu and monitor statistic updates ([999e2ac](https://github.com/Zanuaimi/Nai64Patches/commit/999e2ace061aefe23f3e2f281dec7c14c68bfb5a))",
-  "download_url": "https://github.com/Zanuaimi/Nai64Patches/releases/download/1.8.1/patches-1.8.1.mpp",
+  "created_at": "2026-09-03T11:44:09",
+  "description": "## [1.8.2](https://github.com/Zanuaimi/Nai64Patches/compare/1.8.1...1.8.2) (2026-09-03)\n\n### Bug Fixes\n\n* polish landscape overlay controls ([d0bd4ae](https://github.com/Zanuaimi/Nai64Patches/commit/d0bd4aefea621a52b7e3c30b9c767436b138070c))",
+  "download_url": "https://github.com/Zanuaimi/Nai64Patches/releases/download/1.8.2/patches-1.8.2.mpp",
   "signature_download_url": "",
-  "version": "1.8.1"
+  "version": "1.8.2"
 }
