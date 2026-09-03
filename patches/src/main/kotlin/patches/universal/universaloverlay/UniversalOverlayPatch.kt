@@ -15,7 +15,7 @@ import java.util.Base64
 import java.util.logging.Logger
 
 private const val RUNTIME_CLASS = "Lnai64/universaloverlay/UniversalOverlayRuntime;"
-private const val CONFIG_VERSION = "4"
+private const val CONFIG_VERSION = "5"
 private const val MAX_TITLE_CHARACTERS = 80
 private const val MAX_DESCRIPTION_CHARACTERS = 500
 private const val DEFAULT_DESCRIPTION =
@@ -237,10 +237,16 @@ val universalOverlayPatch = bytecodePatch(
         description = "Optional Activity fallback target.",
     )
     val activateStatisticsOnLaunch by booleanOption(
-        title = "Settings to Modules - Activate statistics on launch",
+        title = "Settings to Modules - Activate statistic modules on launch",
         default = false,
         key = "runtimeOverlayActivateStatisticsOnLaunch",
-        description = "Start selected statistic modules as soon as the app launches. Disabled by default.",
+        description = "Start selected statistic modules as soon as the app launches. Active is disabled by default.",
+    )
+    val enableMonitorsOnLaunch by booleanOption(
+        title = "Settings to Modules - Enable monitors for statistic modules on launch",
+        default = false,
+        key = "runtimeOverlayEnableMonitorsOnLaunch",
+        description = "Show selected statistic monitors as soon as the app launches. Monitor is disabled by default.",
     )
     val statisticMonitorPosition by stringOption(
         title = "Settings to Modules - Statistic monitor position",
@@ -263,17 +269,29 @@ val universalOverlayPatch = bytecodePatch(
         description = "Number of statistic monitor columns.",
         values = linkedMapOf("1 column" to "1", "2 columns" to "2", "3 columns" to "3"),
     )
-    val includeSystemTime by booleanOption(
-        title = "Statistic modules - System Time",
+    val includeDeviceInformation by booleanOption(
+        title = "Statistic modules - Device Information",
         default = false,
-        key = "runtimeOverlayIncludeSystemTime",
-        description = "Include the phone system time statistic module.",
+        key = "runtimeOverlayIncludeDeviceInformation",
+        description = "Include read-only phone and Android device information.",
+    )
+    val includeDeviceTemperature by booleanOption(
+        title = "Statistic modules - Device Temperature",
+        default = false,
+        key = "runtimeOverlayIncludeDeviceTemperature",
+        description = "Include battery-reported temperature in Celsius and Fahrenheit.",
     )
     val includeFps by booleanOption(
         title = "Statistic modules - FPS",
         default = false,
         key = "runtimeOverlayIncludeFps",
         description = "Include the approximate display frame-rate statistic module.",
+    )
+    val includeSystemTime by booleanOption(
+        title = "Statistic modules - System Time",
+        default = false,
+        key = "runtimeOverlayIncludeSystemTime",
+        description = "Include the phone system time statistic module.",
     )
     val includeSessionTime by booleanOption(
         title = "Statistic modules - App Session Time",
@@ -298,18 +316,6 @@ val universalOverlayPatch = bytecodePatch(
         default = false,
         key = "runtimeOverlayIncludeNetworkStatus",
         description = "Include incoming and outgoing app network traffic monitors.",
-    )
-    val includeDeviceInformation by booleanOption(
-        title = "Statistic modules - Device Information",
-        default = false,
-        key = "runtimeOverlayIncludeDeviceInformation",
-        description = "Include read-only phone and Android device information.",
-    )
-    val includeDeviceTemperature by booleanOption(
-        title = "Statistic modules - Device Temperature",
-        default = false,
-        key = "runtimeOverlayIncludeDeviceTemperature",
-        description = "Include battery-reported temperature in Celsius and Fahrenheit.",
     )
     val includeKeepAwake by booleanOption(
         title = "Activity modules - Keep screen awake",
@@ -413,6 +419,7 @@ val universalOverlayPatch = bytecodePatch(
                 if (includeDisableAnimations == true) "disableAnimations" else null,
             ).filterNotNull().joinToString(","),
             if (activateStatisticsOnLaunch == true) "1" else "0",
+            if (enableMonitorsOnLaunch == true) "1" else "0",
             monitorPositionValue,
             monitorScaleValue,
             monitorColumnsValue,

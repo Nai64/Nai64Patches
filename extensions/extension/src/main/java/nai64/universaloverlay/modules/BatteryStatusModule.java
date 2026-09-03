@@ -8,9 +8,10 @@ import android.content.IntentFilter;
 public final class BatteryStatusModule extends UniversalOverlayStatisticModule {
     private final Activity activity;
     public BatteryStatusModule(Activity activity) {
-        super("batteryStatus", "Battery status", "Current battery percentage and charging state.");
+        super("batteryStatus", "Battery status", "Current battery percentage and charging state. Monitor short name: BAT.");
         this.activity = activity;
     }
+    @Override protected String monitorValue() { return "BAT: " + value(); }
     @Override protected String value() {
         Intent battery = activity.registerReceiver(null, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
         if (battery == null) return "Unavailable";

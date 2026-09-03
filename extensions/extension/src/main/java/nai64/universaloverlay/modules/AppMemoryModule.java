@@ -8,10 +8,11 @@ public final class AppMemoryModule extends UniversalOverlayStatisticModule {
     private final ActivityManager manager;
     private final int pid;
     public AppMemoryModule(android.content.Context context) {
-        super("appMemory", "App memory usage", "Approximate memory used by the current app process in MB.");
+        super("appMemory", "App memory usage", "Approximate memory used by the current app process in MB. Monitor short name: MEM.");
         manager = (ActivityManager) context.getSystemService(android.content.Context.ACTIVITY_SERVICE);
         pid = android.os.Process.myPid();
     }
+    @Override protected String monitorValue() { return "MEM: " + value(); }
     @Override protected String value() {
         if (manager == null) return "Unavailable";
         android.os.Debug.MemoryInfo[] infos = manager.getProcessMemoryInfo(new int[]{pid});
