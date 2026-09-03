@@ -22,9 +22,13 @@ final class UniversalOverlayViews {
         drawable.setStroke(Math.max(1, strokeWidth), stroke);
         return drawable;
     }
+
+    /** Builds the legacy icon background while keeping its gradient and outline independent. */
     static Drawable gradientBackground(int first, int second, float angle, int stroke, int strokeWidth, boolean circle) {
         return new GradientBackground(first, second, angle, stroke, strokeWidth, circle);
     }
+
+    /** Uses the overlay theme context so host-app selectable colors do not leak into our controls. */
     static Drawable selectableBackground(Context context) {
         android.content.res.TypedArray attributes = context.obtainStyledAttributes(
                 new int[] { android.R.attr.selectableItemBackgroundBorderless });

@@ -55,6 +55,7 @@ import java.util.Map;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.WeakHashMap;
+import java.io.File;
 
 /**
  * Runtime implementation for the Nai64 overlay.
@@ -218,6 +219,7 @@ public final class UniversalOverlayRuntime {
         private float startX;
         private float startY;
         private boolean dragged;
+        private boolean customIconFallbackRequired;
         private final Runnable dragVisibilityFade;
 
         Controller(Activity activity, UniversalOverlayConfig config) {
@@ -292,6 +294,7 @@ public final class UniversalOverlayRuntime {
                 activity.addContentView(root, contentLayoutParams());
                 attached = true;
                 root.post(this::updateMonitorLayout);
+                if (customIconFallbackRequired) root.post(this::showCustomIconFallbackToast);
             } catch (RuntimeException failure) {
                 removeRoot();
                 throw failure;
@@ -387,14 +390,13 @@ public final class UniversalOverlayRuntime {
                 image.setAntiAlias(true);
                 button.setBackground(image);
             } else {
-                if (config.iconType.equals("image") && !customIconFallbackNotified) {
-                    customIconFallbackNotified = true;
-                    Toast.makeText(activity, "Image not found, falling back to legacy icon", Toast.LENGTH_LONG).show();
-                }
+                customIconFallbackRequired = config.iconType.equals("image");
                 button.setText(config.buttonText);
                 button.setTypeface(Typeface.DEFAULT, config.iconBold ? Typeface.BOLD : Typeface.NORMAL);
                 button.setBackground(UniversalOverlayViews.gradientBackground(
-                        config.buttonBackground, config.iconBackground2, config.iconGradientAngle,
+                        config.buttonBackground,
+                        config.gradientBackground ? config.iconBackground2 : config.buttonBackground,
+                        config.iconGradientAngle,
                         config.iconOutline ? config.iconOutlineColor : Color.TRANSPARENT,
                         config.iconOutline ? Math.min(8, Math.max(2, config.outlineWidth + 1)) : 0, config.shape == 1));
             }
@@ -403,18 +405,58 @@ public final class UniversalOverlayRuntime {
             return button;
         }
 
+        /** Shows the fallback notice after the overlay root is attached to the Activity. */
+        private void showCustomIconFallbackToast() {
+            if (detached || fullyClosed || !customIconFallbackRequired || customIconFallbackNotified) return;
+            customIconFallbackNotified = true;
+            try {
+                Toast.makeText(activity, "Image not found, falling back to legacy icon", Toast.LENGTH_LONG).show();
+            } catch (RuntimeException ignored) {
+                // Toast availability is host-dependent and must not affect overlay startup.
+            }
+        }
+
+        /** Decodes an embedded image, while retaining path/Base64 support for older payloads. */
         private Bitmap decodeCustomIcon(String encoded) {
             if (encoded == null || encoded.trim().isEmpty() || encoded.length() > 4 * 1024 * 1024) return null;
             try {
                 String value = encoded.trim();
                 int comma = value.indexOf(',');
-                if (value.startsWith("data:") && comma >= 0) value = value.substring(comma + 1).trim();
-                if (value.isEmpty()) return null;
-                byte[] bytes = android.util.Base64.decode(value, android.util.Base64.DEFAULT);
+                byte[] bytes;
+                if (value.startsWith("data:") && comma >= 0) {
+                    value = value.substring(comma + 1).trim();
+                    bytes = android.util.Base64.decode(value, android.util.Base64.DEFAULT);
+                } else {
+                    File file = value.startsWith("file:") ? new File(java.net.URI.create(value)) : new File(value);
+                    bytes = file.isFile() ? readFileIcon(file) : android.util.Base64.decode(value, android.util.Base64.DEFAULT);
+                }
                 if (bytes.length == 0) return null;
                 return BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
             } catch (RuntimeException ignored) {
                 return null;
+            }
+        }
+
+        private byte[] readFileIcon(File file) {
+            try (java.io.FileInputStream input = new java.io.FileInputStream(file)) {
+                return readLimited(input, 1024 * 1024);
+            } catch (Exception ignored) {
+                return new byte[0];
+            }
+        }
+
+        /** Bounds fallback file reads so malformed configuration cannot allocate unbounded memory. */
+        private byte[] readLimited(java.io.InputStream input, int limit) throws java.io.IOException {
+            try (java.io.InputStream stream = input; java.io.ByteArrayOutputStream output = new java.io.ByteArrayOutputStream()) {
+                byte[] buffer = new byte[8192];
+                int total = 0;
+                int count;
+                while ((count = stream.read(buffer)) != -1) {
+                    total += count;
+                    if (total > limit) return new byte[0];
+                    output.write(buffer, 0, count);
+                }
+                return output.toByteArray();
             }
         }
 

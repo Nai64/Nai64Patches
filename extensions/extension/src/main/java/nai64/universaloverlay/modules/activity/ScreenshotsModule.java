@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.view.WindowManager;
 import nai64.universaloverlay.modules.UniversalOverlayActivityModule;
 
+/** Temporarily clears FLAG_SECURE and restores the host Activity's original screenshot policy. */
 public final class ScreenshotsModule extends UniversalOverlayActivityModule {
     @Override public String key() { return "screenshots"; }
     private static final int FLAG_SECURE = WindowManager.LayoutParams.FLAG_SECURE;

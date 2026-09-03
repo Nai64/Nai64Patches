@@ -11,11 +11,16 @@ import patches.universal.ads.util.cloneMutable
 import patches.universal.ads.util.numberOfParameterRegisters
 import patches.universal.ads.util.p0Register
 import patches.universal.ui.StartupHooks
+import java.io.File
+import java.io.ByteArrayOutputStream
+import java.net.HttpURLConnection
+import java.net.URL
 import java.util.Base64
 import java.util.logging.Logger
 
 private const val RUNTIME_CLASS = "Lnai64/universaloverlay/UniversalOverlayRuntime;"
-private const val CONFIG_VERSION = "8"
+private const val CONFIG_VERSION = "9"
+private const val MAX_CUSTOM_ICON_BYTES = 1024 * 1024
 private const val MAX_TITLE_CHARACTERS = 80
 private const val MAX_DESCRIPTION_CHARACTERS = 500
 private val DEFAULT_DESCRIPTION =
@@ -28,6 +33,53 @@ private val DEFAULT_DESCRIPTION =
 
 private fun encode(value: String): String =
     Base64.getEncoder().withoutPadding().encodeToString(value.toByteArray(Charsets.UTF_8))
+
+private fun resolveCustomIconImage(source: String, logger: Logger): String {
+    // Resolve external input while patching so the installed APK does not need network access.
+    // Keeping the normalized data URI in the payload also makes local paths portable at runtime.
+    if (source.isBlank()) return ""
+    val bytes = runCatching {
+        when {
+            source.startsWith("data:", ignoreCase = true) -> {
+                val comma = source.indexOf(',')
+                require(comma >= 0 && source.substring(0, comma).contains("base64", ignoreCase = true))
+                Base64.getMimeDecoder().decode(source.substring(comma + 1))
+            }
+            source.startsWith("http://", ignoreCase = true) || source.startsWith("https://", ignoreCase = true) -> {
+                val connection = URL(source).openConnection() as HttpURLConnection
+                connection.connectTimeout = 5000
+                connection.readTimeout = 10000
+                connection.instanceFollowRedirects = true
+                try {
+                    require(connection.responseCode in 200..299)
+                    connection.inputStream.use { input ->
+                        val output = ByteArrayOutputStream()
+                        val buffer = ByteArray(8192)
+                        var total = 0
+                        var count = input.read(buffer)
+                        while (count != -1) {
+                            total += count
+                            require(total <= MAX_CUSTOM_ICON_BYTES)
+                            output.write(buffer, 0, count)
+                            count = input.read(buffer)
+                        }
+                        output.toByteArray()
+                    }
+                } finally {
+                    connection.disconnect()
+                }
+            }
+            source.startsWith("file:", ignoreCase = true) -> File(java.net.URI(source)).readBytes()
+            File(source).isFile -> File(source).readBytes()
+            else -> Base64.getMimeDecoder().decode(source)
+        }
+    }.getOrNull()
+    if (bytes == null || bytes.isEmpty() || bytes.size > MAX_CUSTOM_ICON_BYTES) {
+        logger.warning("Could not resolve custom overlay icon source; runtime fallback will be used.")
+        return ""
+    }
+    return "data:application/octet-stream;base64," + Base64.getEncoder().encodeToString(bytes)
+}
 
 private fun descriptor(value: String): String {
     val trimmed = value.trim()
@@ -138,14 +190,15 @@ val universalOverlayPatch = bytecodePatch(
         fullscreen, app brightness, and haptic controls. Modules are excluded and disabled by default;
         select them in Morphe settings before patching. Statistic modules show information, Activity modules
         control the current Activity, and Hook modules control internal app behavior, such as disabling
-        animations, through best-effort runtime changes. Experimental : May not work on all apps!
+        animations, through best-effort runtime changes. Custom icons support Base64 data, local image
+        paths, and HTTP(S) URLs. This is experimental and may not work on all apps.
 
         The idea and initial works of this Universal Overlay Patch are from Zanuaimi / Noobite.
     """.trimIndent(),
     default = false,
 ) {
-    // TODO(universal-overlay): this extension DEX is the architectural boundary. Do not move UI or
-    // feature implementation back into generated Smali.
+    // Keep the extension DEX as the runtime boundary; generated Smali should only start it and
+    // must not contain overlay UI or feature implementation.
     extendWith("extensions/extension.mpe")
     dependsOn(StartupHooks.resolveRealApplicationPatch)
 
@@ -209,6 +262,12 @@ val universalOverlayPatch = bytecodePatch(
         key = "runtimeOverlayButtonTextColor",
         description = "Text color used by the legacy icon.",
     )
+    val gradientBackground by booleanOption(
+        title = "UI - Gradient background",
+        default = true,
+        key = "runtimeOverlayIconGradientBackground",
+        description = "Blend legacy icon background 1 into background 2. When disabled, only background 1 is used.",
+    )
     val buttonBackgroundColor by stringOption(
         title = "UI - Legacy icon background 1",
         default = "#000083",
@@ -243,14 +302,14 @@ val universalOverlayPatch = bytecodePatch(
         title = "UI - Icon type",
         default = "legacy",
         key = "runtimeOverlayIconType",
-        description = "Legacy icon uses up to three bold text characters and a gradient background. Custom image replaces it and supports transparent images. Custom image requires a valid Base64 PNG or JPEG below; otherwise the legacy icon is used.",
+        description = "Legacy icon uses up to three bold text characters and an optional gradient background. Custom image replaces it and supports transparent images from Base64, local paths, or HTTP(S) URLs. Invalid or missing images fall back to the legacy icon.",
         values = linkedMapOf("Legacy text icon" to "legacy", "Custom image icon" to "image"),
     )
     val customIconImage by stringOption(
-        title = "UI - Custom image icon (Base64)",
+        title = "UI - Custom image icon",
         default = "",
         key = "runtimeOverlayCustomIconImage",
-        description = "Select Custom image icon in UI - Icon type for this image input to be used. Use a trusted Base64 image encoder, such as https://base64.guru/converter/encode/image: choose a square PNG or JPEG, ideally 128x128 or 256x256 pixels, copy its encoded result, then paste it here instead of a file path. Example format: data:image/png;base64,<your encoded image data>. Transparent images are supported and other sizes are scaled proportionally. Leave blank to use the legacy icon; invalid or missing input falls back with a one-time launch notice.",
+        description = "Select Custom image icon in UI - Icon type. Supported input: Base64 data, data:image/...;base64,..., a local image path, or an HTTP(S) image URL. Use a trusted Base64 encoder such as https://base64.guru/converter/encode/image. Prefer a transparent square PNG or JPEG around 128x128 or 256x256 pixels. Example: data:image/png;base64,<your encoded image data>. Images are embedded during patching and scaled proportionally. Leave blank or use invalid input to fall back to the legacy icon with a one-time launch notice.",
     )
     val buttonShape by stringOption(
         title = "UI - Overlay button shape",
@@ -460,7 +519,11 @@ val universalOverlayPatch = bytecodePatch(
         val iconTypeValue = iconType.orEmpty().ifBlank { "legacy" }
         val iconBackground2Value = iconBackground2.orEmpty().ifBlank { "#00AF7C" }
         val iconGradientAngleValue = ((iconGradientAngle ?: 30) % 361 + 361) % 361
-        val customIconImageValue = customIconImage.orEmpty().trim()
+        val customIconImageValue = if (iconTypeValue == "image") {
+            resolveCustomIconImage(customIconImage.orEmpty().trim(), logger)
+        } else {
+            ""
+        }
         val monitorPositionValue = statisticMonitorPosition.orEmpty().ifBlank { "bottom" }
         val monitorScaleValue = monitorScale.orEmpty().ifBlank { "1" }
         val monitorColumnsValue = monitorColumns.orEmpty().ifBlank { "2" }
@@ -519,10 +582,11 @@ val universalOverlayPatch = bytecodePatch(
             iconGradientAngleValue.toString(),
             customIconImageValue,
             dragVisibilityDurationValue.toString(),
+            if (gradientBackground != false) "1" else "0",
         ).joinToString("|") { encode(it) }
 
-        // TODO(universal-overlay): Application.onCreate is the primary hook; the Activity path is
-        // only a compatibility fallback for APKs without a resolvable Application method.
+        // Prefer the process Application entry point. The Activity path is a compatibility fallback
+        // for APKs whose Application class or onCreate method cannot be resolved safely.
         val appDescriptor = StartupHooks.resolvedApplicationDescriptor
         val appClass = appDescriptor?.let { mutableClassDefByOrNull(it) }
         val appMethod = appClass?.let { findInheritedApplicationOnCreate(it) }

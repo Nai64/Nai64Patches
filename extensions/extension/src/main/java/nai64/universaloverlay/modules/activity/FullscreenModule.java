@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.view.View;
 import nai64.universaloverlay.modules.UniversalOverlayActivityModule;
 
+/** Applies immersive system-UI flags while preserving the Activity's original visibility state. */
 public final class FullscreenModule extends UniversalOverlayActivityModule {
     @Override public String key() { return "fullscreen"; }
     private static final int FULLSCREEN_FLAGS = View.SYSTEM_UI_FLAG_LOW_PROFILE

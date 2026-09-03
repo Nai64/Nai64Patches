@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.view.WindowManager;
 import nai64.universaloverlay.modules.UniversalOverlayActivityModule;
 
+/** Temporarily adds the keep-screen-on flag to the current Activity window. */
 public final class KeepAwakeModule extends UniversalOverlayActivityModule {
     @Override public String key() { return "keepAwake"; }
     private static final int FLAG_KEEP_SCREEN_ON = WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON;
