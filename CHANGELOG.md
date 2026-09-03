@@ -1,3 +1,10 @@
+## [1.9.0](https://github.com/Zanuaimi/Nai64Patches/compare/1.8.2...1.9.0) (2026-09-03)
+
+### New Features
+
+* expand universal overlay runtime modules ([bf3384b](https://github.com/Zanuaimi/Nai64Patches/commit/bf3384b6b418c0d00e997bb0bd687f8bc2309d0f))
+* merge universal overlay improvements ([910bb23](https://github.com/Zanuaimi/Nai64Patches/commit/910bb23f309217d08c938a1fb8abf9ffb9964992))
+
 ## [1.8.2](https://github.com/Zanuaimi/Nai64Patches/compare/1.8.1...1.8.2) (2026-09-03)
 
 ### Bug Fixes
