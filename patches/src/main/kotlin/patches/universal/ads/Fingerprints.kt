@@ -803,6 +803,50 @@ internal object IronSourceAdsRewardedShowFingerprint : Fingerprint(
     strings = listOf("com.unity3d.ironsourceads", "IronSourceAds"),
 )
 
+// Precise ironSourceAds Unity wrapper (com.unity3d.ironsourceads.rewarded.RewardedAd).
+// The strings-based fingerprint above misses versions whose show() body holds
+// neither constant.
+internal object IronSourceAdsRewardedShowPreciseFingerprint : Fingerprint(
+    definingClass = "Lcom/unity3d/ironsourceads/rewarded/RewardedAd;",
+    name = "show",
+    returnType = "V",
+    parameters = listOf("Landroid/app/Activity;"),
+)
+
+internal object IronSourceAdsRewardedIsReadyPreciseFingerprint : Fingerprint(
+    definingClass = "Lcom/unity3d/ironsourceads/rewarded/RewardedAd;",
+    name = "isReadyToShow",
+    returnType = "Z",
+    parameters = emptyList(),
+)
+
+// -- Miniclip MADS mediation (madsunityplugin + madsandroidsdk, Kotlin, unobfuscated) --
+
+internal object MadsWrapperShowAdFingerprint : Fingerprint(
+    definingClass = "Lcom/miniclip/madsunityplugin/MAdsAdsManagementWrapper;",
+    name = "showAd",
+    returnType = "Z",
+    parameters = listOf("I", "Ljava/lang/String;", "Ljava/util/HashMap;"),
+)
+
+internal object MadsWrapperIsReadyFingerprint : Fingerprint(
+    definingClass = "Lcom/miniclip/madsunityplugin/MAdsAdsManagementWrapper;",
+    name = "isReady",
+    returnType = "Z",
+    parameters = listOf("I"),
+)
+
+internal object MadsRvHandlerOnRewardedFingerprint : Fingerprint(
+    definingClass = "Lcom/miniclip/madsandroidsdk/base/adunit/RewardedVideosAdHandler;",
+    name = "onAdRewarded",
+    returnType = "V",
+    parameters = listOf(
+        "Lcom/miniclip/madsandroidsdk/base/MediationAdInfo;",
+        "Lcom/miniclip/madsandroidsdk/base/Reward;",
+        "Ljava/lang/String;",
+    ),
+)
+
 // -- Play In-app Updates --
 
 internal object AppUpdateManagerImplStartUpdateFlowFingerprint : Fingerprint(
