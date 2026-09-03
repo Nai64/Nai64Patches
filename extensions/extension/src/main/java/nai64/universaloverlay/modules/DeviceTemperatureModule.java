@@ -8,9 +8,11 @@ import java.util.Locale;
 /** Displays battery-reported temperature in Celsius and Fahrenheit. */
 public final class DeviceTemperatureModule extends UniversalOverlayStatisticModule {
     private final Activity activity;
-    public DeviceTemperatureModule(Activity activity) {
-        super("deviceTemperature", "Device temperature", "Battery-reported temperature in Celsius and Fahrenheit. Monitor short name: TMP.");
+    private final String format;
+    public DeviceTemperatureModule(Activity activity, String format) {
+        super("deviceTemperature", "Device temperature", "Battery-reported temperature in the selected C, F, or K format. Monitor short name: TMP.");
         this.activity = activity;
+        this.format = "fahrenheit".equals(format) || "kelvin".equals(format) ? format : "celsius";
     }
     @Override protected String monitorValue() { return "TMP: " + value(); }
     @Override protected String value() {
@@ -19,6 +21,8 @@ public final class DeviceTemperatureModule extends UniversalOverlayStatisticModu
         int tenthsC = battery.getIntExtra("temperature", Integer.MIN_VALUE);
         if (tenthsC == Integer.MIN_VALUE) return "Unavailable";
         float celsius = tenthsC / 10f;
-        return String.format(Locale.US, "%.1f C | %.1f F", celsius, celsius * 9f / 5f + 32f);
+        if ("fahrenheit".equals(format)) return String.format(Locale.US, "%.1f F", celsius * 9f / 5f + 32f);
+        if ("kelvin".equals(format)) return String.format(Locale.US, "%.1f K", celsius + 273.15f);
+        return String.format(Locale.US, "%.1f C", celsius);
     }
 }
