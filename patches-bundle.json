@@ -1,7 +1,7 @@
 {
-  "created_at": "2026-09-03T07:34:27",
-  "description": "## [1.8.0](https://github.com/Zanuaimi/Nai64Patches/compare/1.7.0...1.8.0) (2026-09-03)\n\n### Bug Fixes\n\n* import overlay brightness color ([9e85078](https://github.com/Zanuaimi/Nai64Patches/commit/9e85078637b995505987079cffd11beae9a579b8))\n* merge overlay brightness import fix ([f8b6547](https://github.com/Zanuaimi/Nai64Patches/commit/f8b6547bbb4067de68a01c1b305e98428a35447c))\n\n### New Features\n\n* merge statistic monitor activation controls ([58e9c39](https://github.com/Zanuaimi/Nai64Patches/commit/58e9c3965bedec4fd5507f70a085b8b7b37693d4))\n* separate statistic monitors from activation ([621a0a1](https://github.com/Zanuaimi/Nai64Patches/commit/621a0a1fdc02fd8d147e2d1e6f72dd93714bdc3e))",
-  "download_url": "https://github.com/Zanuaimi/Nai64Patches/releases/download/1.8.0/patches-1.8.0.mpp",
+  "created_at": "2026-09-03T11:15:30",
+  "description": "## [1.8.1](https://github.com/Zanuaimi/Nai64Patches/compare/1.8.0...1.8.1) (2026-09-03)\n\n### Bug Fixes\n\n* merge statistic update efficiency fix ([20d10da](https://github.com/Zanuaimi/Nai64Patches/commit/20d10dafa1d1e42b68a2a4e178199e89da932f77))\n* separate menu and monitor statistic updates ([999e2ac](https://github.com/Zanuaimi/Nai64Patches/commit/999e2ace061aefe23f3e2f281dec7c14c68bfb5a))",
+  "download_url": "https://github.com/Zanuaimi/Nai64Patches/releases/download/1.8.1/patches-1.8.1.mpp",
   "signature_download_url": "",
-  "version": "1.8.0"
+  "version": "1.8.1"
 }

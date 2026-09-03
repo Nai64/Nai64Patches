@@ -1,3 +1,10 @@
+## [1.8.1](https://github.com/Zanuaimi/Nai64Patches/compare/1.8.0...1.8.1) (2026-09-03)
+
+### Bug Fixes
+
+* merge statistic update efficiency fix ([20d10da](https://github.com/Zanuaimi/Nai64Patches/commit/20d10dafa1d1e42b68a2a4e178199e89da932f77))
+* separate menu and monitor statistic updates ([999e2ac](https://github.com/Zanuaimi/Nai64Patches/commit/999e2ace061aefe23f3e2f281dec7c14c68bfb5a))
+
 ## [1.8.0](https://github.com/Zanuaimi/Nai64Patches/compare/1.7.0...1.8.0) (2026-09-03)
 
 ### Bug Fixes
