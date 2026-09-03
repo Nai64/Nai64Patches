@@ -15,7 +15,7 @@ import java.util.Base64
 import java.util.logging.Logger
 
 private const val RUNTIME_CLASS = "Lnai64/universaloverlay/UniversalOverlayRuntime;"
-private const val CONFIG_VERSION = "6"
+private const val CONFIG_VERSION = "7"
 private const val MAX_TITLE_CHARACTERS = 80
 private const val MAX_DESCRIPTION_CHARACTERS = 500
 private const val DEFAULT_DESCRIPTION =
@@ -23,7 +23,7 @@ private const val DEFAULT_DESCRIPTION =
         "contains optional statistic, activity, and hook modules. More of them may be added in " +
         "future updates. You will find modules below the description if you enabled some modules " +
         "in this patch settings before patching this APK." +
-        "The idea and initial works of this Universal Overlay Patch are from Zanuaimi"
+        "The idea and initial works of Universal Overlay Patch are from Zanuaimi / Noobite."
 
 private fun encode(value: String): String =
     Base64.getEncoder().withoutPadding().encodeToString(value.toByteArray(Charsets.UTF_8))
@@ -43,6 +43,11 @@ private fun validate(
     outline: String,
     buttonTextColor: String,
     buttonBackground: String,
+    outlineWidth: Int,
+    iconOutlineColor: String,
+    iconType: String,
+    iconBackground2: String,
+    iconGradientAngle: Int,
     shape: String,
     position: String,
     size: Int,
@@ -55,6 +60,10 @@ private fun validate(
     fun validColor(value: String) = value.matches(Regex("#[0-9a-fA-F]{6}([0-9a-fA-F]{2})?"))
     check(validColor(background) && validColor(outline))
     check(validColor(buttonTextColor) && validColor(buttonBackground))
+    check(outlineWidth in 1..8)
+    check(validColor(iconOutlineColor) && validColor(iconBackground2))
+    check(iconType in setOf("legacy", "image"))
+    check(iconGradientAngle in 0..360)
     check(shape in setOf("circle", "squircle", "square"))
     check(position in setOf("topLeft", "topMiddle", "topRight", "centerLeft", "centerRight", "bottomLeft", "bottomMiddle", "bottomRight"))
     check(size in 32..128)
@@ -123,22 +132,15 @@ private fun injectMethod(owner: MutableClass, method: MutableMethod, config: Str
 @Suppress("unused")
 val universalOverlayPatch = bytecodePatch(
     name = "Universal Overlay Patch (SPECIAL PATCH, Experimental)",
-    description =
-        "A universal overlay for any supported APK, like ordinary Android apps and games from engines " +
-            "such as Unity and Godot. This patch injects an overlay to patched APK. Modules provide runtime functionality inside the patched app: " +
-            "Statistic modules can show phone System Time, approximate FPS, App Session Time, battery, " +
-            "memory, network traffic, device information, and temperature; Activity modules can keep " +
-            "the screen awake, toggle fullscreen, allow screenshots, adjust app brightness, choose " +
-            "rotation mode, or mute app audio. " +
-            "These actions are performed while the app is running, from the overlay menu, rather " +
-            "than changing one specific APK's game or app logic. Hook modules currently include " +
-            "best-effort haptic feedback and animation controls. Modules are not included by " +
-            "default; select the modules you want before patching, then activate them in the overlay. " +
-            "The title, description, colors, button text, shape, size, opacity, position, statistic " +
-            "monitor placement, panel size, column count, and repository action are customizable in " +
-            "morphe patch settings " +
-            " " + 
-            "The idea and initial works of this Universal Overlay Patch are from Zanuaimi",
+    description = """
+        Universal in-app overlay for Android apps and games. Optional modules include System Time, FPS,
+        fullscreen, app brightness, and haptic controls. Modules are excluded and disabled by default;
+        select them in Morphe settings before patching. Statistic modules show information, Activity modules
+        control the current Activity, and Hook modules control internal app behavior, such as disabling
+        animations, through best-effort runtime changes. Experimental : May not work on all apps!
+
+        The idea and initial works of this Universal Overlay Patch are from Zanuaimi / Noobite.
+    """.trimIndent(),
     default = false,
 ) {
     // TODO(universal-overlay): this extension DEX is the architectural boundary. Do not move UI or
@@ -183,44 +185,93 @@ val universalOverlayPatch = bytecodePatch(
         description = "Overlay outline as #RRGGBB or #AARRGGBB.",
     )
     val buttonText by stringOption(
-        title = "General - Overlay button text",
-        default = "N",
+        title = "UI - Legacy icon text",
+        default = "N64",
         key = "runtimeOverlayButtonText",
-        description = "Button text. Maximum three characters.",
+        description = "Text shown by the legacy icon. Maximum three characters.",
     )
     val buttonTextColor by stringOption(
-        title = "General - Overlay button text color",
-        default = "#FF000000",
+        title = "UI - Legacy icon text color",
+        default = "#FFFFFFFF",
         key = "runtimeOverlayButtonTextColor",
-        description = "Button text color.",
+        description = "Text color used by the legacy icon.",
     )
     val buttonBackgroundColor by stringOption(
-        title = "General - Overlay button background color",
-        default = "#FFFFFFFF",
+        title = "UI - Legacy icon background 1",
+        default = "#FF17304A",
         key = "runtimeOverlayButtonBackgroundColor",
-        description = "Button background color.",
+        description = "First color of the legacy icon gradient.",
+    )
+    val outlineWidth by intOption(
+        title = "UI - Menu outline width (dp)",
+        default = 1,
+        key = "runtimeOverlayOutlineWidthDp",
+        description = "Width of the menu, monitor, and confirmation outlines, from 1 to 8dp.",
+    )
+    val iconOutline by booleanOption(
+        title = "UI - Icon outline",
+        default = false,
+        key = "runtimeOverlayIconOutline",
+        description = "Add a separate outline around the legacy text icon. Disabled by default.",
+    )
+    val iconOutlineColor by stringOption(
+        title = "UI - Icon outline color",
+        default = "#FF55D6BE",
+        key = "runtimeOverlayIconOutlineColor",
+        description = "Color used only when the icon outline is enabled.",
+    )
+    val iconType by stringOption(
+        title = "UI - Icon type",
+        default = "legacy",
+        key = "runtimeOverlayIconType",
+        description = "Legacy icon uses up to three bold text characters and a gradient background. Custom image replaces it and supports transparent images. Custom image requires a valid Base64 PNG or JPEG below; otherwise the legacy icon is used.",
+        values = linkedMapOf("Legacy text icon" to "legacy", "Custom image icon" to "image"),
+    )
+    val iconBold by booleanOption(
+        title = "UI - Legacy icon bold text",
+        default = true,
+        key = "runtimeOverlayIconBold",
+        description = "Use bold text in the legacy icon. Enabled by default.",
+    )
+    val iconBackground2 by stringOption(
+        title = "UI - Legacy icon background 2",
+        default = "#FF174A2E",
+        key = "runtimeOverlayIconBackgroundColor2",
+        description = "Second color of the legacy icon gradient. Background 1 is the existing overlay button background color.",
+    )
+    val iconGradientAngle by intOption(
+        title = "UI - Legacy icon gradient angle (degrees)",
+        default = 30,
+        key = "runtimeOverlayIconGradientAngle",
+        description = "Gradient direction: 0 degrees runs top to bottom, 90 runs left to right, and 30 runs diagonally down and right. Values wrap through 360 degrees.",
+    )
+    val customIconImage by stringOption(
+        title = "UI - Custom image icon (Base64)",
+        default = "",
+        key = "runtimeOverlayCustomIconImage",
+        description = "Use a trusted Base64 image encoder, such as https://base64.guru/converter/encode/image: choose a square PNG or JPEG, ideally 128x128 or 256x256 pixels, copy its encoded result, then paste it here instead of a file path. Example format: data:image/png;base64,<your encoded image data>. Transparent images are supported and other sizes are scaled proportionally. Leave blank to use the legacy icon; invalid or missing input falls back with a one-time launch notice.",
     )
     val buttonShape by stringOption(
-        title = "General - Overlay button shape",
+        title = "UI - Overlay button shape",
         default = "circle",
         key = "runtimeOverlayButtonShape",
-        description = "Button shape.",
+        description = "Shape of the legacy text icon background.",
         values = linkedMapOf("Circle" to "circle", "Squircle" to "squircle", "Square" to "square"),
     )
     val buttonSizeDp by intOption(
-        title = "General - Overlay button size (dp)",
+        title = "UI - Overlay button size (dp)",
         default = 56,
         key = "runtimeOverlayButtonSizeDp",
         description = "Button size in density-independent pixels.",
     )
     val buttonOpacity by intOption(
-        title = "General - Overlay button idle opacity (%)",
+        title = "UI - Overlay button idle opacity (%)",
         default = 35,
         key = "runtimeOverlayButtonIdleOpacityPercent",
         description = "Idle opacity from 10 to 100 percent.",
     )
     val buttonPosition by stringOption(
-        title = "General - Overlay button position",
+        title = "UI - Overlay button position",
         default = "topRight",
         key = "runtimeOverlayButtonPosition",
         description = "Initial floating button position.",
@@ -234,7 +285,7 @@ val universalOverlayPatch = bytecodePatch(
         title = "Advanced - Overlay Activity name override",
         default = "",
         key = "runtimeOverlayActivityNameOverride",
-        description = "Optional Activity fallback target.",
+        description = "Optional fallback Activity class used only when Application startup cannot be found. Leave blank for universal automatic discovery. Example: com.example.MainActivity or Lcom/example/MainActivity;.",
     )
     val activateStatisticsOnLaunch by booleanOption(
         title = "Settings to Modules - Activate statistic modules on launch",
@@ -289,17 +340,17 @@ val universalOverlayPatch = bytecodePatch(
         key = "runtimeOverlayIncludeDeviceInformation",
         description = "Include read-only phone and Android device information.",
     )
-    val includeDeviceTemperature by booleanOption(
-        title = "Statistic modules - Device Temperature",
-        default = false,
-        key = "runtimeOverlayIncludeDeviceTemperature",
-        description = "Include battery-reported temperature in Celsius and Fahrenheit.",
-    )
     val includeFps by booleanOption(
         title = "Statistic modules - FPS",
         default = false,
         key = "runtimeOverlayIncludeFps",
         description = "Include the approximate display frame-rate statistic module.",
+    )
+    val includeDeviceTemperature by booleanOption(
+        title = "Statistic modules - Device Temperature",
+        default = false,
+        key = "runtimeOverlayIncludeDeviceTemperature",
+        description = "Include battery-reported temperature in the selected temperature format.",
     )
     val includeSystemTime by booleanOption(
         title = "Statistic modules - System Time",
@@ -394,8 +445,14 @@ val universalOverlayPatch = bytecodePatch(
         val positionValue = buttonPosition.orEmpty().ifBlank { "topRight" }
         val backgroundValue = backgroundColor.orEmpty().ifBlank { "#CC101820" }
         val outlineValue = outlineColor.orEmpty().ifBlank { "#FF55D6BE" }
-        val buttonTextColorValue = buttonTextColor.orEmpty().ifBlank { "#FF000000" }
-        val buttonBackgroundValue = buttonBackgroundColor.orEmpty().ifBlank { "#FFFFFFFF" }
+        val buttonTextColorValue = buttonTextColor.orEmpty().ifBlank { "#FFFFFFFF" }
+        val buttonBackgroundValue = buttonBackgroundColor.orEmpty().ifBlank { "#FF17304A" }
+        val outlineWidthValue = (outlineWidth ?: 1).coerceIn(1, 8)
+        val iconOutlineColorValue = iconOutlineColor.orEmpty().ifBlank { outlineValue }
+        val iconTypeValue = iconType.orEmpty().ifBlank { "legacy" }
+        val iconBackground2Value = iconBackground2.orEmpty().ifBlank { "#FF174A2E" }
+        val iconGradientAngleValue = ((iconGradientAngle ?: 30) % 361 + 361) % 361
+        val customIconImageValue = customIconImage.orEmpty().trim()
         val monitorPositionValue = statisticMonitorPosition.orEmpty().ifBlank { "bottom" }
         val monitorScaleValue = monitorScale.orEmpty().ifBlank { "1" }
         val monitorColumnsValue = monitorColumns.orEmpty().ifBlank { "2" }
@@ -404,6 +461,8 @@ val universalOverlayPatch = bytecodePatch(
         validate(
             titleValue, descriptionValue, labelValue, urlValue,
             backgroundValue, outlineValue, buttonTextColorValue, buttonBackgroundValue,
+            outlineWidthValue, iconOutlineColorValue, iconTypeValue, iconBackground2Value,
+            iconGradientAngleValue,
             shapeValue, positionValue, sizeValue, opacityValue,
         )
         check(monitorPositionValue in setOf("none", "top", "bottom"))
@@ -415,7 +474,7 @@ val universalOverlayPatch = bytecodePatch(
 
         val config = listOf(
             CONFIG_VERSION, titleValue, descriptionValue, labelValue, urlValue,
-            backgroundValue, outlineValue, buttonText.orEmpty().trim().take(3).ifBlank { "N" },
+            backgroundValue, outlineValue, buttonText.orEmpty().trim().take(3).ifBlank { "N64" },
             buttonTextColorValue, buttonBackgroundValue, shapeValue,
             sizeValue.toString(), opacityValue.toString(), positionValue,
             listOf(
@@ -443,6 +502,14 @@ val universalOverlayPatch = bytecodePatch(
             monitorColumnsValue,
             temperatureFormatValue,
             timeFormatValue,
+            outlineWidthValue.toString(),
+            if (iconOutline == true) "1" else "0",
+            iconOutlineColorValue,
+            iconTypeValue,
+            if (iconBold != false) "1" else "0",
+            iconBackground2Value,
+            iconGradientAngleValue.toString(),
+            customIconImageValue,
         ).joinToString("|") { encode(it) }
 
         // TODO(universal-overlay): Application.onCreate is the primary hook; the Activity path is

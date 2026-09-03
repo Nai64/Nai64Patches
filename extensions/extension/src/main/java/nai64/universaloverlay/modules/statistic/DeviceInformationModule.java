@@ -1,9 +1,10 @@
-package nai64.universaloverlay.modules;
+package nai64.universaloverlay.modules.statistic;
 
 import android.app.ActivityManager;
 import android.content.Context;
 import android.os.Build;
 import android.view.WindowManager;
+import nai64.universaloverlay.modules.UniversalOverlayStatisticModule;
 
 /** Read-only device facts that are inexpensive to collect when the menu is refreshed. */
 public final class DeviceInformationModule extends UniversalOverlayStatisticModule {

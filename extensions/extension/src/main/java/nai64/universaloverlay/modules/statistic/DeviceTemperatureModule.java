@@ -1,9 +1,10 @@
-package nai64.universaloverlay.modules;
+package nai64.universaloverlay.modules.statistic;
 
 import android.app.Activity;
 import android.content.Intent;
 import android.content.IntentFilter;
 import java.util.Locale;
+import nai64.universaloverlay.modules.UniversalOverlayStatisticModule;
 
 /** Displays battery-reported temperature in Celsius and Fahrenheit. */
 public final class DeviceTemperatureModule extends UniversalOverlayStatisticModule {

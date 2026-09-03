@@ -1,7 +1,8 @@
-package nai64.universaloverlay.modules;
+package nai64.universaloverlay.modules.statistic;
 
 import android.os.SystemClock;
 import java.util.Locale;
+import nai64.universaloverlay.modules.UniversalOverlayStatisticModule;
 
 /** Displays elapsed time from the first initialization of the overlay process. */
 public final class SessionTimeModule extends UniversalOverlayStatisticModule {

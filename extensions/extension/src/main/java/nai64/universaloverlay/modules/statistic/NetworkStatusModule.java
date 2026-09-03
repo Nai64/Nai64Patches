@@ -1,8 +1,9 @@
-package nai64.universaloverlay.modules;
+package nai64.universaloverlay.modules.statistic;
 
 import android.app.Activity;
 import android.net.TrafficStats;
 import java.util.Locale;
+import nai64.universaloverlay.modules.UniversalOverlayStatisticModule;
 
 /** Displays process network traffic deltas as separate incoming and outgoing monitors. */
 public final class NetworkStatusModule extends UniversalOverlayStatisticModule {

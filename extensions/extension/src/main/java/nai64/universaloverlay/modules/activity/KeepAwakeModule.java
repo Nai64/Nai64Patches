@@ -1,7 +1,8 @@
-package nai64.universaloverlay.modules;
+package nai64.universaloverlay.modules.activity;
 
 import android.app.Activity;
 import android.view.WindowManager;
+import nai64.universaloverlay.modules.UniversalOverlayActivityModule;
 
 public final class KeepAwakeModule extends UniversalOverlayActivityModule {
     @Override public String key() { return "keepAwake"; }

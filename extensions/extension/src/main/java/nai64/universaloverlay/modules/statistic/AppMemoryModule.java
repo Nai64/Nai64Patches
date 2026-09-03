@@ -1,7 +1,8 @@
-package nai64.universaloverlay.modules;
+package nai64.universaloverlay.modules.statistic;
 
 import android.app.ActivityManager;
 import android.app.Application;
+import nai64.universaloverlay.modules.UniversalOverlayStatisticModule;
 
 /** Shows the host process' approximate private memory in MB. */
 public final class AppMemoryModule extends UniversalOverlayStatisticModule {

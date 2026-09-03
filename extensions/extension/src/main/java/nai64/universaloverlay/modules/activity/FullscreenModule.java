@@ -1,7 +1,8 @@
-package nai64.universaloverlay.modules;
+package nai64.universaloverlay.modules.activity;
 
 import android.app.Activity;
 import android.view.View;
+import nai64.universaloverlay.modules.UniversalOverlayActivityModule;
 
 public final class FullscreenModule extends UniversalOverlayActivityModule {
     @Override public String key() { return "fullscreen"; }
