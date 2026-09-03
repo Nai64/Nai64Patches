@@ -198,13 +198,13 @@ val universalOverlayPatch = bytecodePatch(
     )
     val buttonBackgroundColor by stringOption(
         title = "UI - Legacy icon background 1",
-        default = "#FF17304A",
+        default = "#FF2C6FA3",
         key = "runtimeOverlayButtonBackgroundColor",
         description = "First color of the legacy icon gradient.",
     )
     val iconBackground2 by stringOption(
         title = "UI - Legacy icon background 2",
-        default = "#FF2E8B57",
+        default = "#FF45B96B",
         key = "runtimeOverlayIconBackgroundColor2",
         description = "Second color of the legacy icon gradient. Background 1 is the existing overlay button background color.",
     )
@@ -219,7 +219,7 @@ val universalOverlayPatch = bytecodePatch(
         title = "UI - Custom image icon (Base64)",
         default = "",
         key = "runtimeOverlayCustomIconImage",
-        description = "Use a trusted Base64 image encoder, such as https://base64.guru/converter/encode/image: choose a square PNG or JPEG, ideally 128x128 or 256x256 pixels, copy its encoded result, then paste it here instead of a file path. Example format: data:image/png;base64,<your encoded image data>. Transparent images are supported and other sizes are scaled proportionally. Leave blank to use the legacy icon; invalid or missing input falls back with a one-time launch notice.",
+        description = "Select Custom image icon in UI - Icon type for this image input to be used. Use a trusted Base64 image encoder, such as https://base64.guru/converter/encode/image: choose a square PNG or JPEG, ideally 128x128 or 256x256 pixels, copy its encoded result, then paste it here instead of a file path. Example format: data:image/png;base64,<your encoded image data>. Transparent images are supported and other sizes are scaled proportionally. Leave blank to use the legacy icon; invalid or missing input falls back with a one-time launch notice.",
     )
     val iconBold by booleanOption(
         title = "UI - Legacy icon bold text",
@@ -247,7 +247,7 @@ val universalOverlayPatch = bytecodePatch(
     )
     val outlineWidth by intOption(
         title = "UI - Menu outline width (dp)",
-        default = 1,
+        default = 2,
         key = "runtimeOverlayOutlineWidthDp",
         description = "Width of the menu, monitor, and confirmation outlines, from 1 to 8dp.",
     )
@@ -446,11 +446,11 @@ val universalOverlayPatch = bytecodePatch(
         val backgroundValue = backgroundColor.orEmpty().ifBlank { "#CC101820" }
         val outlineValue = outlineColor.orEmpty().ifBlank { "#FF55D6BE" }
         val buttonTextColorValue = buttonTextColor.orEmpty().ifBlank { "#FFFFFFFF" }
-        val buttonBackgroundValue = buttonBackgroundColor.orEmpty().ifBlank { "#FF17304A" }
+        val buttonBackgroundValue = buttonBackgroundColor.orEmpty().ifBlank { "#FF2C6FA3" }
         val outlineWidthValue = (outlineWidth ?: 1).coerceIn(1, 8)
         val iconOutlineColorValue = iconOutlineColor.orEmpty().ifBlank { outlineValue }
         val iconTypeValue = iconType.orEmpty().ifBlank { "legacy" }
-        val iconBackground2Value = iconBackground2.orEmpty().ifBlank { "#FF2E8B57" }
+        val iconBackground2Value = iconBackground2.orEmpty().ifBlank { "#FF45B96B" }
         val iconGradientAngleValue = ((iconGradientAngle ?: 30) % 361 + 361) % 361
         val customIconImageValue = customIconImage.orEmpty().trim()
         val monitorPositionValue = statisticMonitorPosition.orEmpty().ifBlank { "bottom" }

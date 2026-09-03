@@ -387,7 +387,7 @@ public final class UniversalOverlayRuntime {
                 button.setBackground(UniversalOverlayViews.gradientBackground(
                         config.buttonBackground, config.iconBackground2, config.iconGradientAngle,
                         config.iconOutline ? config.iconOutlineColor : Color.TRANSPARENT,
-                        config.iconOutline ? config.outlineWidth : 0, config.shape == 1));
+                        config.iconOutline ? Math.min(8, Math.max(2, config.outlineWidth + 1)) : 0, config.shape == 1));
             }
             button.setOnClickListener(v -> toggleMenu());
             button.setOnTouchListener(this::onButtonTouch);
