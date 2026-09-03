@@ -227,12 +227,6 @@ public final class UniversalOverlayRuntime {
                     : android.R.style.Theme_Holo_Light_NoActionBar;
             overlayContext = new ContextThemeWrapper(activity, overlayTheme);
             this.config = config;
-            dragVisibilityFade = () -> {
-                if (!detached && !menuVisible) {
-                    floatingButton.animate().alpha(config.opacity).setDuration(180).start();
-                    setMonitorAlpha(config.opacity);
-                }
-            };
             Window window = activity.getWindow();
             originalWindowFlags = window.getAttributes().flags;
             originalSystemUi = window.getDecorView().getSystemUiVisibility();
@@ -270,6 +264,12 @@ public final class UniversalOverlayRuntime {
             monitorWidth = Math.round(((int) Math.ceil(widestMonitor) + dp(24)) * config.monitorScale);
             monitorHeight = Math.round(((int) Math.ceil(metrics.bottom - metrics.top) + dp(12)) * config.monitorScale);
             floatingButton = createFloatingButton();
+            dragVisibilityFade = () -> {
+                if (!detached && !menuVisible) {
+                    floatingButton.animate().alpha(config.opacity).setDuration(180).start();
+                    setMonitorAlpha(config.opacity);
+                }
+            };
             menuLayer = new FrameLayout(overlayContext);
             menuScrim = createMenuScrim();
             panel = createMenuPanel();
