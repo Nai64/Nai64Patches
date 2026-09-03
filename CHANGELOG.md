@@ -1,3 +1,9 @@
+## [1.43.1](https://github.com/Nai64/Nai64Patches/compare/1.43.0...1.43.1) (2026-09-03)
+
+### Bug Fixes
+
+* cover React Native AsyncStorage and billing bridges in unlock premium ([2738ad1](https://github.com/Nai64/Nai64Patches/commit/2738ad1a0863aae45c693f013d912d6a2a2aae5d))
+
 ## [1.43.0](https://github.com/Nai64/Nai64Patches/compare/1.42.0...1.43.0) (2026-09-03)
 
 ### Bug Fixes

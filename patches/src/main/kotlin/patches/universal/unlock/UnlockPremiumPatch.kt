@@ -164,6 +164,96 @@ val unlockPremiumPatch = bytecodePatch(
         }
 
         // ──────────────────────────────────────────────
+        // 1b) React Native billing bridges (Promise-based, no premium method names).
+        // Ownership queries resolve with empty lists ("no purchases" semantics).
+        // ──────────────────────────────────────────────
+
+        for ((bridgeName, promiseReg) in listOf(
+            "listOwnedSubscriptions" to 1,
+            "loadOwnedPurchasesFromGoogle" to 1,
+            "getSubscriptionDetailsArray" to 2,
+            "getSubscriptionTransactionDetails" to 2,
+        )) {
+            patchAll(
+                Fingerprint(
+                    name = bridgeName,
+                    returnType = "V",
+                    custom = { m, _ -> m.parameterTypes.lastOrNull() == "Lcom/facebook/react/bridge/Promise;" }
+                ), "RN:$bridgeName"
+            ) {
+                it.addInstructions(0, """
+                    new-instance v0, Lcom/facebook/react/bridge/WritableNativeArray;
+                    invoke-direct {v0}, Lcom/facebook/react/bridge/WritableNativeArray;-><init>()V
+                    invoke-interface {p$promiseReg, v0}, Lcom/facebook/react/bridge/Promise;->resolve(Ljava/lang/Object;)V
+                    return-void
+                """.trimIndent())
+            }
+        }
+
+        // ──────────────────────────────────────────────
+        // 1c) React Native AsyncStorage (SQLite RKStorage backend).
+        // Single-key reads of premium flags resolve "1", everything else
+        // falls through to the original implementation untouched.
+        // ──────────────────────────────────────────────
+
+        patchAll(
+            Fingerprint(
+                definingClass = "Lcom/facebook/react/modules/storage/AsyncStorageModule;",
+                name = "multiGet",
+                returnType = "V",
+                custom = { m, _ -> m.parameterTypes == listOf("Lcom/facebook/react/bridge/ReadableArray;", "Lcom/facebook/react/bridge/Callback;") }
+            ), "RN:AsyncStorage"
+        ) {
+            val checks = listOf(
+                "subscribed", "subscription", "premium", "entitlement", "lifetime",
+                "unlocked", "remove_ads", "no_ads", "ad_free", "adfree"
+            ).joinToString("\n") { token ->
+                """
+                const-string v2, "$token"
+                invoke-virtual {v1, v2}, Ljava/lang/String;->contains(Ljava/lang/CharSequence;)Z
+                move-result v2
+                if-nez v2, :morphe_async_hit
+                """.trimIndent()
+            }
+            it.addInstructions(0, """
+                invoke-interface {p1}, Lcom/facebook/react/bridge/ReadableArray;->size()I
+                move-result v0
+                const/4 v1, 0x1
+                if-ne v0, v1, :morphe_async_orig
+                const/4 v1, 0x0
+                invoke-interface {p1, v1}, Lcom/facebook/react/bridge/ReadableArray;->getString(I)Ljava/lang/String;
+                move-result-object v1
+                if-eqz v1, :morphe_async_orig
+                invoke-virtual {v1}, Ljava/lang/String;->toLowerCase()Ljava/lang/String;
+                move-result-object v1
+                $checks
+                goto :morphe_async_orig
+                :morphe_async_hit
+                invoke-static {}, Lcom/facebook/react/bridge/Arguments;->createArray()Lcom/facebook/react/bridge/WritableArray;
+                move-result-object v2
+                invoke-static {}, Lcom/facebook/react/bridge/Arguments;->createArray()Lcom/facebook/react/bridge/WritableArray;
+                move-result-object v3
+                const/4 v4, 0x0
+                invoke-interface {p1, v4}, Lcom/facebook/react/bridge/ReadableArray;->getString(I)Ljava/lang/String;
+                move-result-object v4
+                invoke-interface {v3, v4}, Lcom/facebook/react/bridge/WritableArray;->pushString(Ljava/lang/String;)V
+                const-string v4, "1"
+                invoke-interface {v3, v4}, Lcom/facebook/react/bridge/WritableArray;->pushString(Ljava/lang/String;)V
+                invoke-interface {v2, v3}, Lcom/facebook/react/bridge/WritableArray;->pushArray(Lcom/facebook/react/bridge/ReadableArray;)V
+                const/4 v3, 0x2
+                new-array v3, v3, [Ljava/lang/Object;
+                const/4 v4, 0x0
+                const/4 v5, 0x0
+                aput-object v5, v3, v4
+                const/4 v4, 0x1
+                aput-object v2, v3, v4
+                invoke-interface {p2, v3}, Lcom/facebook/react/bridge/Callback;->invoke([Ljava/lang/Object;)V
+                return-void
+                :morphe_async_orig
+            """.trimIndent())
+        }
+
+        // ──────────────────────────────────────────────
         // 2) Single-pass classDefForEach: Prefs + generic premium fallback
         // Merged from 3 passes -> 1 pass to save heap (was 6 scans via helpers)
         // ──────────────────────────────────────────────
