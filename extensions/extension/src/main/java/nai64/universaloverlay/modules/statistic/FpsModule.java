@@ -1,6 +1,7 @@
-package nai64.universaloverlay.modules;
+package nai64.universaloverlay.modules.statistic;
 
 import android.view.Choreographer;
+import nai64.universaloverlay.modules.UniversalOverlayStatisticModule;
 
 /** Samples approximate display frame cadence only while the FPS row is visible. */
 public final class FpsModule extends UniversalOverlayStatisticModule {

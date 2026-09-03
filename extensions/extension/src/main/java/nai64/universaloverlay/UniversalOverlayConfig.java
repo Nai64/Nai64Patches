@@ -5,7 +5,7 @@ import android.view.Gravity;
 
 /**
  * Decodes and validates overlay configuration inside the extension runtime.
- * The patch-building Kotlin code supplies version 4; older 14/15/17-field payloads remain supported.
+ * The patch-building Kotlin code supplies version 7; older payloads remain supported.
  */
 final class UniversalOverlayConfig {
     private static final String DEFAULT_DESCRIPTION =
@@ -15,8 +15,11 @@ final class UniversalOverlayConfig {
             "Zanuaimi.";
     String title, description, repositoryText, repositoryUrl, buttonText;
     int background, outline, buttonTextColor, buttonBackground, buttonSize, gravity;
+    int outlineWidth, iconOutlineColor, iconBackground2, iconGradientAngle;
     float opacity;
     int shape;
+    boolean iconOutline, iconBold;
+    String iconType, customIconImage;
     boolean keepAwake, fullscreen, screenshots;
     boolean systemTime, fps, sessionTime;
     boolean batteryStatus, appMemory, networkStatus, deviceInformation, deviceTemperature;
@@ -29,20 +32,20 @@ final class UniversalOverlayConfig {
     static UniversalOverlayConfig decode(String encoded) {
         UniversalOverlayConfig c = new UniversalOverlayConfig();
         String[] values = encoded == null ? new String[0] : encoded.split("\\|", -1);
-        // Version 2/3/4/5/6 prepends a version field. Keep accepting the original 14-field format so an
+        // Version 2/3/4/5/6/7 prepends a version field. Keep accepting the original 14-field format so an
         // older generated patch remains safe when paired with this newer extension.
-        String[] v = new String[22];
+        String[] v = new String[31];
         for (int i = 0; i < v.length; i++) v[i] = i < values.length ? decodePart(values[i]) : "";
-        int offset = ("2".equals(v[0]) || "3".equals(v[0]) || "4".equals(v[0]) || "5".equals(v[0]) || "6".equals(v[0])) ? 1 : 0;
+        int offset = ("2".equals(v[0]) || "3".equals(v[0]) || "4".equals(v[0]) || "5".equals(v[0]) || "6".equals(v[0]) || "7".equals(v[0])) ? 1 : 0;
         c.title = limit(field(v, offset, 0), 80, "Nai64Patches Universal Overlay Patch");
         c.description = limit(field(v, offset, 1), 500, DEFAULT_DESCRIPTION);
         c.repositoryText = empty(field(v, offset, 2), "Nai64 repository");
         c.repositoryUrl = validUrl(field(v, offset, 3));
         c.background = color(field(v, offset, 4), 0xCC101820);
         c.outline = color(field(v, offset, 5), 0xFF55D6BE);
-        c.buttonText = limit(empty(field(v, offset, 6), "N"), 3, "N");
-        c.buttonTextColor = color(field(v, offset, 7), Color.BLACK);
-        c.buttonBackground = color(field(v, offset, 8), Color.WHITE);
+        c.buttonText = limit(empty(field(v, offset, 6), "N64"), 3, "N64");
+        c.buttonTextColor = color(field(v, offset, 7), Color.WHITE);
+        c.buttonBackground = color(field(v, offset, 8), 0xFF17304A);
         String shape = field(v, offset, 9);
         c.shape = "square".equals(shape) ? 0 : ("squircle".equals(shape) ? 2 : 1);
         c.buttonSize = integer(field(v, offset, 10), 56, 32, 128);
@@ -66,7 +69,7 @@ final class UniversalOverlayConfig {
         c.disableHaptics = hasToken(controls, "disableHaptics");
         c.disableAnimations = hasToken(controls, "disableAnimations");
         c.activateStatisticsOnLaunch = "1".equals(field(v, offset, 14));
-        boolean currentFormat = "5".equals(v[0]) || "6".equals(v[0]);
+        boolean currentFormat = "5".equals(v[0]) || "6".equals(v[0]) || "7".equals(v[0]);
         c.enableMonitorsOnLaunch = currentFormat && "1".equals(field(v, offset, 15));
         int monitorPositionIndex = currentFormat ? 16 : 15;
         int monitorScaleIndex = currentFormat ? 17 : 16;
@@ -76,10 +79,19 @@ final class UniversalOverlayConfig {
                 : ("bottom".equals(monitorPosition) ? 2 : 0);
         c.monitorScale = floatValue(field(v, offset, monitorScaleIndex), 1f, .5f, 2f);
         c.monitorColumns = integer(field(v, offset, monitorColumnsIndex), 2, 1, 3);
-        boolean extendedFormat = "6".equals(v[0]);
+        boolean extendedFormat = "6".equals(v[0]) || "7".equals(v[0]);
         c.temperatureFormat = extendedFormat && "fahrenheit".equals(field(v, offset, 19)) ? "fahrenheit"
                 : (extendedFormat && "kelvin".equals(field(v, offset, 19)) ? "kelvin" : "celsius");
         c.timeFormat = extendedFormat && "24".equals(field(v, offset, 20)) ? "24" : "12";
+        boolean customizationFormat = "7".equals(v[0]);
+        c.outlineWidth = customizationFormat ? integer(field(v, offset, 21), 1, 1, 8) : 1;
+        c.iconOutline = customizationFormat && "1".equals(field(v, offset, 22));
+        c.iconOutlineColor = color(customizationFormat ? field(v, offset, 23) : "", c.outline);
+        c.iconType = customizationFormat && "image".equals(field(v, offset, 24)) ? "image" : "legacy";
+        c.iconBold = !customizationFormat || "1".equals(field(v, offset, 25));
+        c.iconBackground2 = color(customizationFormat ? field(v, offset, 26) : "", 0xFF174A2E);
+        c.iconGradientAngle = customizationFormat ? integer(field(v, offset, 27), 30, 0, 360) : 30;
+        c.customIconImage = customizationFormat ? field(v, offset, 28) : "";
         return c;
     }
 

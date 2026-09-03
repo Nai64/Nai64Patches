@@ -1,7 +1,8 @@
-package nai64.universaloverlay.modules;
+package nai64.universaloverlay.modules.activity;
 
 import android.app.Activity;
 import android.view.View;
+import nai64.universaloverlay.modules.UniversalOverlayActivityModule;
 
 /** Applies a temporary app-content dimming layer without changing system brightness. */
 public final class AppBrightnessModule extends UniversalOverlayActivityModule {

@@ -1,8 +1,9 @@
-package nai64.universaloverlay.modules;
+package nai64.universaloverlay.modules.hook;
 
 import android.app.Activity;
 import android.view.View;
 import android.view.ViewGroup;
+import nai64.universaloverlay.modules.UniversalOverlayHookModule;
 
 /** Best-effort runtime cancellation of animations on currently attached Android views. */
 public final class DisableAnimationsModule extends UniversalOverlayHookModule {

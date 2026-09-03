@@ -1,9 +1,10 @@
-package nai64.universaloverlay.modules;
+package nai64.universaloverlay.modules.statistic;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
+import nai64.universaloverlay.modules.UniversalOverlayStatisticModule;
 
 /** Displays the phone's local date and time in both common clock formats. */
 public final class SystemTimeModule extends UniversalOverlayStatisticModule {

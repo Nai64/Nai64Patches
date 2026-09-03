@@ -1,7 +1,8 @@
-package nai64.universaloverlay.modules;
+package nai64.universaloverlay.modules.activity;
 
 import android.app.Activity;
 import android.content.pm.ActivityInfo;
+import nai64.universaloverlay.modules.UniversalOverlayActivityModule;
 
 /** Applies a per-Activity orientation request and restores the original request. */
 public final class RotationModeModule extends UniversalOverlayActivityModule {

@@ -1,7 +1,8 @@
-package nai64.universaloverlay.modules;
+package nai64.universaloverlay.modules.activity;
 
 import android.app.Activity;
 import android.media.AudioManager;
+import nai64.universaloverlay.modules.UniversalOverlayActivityModule;
 
 /** Best-effort temporary mute for the app's music stream. */
 public final class AppAudioMuteModule extends UniversalOverlayActivityModule {

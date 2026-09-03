@@ -2,8 +2,12 @@ package nai64.universaloverlay;
 
 import android.app.Activity;
 import android.app.Application;
+import android.content.Context;
+import android.view.ContextThemeWrapper;
 import android.content.Intent;
 import android.content.res.ColorStateList;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.Paint;
@@ -24,27 +28,28 @@ import android.widget.Toast;
 import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.widget.ArrayAdapter;
+import android.graphics.drawable.BitmapDrawable;
 
-import nai64.universaloverlay.modules.FullscreenModule;
-import nai64.universaloverlay.modules.KeepAwakeModule;
-import nai64.universaloverlay.modules.ScreenshotsModule;
+import nai64.universaloverlay.modules.activity.AppAudioMuteModule;
+import nai64.universaloverlay.modules.activity.AppBrightnessModule;
+import nai64.universaloverlay.modules.activity.FullscreenModule;
+import nai64.universaloverlay.modules.activity.KeepAwakeModule;
+import nai64.universaloverlay.modules.activity.RotationModeModule;
+import nai64.universaloverlay.modules.activity.ScreenshotsModule;
+import nai64.universaloverlay.modules.hook.DisableAnimationsModule;
+import nai64.universaloverlay.modules.hook.DisableHapticsModule;
+import nai64.universaloverlay.modules.statistic.AppMemoryModule;
+import nai64.universaloverlay.modules.statistic.BatteryStatusModule;
+import nai64.universaloverlay.modules.statistic.DeviceInformationModule;
+import nai64.universaloverlay.modules.statistic.DeviceTemperatureModule;
+import nai64.universaloverlay.modules.statistic.FpsModule;
+import nai64.universaloverlay.modules.statistic.NetworkStatusModule;
+import nai64.universaloverlay.modules.statistic.SessionTimeModule;
+import nai64.universaloverlay.modules.statistic.SystemTimeModule;
 import nai64.universaloverlay.modules.UniversalOverlayActivityModule;
 import nai64.universaloverlay.modules.UniversalOverlayHookModule;
 import nai64.universaloverlay.modules.UniversalOverlayModule;
 import nai64.universaloverlay.modules.UniversalOverlayStatisticModule;
-import nai64.universaloverlay.modules.FpsModule;
-import nai64.universaloverlay.modules.SessionTimeModule;
-import nai64.universaloverlay.modules.SystemTimeModule;
-import nai64.universaloverlay.modules.BatteryStatusModule;
-import nai64.universaloverlay.modules.AppMemoryModule;
-import nai64.universaloverlay.modules.NetworkStatusModule;
-import nai64.universaloverlay.modules.DeviceInformationModule;
-import nai64.universaloverlay.modules.DeviceTemperatureModule;
-import nai64.universaloverlay.modules.AppBrightnessModule;
-import nai64.universaloverlay.modules.RotationModeModule;
-import nai64.universaloverlay.modules.AppAudioMuteModule;
-import nai64.universaloverlay.modules.DisableHapticsModule;
-import nai64.universaloverlay.modules.DisableAnimationsModule;
 
 import java.util.Map;
 import java.util.ArrayList;
@@ -78,6 +83,8 @@ public final class UniversalOverlayRuntime {
     private static int sharedButtonY;
     private static Float appBrightnessState;
     private static Integer rotationModeState;
+    private static boolean customIconFallbackNotified;
+    private static boolean fullyClosedToastShown;
 
     private UniversalOverlayRuntime() { }
 
@@ -184,6 +191,7 @@ public final class UniversalOverlayRuntime {
     /** Owns all views and state for exactly one Activity. */
     private static final class Controller {
         private final Activity activity;
+        private final Context overlayContext;
         private final UniversalOverlayConfig config;
         private final FrameLayout root;
         private final TextView floatingButton;
@@ -213,11 +221,15 @@ public final class UniversalOverlayRuntime {
 
         Controller(Activity activity, UniversalOverlayConfig config) {
             this.activity = activity;
+            int overlayTheme = android.os.Build.VERSION.SDK_INT >= 21
+                    ? android.R.style.Theme_Material_Light_NoActionBar
+                    : android.R.style.Theme_Holo_Light_NoActionBar;
+            overlayContext = new ContextThemeWrapper(activity, overlayTheme);
             this.config = config;
             Window window = activity.getWindow();
             originalWindowFlags = window.getAttributes().flags;
             originalSystemUi = window.getDecorView().getSystemUiVisibility();
-            root = new FrameLayout(activity);
+            root = new FrameLayout(overlayContext);
             root.setClipChildren(false);
             root.setFocusableInTouchMode(true);
             root.setOnKeyListener((view, keyCode, event) -> {
@@ -228,7 +240,7 @@ public final class UniversalOverlayRuntime {
                 }
                 return false;
             });
-            brightnessDimLayer = new View(activity);
+            brightnessDimLayer = new View(overlayContext);
             brightnessDimLayer.setBackgroundColor(Color.BLACK);
             brightnessDimLayer.setClickable(false);
             brightnessDimLayer.setFocusable(false);
@@ -251,7 +263,7 @@ public final class UniversalOverlayRuntime {
             monitorWidth = Math.round(((int) Math.ceil(widestMonitor) + dp(24)) * config.monitorScale);
             monitorHeight = Math.round(((int) Math.ceil(metrics.bottom - metrics.top) + dp(12)) * config.monitorScale);
             floatingButton = createFloatingButton();
-            menuLayer = new FrameLayout(activity);
+            menuLayer = new FrameLayout(overlayContext);
             menuScrim = createMenuScrim();
             panel = createMenuPanel();
             confirmationLayer = createConfirmationLayer();
@@ -353,17 +365,66 @@ public final class UniversalOverlayRuntime {
         }
 
         private TextView createFloatingButton() {
-            TextView button = new TextView(activity);
-            button.setText(config.buttonText);
+            TextView button = new TextView(overlayContext);
             button.setTextColor(config.buttonTextColor);
-            button.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
             button.setGravity(Gravity.CENTER);
             button.setAlpha(config.opacity);
             button.setContentDescription(config.buttonText);
-            button.setBackground(UniversalOverlayViews.background(config.buttonBackground, config.outline, config.shape == 1));
+            Bitmap customIcon = config.iconType.equals("image") ? decodeCustomIcon(config.customIconImage) : null;
+            if (customIcon != null) {
+                button.setText("");
+                BitmapDrawable image = new BitmapDrawable(overlayContext.getResources(), fitCustomIcon(customIcon));
+                image.setGravity(Gravity.CENTER);
+                image.setAntiAlias(true);
+                button.setBackground(image);
+            } else {
+                if (config.iconType.equals("image") && !customIconFallbackNotified) {
+                    customIconFallbackNotified = true;
+                    Toast.makeText(activity, "Image not found, falling back to legacy icon", Toast.LENGTH_LONG).show();
+                }
+                button.setText(config.buttonText);
+                button.setTypeface(Typeface.DEFAULT, config.iconBold ? Typeface.BOLD : Typeface.NORMAL);
+                button.setBackground(UniversalOverlayViews.gradientBackground(
+                        config.buttonBackground, config.iconBackground2, config.iconGradientAngle,
+                        config.iconOutline ? config.iconOutlineColor : Color.TRANSPARENT,
+                        config.iconOutline ? config.outlineWidth : 0, config.shape == 1));
+            }
             button.setOnClickListener(v -> toggleMenu());
             button.setOnTouchListener(this::onButtonTouch);
             return button;
+        }
+
+        private Bitmap decodeCustomIcon(String encoded) {
+            if (encoded == null || encoded.trim().isEmpty() || encoded.length() > 4 * 1024 * 1024) return null;
+            try {
+                String value = encoded.trim();
+                int comma = value.indexOf(',');
+                if (value.startsWith("data:") && comma >= 0) value = value.substring(comma + 1).trim();
+                if (value.isEmpty()) return null;
+                byte[] bytes = android.util.Base64.decode(value, android.util.Base64.DEFAULT);
+                if (bytes.length == 0) return null;
+                return BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+            } catch (RuntimeException ignored) {
+                return null;
+            }
+        }
+
+        private Bitmap fitCustomIcon(Bitmap bitmap) {
+            int target = Math.max(1, dp(config.buttonSize) - dp(8));
+            int width = bitmap.getWidth();
+            int height = bitmap.getHeight();
+            if (width <= 0 || height <= 0) return bitmap;
+            float scale = Math.min((float) target / width, (float) target / height);
+            if (scale == 1f) return bitmap;
+            int scaledWidth = Math.max(1, Math.round(width * scale));
+            int scaledHeight = Math.max(1, Math.round(height * scale));
+            try {
+                Bitmap scaled = Bitmap.createScaledBitmap(bitmap, scaledWidth, scaledHeight, true);
+                if (scaled != bitmap) bitmap.recycle();
+                return scaled;
+            } catch (RuntimeException ignored) {
+                return bitmap;
+            }
         }
 
         private void createStatisticMonitors(UniversalOverlayStatisticModule module) {
@@ -372,7 +433,7 @@ public final class UniversalOverlayRuntime {
                 TextView monitor = text("", 12, config.outline);
                 monitor.setGravity(Gravity.CENTER);
                 monitor.setPadding(dp(3), 0, dp(3), 0);
-                monitor.setBackground(UniversalOverlayViews.background(config.background, config.outline, false));
+                monitor.setBackground(UniversalOverlayViews.background(config.background, config.outline, false, config.outlineWidth));
                 monitor.setClickable(false);
                 monitor.setFocusable(false);
                 monitor.setFocusableInTouchMode(false);
@@ -468,7 +529,7 @@ public final class UniversalOverlayRuntime {
         }
 
         private FrameLayout createMenuLayer() {
-            FrameLayout layer = new FrameLayout(activity);
+            FrameLayout layer = new FrameLayout(overlayContext);
             // This full-screen container remains touchable while the menu is open. Its children
             // consume all background touches so Unity/host content cannot receive game input.
             layer.setClickable(true);
@@ -477,7 +538,7 @@ public final class UniversalOverlayRuntime {
         }
 
         private View createMenuScrim() {
-            View scrim = new View(activity);
+            View scrim = new View(overlayContext);
             scrim.setBackgroundColor(0x55000000);
             scrim.setClickable(true);
             scrim.setFocusable(true);
@@ -489,14 +550,14 @@ public final class UniversalOverlayRuntime {
         }
 
         private LinearLayout createMenuPanel() {
-            LinearLayout menu = new LinearLayout(activity);
+            LinearLayout menu = new LinearLayout(overlayContext);
             menu.setOrientation(LinearLayout.VERTICAL);
             menu.setClickable(true);
             menu.setFocusable(true);
             // Consume unused panel area without preventing its child controls from receiving taps.
             menu.setOnTouchListener((v, event) -> true);
             menu.setPadding(dp(20), dp(18), dp(20), dp(12));
-            menu.setBackground(UniversalOverlayViews.background(config.background, config.outline, false));
+            menu.setBackground(UniversalOverlayViews.background(config.background, config.outline, false, config.outlineWidth));
             FrameLayout.LayoutParams panelParams = new FrameLayout.LayoutParams(
                     Math.max(dp(1), Math.min(dp(560), activity.getResources().getDisplayMetrics().widthPixels - dp(40))),
                     ViewGroup.LayoutParams.WRAP_CONTENT,
@@ -515,9 +576,9 @@ public final class UniversalOverlayRuntime {
 
             int maxControlHeight = Math.max(dp(120), Math.min(dp(280),
                     (int) (activity.getResources().getDisplayMetrics().heightPixels * .45f)) - dp(8));
-            ScrollView scroll = new BoundedScrollView(activity, maxControlHeight);
+            ScrollView scroll = new BoundedScrollView(overlayContext, maxControlHeight);
             scroll.setFillViewport(true);
-            LinearLayout modules = new LinearLayout(activity);
+            LinearLayout modules = new LinearLayout(overlayContext);
             modules.setOrientation(LinearLayout.VERTICAL);
             addModules(modules);
             scroll.addView(modules, new ScrollView.LayoutParams(-1, -2));
@@ -525,7 +586,7 @@ public final class UniversalOverlayRuntime {
             scrollParams.topMargin = dp(12);
             menu.addView(scroll, scrollParams);
 
-            LinearLayout actions = new LinearLayout(activity);
+            LinearLayout actions = new LinearLayout(overlayContext);
             actions.setOrientation(LinearLayout.HORIZONTAL);
             actions.setGravity(Gravity.CENTER);
             menu.addView(actions, new LinearLayout.LayoutParams(-1, -2));
@@ -536,16 +597,16 @@ public final class UniversalOverlayRuntime {
         }
 
         private FrameLayout createConfirmationLayer() {
-            FrameLayout layer = new FrameLayout(activity);
+            FrameLayout layer = new FrameLayout(overlayContext);
             layer.setBackgroundColor(0xB3000000);
             layer.setClickable(true);
             layer.setFocusable(true);
             layer.setOnClickListener(v -> hideCloseConfirmation());
 
-            LinearLayout card = new LinearLayout(activity);
+            LinearLayout card = new LinearLayout(overlayContext);
             card.setOrientation(LinearLayout.VERTICAL);
             card.setPadding(dp(20), dp(18), dp(20), dp(12));
-            card.setBackground(UniversalOverlayViews.background(config.background, config.outline, false));
+            card.setBackground(UniversalOverlayViews.background(config.background, config.outline, false, config.outlineWidth));
             card.setClickable(true);
             card.setOnClickListener(v -> { });
 
@@ -558,7 +619,7 @@ public final class UniversalOverlayRuntime {
             messageParams.topMargin = dp(8);
             card.addView(message, messageParams);
 
-            LinearLayout actions = new LinearLayout(activity);
+            LinearLayout actions = new LinearLayout(overlayContext);
             actions.setOrientation(LinearLayout.HORIZONTAL);
             actions.setGravity(Gravity.CENTER);
             LinearLayout.LayoutParams actionsParams = new LinearLayout.LayoutParams(-1, -2);
@@ -709,9 +770,10 @@ public final class UniversalOverlayRuntime {
             Float remembered = appBrightnessState;
             if (remembered != null) module.apply(activity, remembered);
             LinearLayout row = moduleRow(module.label(), module.description());
-            SeekBar slider = new SeekBar(activity);
+            SeekBar slider = new SeekBar(overlayContext);
             slider.setMax(100);
             slider.setLayoutDirection(View.LAYOUT_DIRECTION_LTR);
+            styleSlider(slider);
             slider.setProgress(Math.round((remembered == null ? module.current(activity) : remembered) * 100f));
             slider.setContentDescription(module.label());
             slider.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -736,9 +798,9 @@ public final class UniversalOverlayRuntime {
             Integer remembered = rotationModeState;
             if (remembered != null) module.apply(activity, remembered);
             LinearLayout row = moduleRow(module.label(), module.description());
-            Spinner spinner = new Spinner(activity);
+            Spinner spinner = new Spinner(overlayContext);
             String[] labels = {"System", "Portrait", "Landscape"};
-            ArrayAdapter<String> adapter = new ArrayAdapter<String>(activity, android.R.layout.simple_spinner_item, labels) {
+            ArrayAdapter<String> adapter = new ArrayAdapter<String>(overlayContext, android.R.layout.simple_spinner_item, labels) {
                 @Override public View getView(int position, View convertView, android.view.ViewGroup parentView) {
                     TextView view = (TextView) super.getView(position, convertView, parentView);
                     view.setTextColor(config.outline);
@@ -753,9 +815,9 @@ public final class UniversalOverlayRuntime {
             };
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             spinner.setAdapter(adapter);
-            spinner.setBackground(UniversalOverlayViews.background(config.background, config.outline, false));
+            spinner.setBackground(UniversalOverlayViews.background(config.background, config.outline, false, config.outlineWidth));
             if (android.os.Build.VERSION.SDK_INT >= 16) {
-                spinner.setPopupBackgroundDrawable(UniversalOverlayViews.background(config.background, config.outline, false));
+                spinner.setPopupBackgroundDrawable(UniversalOverlayViews.background(config.background, config.outline, false, config.outlineWidth));
             }
             int current = remembered == null ? module.current(activity) : remembered;
             spinner.setSelection(current == android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT ? 1
@@ -778,7 +840,7 @@ public final class UniversalOverlayRuntime {
         }
 
         private LinearLayout moduleRow(String label, String details) {
-            LinearLayout row = new LinearLayout(activity);
+            LinearLayout row = new LinearLayout(overlayContext);
             row.setOrientation(LinearLayout.VERTICAL);
             row.setPadding(0, dp(6), 0, dp(6));
             TextView title = text(label, 16, config.outline);
@@ -795,13 +857,13 @@ public final class UniversalOverlayRuntime {
             String label = module.label();
             String description = module.description();
             statistics.add(module);
-            LinearLayout row = new LinearLayout(activity);
+            LinearLayout row = new LinearLayout(overlayContext);
             row.setOrientation(LinearLayout.HORIZONTAL);
             row.setGravity(Gravity.CENTER_VERTICAL);
             row.setPadding(0, dp(6), 0, dp(6));
             row.setMinimumHeight(dp(64));
 
-            LinearLayout copy = new LinearLayout(activity);
+            LinearLayout copy = new LinearLayout(overlayContext);
             copy.setOrientation(LinearLayout.VERTICAL);
             TextView title = text(label, 16, config.outline);
             title.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
@@ -816,7 +878,7 @@ public final class UniversalOverlayRuntime {
 
             CheckBox monitorControl = null;
             if (module.monitorCount() > 0) {
-                monitorControl = new CheckBox(activity);
+                monitorControl = new CheckBox(overlayContext);
                 Boolean rememberedMonitor = MONITOR_STATES.get(key);
                 monitorControl.setChecked(rememberedMonitor != null ? rememberedMonitor : config.enableMonitorsOnLaunch);
                 monitorControl.setText("Monitor");
@@ -834,7 +896,7 @@ public final class UniversalOverlayRuntime {
                 module.setMonitorEnabled(false);
             }
 
-            CheckBox control = new CheckBox(activity);
+            CheckBox control = new CheckBox(overlayContext);
             Boolean remembered = rememberedModuleState(key);
             control.setChecked(remembered != null ? remembered : config.activateStatisticsOnLaunch);
             control.setText("Active");
@@ -917,13 +979,13 @@ public final class UniversalOverlayRuntime {
         }
 
         private void addControlRow(LinearLayout parent, UniversalOverlayModule feature, boolean initial, final Toggle toggle) {
-            LinearLayout row = new LinearLayout(activity);
+            LinearLayout row = new LinearLayout(overlayContext);
             row.setOrientation(LinearLayout.HORIZONTAL);
             row.setGravity(Gravity.CENTER_VERTICAL);
             row.setPadding(0, dp(6), 0, dp(6));
             row.setMinimumHeight(dp(64));
 
-            LinearLayout copy = new LinearLayout(activity);
+            LinearLayout copy = new LinearLayout(overlayContext);
             copy.setOrientation(LinearLayout.VERTICAL);
             TextView title = text(feature.label(), 16, config.outline);
             title.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
@@ -935,7 +997,7 @@ public final class UniversalOverlayRuntime {
             copy.addView(description, descriptionParams);
             row.addView(copy, new LinearLayout.LayoutParams(0, -2, 1f));
 
-            CheckBox control = new CheckBox(activity);
+            CheckBox control = new CheckBox(overlayContext);
             control.setChecked(initial);
             styleCheckBox(control);
             control.setContentDescription(feature.label());
@@ -960,7 +1022,7 @@ public final class UniversalOverlayRuntime {
         }
 
         private TextView text(String value, float size, int color) {
-            TextView view = new TextView(activity);
+            TextView view = new TextView(overlayContext);
             view.setText(value);
             view.setTextSize(size);
             view.setTextColor(color);
@@ -974,12 +1036,21 @@ public final class UniversalOverlayRuntime {
             }
         }
 
+        private void styleSlider(SeekBar slider) {
+            if (android.os.Build.VERSION.SDK_INT >= 21) {
+                ColorStateList tint = ColorStateList.valueOf(config.outline);
+                slider.setProgressTintList(tint);
+                slider.setThumbTintList(tint);
+                slider.setProgressBackgroundTintList(ColorStateList.valueOf(config.background));
+            }
+        }
+
         private void addAction(LinearLayout row, String label, View.OnClickListener listener) {
             TextView action = text(label, 14, config.outline);
             action.setGravity(Gravity.CENTER);
             action.setContentDescription(label);
             action.setOnClickListener(listener);
-            action.setBackground(UniversalOverlayViews.selectableBackground(activity));
+            action.setBackground(UniversalOverlayViews.selectableBackground(overlayContext));
             LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(0, dp(56), 1f);
             row.addView(action, params);
         }
@@ -1013,6 +1084,7 @@ public final class UniversalOverlayRuntime {
         }
 
         private void closeMenu() {
+            boolean wasVisible = menuVisible;
             menuVisible = false;
             root.clearFocus();
             for (UniversalOverlayStatisticModule module : statistics) module.setMenuVisible(false);
@@ -1021,6 +1093,9 @@ public final class UniversalOverlayRuntime {
             floatingButton.animate().alpha(config.opacity).setDuration(180).start();
             setMonitorAlpha(config.opacity);
             root.post(this::updateMonitorLayout);
+            if (wasVisible) {
+                Toast.makeText(activity, "Press the overlay button to open the menu again", Toast.LENGTH_SHORT).show();
+            }
         }
 
         private void hideMenuLayer() {
@@ -1046,6 +1121,12 @@ public final class UniversalOverlayRuntime {
 
         private void fullyClose() {
             fullyClosed = true;
+            if (!fullyClosedToastShown) {
+                fullyClosedToastShown = true;
+                Toast.makeText(activity,
+                        "Universal Overlay is fully closed. Re-open the app to get it again",
+                        Toast.LENGTH_LONG).show();
+            }
             closeGlobally();
         }
 
