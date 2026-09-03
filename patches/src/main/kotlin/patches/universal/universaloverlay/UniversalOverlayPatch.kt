@@ -22,7 +22,7 @@ private const val DEFAULT_DESCRIPTION =
     "Welcome! This is Nai64Patches Universal Overlay Patch Menu. This experimental overlay patch" +
         "contains optional statistic, activity, and hook modules. More of them may be added in " +
         "future updates. You will find modules below the description if you enabled some modules " +
-        "in this patch settings before patching this APK." +
+        "in this patch settings before patching this APK. " +
         "The idea and initial works of Universal Overlay Patch are from Zanuaimi / Noobite."
 
 private fun encode(value: String): String =
@@ -198,15 +198,27 @@ val universalOverlayPatch = bytecodePatch(
     )
     val buttonBackgroundColor by stringOption(
         title = "UI - Legacy icon background 1",
-        default = "#FF2C6FA3",
+        default = "#000083",
         key = "runtimeOverlayButtonBackgroundColor",
         description = "First color of the legacy icon gradient.",
     )
     val iconBackground2 by stringOption(
         title = "UI - Legacy icon background 2",
-        default = "#FF45B96B",
+        default = "#00AF7C",
         key = "runtimeOverlayIconBackgroundColor2",
         description = "Second color of the legacy icon gradient. Background 1 is the existing overlay button background color.",
+    )
+    val iconOutline by booleanOption(
+        title = "UI - Icon outline",
+        default = false,
+        key = "runtimeOverlayIconOutline",
+        description = "Add a separate outline around the legacy text icon. Disabled by default.",
+    )
+    val iconOutlineColor by stringOption(
+        title = "UI - Icon outline color",
+        default = "#FFFFFFFF",
+        key = "runtimeOverlayIconOutlineColor",
+        description = "Color used only when the icon outline is enabled.",
     )
     val iconType by stringOption(
         title = "UI - Icon type",
@@ -226,18 +238,6 @@ val universalOverlayPatch = bytecodePatch(
         default = true,
         key = "runtimeOverlayIconBold",
         description = "Use bold text in the legacy icon. Enabled by default.",
-    )
-    val iconOutline by booleanOption(
-        title = "UI - Icon outline",
-        default = false,
-        key = "runtimeOverlayIconOutline",
-        description = "Add a separate outline around the legacy text icon. Disabled by default.",
-    )
-    val iconOutlineColor by stringOption(
-        title = "UI - Icon outline color",
-        default = "#FF55D6BE",
-        key = "runtimeOverlayIconOutlineColor",
-        description = "Color used only when the icon outline is enabled.",
     )
     val iconGradientAngle by intOption(
         title = "UI - Legacy icon gradient angle (degrees)",
@@ -446,11 +446,11 @@ val universalOverlayPatch = bytecodePatch(
         val backgroundValue = backgroundColor.orEmpty().ifBlank { "#CC101820" }
         val outlineValue = outlineColor.orEmpty().ifBlank { "#FF55D6BE" }
         val buttonTextColorValue = buttonTextColor.orEmpty().ifBlank { "#FFFFFFFF" }
-        val buttonBackgroundValue = buttonBackgroundColor.orEmpty().ifBlank { "#FF2C6FA3" }
+        val buttonBackgroundValue = buttonBackgroundColor.orEmpty().ifBlank { "#000083" }
         val outlineWidthValue = (outlineWidth ?: 1).coerceIn(1, 8)
-        val iconOutlineColorValue = iconOutlineColor.orEmpty().ifBlank { outlineValue }
+        val iconOutlineColorValue = iconOutlineColor.orEmpty().ifBlank { "#FFFFFFFF" }
         val iconTypeValue = iconType.orEmpty().ifBlank { "legacy" }
-        val iconBackground2Value = iconBackground2.orEmpty().ifBlank { "#FF45B96B" }
+        val iconBackground2Value = iconBackground2.orEmpty().ifBlank { "#00AF7C" }
         val iconGradientAngleValue = ((iconGradientAngle ?: 30) % 361 + 361) % 361
         val customIconImageValue = customIconImage.orEmpty().trim()
         val monitorPositionValue = statisticMonitorPosition.orEmpty().ifBlank { "bottom" }
