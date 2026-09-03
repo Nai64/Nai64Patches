@@ -1,3 +1,9 @@
+## [1.10.0](https://github.com/Zanuaimi/Nai64Patches/compare/1.9.0...1.10.0) (2026-09-03)
+
+### New Features
+
+* Update md files attribution and change default 2nd gradient color ([7f81c97](https://github.com/Zanuaimi/Nai64Patches/commit/7f81c97582fc00398426c1582a8f3f360a08eec3))
+
 ## [1.9.0](https://github.com/Zanuaimi/Nai64Patches/compare/1.8.2...1.9.0) (2026-09-03)
 
 ### New Features

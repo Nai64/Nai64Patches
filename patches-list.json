@@ -1,6 +1,6 @@
 {
   "NOTE": "Do NOT manually edit this file. This file is automatically updated when semantic release (release.yml) runs. Manually editing this file can break your releases and break third party tools that use this file.",
-  "version": "1.9.0",
+  "version": "1.10.0",
   "patches": [
     {
       "name": "Skip Consent Popup",
@@ -4610,7 +4610,7 @@
           "description": "Second color of the legacy icon gradient. Background 1 is the existing overlay button background color.",
           "required": false,
           "type": "kotlin.String",
-          "default": "#FF174A2E",
+          "default": "#FF2E8B57",
           "values": null
         },
         {
