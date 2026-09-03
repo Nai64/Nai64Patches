@@ -28,6 +28,7 @@ val installSourceSpoofPatch = bytecodePatch(
                 BuilderInstruction11x(Opcode.RETURN, 0),
             ))
             logger.info("Applied generic boolean Play Store spoof")
+            logger.info("Btw you can use \"Fake Store Install Source\" patch for even better result")
             return@execute
         }
 
@@ -39,6 +40,7 @@ val installSourceSpoofPatch = bytecodePatch(
                 return-object v0
             """.trimIndent())
             logger.info("Applied generic String Play Store spoof")
+            logger.info("Btw you can use \"Fake Store Install Source\" patch for even better result")
             return@execute
         }
 
@@ -50,6 +52,7 @@ val installSourceSpoofPatch = bytecodePatch(
                 BuilderInstruction11x(Opcode.RETURN, 0),
             ))
             logger.info("Applied fallback boolean Play Store spoof")
+            logger.info("Btw you can use \"Fake Store Install Source\" patch for even better result")
             return@execute
         }
 
@@ -61,6 +64,7 @@ val installSourceSpoofPatch = bytecodePatch(
                 return-object v0
             """.trimIndent())
             logger.info("Applied fallback String Play Store spoof")
+            logger.info("Btw you can use \"Fake Store Install Source\" patch for even better result")
             return@execute
         }
 
