@@ -5,7 +5,7 @@ import android.view.Gravity;
 
 /**
  * Decodes and validates overlay configuration inside the extension runtime.
- * The patch-building Kotlin code supplies version 7; older payloads remain supported.
+ * The patch-building Kotlin code supplies version 8; older payloads remain supported.
  */
 final class UniversalOverlayConfig {
     private static final String DEFAULT_DESCRIPTION =
@@ -20,6 +20,7 @@ final class UniversalOverlayConfig {
     int shape;
     boolean iconOutline, iconBold;
     String iconType, customIconImage;
+    int dragVisibilityDurationSeconds;
     boolean keepAwake, fullscreen, screenshots;
     boolean systemTime, fps, sessionTime;
     boolean batteryStatus, appMemory, networkStatus, deviceInformation, deviceTemperature;
@@ -32,11 +33,11 @@ final class UniversalOverlayConfig {
     static UniversalOverlayConfig decode(String encoded) {
         UniversalOverlayConfig c = new UniversalOverlayConfig();
         String[] values = encoded == null ? new String[0] : encoded.split("\\|", -1);
-        // Version 2/3/4/5/6/7 prepends a version field. Keep accepting the original 14-field format so an
+        // Version 2/3/4/5/6/7/8 prepends a version field. Keep accepting the original 14-field format so an
         // older generated patch remains safe when paired with this newer extension.
-        String[] v = new String[31];
+        String[] v = new String[32];
         for (int i = 0; i < v.length; i++) v[i] = i < values.length ? decodePart(values[i]) : "";
-        int offset = ("2".equals(v[0]) || "3".equals(v[0]) || "4".equals(v[0]) || "5".equals(v[0]) || "6".equals(v[0]) || "7".equals(v[0])) ? 1 : 0;
+        int offset = ("2".equals(v[0]) || "3".equals(v[0]) || "4".equals(v[0]) || "5".equals(v[0]) || "6".equals(v[0]) || "7".equals(v[0]) || "8".equals(v[0])) ? 1 : 0;
         c.title = limit(field(v, offset, 0), 80, "Nai64Patches Universal Overlay Patch");
         c.description = limit(field(v, offset, 1), 500, DEFAULT_DESCRIPTION);
         c.repositoryText = empty(field(v, offset, 2), "Nai64 repository");
@@ -49,7 +50,7 @@ final class UniversalOverlayConfig {
         String shape = field(v, offset, 9);
         c.shape = "square".equals(shape) ? 0 : ("squircle".equals(shape) ? 2 : 1);
         c.buttonSize = integer(field(v, offset, 10), 56, 32, 128);
-        c.opacity = integer(field(v, offset, 11), 35, 10, 100) / 100f;
+        c.opacity = integer(field(v, offset, 11), 50, 10, 100) / 100f;
         c.gravity = gravity(field(v, offset, 12));
         String controls = field(v, offset, 13);
         c.keepAwake = hasToken(controls, "keep");
@@ -69,7 +70,7 @@ final class UniversalOverlayConfig {
         c.disableHaptics = hasToken(controls, "disableHaptics");
         c.disableAnimations = hasToken(controls, "disableAnimations");
         c.activateStatisticsOnLaunch = "1".equals(field(v, offset, 14));
-        boolean currentFormat = "5".equals(v[0]) || "6".equals(v[0]) || "7".equals(v[0]);
+        boolean currentFormat = "5".equals(v[0]) || "6".equals(v[0]) || "7".equals(v[0]) || "8".equals(v[0]);
         c.enableMonitorsOnLaunch = currentFormat && "1".equals(field(v, offset, 15));
         int monitorPositionIndex = currentFormat ? 16 : 15;
         int monitorScaleIndex = currentFormat ? 17 : 16;
@@ -79,11 +80,11 @@ final class UniversalOverlayConfig {
                 : ("bottom".equals(monitorPosition) ? 2 : 0);
         c.monitorScale = floatValue(field(v, offset, monitorScaleIndex), 1f, .5f, 2f);
         c.monitorColumns = integer(field(v, offset, monitorColumnsIndex), 2, 1, 3);
-        boolean extendedFormat = "6".equals(v[0]) || "7".equals(v[0]);
+        boolean extendedFormat = "6".equals(v[0]) || "7".equals(v[0]) || "8".equals(v[0]);
         c.temperatureFormat = extendedFormat && "fahrenheit".equals(field(v, offset, 19)) ? "fahrenheit"
                 : (extendedFormat && "kelvin".equals(field(v, offset, 19)) ? "kelvin" : "celsius");
         c.timeFormat = extendedFormat && "24".equals(field(v, offset, 20)) ? "24" : "12";
-        boolean customizationFormat = "7".equals(v[0]);
+        boolean customizationFormat = "7".equals(v[0]) || "8".equals(v[0]);
         c.outlineWidth = customizationFormat ? integer(field(v, offset, 21), 1, 1, 8) : 1;
         c.iconOutline = customizationFormat && "1".equals(field(v, offset, 22));
         c.iconOutlineColor = color(customizationFormat ? field(v, offset, 23) : "", c.outline);
@@ -92,6 +93,8 @@ final class UniversalOverlayConfig {
         c.iconBackground2 = color(customizationFormat ? field(v, offset, 26) : "", 0xFF2E8B57);
         c.iconGradientAngle = customizationFormat ? integer(field(v, offset, 27), 30, 0, 360) : 30;
         c.customIconImage = customizationFormat ? field(v, offset, 28) : "";
+        c.dragVisibilityDurationSeconds = customizationFormat
+                ? integer(field(v, offset, 29), 2, 1, 10) : 2;
         return c;
     }
 

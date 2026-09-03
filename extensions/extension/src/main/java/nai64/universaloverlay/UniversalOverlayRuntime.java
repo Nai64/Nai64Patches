@@ -218,6 +218,7 @@ public final class UniversalOverlayRuntime {
         private float startX;
         private float startY;
         private boolean dragged;
+        private final Runnable dragVisibilityFade;
 
         Controller(Activity activity, UniversalOverlayConfig config) {
             this.activity = activity;
@@ -226,6 +227,12 @@ public final class UniversalOverlayRuntime {
                     : android.R.style.Theme_Holo_Light_NoActionBar;
             overlayContext = new ContextThemeWrapper(activity, overlayTheme);
             this.config = config;
+            dragVisibilityFade = () -> {
+                if (!detached && !menuVisible) {
+                    floatingButton.animate().alpha(config.opacity).setDuration(180).start();
+                    setMonitorAlpha(config.opacity);
+                }
+            };
             Window window = activity.getWindow();
             originalWindowFlags = window.getAttributes().flags;
             originalSystemUi = window.getDecorView().getSystemUiVisibility();
@@ -294,6 +301,7 @@ public final class UniversalOverlayRuntime {
         void detach() {
             if (detached) return;
             detached = true;
+            root.removeCallbacks(dragVisibilityFade);
             for (UniversalOverlayStatisticModule module : statistics) module.stopSafely();
             restoreActivityModules();
             removeRoot();
@@ -301,6 +309,7 @@ public final class UniversalOverlayRuntime {
 
         void pause() {
             if (detached) return;
+            root.removeCallbacks(dragVisibilityFade);
             menuVisible = false;
             menuLayer.setVisibility(View.GONE);
             confirmationLayer.setVisibility(View.GONE);
@@ -526,6 +535,14 @@ public final class UniversalOverlayRuntime {
                     monitor.setAlpha(alpha);
                 }
             }
+        }
+
+        private void showButtonFullyVisibleAfterDrag() {
+            root.removeCallbacks(dragVisibilityFade);
+            floatingButton.animate().cancel();
+            floatingButton.setAlpha(1f);
+            setMonitorAlphaImmediate(1f);
+            root.postDelayed(dragVisibilityFade, config.dragVisibilityDurationSeconds * 1000L);
         }
 
         private FrameLayout createMenuLayer() {
@@ -1152,10 +1169,9 @@ public final class UniversalOverlayRuntime {
                     if (dragged) {
                         view.setX(clamp(startX + dx, 0, root.getWidth() - view.getWidth()));
                         view.setY(clamp(startY + dy, 0, root.getHeight() - view.getHeight()));
-                        // The idle state is intentionally translucent, but dragging must make
-                        // the control fully visible so its position remains easy to track.
-                        view.setAlpha(1f);
-                        setMonitorAlphaImmediate(1f);
+                        // Keep the control fully visible while dragging and reset the fade timer
+                        // for every movement so repeated dragging never fades mid-drag.
+                        showButtonFullyVisibleAfterDrag();
                         updateMonitorLayout();
                     }
                     return true;
@@ -1165,8 +1181,8 @@ public final class UniversalOverlayRuntime {
                         sharedButtonPositionInitialized = true;
                         sharedButtonX = Math.max(0, (int) view.getX());
                         sharedButtonY = Math.max(0, (int) view.getY());
-                        view.animate().alpha(config.opacity).setDuration(180).start();
-                        setMonitorAlpha(config.opacity);
+                        // Start the full-visibility countdown after the finger is released.
+                        showButtonFullyVisibleAfterDrag();
                         updateMonitorLayout();
                     }
                     return true;

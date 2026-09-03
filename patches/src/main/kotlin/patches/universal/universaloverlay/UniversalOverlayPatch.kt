@@ -15,15 +15,16 @@ import java.util.Base64
 import java.util.logging.Logger
 
 private const val RUNTIME_CLASS = "Lnai64/universaloverlay/UniversalOverlayRuntime;"
-private const val CONFIG_VERSION = "7"
+private const val CONFIG_VERSION = "8"
 private const val MAX_TITLE_CHARACTERS = 80
 private const val MAX_DESCRIPTION_CHARACTERS = 500
-private const val DEFAULT_DESCRIPTION =
-    "Welcome! This is Nai64Patches Universal Overlay Patch Menu. This experimental overlay patch" +
-        "contains optional statistic, activity, and hook modules. More of them may be added in " +
-        "future updates. You will find modules below the description if you enabled some modules " +
-        "in this patch settings before patching this APK. " +
-        "The idea and initial works of Universal Overlay Patch are from Zanuaimi / Noobite."
+private val DEFAULT_DESCRIPTION =
+    """
+    Welcome! This is Nai64Patches Universal Overlay Patch Menu.
+    You will find modules below the description if you enabled some modules
+    in this patch settings before patching this APK.
+    The idea and initial works of Universal Overlay Patch are from Zanuaimi / Noobite.
+    """.trimIndent()
 
 private fun encode(value: String): String =
     Base64.getEncoder().withoutPadding().encodeToString(value.toByteArray(Charsets.UTF_8))
@@ -266,9 +267,15 @@ val universalOverlayPatch = bytecodePatch(
     )
     val buttonOpacity by intOption(
         title = "UI - Overlay button idle opacity (%)",
-        default = 35,
+        default = 50,
         key = "runtimeOverlayButtonIdleOpacityPercent",
-        description = "Idle opacity from 10 to 100 percent.",
+        description = "Idle opacity from 10 to 100 percent. Higher values make the button less transparent.",
+    )
+    val buttonDragVisibilityDurationSeconds by intOption(
+        title = "UI - Overlay button fully visible duration (seconds)",
+        default = 2,
+        key = "runtimeOverlayButtonDragVisibilityDurationSeconds",
+        description = "How long the overlay button stays fully visible after dragging before fading to its idle opacity. The timer resets while dragging and starts again when the finger is released. Use a value from 1 to 10 seconds.",
     )
     val buttonPosition by stringOption(
         title = "UI - Overlay button position",
@@ -440,7 +447,8 @@ val universalOverlayPatch = bytecodePatch(
         val labelValue = repositoryText.orEmpty().ifBlank { "Nai64 repository" }
         val urlValue = repositoryUrl.orEmpty().ifBlank { "https://github.com/Nai64/Nai64Patches" }
         val sizeValue = (buttonSizeDp ?: 56).coerceIn(32, 128)
-        val opacityValue = (buttonOpacity ?: 35).coerceIn(10, 100)
+        val opacityValue = (buttonOpacity ?: 50).coerceIn(10, 100)
+        val dragVisibilityDurationValue = (buttonDragVisibilityDurationSeconds ?: 2).coerceIn(1, 10)
         val shapeValue = buttonShape.orEmpty().ifBlank { "circle" }
         val positionValue = buttonPosition.orEmpty().ifBlank { "topRight" }
         val backgroundValue = backgroundColor.orEmpty().ifBlank { "#CC101820" }
@@ -510,6 +518,7 @@ val universalOverlayPatch = bytecodePatch(
             iconBackground2Value,
             iconGradientAngleValue.toString(),
             customIconImageValue,
+            dragVisibilityDurationValue.toString(),
         ).joinToString("|") { encode(it) }
 
         // TODO(universal-overlay): Application.onCreate is the primary hook; the Activity path is
