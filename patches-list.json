@@ -1,6 +1,6 @@
 {
   "NOTE": "Do NOT manually edit this file. This file is automatically updated when semantic release (release.yml) runs. Manually editing this file can break your releases and break third party tools that use this file.",
-  "version": "1.7.0",
+  "version": "1.8.0",
   "patches": [
     {
       "name": "Skip Consent Popup",
@@ -4616,8 +4616,17 @@
         },
         {
           "key": "runtimeOverlayActivateStatisticsOnLaunch",
-          "title": "Settings to Modules - Activate statistics on launch",
-          "description": "Start selected statistic modules as soon as the app launches. Disabled by default.",
+          "title": "Settings to Modules - Activate statistic modules on launch",
+          "description": "Start selected statistic modules as soon as the app launches. Active is disabled by default.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "runtimeOverlayEnableMonitorsOnLaunch",
+          "title": "Settings to Modules - Enable monitors for statistic modules on launch",
+          "description": "Show selected statistic monitors as soon as the app launches. Monitor is disabled by default.",
           "required": false,
           "type": "kotlin.Boolean",
           "default": false,
@@ -4665,9 +4674,18 @@
           }
         },
         {
-          "key": "runtimeOverlayIncludeSystemTime",
-          "title": "Statistic modules - System Time",
-          "description": "Include the phone system time statistic module.",
+          "key": "runtimeOverlayIncludeDeviceInformation",
+          "title": "Statistic modules - Device Information",
+          "description": "Include read-only phone and Android device information.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "runtimeOverlayIncludeDeviceTemperature",
+          "title": "Statistic modules - Device Temperature",
+          "description": "Include battery-reported temperature in Celsius and Fahrenheit.",
           "required": false,
           "type": "kotlin.Boolean",
           "default": false,
@@ -4677,6 +4695,15 @@
           "key": "runtimeOverlayIncludeFps",
           "title": "Statistic modules - FPS",
           "description": "Include the approximate display frame-rate statistic module.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "runtimeOverlayIncludeSystemTime",
+          "title": "Statistic modules - System Time",
+          "description": "Include the phone system time statistic module.",
           "required": false,
           "type": "kotlin.Boolean",
           "default": false,
@@ -4713,24 +4740,6 @@
           "key": "runtimeOverlayIncludeNetworkStatus",
           "title": "Statistic modules - Network Status",
           "description": "Include incoming and outgoing app network traffic monitors.",
-          "required": false,
-          "type": "kotlin.Boolean",
-          "default": false,
-          "values": null
-        },
-        {
-          "key": "runtimeOverlayIncludeDeviceInformation",
-          "title": "Statistic modules - Device Information",
-          "description": "Include read-only phone and Android device information.",
-          "required": false,
-          "type": "kotlin.Boolean",
-          "default": false,
-          "values": null
-        },
-        {
-          "key": "runtimeOverlayIncludeDeviceTemperature",
-          "title": "Statistic modules - Device Temperature",
-          "description": "Include battery-reported temperature in Celsius and Fahrenheit.",
           "required": false,
           "type": "kotlin.Boolean",
           "default": false,

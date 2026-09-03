@@ -1,3 +1,15 @@
+## [1.8.0](https://github.com/Zanuaimi/Nai64Patches/compare/1.7.0...1.8.0) (2026-09-03)
+
+### Bug Fixes
+
+* import overlay brightness color ([9e85078](https://github.com/Zanuaimi/Nai64Patches/commit/9e85078637b995505987079cffd11beae9a579b8))
+* merge overlay brightness import fix ([f8b6547](https://github.com/Zanuaimi/Nai64Patches/commit/f8b6547bbb4067de68a01c1b305e98428a35447c))
+
+### New Features
+
+* merge statistic monitor activation controls ([58e9c39](https://github.com/Zanuaimi/Nai64Patches/commit/58e9c3965bedec4fd5507f70a085b8b7b37693d4))
+* separate statistic monitors from activation ([621a0a1](https://github.com/Zanuaimi/Nai64Patches/commit/621a0a1fdc02fd8d147e2d1e6f72dd93714bdc3e))
+
 ## [1.7.0](https://github.com/Zanuaimi/Nai64Patches/compare/1.6.3...1.7.0) (2026-09-02)
 
 ### Bug Fixes
