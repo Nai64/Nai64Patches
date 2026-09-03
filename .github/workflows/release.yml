@@ -1,9 +1,6 @@
 name: Release
 
 on:
-  push:
-    branches:
-      - main
   workflow_dispatch:
 
 jobs:
@@ -69,5 +66,5 @@ jobs:
         if: steps.release.outputs.new_release_published == 'true'
         uses: actions/attest-build-provenance@v4
         with:
-          subject-name: "Nai64Patches ${{ steps.release.outputs.new_release_git_tag }}"
+          subject-name: 'Nai64Patches ${{ steps.release.outputs.new_release_git_tag }}'
           subject-path: patches/build/libs/patches-*.mpp
