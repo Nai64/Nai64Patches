@@ -15,7 +15,7 @@ import java.util.Base64
 import java.util.logging.Logger
 
 private const val RUNTIME_CLASS = "Lnai64/universaloverlay/UniversalOverlayRuntime;"
-private const val CONFIG_VERSION = "5"
+private const val CONFIG_VERSION = "6"
 private const val MAX_TITLE_CHARACTERS = 80
 private const val MAX_DESCRIPTION_CHARACTERS = 500
 private const val DEFAULT_DESCRIPTION =
@@ -269,6 +269,20 @@ val universalOverlayPatch = bytecodePatch(
         description = "Number of statistic monitor columns.",
         values = linkedMapOf("1 column" to "1", "2 columns" to "2", "3 columns" to "3"),
     )
+    val temperatureFormat by stringOption(
+        title = "Settings to Modules - Temperature stat format",
+        default = "celsius",
+        key = "runtimeOverlayTemperatureFormat",
+        description = "Temperature unit used by the Device Temperature menu value and monitor.",
+        values = linkedMapOf("Celsius" to "celsius", "Fahrenheit" to "fahrenheit", "Kelvin" to "kelvin"),
+    )
+    val timeFormat by stringOption(
+        title = "Settings to Modules - System time format",
+        default = "12",
+        key = "runtimeOverlayTimeFormat",
+        description = "Clock format used by the System Time menu value and monitor. Timezone is shown in the menu value.",
+        values = linkedMapOf("12-hour clock" to "12", "24-hour clock" to "24"),
+    )
     val includeDeviceInformation by booleanOption(
         title = "Statistic modules - Device Information",
         default = false,
@@ -385,6 +399,8 @@ val universalOverlayPatch = bytecodePatch(
         val monitorPositionValue = statisticMonitorPosition.orEmpty().ifBlank { "bottom" }
         val monitorScaleValue = monitorScale.orEmpty().ifBlank { "1" }
         val monitorColumnsValue = monitorColumns.orEmpty().ifBlank { "2" }
+        val temperatureFormatValue = temperatureFormat.orEmpty().ifBlank { "celsius" }
+        val timeFormatValue = timeFormat.orEmpty().ifBlank { "12" }
         validate(
             titleValue, descriptionValue, labelValue, urlValue,
             backgroundValue, outlineValue, buttonTextColorValue, buttonBackgroundValue,
@@ -393,6 +409,8 @@ val universalOverlayPatch = bytecodePatch(
         check(monitorPositionValue in setOf("none", "top", "bottom"))
         check(monitorScaleValue.toFloatOrNull() in listOf(.75f, 1f, 1.25f, 1.5f, 2f))
         check(monitorColumnsValue in setOf("1", "2", "3"))
+        check(temperatureFormatValue in setOf("celsius", "fahrenheit", "kelvin"))
+        check(timeFormatValue in setOf("12", "24"))
         check(buttonText.orEmpty().trim().length <= 3)
 
         val config = listOf(
@@ -423,6 +441,8 @@ val universalOverlayPatch = bytecodePatch(
             monitorPositionValue,
             monitorScaleValue,
             monitorColumnsValue,
+            temperatureFormatValue,
+            timeFormatValue,
         ).joinToString("|") { encode(it) }
 
         // TODO(universal-overlay): Application.onCreate is the primary hook; the Activity path is

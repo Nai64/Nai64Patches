@@ -19,6 +19,7 @@ public abstract class UniversalOverlayStatisticModule implements UniversalOverla
     protected boolean running;
     private boolean enabled;
     private boolean monitorEnabled;
+    private boolean menuVisible;
     private final Runnable sampler = this::sample;
 
     private void sample() {
@@ -62,6 +63,10 @@ public abstract class UniversalOverlayStatisticModule implements UniversalOverla
     public final boolean isMonitorEnabled() { return monitorEnabled; }
 
     public final void setMonitorEnabled(boolean enabled) { monitorEnabled = enabled; }
+
+    public final void setMenuVisible(boolean visible) { menuVisible = visible; }
+
+    protected final boolean isMenuVisible() { return menuVisible; }
 
     public final boolean setEnabled(boolean enabled, boolean menuVisible) {
         this.enabled = enabled;
@@ -112,9 +117,11 @@ public abstract class UniversalOverlayStatisticModule implements UniversalOverla
 
     protected final void refresh() {
         String current = value();
-        if (valueView != null) valueView.setText(current);
-        setMonitorText(monitorValue());
-        refreshMonitors();
+        if (menuVisible && valueView != null) valueView.setText(current);
+        if (!menuVisible) {
+            setMonitorText(monitorValue());
+            refreshMonitors();
+        }
     }
 
     /** Compact value used by the optional floating monitor. */
