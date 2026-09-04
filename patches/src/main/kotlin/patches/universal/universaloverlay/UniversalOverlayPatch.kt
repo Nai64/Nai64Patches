@@ -153,7 +153,7 @@ private fun injectMethod(owner: MutableClass, method: MutableMethod, config: Str
 
 @Suppress("unused")
 val universalOverlayPatch = bytecodePatch(
-    name = "Universal Overlay Patch (SPECIAL PATCH, Experimental)",
+    name = "Universal Overlay Patch v1.0 (Experimental)",
     description = """
         Universal in-app overlay for Android apps and games. Optional modules include System Time, FPS,
         fullscreen, app brightness, and haptic controls. Modules are excluded and disabled by default;
