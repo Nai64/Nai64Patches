@@ -13,9 +13,6 @@ import patches.universal.ads.util.numberOfParameterRegisters
 import patches.universal.ads.util.p0Register
 import patches.universal.ui.StartupHooks
 import java.io.File
-import java.io.ByteArrayOutputStream
-import java.net.HttpURLConnection
-import java.net.URL
 import java.util.Base64
 import java.util.logging.Logger
 
@@ -36,44 +33,17 @@ private fun encode(value: String): String =
     Base64.getEncoder().withoutPadding().encodeToString(value.toByteArray(Charsets.UTF_8))
 
 private fun resolveCustomIconImage(source: String, logger: Logger): String {
-    // Resolve external input while patching so the installed APK does not need network access.
-    // Keeping the normalized data URI in the payload also makes local paths portable at runtime.
+    // Read the selected local file while patching so the installed APK does not need filesystem
+    // access. The resulting embedded data is an implementation detail, not another user input.
     if (source.isBlank()) return ""
     val bytes = runCatching {
-        when {
-            source.startsWith("data:", ignoreCase = true) -> {
-                val comma = source.indexOf(',')
-                require(comma >= 0 && source.substring(0, comma).contains("base64", ignoreCase = true))
-                Base64.getMimeDecoder().decode(source.substring(comma + 1))
-            }
-            source.startsWith("http://", ignoreCase = true) || source.startsWith("https://", ignoreCase = true) -> {
-                val connection = URL(source).openConnection() as HttpURLConnection
-                connection.connectTimeout = 5000
-                connection.readTimeout = 10000
-                connection.instanceFollowRedirects = true
-                try {
-                    require(connection.responseCode in 200..299)
-                    connection.inputStream.use { input ->
-                        val output = ByteArrayOutputStream()
-                        val buffer = ByteArray(8192)
-                        var total = 0
-                        var count = input.read(buffer)
-                        while (count != -1) {
-                            total += count
-                            require(total <= MAX_CUSTOM_ICON_BYTES)
-                            output.write(buffer, 0, count)
-                            count = input.read(buffer)
-                        }
-                        output.toByteArray()
-                    }
-                } finally {
-                    connection.disconnect()
-                }
-            }
-            source.startsWith("file:", ignoreCase = true) -> File(java.net.URI(source)).readBytes()
-            File(source).isFile -> File(source).readBytes()
-            else -> Base64.getMimeDecoder().decode(source)
+        val file = if (source.startsWith("file:", ignoreCase = true)) {
+            File(java.net.URI(source))
+        } else {
+            File(source)
         }
+        require(file.isFile && file.length() in 1..MAX_CUSTOM_ICON_BYTES)
+        file.readBytes()
     }.getOrNull()
     if (bytes == null || bytes.isEmpty() || bytes.size > MAX_CUSTOM_ICON_BYTES) {
         logger.warning("Could not resolve custom overlay icon source; runtime fallback will be used.")
@@ -189,9 +159,9 @@ val universalOverlayPatch = bytecodePatch(
         fullscreen, app brightness, and haptic controls. Modules are excluded and disabled by default;
         select them in Morphe settings before patching. Statistic modules show information, Activity modules
         control the current Activity, and Hook modules control internal app behavior, such as disabling
-        animations, through best-effort runtime changes. A valid custom image automatically replaces the
-        legacy icon; empty or invalid image input falls back to the legacy icon. Custom images support
-        Base64 data, local image paths, and HTTP(S) URLs. This is experimental and may not work on all apps.
+        animations, through best-effort runtime changes. A selected local image automatically replaces
+        the legacy icon; empty or invalid image input falls back to the legacy icon. This is experimental
+        and may not work on all apps.
 
         The idea and initial works of this Universal Overlay Patch are from Zanuaimi / Noobite.
     """.trimIndent(),
@@ -304,7 +274,7 @@ val universalOverlayPatch = bytecodePatch(
         key = "runtimeOverlayCustomIconImage",
         allowedExtensions = listOf("png", "jpg", "jpeg", "webp"),
         recommendedSize = app.morphe.patcher.patch.ImageSize(128, 128),
-        description = "A valid image automatically replaces the legacy icon, including its outline. Supported input: an image file, Base64 data, data:image/...;base64,..., a local image path, or an HTTP(S) image URL. Use a trusted Base64 encoder such as https://base64.guru/converter/encode/image. Prefer a transparent square PNG or JPEG around 128x128 or 256x256 pixels. Example: data:image/png;base64,<your encoded image data>. Images are embedded during patching and scaled proportionally. Leave blank or use invalid input to fall back to the legacy icon with a one-time launch notice.",
+        description = "Select a local PNG, JPG, JPEG, or WebP image file. A valid image automatically replaces the legacy icon, including its outline. Prefer a transparent square image around 128x128 or 256x256 pixels. Images are embedded during patching and scaled proportionally. Leave blank or use an invalid file to fall back to the legacy icon with a one-time launch notice.",
     )
     val buttonShape by stringOption(
         title = "UI - Overlay button shape",
