@@ -1,0 +1,59 @@
+ads:
+  - changed-files:
+      - any-glob-to-any-file: ['patches/**/ads/**']
+
+unlock:
+  - changed-files:
+      - any-glob-to-any-file: ['patches/**/unlock/**']
+
+ui:
+  - changed-files:
+      - any-glob-to-any-file: ['patches/**/ui/**']
+
+overlay:
+  - changed-files:
+      - any-glob-to-any-file: ['patches/**/universaloverlay/**', 'extensions/**']
+
+manifest:
+  - changed-files:
+      - any-glob-to-any-file: ['patches/**/manifest/**']
+
+misc:
+  - changed-files:
+      - any-glob-to-any-file: ['patches/**/misc/**']
+
+privacy:
+  - changed-files:
+      - any-glob-to-any-file: ['patches/**/privacy/**']
+
+telemetry:
+  - changed-files:
+      - any-glob-to-any-file: ['patches/**/telemetry/**']
+
+network:
+  - changed-files:
+      - any-glob-to-any-file: ['patches/**/network/**', 'patches/**/update/**']
+
+gms:
+  - changed-files:
+      - any-glob-to-any-file: ['patches/**/gms/**']
+
+graphics:
+  - changed-files:
+      - any-glob-to-any-file: ['patches/**/graphics/**']
+
+bandcamp:
+  - changed-files:
+      - any-glob-to-any-file: ['patches/**/bandcamp/**']
+
+docs:
+  - changed-files:
+      - any-glob-to-any-file: ['**.md', '.github/ISSUE_TEMPLATE/**']
+
+ci:
+  - changed-files:
+      - any-glob-to-any-file: ['.github/workflows/**', '.github/dependabot.yml']
+
+tests:
+  - changed-files:
+      - any-glob-to-any-file: ['tests/**']
