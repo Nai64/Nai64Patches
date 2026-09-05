@@ -65,6 +65,8 @@ gradle-app.setting
 !COMPATIBILITY.md
 !TROUBLESHOOTING.md
 !CONTRIBUTING.md
+!UNIVERSAL_OVERLAY_MODULES.md
+!UNIVERSAL_OVERLAY.md
 !.github/pull_request_template.md
 *.apk
 *.xapk

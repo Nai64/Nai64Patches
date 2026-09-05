@@ -35,6 +35,9 @@ internal object StartupHooks {
      */
     var resolvedLauncherActivityDescriptor: String? = null
 
+    /** Activity descriptors declared with android:noHistory="true". */
+    var resolvedNoHistoryActivityDescriptors: Set<String> = emptySet()
+
     /** Reads the Application and launcher classes declared in the manifest. */
     val resolveRealApplicationPatch = resourcePatch(
         name = "Resolve Real Application (internal)",
@@ -53,19 +56,42 @@ internal object StartupHooks {
                     }
 
                     resolvedLauncherActivityDescriptor = findLauncherActivity(doc.documentElement)
+                    resolvedNoHistoryActivityDescriptors = findNoHistoryActivities(doc.documentElement)
                 }
             } catch (_: Exception) {
                 resolvedApplicationDescriptor = null
                 resolvedLauncherActivityDescriptor = null
+                resolvedNoHistoryActivityDescriptors = emptySet()
             }
         }
     }
 
-    /** Returns the descriptor of the activity with a MAIN/LAUNCHER filter, or null. */
-    private fun findLauncherActivity(root: Element): String? {
+    private fun findNoHistoryActivities(root: Element): Set<String> {
+        val packageName = root.getAttribute("package")
+        val result = mutableSetOf<String>()
         val activities = root.getElementsByTagName("activity")
         for (i in 0 until activities.length) {
             val activity = activities.item(i) as? Element ?: continue
+            val noHistory = activity.getAttributeNS(NS_ANDROID, "noHistory")
+                .ifEmpty { activity.getAttribute("android:noHistory") }
+            if (noHistory == "true") {
+                val name = activity.getAttributeNS(NS_ANDROID, "name")
+                    .ifEmpty { activity.getAttribute("android:name") }
+                if (name.isNotEmpty()) result += componentDescriptor(name, packageName)
+            }
+        }
+        return result
+    }
+
+    /** Returns the descriptor of the activity with a MAIN/LAUNCHER filter, or null. */
+    private fun findLauncherActivity(root: Element): String? {
+        val packageName = root.getAttribute("package")
+        val activities = root.getElementsByTagName("activity")
+        for (i in 0 until activities.length) {
+            val activity = activities.item(i) as? Element ?: continue
+            if (activity.getAttributeNS(NS_ANDROID, "enabled") == "false" ||
+                activity.getAttribute("android:enabled") == "false"
+            ) continue
             var hasMain = false
             var hasLauncher = false
             val filters = activity.getElementsByTagName("intent-filter")
@@ -89,10 +115,46 @@ internal object StartupHooks {
             }
             if (hasMain && hasLauncher) {
                 val name = activity.getAttribute("android:name")
-                if (!name.isNullOrEmpty()) return "L" + name.replace('.', '/') + ";"
+                if (!name.isNullOrEmpty()) return componentDescriptor(name, packageName)
+            }
+        }
+        val aliases = root.getElementsByTagName("activity-alias")
+        for (i in 0 until aliases.length) {
+            val alias = aliases.item(i) as? Element ?: continue
+            if (alias.getAttributeNS(NS_ANDROID, "enabled") == "false" ||
+                alias.getAttribute("android:enabled") == "false"
+            ) continue
+            var hasMain = false
+            var hasLauncher = false
+            val filters = alias.getElementsByTagName("intent-filter")
+            for (j in 0 until filters.length) {
+                val filter = filters.item(j) as? Element ?: continue
+                val actions = filter.getElementsByTagName("action")
+                for (k in 0 until actions.length) {
+                    val action = actions.item(k) as? Element ?: continue
+                    if (action.getAttribute("android:name") == "android.intent.action.MAIN") hasMain = true
+                }
+                val categories = filter.getElementsByTagName("category")
+                for (k in 0 until categories.length) {
+                    val category = categories.item(k) as? Element ?: continue
+                    if (category.getAttribute("android:name") == "android.intent.category.LAUNCHER") hasLauncher = true
+                }
+            }
+            if (hasMain && hasLauncher) {
+                val target = alias.getAttribute("android:targetActivity")
+                if (!target.isNullOrEmpty()) return componentDescriptor(target, packageName)
             }
         }
         return null
+    }
+
+    private fun componentDescriptor(name: String, packageName: String): String {
+        val qualifiedName = when {
+            name.startsWith(".") -> packageName + name
+            '.' !in name -> "$packageName.$name"
+            else -> name
+        }
+        return "L" + qualifiedName.replace('.', '/') + ";"
     }
 
     fun escapeSmali(value: String): String =
