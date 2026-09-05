@@ -1,0 +1,27 @@
+name: Welcome
+
+on:
+  issues:
+    types: [opened]
+  pull_request_target:
+    types: [opened]
+
+jobs:
+  greet:
+    name: Greet first-time contributors
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
+    steps:
+      - uses: actions/first-interaction@v3
+        with:
+          issue_message: >
+            Thanks for opening your first issue here. Please include the app
+            name and version, which patch you used, and what you expected to
+            happen. The issue templates ask for most of this already.
+          pr_message: >
+            Thanks for your first pull request. Please check CONTRIBUTING.md
+            and the PR checklist before review: one logical change per commit,
+            conventional commit messages, and universal patches default to
+            disabled with no hardcoded apps.
