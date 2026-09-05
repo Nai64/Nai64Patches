@@ -1,0 +1,31 @@
+name: Stale
+
+on:
+  schedule:
+    - cron: '30 1 * * *'
+  workflow_dispatch:
+
+jobs:
+  stale:
+    name: Mark stale issues and PRs
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
+    steps:
+      - uses: actions/stale@v10
+        with:
+          days-before-stale: 60
+          days-before-close: 14
+          exempt-issue-labels: pinned,security,help wanted
+          exempt-pr-labels: pinned,security
+          stale-issue-message: >
+            This issue has been quiet for 60 days and was marked stale.
+            Comment or it will be closed in 14 days.
+          stale-pr-message: >
+            This pull request has been quiet for 60 days and was marked stale.
+            Comment or push, or it will be closed in 14 days.
+          close-issue-message: >
+            Closed for inactivity. Reopen if this still matters.
+          close-pr-message: >
+            Closed for inactivity. Reopen if you pick this up again.
