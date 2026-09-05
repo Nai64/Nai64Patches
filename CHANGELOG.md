@@ -1,3 +1,9 @@
+## [1.44.0](https://github.com/Nai64/Nai64Patches/compare/1.43.1...1.44.0) (2026-09-05)
+
+### New Features
+
+* add Universal Overlay Patch v1.0  ( Experimental ) ([#73](https://github.com/Nai64/Nai64Patches/issues/73)) ([438989d](https://github.com/Nai64/Nai64Patches/commit/438989daf0b17550e4273bc15413f11b0e3ecb65))
+
 ## [1.43.1](https://github.com/Nai64/Nai64Patches/compare/1.43.0...1.43.1) (2026-09-03)
 
 ### Bug Fixes
