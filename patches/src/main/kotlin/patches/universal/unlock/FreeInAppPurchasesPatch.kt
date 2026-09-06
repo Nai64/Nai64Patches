@@ -2,7 +2,9 @@ package patches.universal.unlock
 
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
+import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.patch.bytecodePatch
+import patches.universal.ads.util.cloneMutable
 import java.util.logging.Logger
 
 @Suppress("unused")
@@ -430,6 +432,191 @@ val freeInAppPurchasesPatch = bytecodePatch(
         // Unity CrossPlatformValidator
         patchAll(Fingerprint(returnType = "Z", custom = { m, c -> c.type.contains("CrossPlatformValidator") || (c.type.contains("Validator") && m.name.lowercase().contains("valid")) }), "CrossPlatformValidator") {
             it.addInstructions(0, "const/4 v0, 0x1\nreturn v0")
+        }
+
+        // ──────────────────────────────────────────────
+        // REVENUECAT (server receipt validation cannot be faked;
+        // these make the app run its bought-path locally instead)
+        // ──────────────────────────────────────────────
+
+        val rcPurchases = "Lcom/revenuecat/purchases/Purchases;"
+        val rcPurchaseCb = "Lcom/revenuecat/purchases/interfaces/PurchaseCallback;"
+        val rcInfo = "Lcom/revenuecat/purchases/EntitlementInfo;"
+        val rcInfos = "Lcom/revenuecat/purchases/EntitlementInfos;"
+        val rcTx = "Lcom/revenuecat/purchases/models/StoreTransaction;"
+        val rcCust = "Lcom/revenuecat/purchases/CustomerInfo;"
+        val fakeId = "morphe_fake"
+
+        // 1b) Same fake via sun.misc.Unsafe allocation (no constructors, no
+        // range invokes): allocate + populate fields resolved at patch time.
+        fun rcField(className: String, name: String, type: String? = null): String? {
+            val cls = try { mutableClassDefByOrNull(className) } catch (_: Exception) { return null } ?: return null
+            val f = cls.fields.firstOrNull { it.name == name && (type == null || it.type == type) } ?: return null
+            return "$className->${f.name}:${f.type}"
+        }
+        fun rcFirstFieldOfType(className: String, type: String): String? {
+            val cls = try { mutableClassDefByOrNull(className) } catch (_: Exception) { return null } ?: return null
+            val f = cls.fields.firstOrNull { it.type == type } ?: return null
+            return "$className->${f.name}:${f.type}"
+        }
+        val rcInfoIdF = rcField(rcInfo, "identifier", "Ljava/lang/String;")
+            ?: rcFirstFieldOfType(rcInfo, "Ljava/lang/String;")
+        val rcInfoActiveF = rcField(rcInfo, "isActive", "Z")
+            ?: rcFirstFieldOfType(rcInfo, "Z")
+        val rcInfosCtor1 = try {
+            mutableClassDefByOrNull(rcInfos)?.methods
+                ?.firstOrNull { it.name == "<init>" && it.parameterTypes == listOf("Ljava/util/Map;") }
+        } catch (_: Exception) { null }
+        val rcTxOrderF = rcField(rcTx, "orderId", "Ljava/lang/String;")
+        val rcTxTokenF = rcField(rcTx, "purchaseToken", "Ljava/lang/String;")
+        val rcCustInfosF = rcFirstFieldOfType(rcCust, rcInfos)
+        if (rcInfoIdF != null && rcInfoActiveF != null && rcInfosCtor1 != null && rcCustInfosF != null) {
+            // fixed regs v0-v9 (4-bit-safe throughout, no range, no clone-window math beyond +12)
+            val uCb = 0
+            val uId = 1
+            val uInfo = 2
+            val uMap = 3
+            val uInfos = 4
+            val uTx = 5
+            val uCust = 6
+            val uUnsafe = 7
+            val uField = 8
+            val uTmp = 9
+            for (pn in listOf("purchase", "purchasePackage", "purchaseProduct")) {
+                patchAll(Fingerprint(name = pn, definingClass = rcPurchases, returnType = "V",
+                    custom = { m, _ -> m.parameterTypes.lastOrNull() == rcPurchaseCb }), "RC.$pn-unsafe") { method ->
+                    try {
+                        val cbIdx = method.parameterTypes.size
+                        val owner = try {
+                            Fingerprint(name = pn, definingClass = rcPurchases, returnType = "V",
+                                custom = { m, _ -> m.parameterTypes.lastOrNull() == rcPurchaseCb }).classDefOrNull
+                        } catch (_: Exception) { null } ?: return@patchAll
+                        val cloned = method.cloneMutable(additionalRegisters = 12)
+                        val target = owner.methods.firstOrNull {
+                            it.name == method.name && it.parameterTypes == method.parameterTypes && it.returnType == method.returnType
+                        } ?: return@patchAll
+                        val sb = StringBuilder()
+                        fun emit(s: String) {
+                            sb.append(s).append('\n')
+                        }
+                        emit("move-object/from16 v$uCb, p$cbIdx")
+                        emit("const-string v$uId, \"$fakeId\"")
+                        // Unsafe handle
+                        emit("const-string v$uTmp, \"theUnsafe\"")
+                        emit("const-class v$uUnsafe, Lsun/misc/Unsafe;")
+                        emit("invoke-virtual {v$uUnsafe, v$uTmp}, Ljava/lang/Class;->getDeclaredField(Ljava/lang/String;)Ljava/lang/reflect/Field;")
+                        emit("move-result-object v$uField")
+                        emit("const/4 v$uTmp, 0x1")
+                        emit("invoke-virtual {v$uField, v$uTmp}, Ljava/lang/reflect/Field;->setAccessible(Z)V")
+                        emit("const/4 v$uTmp, 0x0")
+                        emit("invoke-virtual {v$uField, v$uTmp}, Ljava/lang/reflect/Field;->get(Ljava/lang/Object;)Ljava/lang/Object;")
+                        emit("move-result-object v$uUnsafe")
+                        emit("check-cast v$uUnsafe, Lsun/misc/Unsafe;")
+                        // EntitlementInfo + active flag + id
+                        emit("const-class v$uTmp, $rcInfo")
+                        emit("invoke-virtual {v$uUnsafe, v$uTmp}, Lsun/misc/Unsafe;->allocateInstance(Ljava/lang/Class;)Ljava/lang/Object;")
+                        emit("move-result-object v$uInfo")
+                        emit("check-cast v$uInfo, $rcInfo")
+                        emit("const/4 v$uTmp, 0x1")
+                        emit("iput-boolean v$uTmp, v$uInfo, $rcInfoActiveF")
+                        emit("iput-object v$uId, v$uInfo, $rcInfoIdF")
+                        // EntitlementInfos via real 1-arg ctor over singleton map
+                        emit("invoke-static {v$uId, v$uInfo}, Ljava/util/Collections;->singletonMap(Ljava/lang/Object;Ljava/lang/Object;)Ljava/util/Map;")
+                        emit("move-result-object v$uMap")
+                        emit("new-instance v$uInfos, $rcInfos")
+                        emit("invoke-direct {v$uInfos, v$uMap}, $rcInfos-><init>(Ljava/util/Map;)V")
+                        // StoreTransaction allocated, best-effort id fields
+                        emit("const-class v$uTmp, $rcTx")
+                        emit("invoke-virtual {v$uUnsafe, v$uTmp}, Lsun/misc/Unsafe;->allocateInstance(Ljava/lang/Class;)Ljava/lang/Object;")
+                        emit("move-result-object v$uTx")
+                        emit("check-cast v$uTx, $rcTx")
+                        if (rcTxOrderF != null) emit("iput-object v$uId, v$uTx, $rcTxOrderF")
+                        if (rcTxTokenF != null) emit("iput-object v$uId, v$uTx, $rcTxTokenF")
+                        // CustomerInfo allocated + infos field
+                        emit("const-class v$uTmp, $rcCust")
+                        emit("invoke-virtual {v$uUnsafe, v$uTmp}, Lsun/misc/Unsafe;->allocateInstance(Ljava/lang/Class;)Ljava/lang/Object;")
+                        emit("move-result-object v$uCust")
+                        emit("check-cast v$uCust, $rcCust")
+                        emit("iput-object v$uInfos, v$uCust, $rcCustInfosF")
+                        emit("invoke-interface {v$uCb, v$uTx, v$uCust}, $rcPurchaseCb->onCompleted($rcTx$rcCust)V")
+                        emit("return-void")
+                        try {
+                            owner.methods.remove(target)
+                        } catch (_: Exception) {}
+                        cloned.addInstructions(0, sb.toString().trimIndent())
+                        owner.methods.add(cloned)
+                        patched++
+                        patchedMethods.add("RC.$pn-unsafe")
+                        logger.info("Free In-app Purchases: faked RevenueCat $pn success callback (unsafe)")
+                    } catch (e: Exception) {
+                        logger.warning("Free In-app Purchases: RC.$pn unsafe fake skipped: ${e.message}")
+                    }
+                }
+            }
+        } else {
+            logger.warning("Free In-app Purchases: RevenueCat unsafe fake skipped (fields not found)")
+        }
+
+        // 2) RevenueCat BillingWrapper.onPurchasesUpdated -> append a fake
+        // PURCHASED Google purchase to a list copy, rebind the param, fall through.
+        patchAll(Fingerprint(name = "onPurchasesUpdated",
+            definingClass = "Lcom/revenuecat/purchases/google/BillingWrapper;",
+            returnType = "V",
+            custom = { m, _ -> m.parameterTypes.size == 2 && m.parameterTypes[1] == "Ljava/util/List;" }),
+            "RC.onPurchasesUpdated") { method ->
+            try {
+                val origCount = method.implementation!!.registerCount
+                val vH = origCount
+                val owner = try {
+                    Fingerprint(name = "onPurchasesUpdated",
+                        definingClass = "Lcom/revenuecat/purchases/google/BillingWrapper;",
+                        returnType = "V",
+                        custom = { m, _ -> m.parameterTypes.size == 2 && m.parameterTypes[1] == "Ljava/util/List;" }).classDefOrNull
+                } catch (_: Exception) { null } ?: return@patchAll
+                val cloned = method.cloneMutable(additionalRegisters = 4)
+                val target = owner.methods.firstOrNull {
+                    it.name == method.name && it.parameterTypes == method.parameterTypes && it.returnType == method.returnType
+                } ?: return@patchAll
+                val sb = StringBuilder()
+                fun emit(s: String) {
+                    sb.append(s).append('\n')
+                }
+                emit("move-object/from16 v$vH, v0")
+                emit("move-object/from16 v${vH + 1}, v1")
+                emit("move-object/from16 v${vH + 2}, v2")
+                emit("move-object/from16 v${vH + 3}, v3")
+                emit("const-string v0, \"{\\\"orderId\\\":\\\"morphe_fake\\\",\\\"packageName\\\":\\\"morphe_fake\\\",\\\"productId\\\":\\\"morphe_fake\\\",\\\"purchaseTime\\\":0,\\\"purchaseState\\\":1,\\\"purchaseToken\\\":\\\"morphe_fake\\\",\\\"quantity\\\":1,\\\"acknowledged\\\":true}\"")
+                emit("const-string v1, \"morphe_fake\"")
+                emit("new-instance v2, Lcom/android/billingclient/api/Purchase;")
+                emit("invoke-direct {v2, v0, v1}, Lcom/android/billingclient/api/Purchase;-><init>(Ljava/lang/String;Ljava/lang/String;)V")
+                emit("move-object/from16 v0, p2")
+                emit("new-instance v1, Ljava/util/ArrayList;")
+                emit("invoke-direct {v1, v0}, Ljava/util/ArrayList;-><init>(Ljava/util/Collection;)V")
+                emit("invoke-virtual {v1, v2}, Ljava/util/ArrayList;->add(Ljava/lang/Object;)Z")
+                emit("move-object/from16 p2, v1")
+                emit("move-object/from16 v0, v$vH")
+                emit("move-object/from16 v1, v${vH + 1}")
+                emit("move-object/from16 v2, v${vH + 2}")
+                emit("move-object/from16 v3, v${vH + 3}")
+                try {
+                    owner.methods.remove(target)
+                } catch (_: Exception) {}
+                cloned.addInstructions(0, sb.toString().trimIndent())
+                owner.methods.add(cloned)
+                patched++
+                patchedMethods.add("RC.onPurchasesUpdated")
+                logger.info("Free In-app Purchases: faked purchase into RevenueCat BillingWrapper")
+            } catch (e: Exception) {
+                logger.warning("Free In-app Purchases: RC.onPurchasesUpdated fake skipped: ${e.message}")
+            }
+        }
+
+        // 3) App-side RevenueCat error callbacks with PurchasesError -> suppress,
+        // so failed server validation cannot pop error UI over the unlock.
+        patchAll(Fingerprint(name = "onError", returnType = "V",
+            custom = { m, c -> !c.type.contains("revenuecat") && m.parameterTypes.any { it.contains("PurchasesError") } }),
+            "RC.onError") {
+            it.addInstructions(0, "return-void")
         }
 
         // ──────────────────────────────────────────────
