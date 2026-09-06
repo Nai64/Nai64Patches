@@ -425,6 +425,58 @@ internal fun BytecodePatchContext.foldBooleanGetterConst(
 }
 
 /**
+ * Folds any `int`-returning getter into [value] (const/4 when it fits,
+ * const/16 otherwise).
+ */
+internal fun BytecodePatchContext.foldIntGetterConst(
+    definingClass: String,
+    methodNames: Set<String>,
+    value: Int,
+): Int {
+    var patched = 0
+    classDefForEach { classDef ->
+        // prefilter: skip classes that never reference the target definingClass
+        var hasRef = false
+        for (m in classDef.methods) {
+            val impl = m.implementation ?: continue
+            for (insn in impl.instructions) {
+                val ref = (insn as? ReferenceInstruction)?.reference ?: continue
+                if (ref is MethodReference && ref.definingClass == definingClass && ref.name in methodNames) { hasRef = true; break }
+            }
+            if (hasRef) break
+        }
+        if (!hasRef) return@classDefForEach
+        val mutableClass = mutableClassDefBy(classDef)
+        for (method in mutableClass.methods) {
+            val implementation = method.implementation ?: continue
+            val instructions: List<Instruction> = implementation.instructions.toList()
+            for ((index, instruction) in instructions.withIndex()) {
+                val reference =
+                    (instruction as? ReferenceInstruction)?.reference as? MethodReference
+                        ?: continue
+                if (reference.definingClass != definingClass) continue
+                if (reference.name !in methodNames) continue
+                if (reference.returnType != "I") continue
+
+                val next = instructions.getOrNull(index + 1)
+                if (next != null && next.opcode == Opcode.MOVE_RESULT) {
+                    val resultRegister = (next as OneRegisterInstruction).registerA
+                    val const = if (value in -8..7) {
+                        "const/4 v$resultRegister, 0x${value.and(0xf).toString(16)}"
+                    } else {
+                        "const/16 v$resultRegister, 0x${value.and(0xffff).toString(16)}"
+                    }
+                    method.replaceInstruction(index, const)
+                    method.replaceInstruction(index + 1, "nop")
+                    patched++
+                }
+            }
+        }
+    }
+    return patched
+}
+
+/**
  * Folds any object-returning getter into `null` (const/4 0x0).
  */
 internal fun BytecodePatchContext.foldObjectGetterToNull(
