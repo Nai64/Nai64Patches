@@ -1,6 +1,6 @@
 {
   "NOTE": "Do NOT manually edit this file. This file is automatically updated when semantic release (release.yml) runs. Manually editing this file can break your releases and break third party tools that use this file.",
-  "version": "1.44.0",
+  "version": "1.45.0",
   "patches": [
     {
       "name": "Skip Consent Popup",
@@ -779,134 +779,6 @@
     {
       "name": "Pairip Bypass (Experimental)",
       "description": "Bypass app protection so the patched app can start.",
-      "default": false,
-      "dependencies": [
-        "ResourcePatch"
-      ],
-      "compatiblePackages": null,
-      "options": [
-        {
-          "key": "automaticStrategySelection",
-          "title": "Automatic strategy selection",
-          "description": "Apply every compatible PairIP strategy whose target is found. Turn this off to select only the strategy groups needed for testing.",
-          "required": false,
-          "type": "kotlin.Boolean",
-          "default": true,
-          "values": null
-        },
-        {
-          "key": "manifestCleanupStrategy",
-          "title": "XML manifest cleanup",
-          "description": "Redirect the PairIP Application wrapper when possible, then remove PairIP license activities, provider, and CHECK_LICENSE permission from AndroidManifest.xml.",
-          "required": false,
-          "type": "kotlin.Boolean",
-          "default": false,
-          "values": null
-        },
-        {
-          "key": "pairipVmRunnerChecks",
-          "title": "PairIP VMRunner checks",
-          "description": "Bypass Application.<clinit> and VMRunner.invoke startup paths that can execute the PairIP VM.",
-          "required": false,
-          "type": "kotlin.Boolean",
-          "default": false,
-          "values": null
-        },
-        {
-          "key": "startupLauncherChecks",
-          "title": "StartupLauncher checks",
-          "description": "Bypass both PairIP StartupLauncher.launch and StartupLauncher.pairip entry points.",
-          "required": false,
-          "type": "kotlin.Boolean",
-          "default": false,
-          "values": null
-        },
-        {
-          "key": "licenseClientV3Activity",
-          "title": "LicenseClient V3 activity",
-          "description": "Disable the PairIP V3 LicenseClient.onActivityCreate path.",
-          "required": false,
-          "type": "kotlin.Boolean",
-          "default": false,
-          "values": null
-        },
-        {
-          "key": "localInstallerChecks",
-          "title": "Local installer checks",
-          "description": "Spoof checks that verify which installer installed the app.",
-          "required": false,
-          "type": "kotlin.Boolean",
-          "default": false,
-          "values": null
-        },
-        {
-          "key": "signatureChecks",
-          "title": "Signature checks",
-          "description": "Bypass APK integrity and signature-match checks.",
-          "required": false,
-          "type": "kotlin.Boolean",
-          "default": false,
-          "values": null
-        },
-        {
-          "key": "licenseUiSuppression",
-          "title": "License error and paywall UI",
-          "description": "Suppress PairIP error dialogs, paywalls, and close-app screens.",
-          "required": false,
-          "type": "kotlin.Boolean",
-          "default": false,
-          "values": null
-        },
-        {
-          "key": "applicationStartupHooks",
-          "title": "Application startup hooks",
-          "description": "Bypass PairIP Application attachBaseContext and onCreate hooks. These run early and may be less compatible with some apps.",
-          "required": false,
-          "type": "kotlin.Boolean",
-          "default": false,
-          "values": null
-        },
-        {
-          "key": "licenseClientChecks",
-          "title": "License client checks",
-          "description": "Disable the legacy LicenseClient license-check and root-termination path.",
-          "required": false,
-          "type": "kotlin.Boolean",
-          "default": false,
-          "values": null
-        },
-        {
-          "key": "contentProviderChecks",
-          "title": "Content provider checks",
-          "description": "Bypass PairIP content-provider initialization and query checks.",
-          "required": false,
-          "type": "kotlin.Boolean",
-          "default": false,
-          "values": null
-        },
-        {
-          "key": "responseValidationChecks",
-          "title": "Response validation checks",
-          "description": "Bypass license-response validation, metadata, and signature checks across legacy validator variants.",
-          "required": false,
-          "type": "kotlin.Boolean",
-          "default": false,
-          "values": null
-        },
-        {
-          "key": "pairipV2Checks",
-          "title": "PairIP V2 checks",
-          "description": "Bypass PairIP V2 license flow, response signature verification, and repeated background checks.",
-          "required": false,
-          "type": "kotlin.Boolean",
-          "default": false,
-          "values": null
-        }
-      ]
-    },
-    {
-      "name": "Unlock RevenueCat Entitlements",
-      "description": "Unlock premium features in apps that use RevenueCat.",
       "default": false,
       "dependencies": [],
       "compatiblePackages": null,
@@ -2098,6 +1970,24 @@
       "options": []
     },
     {
+      "name": "Disable Notification Badges",
+      "description": "Remove launcher badge dots from notification channels.",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": [
+        {
+          "key": "notificationBadgesDisabled",
+          "title": "Disable badges",
+          "description": "Force channels to not show badges (true) or leave them alone (false).",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": true,
+          "values": null
+        }
+      ]
+    },
+    {
       "name": "Disable Notification Sound",
       "description": "Mutes notification sounds.",
       "default": false,
@@ -2648,6 +2538,24 @@
       ]
     },
     {
+      "name": "Fake Device Admin",
+      "description": "Report device admin as active.",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": [
+        {
+          "key": "deviceAdminActive",
+          "title": "Report active",
+          "description": "Report device admin as active (true) or inactive (false).",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": true,
+          "values": null
+        }
+      ]
+    },
+    {
       "name": "Fake Device Idle Mode",
       "description": "Makes PowerManager.isDeviceIdleMode() report a chosen state so apps that gate features behind device idle checks stop doing so.",
       "default": false,
@@ -2752,6 +2660,24 @@
       "dependencies": [],
       "compatiblePackages": null,
       "options": []
+    },
+    {
+      "name": "Fake Notification Listener",
+      "description": "Report notification-listener access as granted.",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": [
+        {
+          "key": "notificationListenerAccess",
+          "title": "Grant access",
+          "description": "Report notification-listener access as granted (true) or denied (false).",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": true,
+          "values": null
+        }
+      ]
     },
     {
       "name": "Fake Notification Policy Access",
@@ -2911,6 +2837,24 @@
       ]
     },
     {
+      "name": "Fake Usage Access",
+      "description": "Report usage-stats access as granted.",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": [
+        {
+          "key": "usageStatsAccess",
+          "title": "Grant access",
+          "description": "Report usage-stats access as granted (true) or denied (false).",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": true,
+          "values": null
+        }
+      ]
+    },
+    {
       "name": "Fake Vibrate When Ringing",
       "description": "Reports a chosen vibrate-when-ringing state through Settings.System so apps that check ringer vibration behavior stop doing so.",
       "default": false,
@@ -2935,6 +2879,24 @@
       "dependencies": [],
       "compatiblePackages": null,
       "options": []
+    },
+    {
+      "name": "Fake Write Settings Access",
+      "description": "Report system-settings write access as granted.",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": [
+        {
+          "key": "writeSettingsAccess",
+          "title": "Grant access",
+          "description": "Report write-settings access as granted (true) or denied (false).",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": true,
+          "values": null
+        }
+      ]
     },
     {
       "name": "Force 5GHz Band Supported",
@@ -4204,6 +4166,24 @@
       "options": []
     },
     {
+      "name": "Report No Cameras",
+      "description": "Report an empty camera list to apps.",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": [
+        {
+          "key": "hideCameras",
+          "title": "Hide cameras",
+          "description": "Report zero cameras (true) or leave the camera list alone (false).",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": true,
+          "values": null
+        }
+      ]
+    },
+    {
       "name": "Show Search Result Scores",
       "description": "Bandcamp: always shows relevance scores in search results (admin debug flag show_search_result_score).",
       "default": false,
@@ -4227,6 +4207,14 @@
           ]
         }
       ],
+      "options": []
+    },
+    {
+      "name": "Show Status Bar",
+      "description": "Keep the status bar visible in fullscreen apps",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
       "options": []
     },
     {
@@ -4944,6 +4932,24 @@
           "required": false,
           "type": "kotlin.Boolean",
           "default": true,
+          "values": null
+        }
+      ]
+    },
+    {
+      "name": "Tablet Mode",
+      "description": "Spoof a tablet smallest width so apps render their tablet UI.",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": [
+        {
+          "key": "tabletSmallestWidthDp",
+          "title": "Smallest width (dp)",
+          "description": "Reported smallestScreenWidthDp. 600 or higher unlocks most tablet layouts.",
+          "required": false,
+          "type": "kotlin.Int",
+          "default": 600,
           "values": null
         }
       ]

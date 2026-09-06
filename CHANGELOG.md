@@ -1,3 +1,22 @@
+## [1.45.0](https://github.com/Nai64/Nai64Patches/compare/1.44.0...1.45.0) (2026-09-06)
+
+### Bug Fixes
+
+* non-null RevenueCat entitlement construction with high-register move ([8b1810d](https://github.com/Nai64/Nai64Patches/commit/8b1810d06216165cf469d37f60ba458e7129cfda))
+* slim Pairip Bypass to installer check, store spoof and StartupLauncher ([5cf4ab3](https://github.com/Nai64/Nai64Patches/commit/5cf4ab34d99eac8306917f85d9c1f07735314092))
+
+### New Features
+
+* add Disable Notification Badges patch ([e98deec](https://github.com/Nai64/Nai64Patches/commit/e98deecc55b5c89d453fbf251785bee4f54e5e01))
+* add Fake Device Admin patch ([b9686fa](https://github.com/Nai64/Nai64Patches/commit/b9686fa95eb7589399868f17ca4914288282c6b9))
+* add Fake Notification Listener patch ([a8ba684](https://github.com/Nai64/Nai64Patches/commit/a8ba68402c30eac83ecc246349fc2d78123b36a9))
+* add Fake Write Settings Access patch ([1bde1fb](https://github.com/Nai64/Nai64Patches/commit/1bde1fb30b4d0fba9c8beb8aee21eca7d8c3ce06))
+* add int getter fold and Fake Usage Access patch ([c19056d](https://github.com/Nai64/Nai64Patches/commit/c19056de905f5301963b4d198275c32184d4c775))
+* add Report No Cameras patch ([5ff2df3](https://github.com/Nai64/Nai64Patches/commit/5ff2df31e0c05a96bb79d185218d8b39cd808dec))
+* add Show Status Bar patch ([ef7ffc1](https://github.com/Nai64/Nai64Patches/commit/ef7ffc1420a9741072429b185fcbda015d3e801f))
+* add Tablet Mode patch ([c964169](https://github.com/Nai64/Nai64Patches/commit/c964169a336a95e21638634b6a16eb3c67a3e85a))
+* merge RevenueCat unlock into Unlock Premium with entitlement fake ([4dc1481](https://github.com/Nai64/Nai64Patches/commit/4dc1481ca7b8e7ef0c75a44cb3afae16f87bbb3d))
+
 ## [1.44.0](https://github.com/Nai64/Nai64Patches/compare/1.43.1...1.44.0) (2026-09-05)
 
 ### New Features
