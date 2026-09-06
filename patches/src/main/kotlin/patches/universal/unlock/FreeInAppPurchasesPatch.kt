@@ -566,6 +566,13 @@ val freeInAppPurchasesPatch = bytecodePatch(
             "RC.onPurchasesUpdated") { method ->
             try {
                 val origCount = method.implementation!!.registerCount
+                // High regs only: low regs are Undefined at entry (reading them
+                // fails verification), and 35c needs regs <= 15. Temps must also
+                // stay BELOW the param slots at the top of the frame.
+                if (origCount > 13) {
+                    logger.warning("Free In-app Purchases: RC.onPurchasesUpdated fake skipped (frame too large)")
+                    return@patchAll
+                }
                 val vH = origCount
                 val owner = try {
                     Fingerprint(name = "onPurchasesUpdated",
@@ -573,7 +580,8 @@ val freeInAppPurchasesPatch = bytecodePatch(
                         returnType = "V",
                         custom = { m, _ -> m.parameterTypes.size == 2 && m.parameterTypes[1] == "Ljava/util/List;" }).classDefOrNull
                 } catch (_: Exception) { null } ?: return@patchAll
-                val cloned = method.cloneMutable(additionalRegisters = 4)
+                // +8: temps (3) must end up strictly below the param slots.
+                val cloned = method.cloneMutable(additionalRegisters = 8)
                 val target = owner.methods.firstOrNull {
                     it.name == method.name && it.parameterTypes == method.parameterTypes && it.returnType == method.returnType
                 } ?: return@patchAll
@@ -581,23 +589,15 @@ val freeInAppPurchasesPatch = bytecodePatch(
                 fun emit(s: String) {
                     sb.append(s).append('\n')
                 }
-                emit("move-object/from16 v$vH, v0")
-                emit("move-object/from16 v${vH + 1}, v1")
-                emit("move-object/from16 v${vH + 2}, v2")
-                emit("move-object/from16 v${vH + 3}, v3")
-                emit("const-string v0, \"{\\\"orderId\\\":\\\"morphe_fake\\\",\\\"packageName\\\":\\\"morphe_fake\\\",\\\"productId\\\":\\\"morphe_fake\\\",\\\"purchaseTime\\\":0,\\\"purchaseState\\\":1,\\\"purchaseToken\\\":\\\"morphe_fake\\\",\\\"quantity\\\":1,\\\"acknowledged\\\":true}\"")
-                emit("const-string v1, \"morphe_fake\"")
-                emit("new-instance v2, Lcom/android/billingclient/api/Purchase;")
-                emit("invoke-direct {v2, v0, v1}, Lcom/android/billingclient/api/Purchase;-><init>(Ljava/lang/String;Ljava/lang/String;)V")
-                emit("move-object/from16 v0, p2")
-                emit("new-instance v1, Ljava/util/ArrayList;")
-                emit("invoke-direct {v1, v0}, Ljava/util/ArrayList;-><init>(Ljava/util/Collection;)V")
-                emit("invoke-virtual {v1, v2}, Ljava/util/ArrayList;->add(Ljava/lang/Object;)Z")
-                emit("move-object/from16 p2, v1")
-                emit("move-object/from16 v0, v$vH")
-                emit("move-object/from16 v1, v${vH + 1}")
-                emit("move-object/from16 v2, v${vH + 2}")
-                emit("move-object/from16 v3, v${vH + 3}")
+                emit("const-string v$vH, \"{\\\"orderId\\\":\\\"morphe_fake\\\",\\\"packageName\\\":\\\"morphe_fake\\\",\\\"productId\\\":\\\"morphe_fake\\\",\\\"purchaseTime\\\":0,\\\"purchaseState\\\":1,\\\"purchaseToken\\\":\\\"morphe_fake\\\",\\\"quantity\\\":1,\\\"acknowledged\\\":true}\"")
+                emit("const-string v${vH + 1}, \"morphe_fake\"")
+                emit("new-instance v${vH + 2}, Lcom/android/billingclient/api/Purchase;")
+                emit("invoke-direct {v${vH + 2}, v$vH, v${vH + 1}}, Lcom/android/billingclient/api/Purchase;-><init>(Ljava/lang/String;Ljava/lang/String;)V")
+                emit("move-object/from16 v$vH, p2")
+                emit("new-instance v${vH + 1}, Ljava/util/ArrayList;")
+                emit("invoke-direct {v${vH + 1}, v$vH}, Ljava/util/ArrayList;-><init>(Ljava/util/Collection;)V")
+                emit("invoke-virtual {v${vH + 1}, v${vH + 2}}, Ljava/util/ArrayList;->add(Ljava/lang/Object;)Z")
+                emit("move-object/from16 p2, v${vH + 1}")
                 try {
                     owner.methods.remove(target)
                 } catch (_: Exception) {}
