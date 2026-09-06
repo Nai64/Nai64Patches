@@ -5,6 +5,7 @@ import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.patch.stringOption
+import patches.universal.ads.util.cloneMutable
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
@@ -251,6 +252,128 @@ val unlockPremiumPatch = bytecodePatch(
                 return-void
                 :morphe_async_orig
             """.trimIndent())
+        }
+
+        // ──────────────────────────────────────────────
+        // 1d) RevenueCat (merged from Unlock RevenueCat Entitlements).
+        // isActive -> true covers synced infos; the EntitlementInfos.get
+        // fake covers empty maps (fresh accounts) by returning a
+        // constructed active EntitlementInfo for whatever id the app asks.
+        // ──────────────────────────────────────────────
+
+        patchAll(
+            Fingerprint(
+                definingClass = "Lcom/revenuecat/purchases/EntitlementInfo;",
+                name = "isActive",
+                returnType = "Z",
+                custom = { m, _ -> m.parameterTypes.isEmpty() }
+            ), "RC:isActive"
+        ) { it.addInstructions(0, "const/4 v0, 0x1\nreturn v0") }
+
+        // Generic RevenueCat fallback: any isActive/isEntitled/hasActive in com/revenuecat that returns Z -> true
+        classDefForEach { classDef ->
+            val tl = classDef.type.lowercase()
+            if (!tl.contains("revenuecat") && !tl.contains("purchases")) return@classDefForEach
+            if (tl.contains("okhttp") || tl.contains("ssl")) return@classDefForEach
+            val mutableClass = try { mutableClassDefBy(classDef) } catch (_: Exception) { return@classDefForEach }
+            for (method in mutableClass.methods) {
+                if (method.returnType != "Z") continue
+                val n = method.name.lowercase()
+                if (n.contains("provider") || n.contains("product") || n.contains("progress")) continue
+                val isEntitlementCheck = n.contains("isactive") || n.contains("isentitled") || n.contains("hasactive") || n.contains("ispremium") || n.contains("haspremium") || n == "isactive" || n == "isentitled"
+                if (!isEntitlementCheck) continue
+                try {
+                    if (method.implementation == null) continue
+                    method.addInstructions(0, "const/4 v0, 0x1\nreturn v0")
+                    patched++
+                    patchedMethods.add("RC:${method.name}")
+                } catch (_: Exception) {}
+            }
+        }
+
+        // Signature verification mode: force verify Z-methods true to avoid Enforced failure
+        classDefForEach { classDef ->
+            val tl = classDef.type.lowercase()
+            if (!tl.contains("revenuecat") || !tl.contains("verification")) return@classDefForEach
+            val mutableClass = try { mutableClassDefBy(classDef) } catch (_: Exception) { return@classDefForEach }
+            for (method in mutableClass.methods) {
+                if (method.returnType != "Z") continue
+                val n = method.name.lowercase()
+                if (n.contains("verify") || n.contains("enforced") || n.contains("informational")) {
+                    try {
+                        if (method.implementation == null) continue
+                        method.addInstructions(0, "const/4 v0, 0x1\nreturn v0")
+                        patched++
+                        patchedMethods.add("RC:verify:${method.name}")
+                    } catch (_: Exception) {}
+                }
+            }
+        }
+
+        // EntitlementInfos.get(id) -> constructed active EntitlementInfo.
+        // Constructor resolved at patch time (shortest <init>, args mapped
+        // by type: first String = queried id, Z = true, Date = now, else null).
+        try {
+            val rcGetFp = Fingerprint(
+                definingClass = "Lcom/revenuecat/purchases/EntitlementInfos;",
+                name = "get",
+                returnType = "Lcom/revenuecat/purchases/EntitlementInfo;",
+                custom = { m, _ -> m.parameterTypes == listOf("Ljava/lang/String;") }
+            )
+            val rcGet = try { rcGetFp.methodOrNull } catch (_: Exception) { null }
+            val rcOwner = try { rcGetFp.classDefOrNull } catch (_: Exception) { null }
+            val rcInfoClass = try { mutableClassDefByOrNull("Lcom/revenuecat/purchases/EntitlementInfo;") } catch (_: Exception) { null }
+            if (rcGet?.implementation != null && rcOwner != null && rcInfoClass != null) {
+                val ctor = rcInfoClass.methods.filter { it.name == "<init>" }.minByOrNull { it.parameterTypes.size }
+                if (ctor != null) {
+                    val params = ctor.parameterTypes
+                    val sb = StringBuilder()
+                    sb.appendLine("new-instance v0, Lcom/revenuecat/purchases/EntitlementInfo;")
+                    var reg = 1
+                    var idUsed = false
+                    val argRegs = mutableListOf<Int>()
+                    for (pt in params) {
+                        argRegs.add(reg)
+                        when {
+                            pt == "Ljava/lang/String;" && !idUsed -> {
+                                // from16: params were shifted to high regs by the clone
+                                sb.appendLine("move-object/from16 v$reg, p1")
+                                idUsed = true
+                            }
+                            pt == "Ljava/lang/String;" -> sb.appendLine("const/4 v$reg, 0x0")
+                            pt == "Z" -> sb.appendLine("const/4 v$reg, 0x1")
+                            pt == "Ljava/util/Date;" -> {
+                                sb.appendLine("new-instance v$reg, Ljava/util/Date;")
+                                sb.appendLine("invoke-direct {v$reg}, Ljava/util/Date;-><init>()V")
+                            }
+                            pt == "J" || pt == "D" -> sb.appendLine("const-wide v$reg, 0x0L")
+                            pt == "I" || pt == "S" || pt == "B" || pt == "C" || pt == "F" -> sb.appendLine("const/4 v$reg, 0x0")
+                            else -> sb.appendLine("const/4 v$reg, 0x0")
+                        }
+                        reg += if (pt == "J" || pt == "D") 2 else 1
+                    }
+                    val lastReg = reg - 1
+                    val paramDesc = params.joinToString("")
+                    sb.appendLine("invoke-direct/range {v0 .. v$lastReg}, Lcom/revenuecat/purchases/EntitlementInfo;-><init>($paramDesc)V")
+                    sb.appendLine("return-object v0")
+                    val cloned = rcGet.cloneMutable(additionalRegisters = lastReg + 1)
+                    val target = rcOwner.methods.firstOrNull {
+                        it.name == rcGet.name && it.parameterTypes == rcGet.parameterTypes && it.returnType == rcGet.returnType
+                    }
+                    if (target != null) {
+                        try {
+                            rcOwner.methods.remove(target)
+                        } catch (_: Exception) {}
+                        cloned.addInstructions(0, sb.toString().trimIndent())
+                        rcOwner.methods.add(cloned)
+                        patched++
+                        patchedMethods.add("RC:EntitlementInfos.get")
+                        logger.info("Faked RevenueCat EntitlementInfos.get with ${params.size}-arg constructor")
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            logger.warning("RevenueCat EntitlementInfos.get fake skipped: ${e.message}")
         }
 
         // ──────────────────────────────────────────────
