@@ -325,7 +325,18 @@ val unlockPremiumPatch = bytecodePatch(
             val rcInfoClass = try { mutableClassDefByOrNull("Lcom/revenuecat/purchases/EntitlementInfo;") } catch (_: Exception) { null }
             if (rcGet?.implementation != null && rcOwner != null && rcInfoClass != null) {
                 val ctor = rcInfoClass.methods.filter { it.name == "<init>" }.minByOrNull { it.parameterTypes.size }
-                if (ctor != null) {
+                // Kotlin ctors null-check reference params (getClass() calls), so every
+                // object arg must be non-null: empty strings, real enum constants
+                // (verified below), fresh dates, blank JSON object.
+                val hasNormal = try {
+                    mutableClassDefByOrNull("Lcom/revenuecat/purchases/PeriodType;")
+                        ?.fields?.any { it.name == "NORMAL" } == true &&
+                    mutableClassDefByOrNull("Lcom/revenuecat/purchases/Store;")
+                        ?.fields?.any { it.name == "PLAY_STORE" } == true &&
+                    mutableClassDefByOrNull("Lcom/revenuecat/purchases/OwnershipType;")
+                        ?.fields?.any { it.name == "PURCHASED" } == true
+                } catch (_: Exception) { false }
+                if (ctor != null && hasNormal) {
                     val params = ctor.parameterTypes
                     val sb = StringBuilder()
                     sb.appendLine("new-instance v0, Lcom/revenuecat/purchases/EntitlementInfo;")
@@ -340,11 +351,21 @@ val unlockPremiumPatch = bytecodePatch(
                                 sb.appendLine("move-object/from16 v$reg, p1")
                                 idUsed = true
                             }
-                            pt == "Ljava/lang/String;" -> sb.appendLine("const/4 v$reg, 0x0")
+                            pt == "Ljava/lang/String;" -> sb.appendLine("const-string v$reg, \"\"")
                             pt == "Z" -> sb.appendLine("const/4 v$reg, 0x1")
                             pt == "Ljava/util/Date;" -> {
                                 sb.appendLine("new-instance v$reg, Ljava/util/Date;")
                                 sb.appendLine("invoke-direct {v$reg}, Ljava/util/Date;-><init>()V")
+                            }
+                            pt == "Lcom/revenuecat/purchases/PeriodType;" ->
+                                sb.appendLine("sget-object v$reg, Lcom/revenuecat/purchases/PeriodType;->NORMAL:Lcom/revenuecat/purchases/PeriodType;")
+                            pt == "Lcom/revenuecat/purchases/Store;" ->
+                                sb.appendLine("sget-object v$reg, Lcom/revenuecat/purchases/Store;->PLAY_STORE:Lcom/revenuecat/purchases/Store;")
+                            pt == "Lcom/revenuecat/purchases/OwnershipType;" ->
+                                sb.appendLine("sget-object v$reg, Lcom/revenuecat/purchases/OwnershipType;->PURCHASED:Lcom/revenuecat/purchases/OwnershipType;")
+                            pt == "Lorg/json/JSONObject;" -> {
+                                sb.appendLine("new-instance v$reg, Lorg/json/JSONObject;")
+                                sb.appendLine("invoke-direct {v$reg}, Lorg/json/JSONObject;-><init>()V")
                             }
                             pt == "J" || pt == "D" -> sb.appendLine("const-wide v$reg, 0x0L")
                             pt == "I" || pt == "S" || pt == "B" || pt == "C" || pt == "F" -> sb.appendLine("const/4 v$reg, 0x0")
