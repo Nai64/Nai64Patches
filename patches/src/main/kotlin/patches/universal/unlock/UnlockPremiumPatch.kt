@@ -46,6 +46,9 @@ val unlockPremiumPatch = bytecodePatch(
         )
         fun isPremiumKey(lower: String): Boolean {
             if (extraSet.any { it.isNotEmpty() && lower == it }) return true
+            // "ignore/disregard X" flags mean "disregard the premium state":
+            // forcing those true inverts them (locks instead of unlocking)
+            if (lower.contains("ignore") || lower.contains("disregard")) return false
             for (k in premiumSubstrings) {
                 if (lower.contains(k)) {
                     // guard generic "pro" inside provider/product
