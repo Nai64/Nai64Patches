@@ -103,6 +103,7 @@ val unlockPremiumPatch = bytecodePatch(
             "hasEntitlement", "isEntitled", "checkPremium", "verifyPremium",
             "isPremiumUser", "hasAdFree", "isPaidUser", "checkVip",
             "hasSubscriptionActive", "hasActivePurchase", "isProMember", "isVipUser", "hasPremiumAccessChanged",
+            "hasProFeatures", "hasProAccess", "hasActiveSubscription",
         )) {
             val isGenericActive = checkName == "isActive" || checkName == "hasActive" || checkName == "isPro" || checkName == "hasPro"
             patchAll(
@@ -117,12 +118,24 @@ val unlockPremiumPatch = bytecodePatch(
             ) { it.addInstructions(0, "const/4 v0, 0x1\nreturn v0") }
         }
 
-        for (negName in listOf("isExpired", "isCancelled", "isTrialExpired", "isLocked", "isPremiumLocked", "isContentLocked")) {
+        for (negName in listOf("isExpired", "isCancelled", "isTrialExpired", "isLocked", "isPremiumLocked", "isContentLocked", "isHardPaywall")) {
             patchAll(Fingerprint(name = negName, returnType = "Z", custom = { _, c ->
                 val t = c.type.lowercase()
-                t.contains("premium") || t.contains("subscription") || t.contains("entitle") || t.contains("vip") || t.contains("billing") || t.contains("purchase") || t.contains("content") || t.contains("station")
+                t.contains("premium") || t.contains("subscription") || t.contains("entitle") || t.contains("vip") || t.contains("billing") || t.contains("purchase") || t.contains("content") || t.contains("station") || t.contains("paywall")
             }), negName) {
                 it.addInstructions(0, "const/4 v0, 0x0\nreturn v0")
+            }
+        }
+
+        // Paywall option flags (trial/promo/lifetime-switch availability).
+        // Class-gated to billing/paywall/offer holders so generic
+        // getSupportsPromo-like names elsewhere stay untouched.
+        for (optName in listOf("getSupportsLifetimeSwitch", "getSupportsPromo", "getDoesOfferTrial")) {
+            patchAll(Fingerprint(name = optName, returnType = "Z", custom = { _, c ->
+                val t = c.type.lowercase()
+                t.contains("paywall") || t.contains("billing") || t.contains("purchase") || t.contains("subscription") || t.contains("offer") || t.contains("product")
+            }), optName) {
+                it.addInstructions(0, "const/4 v0, 0x1\nreturn v0")
             }
         }
 
@@ -395,6 +408,79 @@ val unlockPremiumPatch = bytecodePatch(
             }
         } catch (e: Exception) {
             logger.warning("RevenueCat EntitlementInfos.get fake skipped: ${e.message}")
+        }
+
+        // ──────────────────────────────────────────────
+        // 1e) Two-state status enums (PremiumStatus-style).
+        // Any strict two-constant enum with an active/inactive name pair
+        // gets: no-arg methods returning the enum type -> ACTIVE constant,
+        // and getValue()I inside the enum -> ACTIVE constant's int field.
+        // Purely structural, no app/SDK names referenced.
+        // ──────────────────────────────────────────────
+
+        try {
+            val activeNames = setOf("active", "enabled", "premium", "pro", "unlocked", "valid", "licensed", "subscribed", "entitled", "paid")
+            val inactiveNames = setOf("not_active", "inactive", "notactive", "disabled", "free", "locked", "invalid", "unlicensed", "unsubscribed", "not_entitled", "expired")
+            val activeConst = mutableMapOf<String, String>()
+            val constIntField = mutableMapOf<String, String>()
+            classDefForEach { classDef ->
+                try {
+                    if (classDef.superclass != "Ljava/lang/Enum;") return@classDefForEach
+                    val consts = classDef.fields.filter { f ->
+                        f.type == classDef.type && !f.name.startsWith("$") && f.accessFlags and 0x8 != 0
+                    }
+                    if (consts.size != 2) return@classDefForEach
+                    val active = consts.firstOrNull { it.name.lowercase() in activeNames } ?: return@classDefForEach
+                    if (consts.none { it.name.lowercase() in inactiveNames }) return@classDefForEach
+                    activeConst[classDef.type] = active.name
+                    // int field backing getValue(): first IGET of an own-type I field
+                    outer@ for (m in classDef.methods) {
+                        if (m.name != "getValue" || m.returnType != "I") continue
+                        val impl = m.implementation ?: continue
+                        for (insn in impl.instructions) {
+                            val ref = (insn as? ReferenceInstruction)?.reference as? com.android.tools.smali.dexlib2.iface.reference.FieldReference ?: continue
+                            if (insn.opcode != Opcode.IGET) continue
+                            if (ref.definingClass == classDef.type && ref.type == "I") {
+                                constIntField[classDef.type] = ref.name
+                                break@outer
+                            }
+                        }
+                    }
+                    logger.info("Unlock Premium: two-state status enum ${classDef.type} active=${active.name}")
+                } catch (_: Exception) {}
+            }
+            if (activeConst.isNotEmpty()) {
+                classDefForEach { classDef ->
+                    val hasCandidate = classDef.methods.any { m ->
+                        m.parameterTypes.isEmpty() && (activeConst.containsKey(m.returnType) ||
+                            (m.name == "getValue" && m.returnType == "I" && activeConst.containsKey(classDef.type)))
+                    }
+                    if (!hasCandidate) return@classDefForEach
+                    val mutableClass = try { mutableClassDefBy(classDef) } catch (_: Exception) { return@classDefForEach }
+                    for (method in mutableClass.methods) {
+                        try {
+                            if (method.implementation == null || method.parameterTypes.isNotEmpty()) continue
+                            val ret = method.returnType
+                            val activeField = activeConst[ret]
+                            if (activeField != null) {
+                                if (method.name == "values" || method.name == "valueOf" || method.name == "getEntries") continue
+                                method.addInstructions(0, "sget-object v0, $ret->$activeField:$ret\nreturn-object v0")
+                                patched++
+                                patchedMethods.add("EnumStatus:${method.name}->$activeField")
+                            } else if (method.name == "getValue" && ret == "I" && activeConst.containsKey(classDef.type)) {
+                                val intField = constIntField[classDef.type] ?: continue
+                                val enumType = classDef.type
+                                val field = activeConst[enumType] ?: continue
+                                method.addInstructions(0, "sget-object v0, $enumType->$field:$enumType\niget v0, v0, $enumType->$intField:I\nreturn v0")
+                                patched++
+                                patchedMethods.add("EnumStatus:getValue->$field")
+                            }
+                        } catch (_: Exception) {}
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            logger.warning("Unlock Premium: two-state enum strategy skipped: ${e.message}")
         }
 
         // ──────────────────────────────────────────────
