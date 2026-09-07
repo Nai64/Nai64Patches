@@ -500,6 +500,9 @@ val freeInAppPurchasesPatch = bytecodePatch(
                             sb.append(s).append('\n')
                         }
                         emit("move-object/from16 v$uCb, p$cbIdx")
+                        emit("const-string v10, \"MorpheRC\"")
+                        emit("const-string v11, \"RC $pn buy tapped\"")
+                        emit("invoke-static {v10, v11}, Landroid/util/Log;->d(Ljava/lang/String;Ljava/lang/String;)I")
                         emit("const-string v$uId, \"$fakeId\"")
                         // Unsafe handle
                         emit("const-string v$uTmp, \"theUnsafe\"")
@@ -589,6 +592,9 @@ val freeInAppPurchasesPatch = bytecodePatch(
                 fun emit(s: String) {
                     sb.append(s).append('\n')
                 }
+                emit("const-string v$vH, \"MorpheRC\"")
+                emit("const-string v${vH + 1}, \"RC purchasesUpdated\"")
+                emit("invoke-static {v$vH, v${vH + 1}}, Landroid/util/Log;->d(Ljava/lang/String;Ljava/lang/String;)I")
                 emit("const-string v$vH, \"{\\\"orderId\\\":\\\"morphe_fake\\\",\\\"packageName\\\":\\\"morphe_fake\\\",\\\"productId\\\":\\\"morphe_fake\\\",\\\"purchaseTime\\\":0,\\\"purchaseState\\\":1,\\\"purchaseToken\\\":\\\"morphe_fake\\\",\\\"quantity\\\":1,\\\"acknowledged\\\":true}\"")
                 emit("const-string v${vH + 1}, \"morphe_fake\"")
                 emit("new-instance v${vH + 2}, Lcom/android/billingclient/api/Purchase;")
