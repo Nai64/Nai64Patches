@@ -73,6 +73,20 @@ val freeInAppPurchasesPatch = bytecodePatch(
             }
         }
 
+        // Unity IL2CPP native bridge (BillingClientImpl.launchBillingFlowCpp):
+        // exact-name fingerprint above misses it, so cover by return type.
+        patchAll(Fingerprint(name = "launchBillingFlowCpp"), "launchBillingFlowCpp") {
+            when {
+                it.returnType.contains("BillingResult") -> try {
+                    it.addInstructions(0, okBillingResult)
+                } catch (_: Exception) {
+                    try { it.addInstructions(0, "const/4 v0, 0x0\nreturn-object v0") } catch (_: Exception) {}
+                }
+                it.returnType == "I" -> it.addInstructions(0, "const/4 v0, 0x0\nreturn v0")
+                it.returnType == "V" -> it.addInstructions(0, "return-void")
+            }
+        }
+
         patchAll(Fingerprint(name = "isReady", returnType = "Z", custom = { _, c -> c.type.contains("BillingClient") }), "BillingClient.isReady") {
             it.addInstructions(0, "const/4 v0, 0x1\nreturn v0")
         }
@@ -81,10 +95,25 @@ val freeInAppPurchasesPatch = bytecodePatch(
             it.addInstructions(0, "return-void")
         }
 
-        // startConnection -> fire onBillingSetupFinished(OK) then return
+        // startConnection -> fire onBillingSetupFinished(OK) on the listener,
+        // otherwise the app waits for setup forever and billing never inits
         patchAll(Fingerprint(name = "startConnection", custom = { _, c -> c.type.contains("BillingClient") }), "BillingClient.startConnection") {
-            // just make it succeed and callback OK if listener present
-            it.addInstructions(0, "return-void")
+            if (it.parameterTypes == listOf("Lcom/android/billingclient/api/BillingClientStateListener;") && it.returnType == "V") {
+                it.addInstructions(0, """
+                    invoke-static {}, Lcom/android/billingclient/api/BillingResult;->newBuilder()Lcom/android/billingclient/api/BillingResult${'$'}Builder;
+                    move-result-object v0
+                    const/4 v1, 0x0
+                    invoke-virtual {v0, v1}, Lcom/android/billingclient/api/BillingResult${'$'}Builder;->setResponseCode(I)Lcom/android/billingclient/api/BillingResult${'$'}Builder;
+                    move-result-object v0
+                    invoke-virtual {v0}, Lcom/android/billingclient/api/BillingResult${'$'}Builder;->build()Lcom/android/billingclient/api/BillingResult;
+                    move-result-object v0
+                    move-object v1, p1
+                    invoke-interface {v1, v0}, Lcom/android/billingclient/api/BillingClientStateListener;->onBillingSetupFinished(Lcom/android/billingclient/api/BillingResult;)V
+                    return-void
+                """.trimIndent())
+            } else {
+                it.addInstructions(0, "return-void")
+            }
         }
 
         // onPurchasesUpdated is intentionally left intact: the game grants items in its
@@ -177,10 +206,37 @@ val freeInAppPurchasesPatch = bytecodePatch(
             }
         }
 
-        // querySkuDetailsAsync / queryProductDetailsAsync -> invoke callback with OK + empty list
+        // querySkuDetailsAsync / queryProductDetailsAsync -> fire the details
+        // listener with OK + empty list (a bare return-void hangs shop UIs
+        // waiting for products); sync variants returning List get emptyList
+        // (voiding those would crash verification).
         for (qn in listOf("querySkuDetailsAsync", "queryProductDetailsAsync", "querySkuDetails", "queryProductDetails", "queryProductDetailsAsyncWithListener")) {
             patchAll(Fingerprint(name = qn), qn) {
-                it.addInstructions(0, "return-void")
+                val listenerIdx = it.parameterTypes.indexOfFirst { p -> p.contains("ProductDetailsResponseListener") || p.contains("SkuDetailsResponseListener") }
+                if (listenerIdx >= 0 && it.returnType == "V") {
+                    val isSku = it.parameterTypes[listenerIdx].contains("SkuDetails")
+                    val iface = if (isSku) "Lcom/android/billingclient/api/SkuDetailsResponseListener;" else "Lcom/android/billingclient/api/ProductDetailsResponseListener;"
+                    val cb = if (isSku) "onSkuDetailsResponse" else "onProductDetailsResponse"
+                    val listenerReg = "p${listenerIdx + 1}"
+                    it.addInstructions(0, """
+                        invoke-static {}, Lcom/android/billingclient/api/BillingResult;->newBuilder()Lcom/android/billingclient/api/BillingResult${'$'}Builder;
+                        move-result-object v0
+                        const/4 v1, 0x0
+                        invoke-virtual {v0, v1}, Lcom/android/billingclient/api/BillingResult${'$'}Builder;->setResponseCode(I)Lcom/android/billingclient/api/BillingResult${'$'}Builder;
+                        move-result-object v0
+                        invoke-virtual {v0}, Lcom/android/billingclient/api/BillingResult${'$'}Builder;->build()Lcom/android/billingclient/api/BillingResult;
+                        move-result-object v0
+                        invoke-static {}, Ljava/util/Collections;->emptyList()Ljava/util/List;
+                        move-result-object v1
+                        move-object v2, $listenerReg
+                        invoke-interface {v2, v0, v1}, $iface->$cb(Lcom/android/billingclient/api/BillingResult;Ljava/util/List;)V
+                        return-void
+                    """.trimIndent())
+                } else if (it.returnType.contains("List")) {
+                    it.addInstructions(0, "invoke-static {}, Ljava/util/Collections;->emptyList()Ljava/util/List;\nmove-result-object v0\nreturn-object v0")
+                } else if (it.returnType == "V") {
+                    it.addInstructions(0, "return-void")
+                }
             }
         }
 
@@ -320,10 +376,9 @@ val freeInAppPurchasesPatch = bytecodePatch(
             it.addInstructions(0, "const/4 v0, 0x2\nreturn v0")
         }
 
-        // onBillingSetupFinished -> suppress recursion, just return
-        patchAll(Fingerprint(name = "onBillingSetupFinished"), "onBillingSetupFinished") {
-            it.addInstructions(0, "return-void")
-        }
+        // NOTE: onBillingSetupFinished is intentionally left intact: the game
+        // learns billing is ready through its own listener, and startConnection
+        // above already fires it with OK. Suppressing it breaks init.
 
         // ──────────────────────────────────────────────
         // UNITY IAP
@@ -333,6 +388,7 @@ val freeInAppPurchasesPatch = bytecodePatch(
             it.addInstructions(0, "sget-object v0, Lcom/unity/purchasing/PurchaseProcessingResult;->Complete:Lcom/unity/purchasing/PurchaseProcessingResult;\nreturn-object v0")
         }
         patchAll(Fingerprint(name = "OnPurchaseFailed"), "OnPurchaseFailed") { it.addInstructions(0, "return-void") }
+        patchAll(Fingerprint(name = "OnSetupFailed"), "OnSetupFailed") { it.addInstructions(0, "return-void") }
         patchAll(Fingerprint(name = "OnPurchaseComplete"), "OnPurchaseComplete") { it.addInstructions(0, "return-void") }
         // CrossPlatformValidator
         patchAll(Fingerprint(name = "Validate", custom = { m, c -> m.returnType.contains("CrossPlatformValidator") || c.type.contains("CrossPlatformValidator") }), "CrossPlatformValidator.Validate") {
