@@ -1,7 +1,281 @@
 {
   "NOTE": "Do NOT manually edit this file. This file is automatically updated when semantic release (release.yml) runs. Manually editing this file can break your releases and break third party tools that use this file.",
-  "version": "1.45.0",
+  "version": "1.46.0",
   "patches": [
+    {
+      "name": "★ Unlock Premium",
+      "description": "Unlock premium features and remove paywalls.",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": [
+        {
+          "key": "premiumCustomKeys",
+          "title": "Extra keys",
+          "description": "Comma-separated extra SharedPreferences/DataStore keys to spoof (e.g. my_premium,my_pro). Leave empty for default list.",
+          "required": false,
+          "type": "kotlin.String",
+          "default": "",
+          "values": null
+        }
+      ]
+    },
+    {
+      "name": "★ Free In-app Purchases",
+      "description": "Get paid items for free. Best for offline games.",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": []
+    },
+    {
+      "name": "★ No Ads",
+      "description": "Blocks ads by type. Pick what to block. For rewarded ads use Ads Free Rewards instead.",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": [
+        {
+          "key": "preset",
+          "title": "Preset",
+          "description": "Quick setup: Recommended blocks most ads but keeps rewarded ads for Ads Free Rewards compatibility. Aggressive blocks everything including rewarded. Custom lets you pick below.",
+          "required": false,
+          "type": "kotlin.String",
+          "default": "recommended",
+          "values": {
+            "Recommended (keep rewarded)": "recommended",
+            "Aggressive (block all)": "aggressive",
+            "Custom": "custom"
+          }
+        },
+        {
+          "key": "blockInterstitials",
+          "title": "Block Interstitials",
+          "description": "Full-screen ads between levels or menus. Safe to block in most apps.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": true,
+          "values": null
+        },
+        {
+          "key": "blockBanners",
+          "title": "Block Banners",
+          "description": "Thin banners at top/bottom. Safe to block; rarely breaks layout.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": true,
+          "values": null
+        },
+        {
+          "key": "blockAppOpen",
+          "title": "Block App Open",
+          "description": "Ads on cold start. Block to skip the launch ad.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": true,
+          "values": null
+        },
+        {
+          "key": "blockMRec",
+          "title": "Block MREC",
+          "description": "Medium rectangles (300x250) inside feeds. Safe to block.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": true,
+          "values": null
+        },
+        {
+          "key": "blockRewarded",
+          "title": "Block Rewarded",
+          "description": "Rewarded video  -  disable if you use Ads Free Rewards, otherwise progress gates may break. Enable only to fully remove rewarded ads.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "blockNative",
+          "title": "Block Native",
+          "description": "Native ads blended into feeds/lists. Enable for cleaner feeds (may leave empty placeholders).",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": true,
+          "values": null
+        }
+      ]
+    },
+    {
+      "name": "★ Ads Free Rewards",
+      "description": "Get rewards without watching ads. Combine with No Ads for other formats, but keep No Ads' rewarded block off.",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": [
+        {
+          "key": "patchVersion",
+          "title": "Patch version",
+          "description": "Choose the implementation to use. Each version is a snapshot - newer ones support more networks. If the latest does not work for your app, try an older version.",
+          "required": false,
+          "type": "kotlin.String",
+          "default": "1.41.0",
+          "values": {
+            "1.41.0": "1.41.0",
+            "1.40.0": "1.40.0",
+            "1.38.0": "1.38.0",
+            "1.34.0": "1.34.0",
+            "1.33.0": "1.33.0",
+            "1.32.0": "1.32.0",
+            "1.31.0": "1.31.0",
+            "1.30.0": "1.30.0",
+            "1.22.0": "1.22.0",
+            "1.21.0": "1.21.0",
+            "1.20.0": "1.20.0",
+            "1.19.0": "1.19.0",
+            "1.18.1": "1.18.1",
+            "1.18.0": "1.18.0",
+            "1.17.0": "1.17.0",
+            "1.16.0": "1.16.0",
+            "1.15.0": "1.15.0",
+            "1.1.0 (Original)": "1.1.0"
+          }
+        },
+        {
+          "key": "rewardStrategy",
+          "title": "Reward Strategy",
+          "description": "Which ad-network integration to patch. 'Auto' covers every supported network",
+          "required": false,
+          "type": "kotlin.String",
+          "default": "auto",
+          "values": {
+            "Auto (all networks)": "auto",
+            "AppLovin MAX": "max",
+            "Unity Ads": "unityAds",
+            "ironSource / LevelPlay": "ironSource",
+            "RuStore / VK MyTarget": "rustore",
+            "Huawei Ads Kit / Petal Ads": "huawei"
+          }
+        },
+        {
+          "key": "instantReward",
+          "title": "Instant reward",
+          "description": "Claim the reward immediately without showing an ad (applies to the current patch version)",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": true,
+          "values": null
+        },
+        {
+          "key": "fakeAdAvailability",
+          "title": "Fake ad availability",
+          "description": "Force ad SDKs to report ads as available so the reward flow triggers (needed when no real ad can fill)",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": true,
+          "values": null
+        }
+      ]
+    },
+    {
+      "name": "★ Unlimited Currencies",
+      "description": "Get unlimited coins, gems and other currencies. Works on most games. Not supported on newer Unity games.",
+      "default": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": [
+        {
+          "key": "currencyAmount",
+          "title": "Amount",
+          "description": "Amount to report for currency. Price fields will be 0.",
+          "required": false,
+          "type": "kotlin.Int",
+          "default": 999999,
+          "values": null
+        },
+        {
+          "key": "currencyCustomKeys",
+          "title": "Extra keys",
+          "description": "Comma-separated extra keys to spoof (e.g. my_gem,my_coin). Leave empty for default list.",
+          "required": false,
+          "type": "kotlin.String",
+          "default": "",
+          "values": null
+        },
+        {
+          "key": "infiniteMode",
+          "title": "Infinite mode",
+          "description": "ON: all currencies set to huge amount. OFF: currencies set to the Amount value above.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": true,
+          "values": null
+        },
+        {
+          "key": "multiplyMode",
+          "title": "Multiply income",
+          "description": "When ON, every time a currency is saved it gets multiplied by the Multiplier value. Useful when infinite mode doesn't work.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "currencyMultiplier",
+          "title": "Multiplier",
+          "description": "Multiplier value used in Multiply income mode.",
+          "required": false,
+          "type": "kotlin.Int",
+          "default": 10,
+          "values": null
+        }
+      ]
+    },
+    {
+      "name": "★ Pairip Bypass",
+      "description": "Bypass app protection so the patched app can start.",
+      "default": false,
+      "dependencies": [
+        "ResourcePatch"
+      ],
+      "compatiblePackages": null,
+      "options": [
+        {
+          "key": "localInstallerChecks",
+          "title": "Local installer checks",
+          "description": "Spoof checks that verify which installer installed the app.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": true,
+          "values": null
+        },
+        {
+          "key": "storeSpoofChecks",
+          "title": "Play Store install spoof",
+          "description": "Report Play Store installation (integrated Spoof Play Store Install Source).",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": true,
+          "values": null
+        },
+        {
+          "key": "startupLauncherChecks",
+          "title": "StartupLauncher checks",
+          "description": "Bypass both PairIP StartupLauncher.launch and StartupLauncher.pairip entry points.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": true,
+          "values": null
+        },
+        {
+          "key": "disableFirebase",
+          "title": "Disable Firebase",
+          "description": "Add Firebase manifest switches that stop Analytics, Messaging, Crashlytics and Performance from auto-initializing, and remove the measurement init provider, receiver and services. For apps that crash at startup in ScionFrontendApi (broken Dynamite loading).",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": true,
+          "values": null
+        }
+      ]
+    },
     {
       "name": "Skip Consent Popup",
       "description": "Skip the Google consent (GDPR) popup",
@@ -777,14 +1051,6 @@
       "options": []
     },
     {
-      "name": "Pairip Bypass (Experimental)",
-      "description": "Bypass app protection so the patched app can start.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
       "name": "Custom App Resolution (Experimental)",
       "description": "Set a custom resolution for the game",
       "default": false,
@@ -1014,77 +1280,6 @@
           "key": "amoledBlackenSurfaces",
           "title": "Blacken Surfaces",
           "description": "Also blacken Material3 surface container colors (recommended for full AMOLED).",
-          "required": false,
-          "type": "kotlin.Boolean",
-          "default": true,
-          "values": null
-        }
-      ]
-    },
-    {
-      "name": "Ads Free Rewards (Experimental)",
-      "description": "Get rewards without watching ads. Combine with No Ads for other formats, but keep No Ads' rewarded block off.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": [
-        {
-          "key": "patchVersion",
-          "title": "Patch version",
-          "description": "Choose the implementation to use. Each version is a snapshot - newer ones support more networks. If the latest does not work for your app, try an older version.",
-          "required": false,
-          "type": "kotlin.String",
-          "default": "1.41.0",
-          "values": {
-            "1.41.0": "1.41.0",
-            "1.40.0": "1.40.0",
-            "1.38.0": "1.38.0",
-            "1.34.0": "1.34.0",
-            "1.33.0": "1.33.0",
-            "1.32.0": "1.32.0",
-            "1.31.0": "1.31.0",
-            "1.30.0": "1.30.0",
-            "1.22.0": "1.22.0",
-            "1.21.0": "1.21.0",
-            "1.20.0": "1.20.0",
-            "1.19.0": "1.19.0",
-            "1.18.1": "1.18.1",
-            "1.18.0": "1.18.0",
-            "1.17.0": "1.17.0",
-            "1.16.0": "1.16.0",
-            "1.15.0": "1.15.0",
-            "1.1.0 (Original)": "1.1.0"
-          }
-        },
-        {
-          "key": "rewardStrategy",
-          "title": "Reward Strategy",
-          "description": "Which ad-network integration to patch. 'Auto' covers every supported network",
-          "required": false,
-          "type": "kotlin.String",
-          "default": "auto",
-          "values": {
-            "Auto (all networks)": "auto",
-            "AppLovin MAX": "max",
-            "Unity Ads": "unityAds",
-            "ironSource / LevelPlay": "ironSource",
-            "RuStore / VK MyTarget": "rustore",
-            "Huawei Ads Kit / Petal Ads": "huawei"
-          }
-        },
-        {
-          "key": "instantReward",
-          "title": "Instant reward",
-          "description": "Claim the reward immediately without showing an ad (applies to the current patch version)",
-          "required": false,
-          "type": "kotlin.Boolean",
-          "default": true,
-          "values": null
-        },
-        {
-          "key": "fakeAdAvailability",
-          "title": "Fake ad availability",
-          "description": "Force ad SDKs to report ads as available so the reward flow triggers (needed when no real ad can fill)",
           "required": false,
           "type": "kotlin.Boolean",
           "default": true,
@@ -1783,14 +1978,6 @@
     {
       "name": "Disable Facebook SDK Auto-Init",
       "description": "Adds Facebook SDK manifest switches that stop auto-initialization, automatic app event logging and advertiser ID collection at startup",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
-      "name": "Disable Firebase Auto-Init",
-      "description": "Adds Firebase manifest switches that stop Analytics, Messaging, Crashlytics and Performance from initializing themselves at startup",
       "default": false,
       "dependencies": [],
       "compatiblePackages": null,
@@ -3250,14 +3437,6 @@
       ]
     },
     {
-      "name": "Free In-app Purchases (Experimental)",
-      "description": "Get paid items for free. Best for offline games.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": []
-    },
-    {
       "name": "GmsCore support (MicroG)",
       "description": "Use MicroG instead of Google Play Services for logins.",
       "default": false,
@@ -4011,82 +4190,6 @@
           "required": false,
           "type": "kotlin.Boolean",
           "default": false,
-          "values": null
-        }
-      ]
-    },
-    {
-      "name": "No Ads (Experimental)",
-      "description": "Blocks ads by type. Pick what to block. For rewarded ads use Ads Free Rewards instead.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": [
-        {
-          "key": "preset",
-          "title": "Preset",
-          "description": "Quick setup: Recommended blocks most ads but keeps rewarded ads for Ads Free Rewards compatibility. Aggressive blocks everything including rewarded. Custom lets you pick below.",
-          "required": false,
-          "type": "kotlin.String",
-          "default": "recommended",
-          "values": {
-            "Recommended (keep rewarded)": "recommended",
-            "Aggressive (block all)": "aggressive",
-            "Custom": "custom"
-          }
-        },
-        {
-          "key": "blockInterstitials",
-          "title": "Block Interstitials",
-          "description": "Full-screen ads between levels or menus. Safe to block in most apps.",
-          "required": false,
-          "type": "kotlin.Boolean",
-          "default": true,
-          "values": null
-        },
-        {
-          "key": "blockBanners",
-          "title": "Block Banners",
-          "description": "Thin banners at top/bottom. Safe to block; rarely breaks layout.",
-          "required": false,
-          "type": "kotlin.Boolean",
-          "default": true,
-          "values": null
-        },
-        {
-          "key": "blockAppOpen",
-          "title": "Block App Open",
-          "description": "Ads on cold start. Block to skip the launch ad.",
-          "required": false,
-          "type": "kotlin.Boolean",
-          "default": true,
-          "values": null
-        },
-        {
-          "key": "blockMRec",
-          "title": "Block MREC",
-          "description": "Medium rectangles (300x250) inside feeds. Safe to block.",
-          "required": false,
-          "type": "kotlin.Boolean",
-          "default": true,
-          "values": null
-        },
-        {
-          "key": "blockRewarded",
-          "title": "Block Rewarded",
-          "description": "Rewarded video  -  disable if you use Ads Free Rewards, otherwise progress gates may break. Enable only to fully remove rewarded ads.",
-          "required": false,
-          "type": "kotlin.Boolean",
-          "default": false,
-          "values": null
-        },
-        {
-          "key": "blockNative",
-          "title": "Block Native",
-          "description": "Native ads blended into feeds/lists. Enable for cleaner feeds (may leave empty placeholders).",
-          "required": false,
-          "type": "kotlin.Boolean",
-          "default": true,
           "values": null
         }
       ]
@@ -4971,60 +5074,6 @@
       "options": []
     },
     {
-      "name": "Unlimited Currencies",
-      "description": "Get unlimited coins, gems and other currencies. Works on most games. Not supported on newer Unity games.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": [
-        {
-          "key": "currencyAmount",
-          "title": "Amount",
-          "description": "Amount to report for currency. Price fields will be 0.",
-          "required": false,
-          "type": "kotlin.Int",
-          "default": 999999,
-          "values": null
-        },
-        {
-          "key": "currencyCustomKeys",
-          "title": "Extra keys",
-          "description": "Comma-separated extra keys to spoof (e.g. my_gem,my_coin). Leave empty for default list.",
-          "required": false,
-          "type": "kotlin.String",
-          "default": "",
-          "values": null
-        },
-        {
-          "key": "infiniteMode",
-          "title": "Infinite mode",
-          "description": "ON: all currencies set to huge amount. OFF: currencies set to the Amount value above.",
-          "required": false,
-          "type": "kotlin.Boolean",
-          "default": true,
-          "values": null
-        },
-        {
-          "key": "multiplyMode",
-          "title": "Multiply income",
-          "description": "When ON, every time a currency is saved it gets multiplied by the Multiplier value. Useful when infinite mode doesn't work.",
-          "required": false,
-          "type": "kotlin.Boolean",
-          "default": false,
-          "values": null
-        },
-        {
-          "key": "currencyMultiplier",
-          "title": "Multiplier",
-          "description": "Multiplier value used in Multiply income mode.",
-          "required": false,
-          "type": "kotlin.Int",
-          "default": 10,
-          "values": null
-        }
-      ]
-    },
-    {
       "name": "Unlock Notification Channels",
       "description": "Makes all notification channels blockable and their importance unlocked so greyed-out toggles become interactable.",
       "default": false,
@@ -5057,24 +5106,6 @@
         }
       ],
       "options": []
-    },
-    {
-      "name": "Unlock Premium",
-      "description": "Unlock premium features and remove paywalls.",
-      "default": false,
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": [
-        {
-          "key": "premiumCustomKeys",
-          "title": "Extra keys",
-          "description": "Comma-separated extra SharedPreferences/DataStore keys to spoof (e.g. my_premium,my_pro). Leave empty for default list.",
-          "required": false,
-          "type": "kotlin.String",
-          "default": "",
-          "values": null
-        }
-      ]
     },
     {
       "name": "Unmark Test Only",
