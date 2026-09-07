@@ -12,7 +12,7 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val adsFreeRewardsPatch = bytecodePatch(
-    name = "Ads Free Rewards (Experimental)",
+    name = "★ Ads Free Rewards (Experimental)",
     description = "Get rewards without watching ads. Combine with No Ads for other formats, but keep No Ads' rewarded block off.",
     default = false,
 ) {

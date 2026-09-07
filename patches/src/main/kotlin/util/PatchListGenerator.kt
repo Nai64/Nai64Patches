@@ -37,7 +37,12 @@ private fun generatePatchList(version: String, patches: Set<Patch<*>>) {
     val listJson = File("../patches-list.json")
 
     val patchOrder = listOf(
-        "Ads Free Rewards",
+        "★ Unlock Premium",
+        "★ Free In-app Purchases (Experimental)",
+        "★ No Ads (Experimental)",
+        "★ Ads Free Rewards (Experimental)",
+        "★ Unlimited Currencies",
+        "★ Pairip Bypass (Experimental)",
         "No Ads",
         "Skip Consent Popup",
         "Skip Rate-Us Prompt",
@@ -110,7 +115,6 @@ private fun generatePatchList(version: String, patches: Set<Patch<*>>) {
         "Spoof Play Integrity",
         "Bypass License Verification",
         "Bypass Google Play Services Check",
-        "Pairip Bypass (Experimental)",
         "Unlock RevenueCat Entitlements",
         "Unlock All IAPs (Unity IAP)",
         "Custom App Resolution (Experimental)",

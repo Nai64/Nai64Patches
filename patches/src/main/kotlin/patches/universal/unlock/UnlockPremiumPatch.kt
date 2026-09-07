@@ -14,7 +14,7 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val unlockPremiumPatch = bytecodePatch(
-    name = "Unlock Premium",
+    name = "★ Unlock Premium",
     description = "Unlock premium features and remove paywalls.",
     default = false,
 ) {

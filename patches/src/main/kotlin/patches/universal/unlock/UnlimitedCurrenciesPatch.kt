@@ -98,7 +98,7 @@ private fun isPriceMethod(name: String): Boolean {
 
 @Suppress("unused")
 val unlimitedCurrenciesPatch = bytecodePatch(
-    name = "Unlimited Currencies",
+    name = "★ Unlimited Currencies",
     description = "Get unlimited coins, gems and other currencies. Works on most games. Not supported on newer Unity games.",
     default = false,
 ) {
