@@ -10,6 +10,9 @@ val fakeMemoryClassPatch = bytecodePatch(
     description = "Reports a chosen memory class through ActivityManager.getMemoryClass() so apps that check available heap see a high value.",
     default = false,
 ) {
+    // Guarded: morphe-patcher < 1.13.0 has no category() and the bundle
+    // must still load there (ungrouped) instead of dying on linkage.
+    try { category("Fake") } catch (_: NoSuchMethodError) {}
     val memoryClass by intOption(
         title = "Memory class (MB)",
         default = 512,

@@ -12,6 +12,9 @@ val hideCurrentLocationPatch = bytecodePatch(
     description = "Prevents the app from requesting your current location.",
     default = false,
 ) {
+    // Guarded: morphe-patcher < 1.13.0 has no category() and the bundle
+    // must still load there (ungrouped) instead of dying on linkage.
+    try { category("Privacy") } catch (_: NoSuchMethodError) {}
     execute {
         val logger = Logger.getLogger(this::class.java.name)
         var patched = 0

@@ -16,6 +16,9 @@ val fakeStorageAvailablePatch = bytecodePatch(
     description = "Reports a chosen amount of free storage through StatFs so apps that refuse to run or nag when storage is low stop doing so.",
     default = false,
 ) {
+    // Guarded: morphe-patcher < 1.13.0 has no category() and the bundle
+    // must still load there (ungrouped) instead of dying on linkage.
+    try { category("Fake") } catch (_: NoSuchMethodError) {}
     val storageGb by intOption(
         title = "Storage (GB)",
         default = 128,

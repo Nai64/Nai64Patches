@@ -10,6 +10,9 @@ val fakeNotificationListenerPatch = bytecodePatch(
     description = "Report notification-listener access as granted.",
     default = false,
 ) {
+    // Guarded: morphe-patcher < 1.13.0 has no category() and the bundle
+    // must still load there (ungrouped) instead of dying on linkage.
+    try { category("Fake") } catch (_: NoSuchMethodError) {}
     val granted by booleanOption(
         title = "Grant access",
         default = true,

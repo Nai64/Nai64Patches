@@ -64,6 +64,9 @@ val enableWebViewGeolocationPatch = bytecodePatch(
     description = "Forces WebSettings.setGeolocationEnabled(true) so WebViews expose the HTML5 Geolocation API (pairs with auto-granting prompts).",
     default = false,
 ) {
+    // Guarded: morphe-patcher < 1.13.0 has no category() and the bundle
+    // must still load there (ungrouped) instead of dying on linkage.
+    try { category("Enable") } catch (_: NoSuchMethodError) {}
     execute {
         val logger = Logger.getLogger(this::class.java.name)
         val patched = forceBooleanSetter("Landroid/webkit/WebSettings;", setOf("setGeolocationEnabled"), true)

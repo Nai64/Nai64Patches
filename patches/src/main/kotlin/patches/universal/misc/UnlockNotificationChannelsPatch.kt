@@ -14,6 +14,9 @@ val unlockNotificationChannelsPatch = bytecodePatch(
     description = "Makes all notification channels blockable and their importance unlocked so greyed-out toggles become interactable.",
     default = false,
 ) {
+    // Guarded: morphe-patcher < 1.13.0 has no category() and the bundle
+    // must still load there (ungrouped) instead of dying on linkage.
+    try { category("Misc") } catch (_: NoSuchMethodError) {}
     execute {
         val logger = Logger.getLogger(this::class.java.name)
 

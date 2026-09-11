@@ -19,6 +19,9 @@ val fakeVibrateWhenRingingPatch = bytecodePatch(
     description = "Reports a chosen vibrate-when-ringing state through Settings.System so apps that check ringer vibration behavior stop doing so.",
     default = false,
 ) {
+    // Guarded: morphe-patcher < 1.13.0 has no category() and the bundle
+    // must still load there (ungrouped) instead of dying on linkage.
+    try { category("Fake") } catch (_: NoSuchMethodError) {}
     val enabled by booleanOption(
         title = "Enable vibrate when ringing",
         default = false,

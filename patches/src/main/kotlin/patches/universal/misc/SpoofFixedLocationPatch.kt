@@ -15,6 +15,9 @@ val spoofFixedLocationPatch = bytecodePatch(
     description = "Fakes your GPS location.",
     default = false,
 ) {
+    // Guarded: morphe-patcher < 1.13.0 has no category() and the bundle
+    // must still load there (ungrouped) instead of dying on linkage.
+    try { category("Spoof") } catch (_: NoSuchMethodError) {}
     val latitude by stringOption(
         key = "latitude",
         default = "35.681236",

@@ -10,6 +10,9 @@ val hideDefaultSensorPatch = bytecodePatch(
     description = "Makes SensorManager.getDefaultSensor return null so sensor fingerprint and VR gates see no hardware",
     default = false,
 ) {
+    // Guarded: morphe-patcher < 1.13.0 has no category() and the bundle
+    // must still load there (ungrouped) instead of dying on linkage.
+    try { category("Privacy") } catch (_: NoSuchMethodError) {}
     execute {
         val logger = Logger.getLogger(this::class.java.name)
         var patched = 0

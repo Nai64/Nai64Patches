@@ -10,6 +10,9 @@ val fakeAvailableProcessorsPatch = bytecodePatch(
     description = "Reports a chosen CPU count through Runtime.availableProcessors() so apps that check core count see a high-end device.",
     default = false,
 ) {
+    // Guarded: morphe-patcher < 1.13.0 has no category() and the bundle
+    // must still load there (ungrouped) instead of dying on linkage.
+    try { category("Fake") } catch (_: NoSuchMethodError) {}
     val processors by intOption(
         title = "Processor count",
         default = 8,

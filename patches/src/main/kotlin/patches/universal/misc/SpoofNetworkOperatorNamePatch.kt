@@ -10,6 +10,9 @@ val spoofNetworkOperatorNamePatch = bytecodePatch(
     description = "Fakes the network operator name.",
     default = false,
 ) {
+    // Guarded: morphe-patcher < 1.13.0 has no category() and the bundle
+    // must still load there (ungrouped) instead of dying on linkage.
+    try { category("Spoof") } catch (_: NoSuchMethodError) {}
     val operatorName by stringOption(
         title = "Operator name",
         default = "Android",

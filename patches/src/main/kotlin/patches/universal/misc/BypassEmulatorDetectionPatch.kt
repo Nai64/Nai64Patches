@@ -317,6 +317,9 @@ val bypassEmulatorDetectionPatch = bytecodePatch(
     description = "Hides emulator traces by spoofing Build info and related checks so apps cannot detect an emulator.",
     default = false,
 ) {
+    // Guarded: morphe-patcher < 1.13.0 has no category() and the bundle
+    // must still load there (ungrouped) instead of dying on linkage.
+    try { category("Bypass") } catch (_: NoSuchMethodError) {}
     val profile by stringOption(
         title = "Device profile",
         default = "pixel6",

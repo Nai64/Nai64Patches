@@ -10,6 +10,9 @@ val disableSupportBannersPatch = bytecodePatch(
     description = "Bandcamp: hides server-pushed banner dialogs such as update prompts, rate-me requests and announcements.",
     default = false,
 ) {
+    // Guarded: morphe-patcher < 1.13.0 has no category() and the bundle
+    // must still load there (ungrouped) instead of dying on linkage.
+    try { category("Bandcamp") } catch (_: NoSuchMethodError) {}
     compatibleWith("com.bandcamp.android")
 
     execute {

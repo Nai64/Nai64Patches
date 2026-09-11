@@ -10,6 +10,9 @@ val fakeInstallSourcePlayPatch = bytecodePatch(
     description = "Fakes the install source.",
     default = false,
 ) {
+    // Guarded: morphe-patcher < 1.13.0 has no category() and the bundle
+    // must still load there (ungrouped) instead of dying on linkage.
+    try { category("Fake") } catch (_: NoSuchMethodError) {}
     val installer by stringOption(
         title = "Installer package",
         default = "com.android.vending",

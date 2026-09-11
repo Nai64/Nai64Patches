@@ -45,6 +45,9 @@ private val startupSoundAssetPatch = resourcePatch(
     description = "Internal helper to write startup sound asset",
     default = false,
 ) {
+    // Guarded: morphe-patcher < 1.13.0 has no category() and the bundle
+    // must still load there (ungrouped) instead of dying on linkage.
+    try { category("Interface") } catch (_: NoSuchMethodError) {}
     execute {
         // Placeholder - actual write is done in bytecode patch via File API using patch temp dir
         // This resource patch exists only to ensure assets directory is created
@@ -59,6 +62,9 @@ val customStartupSoundPatch = bytecodePatch(
 ) {
     dependsOn(StartupHooks.resolveRealApplicationPatch)
     dependsOn(startupSoundAssetPatch)
+    // Guarded: morphe-patcher < 1.13.0 has no category() and the bundle
+    // must still load there (ungrouped) instead of dying on linkage.
+    try { category("Interface") } catch (_: NoSuchMethodError) {}
 
     val soundSource by stringOption(
         title = "Sound source",

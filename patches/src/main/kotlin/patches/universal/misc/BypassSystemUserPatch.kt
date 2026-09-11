@@ -9,6 +9,9 @@ val bypassSystemUserPatch = bytecodePatch(
     description = "Makes UserManager.isSystemUser() report false so apps gating behavior to the system user treat the current user as normal.",
     default = false,
 ) {
+    // Guarded: morphe-patcher < 1.13.0 has no category() and the bundle
+    // must still load there (ungrouped) instead of dying on linkage.
+    try { category("Bypass") } catch (_: NoSuchMethodError) {}
     execute {
         val logger = Logger.getLogger(this::class.java.name)
         val patched = foldBooleanReturns(

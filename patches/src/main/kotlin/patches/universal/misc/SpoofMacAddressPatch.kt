@@ -10,6 +10,9 @@ val spoofMacAddressPatch = bytecodePatch(
     description = "Reports a chosen MAC address through WifiInfo.getMacAddress() so apps cannot fingerprint the device by its Wi-Fi MAC.",
     default = false,
 ) {
+    // Guarded: morphe-patcher < 1.13.0 has no category() and the bundle
+    // must still load there (ungrouped) instead of dying on linkage.
+    try { category("Spoof") } catch (_: NoSuchMethodError) {}
     val mac by stringOption(
         title = "MAC address",
         default = "02:00:00:00:00:00",

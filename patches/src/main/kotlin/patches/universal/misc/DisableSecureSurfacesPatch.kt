@@ -64,6 +64,9 @@ val disableSecureSurfacesPatch = bytecodePatch(
     description = "Forces Surface.setSecure() and SurfaceView.setSecure() to false so secure surfaces no longer block screenshots and screen recording.",
     default = false,
 ) {
+    // Guarded: morphe-patcher < 1.13.0 has no category() and the bundle
+    // must still load there (ungrouped) instead of dying on linkage.
+    try { category("Disable") } catch (_: NoSuchMethodError) {}
     execute {
         val logger = Logger.getLogger(this::class.java.name)
         val a = forceBooleanSetter("Landroid/view/Surface;", setOf("setSecure"), false)

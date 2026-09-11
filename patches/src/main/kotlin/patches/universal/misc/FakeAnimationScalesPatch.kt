@@ -19,6 +19,9 @@ val fakeAnimationScalesPatch = bytecodePatch(
     description = "Reports animation scales via Settings so apps that check them see a chosen value.",
     default = false,
 ) {
+    // Guarded: morphe-patcher < 1.13.0 has no category() and the bundle
+    // must still load there (ungrouped) instead of dying on linkage.
+    try { category("Fake") } catch (_: NoSuchMethodError) {}
     val scale by stringOption(
         title = "Scale",
         default = "Off",

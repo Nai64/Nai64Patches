@@ -11,6 +11,9 @@ val disableOnboardingOverlaysPatch = bytecodePatch(
     description = "Bandcamp: skips the one-time onboarding overlays for the play queue, long-press downloads and public playlist tooltips.",
     default = false,
 ) {
+    // Guarded: morphe-patcher < 1.13.0 has no category() and the bundle
+    // must still load there (ungrouped) instead of dying on linkage.
+    try { category("Bandcamp") } catch (_: NoSuchMethodError) {}
     compatibleWith("com.bandcamp.android")
 
     execute {

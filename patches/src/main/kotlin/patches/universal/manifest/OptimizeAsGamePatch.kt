@@ -11,6 +11,9 @@ val optimizeAsGamePatch = resourcePatch(
             "screenshot optimizations tuned for games",
     default = false,
 ) {
+    // Guarded: morphe-patcher < 1.13.0 has no category() and the bundle
+    // must still load there (ungrouped) instead of dying on linkage.
+    try { category("Manifest") } catch (_: NoSuchMethodError) {}
     execute {
         val logger = Logger.getLogger(this::class.java.name)
 

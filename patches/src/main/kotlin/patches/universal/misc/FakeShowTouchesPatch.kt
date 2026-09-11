@@ -19,6 +19,9 @@ val fakeShowTouchesPatch = bytecodePatch(
     description = "Reports show touches as disabled via Settings so apps that check developer touch visualization stop doing so.",
     default = false,
 ) {
+    // Guarded: morphe-patcher < 1.13.0 has no category() and the bundle
+    // must still load there (ungrouped) instead of dying on linkage.
+    try { category("Fake") } catch (_: NoSuchMethodError) {}
     val enabled by booleanOption(
         title = "Show touches",
         default = false,

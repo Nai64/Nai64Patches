@@ -10,6 +10,9 @@ val spoofTimeZonePatch = bytecodePatch(
     description = "Forces TimeZone.getDefault() to return a fixed timezone so region-locked apps see a constant zone (e.g. Europe/London for All4).",
     default = false,
 ) {
+    // Guarded: morphe-patcher < 1.13.0 has no category() and the bundle
+    // must still load there (ungrouped) instead of dying on linkage.
+    try { category("Spoof") } catch (_: NoSuchMethodError) {}
     val timeZoneId by stringOption(
         key = "timeZoneId",
         default = "UTC",

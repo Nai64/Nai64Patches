@@ -20,6 +20,9 @@ private val manifestResolutionPatch = resourcePatch(
     name = "Custom App Resolution Manifest (internal)",
     default = false,
 ) {
+    // Guarded: morphe-patcher < 1.13.0 has no category() and the bundle
+    // must still load there (ungrouped) instead of dying on linkage.
+    try { category("Resolution") } catch (_: NoSuchMethodError) {}
     execute {
         val logger = Logger.getLogger(this::class.java.name)
 
@@ -72,6 +75,9 @@ val customResolutionPatch = bytecodePatch(
 ) {
     dependsOn(manifestResolutionPatch)
 
+    // Guarded: morphe-patcher < 1.13.0 has no category() and the bundle
+    // must still load there (ungrouped) instead of dying on linkage.
+    try { category("Resolution") } catch (_: NoSuchMethodError) {}
     val enableCustomResolution by booleanOption(
         title = "Enable Custom Resolution",
         default = false,

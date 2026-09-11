@@ -19,6 +19,9 @@ val forceChargingStatusPatch = bytecodePatch(
     description = "Fakes the charging state.",
     default = false,
 ) {
+    // Guarded: morphe-patcher < 1.13.0 has no category() and the bundle
+    // must still load there (ungrouped) instead of dying on linkage.
+    try { category("Force") } catch (_: NoSuchMethodError) {}
     val status by stringOption(
         title = "Battery status",
         default = "Charging",

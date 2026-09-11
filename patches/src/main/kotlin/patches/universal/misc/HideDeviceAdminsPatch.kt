@@ -9,6 +9,9 @@ val hideDeviceAdminsPatch = bytecodePatch(
     description = "Redirects DevicePolicyManager.getActiveAdmins() to Collections.emptyList() so the app sees no active device admins.",
     default = false,
 ) {
+    // Guarded: morphe-patcher < 1.13.0 has no category() and the bundle
+    // must still load there (ungrouped) instead of dying on linkage.
+    try { category("Hide") } catch (_: NoSuchMethodError) {}
     execute {
         val logger = Logger.getLogger(this::class.java.name)
         val patched = replaceGetterWithStaticCall(

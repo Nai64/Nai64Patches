@@ -137,6 +137,9 @@ private val minSdkGuardPatch = app.morphe.patcher.patch.resourcePatch(
     description = "Fixes a Huawei install issue.",
     default = false,
 ) {
+    // Guarded: morphe-patcher < 1.13.0 has no category() and the bundle
+    // must still load there (ungrouped) instead of dying on linkage.
+    try { category("Spoof") } catch (_: NoSuchMethodError) {}
     execute {
         val logger = Logger.getLogger(this::class.java.name)
         document("AndroidManifest.xml").use { manifest ->
@@ -168,6 +171,9 @@ val spoofDeveloperOptionsPatch = bytecodePatch(
 ) {
     dependsOn(minSdkGuardPatch)
 
+    // Guarded: morphe-patcher < 1.13.0 has no category() and the bundle
+    // must still load there (ungrouped) instead of dying on linkage.
+    try { category("Spoof") } catch (_: NoSuchMethodError) {}
     execute {
         val logger = Logger.getLogger(this::class.java.name)
 

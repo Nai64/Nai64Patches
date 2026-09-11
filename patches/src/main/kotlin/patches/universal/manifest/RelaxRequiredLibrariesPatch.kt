@@ -10,6 +10,9 @@ val relaxRequiredLibrariesPatch = resourcePatch(
     description = "Sets android:required=\"false\" on every <uses-library> so the app installs even when optional system libraries are missing.",
     default = false,
 ) {
+    // Guarded: morphe-patcher < 1.13.0 has no category() and the bundle
+    // must still load there (ungrouped) instead of dying on linkage.
+    try { category("Manifest") } catch (_: NoSuchMethodError) {}
     execute {
         val logger = Logger.getLogger(this::class.java.name)
         var n = 0

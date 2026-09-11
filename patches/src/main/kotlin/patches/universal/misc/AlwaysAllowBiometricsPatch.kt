@@ -11,6 +11,9 @@ val alwaysAllowBiometricsPatch = bytecodePatch(
             "not block biometric features on unsupported or unenrolled devices",
     default = false,
 ) {
+    // Guarded: morphe-patcher < 1.13.0 has no category() and the bundle
+    // must still load there (ungrouped) instead of dying on linkage.
+    try { category("Misc") } catch (_: NoSuchMethodError) {}
     execute {
         val logger = Logger.getLogger(this::class.java.name)
 

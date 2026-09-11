@@ -9,6 +9,9 @@ val forceUserUnlockedPatch = bytecodePatch(
     description = "Makes UserManager.isUserUnlocked() report true so direct-boot restricted features and storage become available immediately.",
     default = false,
 ) {
+    // Guarded: morphe-patcher < 1.13.0 has no category() and the bundle
+    // must still load there (ungrouped) instead of dying on linkage.
+    try { category("Force") } catch (_: NoSuchMethodError) {}
     execute {
         val logger = Logger.getLogger(this::class.java.name)
         val patched = foldBooleanReturns(

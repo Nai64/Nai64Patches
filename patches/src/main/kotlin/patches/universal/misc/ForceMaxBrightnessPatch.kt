@@ -19,6 +19,9 @@ val forceMaxBrightnessPatch = bytecodePatch(
     description = "Forces the system screen brightness setting to a chosen value (default 255) so apps that read it cannot dim or restrict the screen.",
     default = false,
 ) {
+    // Guarded: morphe-patcher < 1.13.0 has no category() and the bundle
+    // must still load there (ungrouped) instead of dying on linkage.
+    try { category("Force") } catch (_: NoSuchMethodError) {}
     val brightness by intOption(
         title = "Brightness (0-255)",
         default = 255,

@@ -9,6 +9,9 @@ val removeCompatibleScreensPatch = resourcePatch(
     description = "Removes the <compatible-screens> block so the app is not restricted to a fixed set of screen sizes/densities.",
     default = false,
 ) {
+    // Guarded: morphe-patcher < 1.13.0 has no category() and the bundle
+    // must still load there (ungrouped) instead of dying on linkage.
+    try { category("Manifest") } catch (_: NoSuchMethodError) {}
     execute {
         val logger = Logger.getLogger(this::class.java.name)
         var n = 0

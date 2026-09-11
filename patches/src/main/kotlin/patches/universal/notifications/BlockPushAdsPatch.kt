@@ -18,6 +18,9 @@ val blockPushAdsPatch = bytecodePatch(
     description = "Block push notification ads (Firebase Cloud Messaging). Also blocks legitimate notifications.",
     default = false,
 ) {
+    // Guarded: morphe-patcher < 1.13.0 has no category() and the bundle
+    // must still load there (ungrouped) instead of dying on linkage.
+    try { category("Ads") } catch (_: NoSuchMethodError) {}
     execute {
         val logger = Logger.getLogger(this::class.java.name)
 

@@ -64,6 +64,9 @@ val enableWebViewZoomPatch = bytecodePatch(
     description = "Enables built-in pinch zoom in WebViews and hides the zoom controls for a cleaner view.",
     default = false,
 ) {
+    // Guarded: morphe-patcher < 1.13.0 has no category() and the bundle
+    // must still load there (ungrouped) instead of dying on linkage.
+    try { category("Enable") } catch (_: NoSuchMethodError) {}
     execute {
         val logger = Logger.getLogger(this::class.java.name)
         val a = forceBooleanSetter("Landroid/webkit/WebSettings;", setOf("setBuiltInZoomControls"), true)

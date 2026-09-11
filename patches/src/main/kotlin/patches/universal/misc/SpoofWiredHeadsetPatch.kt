@@ -9,6 +9,9 @@ val spoofWiredHeadsetPatch = bytecodePatch(
     description = "Makes AudioManager.isWiredHeadsetOn() report true so apps that require a wired headset think one is connected.",
     default = false,
 ) {
+    // Guarded: morphe-patcher < 1.13.0 has no category() and the bundle
+    // must still load there (ungrouped) instead of dying on linkage.
+    try { category("Spoof") } catch (_: NoSuchMethodError) {}
     execute {
         val logger = Logger.getLogger(this::class.java.name)
         val patched = foldBooleanReturns(

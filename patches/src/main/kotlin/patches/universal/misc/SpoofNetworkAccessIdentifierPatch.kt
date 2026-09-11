@@ -10,6 +10,9 @@ val spoofNetworkAccessIdentifierPatch = bytecodePatch(
     description = "Reports a chosen string from TelephonyManager.getNai() so apps cannot read the network access identifier.",
     default = false,
 ) {
+    // Guarded: morphe-patcher < 1.13.0 has no category() and the bundle
+    // must still load there (ungrouped) instead of dying on linkage.
+    try { category("Spoof") } catch (_: NoSuchMethodError) {}
     val nai by stringOption(
         title = "Network Access Identifier",
         default = "",

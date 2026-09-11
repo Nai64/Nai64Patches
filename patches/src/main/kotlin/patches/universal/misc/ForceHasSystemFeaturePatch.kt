@@ -9,6 +9,9 @@ val forceHasSystemFeaturePatch = bytecodePatch(
     description = "Makes PackageManager.hasSystemFeature always return true so feature-gated installs pass runtime checks",
     default = false,
 ) {
+    // Guarded: morphe-patcher < 1.13.0 has no category() and the bundle
+    // must still load there (ungrouped) instead of dying on linkage.
+    try { category("Force") } catch (_: NoSuchMethodError) {}
     execute {
         val logger = Logger.getLogger(this::class.java.name)
         val patched = foldBooleanReturns(

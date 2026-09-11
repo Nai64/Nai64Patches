@@ -11,6 +11,9 @@ val changePackageNamePatch = resourcePatch(
     description = "Clone the app with a new package name.",
     default = false,
 ) {
+    // Guarded: morphe-patcher < 1.13.0 has no category() and the bundle
+    // must still load there (ungrouped) instead of dying on linkage.
+    try { category("Manifest") } catch (_: NoSuchMethodError) {}
     val customPackageName by stringOption(
         key = "customPackageName",
         default = "",

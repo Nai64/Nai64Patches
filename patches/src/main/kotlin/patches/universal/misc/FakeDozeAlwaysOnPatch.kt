@@ -19,6 +19,9 @@ val fakeDozeAlwaysOnPatch = bytecodePatch(
     description = "Reports a chosen always-on display state through Settings.Secure so apps that restrict features based on doze settings stop doing so.",
     default = false,
 ) {
+    // Guarded: morphe-patcher < 1.13.0 has no category() and the bundle
+    // must still load there (ungrouped) instead of dying on linkage.
+    try { category("Fake") } catch (_: NoSuchMethodError) {}
     val enabled by booleanOption(
         title = "Enable always-on",
         default = true,

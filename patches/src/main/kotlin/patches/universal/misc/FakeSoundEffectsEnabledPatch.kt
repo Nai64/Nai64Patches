@@ -19,6 +19,9 @@ val fakeSoundEffectsEnabledPatch = bytecodePatch(
     description = "Reports sound effects as disabled via Settings so apps that check it stop playing touch sounds.",
     default = false,
 ) {
+    // Guarded: morphe-patcher < 1.13.0 has no category() and the bundle
+    // must still load there (ungrouped) instead of dying on linkage.
+    try { category("Fake") } catch (_: NoSuchMethodError) {}
     val enabled by booleanOption(
         title = "Sound effects",
         default = false,

@@ -10,6 +10,9 @@ val forceIgnoreAudioFocusPatch = bytecodePatch(
     description = "Makes AudioManager.requestAudioFocus always return granted so apps never duck or pause for other audio.",
     default = false,
 ) {
+    // Guarded: morphe-patcher < 1.13.0 has no category() and the bundle
+    // must still load there (ungrouped) instead of dying on linkage.
+    try { category("Force") } catch (_: NoSuchMethodError) {}
     val alwaysGrant by booleanOption(
         title = "Always grant",
         default = true,

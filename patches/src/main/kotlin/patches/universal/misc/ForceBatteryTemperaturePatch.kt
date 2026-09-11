@@ -19,6 +19,9 @@ val forceBatteryTemperaturePatch = bytecodePatch(
     description = "Fakes the battery temperature.",
     default = false,
 ) {
+    // Guarded: morphe-patcher < 1.13.0 has no category() and the bundle
+    // must still load there (ungrouped) instead of dying on linkage.
+    try { category("Force") } catch (_: NoSuchMethodError) {}
     val temperature by intOption(
         title = "Temperature (0.1C)",
         default = 250,

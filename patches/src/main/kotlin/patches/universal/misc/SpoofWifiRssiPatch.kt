@@ -10,6 +10,9 @@ val spoofWifiRssiPatch = bytecodePatch(
     description = "Reports a chosen signal strength from WifiInfo.getRssi() so apps cannot read the real Wi-Fi signal level.",
     default = false,
 ) {
+    // Guarded: morphe-patcher < 1.13.0 has no category() and the bundle
+    // must still load there (ungrouped) instead of dying on linkage.
+    try { category("Spoof") } catch (_: NoSuchMethodError) {}
     val rssi by intOption(
         title = "RSSI (dBm)",
         default = -50,

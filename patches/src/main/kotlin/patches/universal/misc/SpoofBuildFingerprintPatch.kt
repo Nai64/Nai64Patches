@@ -23,6 +23,9 @@ val spoofBuildFingerprintPatch = bytecodePatch(
             "and device checks. Leave empty to keep the original fingerprint",
     default = false,
 ) {
+    // Guarded: morphe-patcher < 1.13.0 has no category() and the bundle
+    // must still load there (ungrouped) instead of dying on linkage.
+    try { category("Spoof") } catch (_: NoSuchMethodError) {}
     val fingerprint by stringOption(
         title = "Fingerprint",
         default = "",

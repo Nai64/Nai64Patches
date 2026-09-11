@@ -30,6 +30,9 @@ val frameRatePreferencePatch = bytecodePatch(
     description = "Requests a preferred refresh rate like 60 or 90 Hz for the app window. The system may ignore it.",
     default = false,
 ) {
+    // Guarded: morphe-patcher < 1.13.0 has no category() and the bundle
+    // must still load there (ungrouped) instead of dying on linkage.
+    try { category("Graphics") } catch (_: NoSuchMethodError) {}
     val frameRate by stringOption(
         key = "frameRate",
         title = "Frame rate",

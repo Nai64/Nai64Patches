@@ -64,6 +64,9 @@ val allowWebViewFileAccessPatch = bytecodePatch(
     description = "Forces WebSettings file-access flags on so WebViews can load local files and content URLs.",
     default = false,
 ) {
+    // Guarded: morphe-patcher < 1.13.0 has no category() and the bundle
+    // must still load there (ungrouped) instead of dying on linkage.
+    try { category("Allow") } catch (_: NoSuchMethodError) {}
     execute {
         val logger = Logger.getLogger(this::class.java.name)
         val patched = forceBooleanSetter(
