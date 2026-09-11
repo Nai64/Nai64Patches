@@ -1,3 +1,16 @@
+## [1.47.0](https://github.com/Nai64/Nai64Patches/compare/1.46.0...1.47.0) (2026-09-11)
+
+### Bug Fixes
+
+* remove star prefixes from featured patch names ([9c3969d](https://github.com/Nai64/Nai64Patches/commit/9c3969daf262509a6d40683c3b475149e1625d07))
+* Use mutable class only if required ([#96](https://github.com/Nai64/Nai64Patches/issues/96)) ([2b2c21c](https://github.com/Nai64/Nai64Patches/commit/2b2c21c3bb923f6e20523ec8695cc662b536ec8e))
+* use mutable method for instruction replacement in spoof fixed location ([d1a4d62](https://github.com/Nai64/Nai64Patches/commit/d1a4d62a4565b64540bb3743abf6341cae879d4e))
+
+### New Features
+
+* group all patches into morphe categories ([d0375eb](https://github.com/Nai64/Nai64Patches/commit/d0375ebca9b617130b9cff72269e0a3be3282bb3))
+* tag featured patches with morphe category ([04480d3](https://github.com/Nai64/Nai64Patches/commit/04480d346a903e933d6f71cf7ad580a712301d90))
+
 ## [1.46.0](https://github.com/Nai64/Nai64Patches/compare/1.45.0...1.46.0) (2026-09-07)
 
 ### Bug Fixes
