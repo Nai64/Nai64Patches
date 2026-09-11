@@ -599,9 +599,8 @@ private fun app.morphe.patcher.patch.BytecodePatchContext.findFallbackActivity()
     val candidates = mutableListOf<MutableClass>()
     classDefForEach { classDef ->
         if (!isActivity(classDef.type)) return@classDefForEach
-        val candidate = mutableClassDefBy(classDef)
-        if (candidate.methods.any { it.name == "onCreate" && it.returnType == "V" && it.parameterTypes == listOf("Landroid/os/Bundle;") }) {
-            candidates += candidate
+        if (classDef.methods.any { it.name == "onCreate" && it.returnType == "V" && it.parameterTypes == listOf("Landroid/os/Bundle;") }) {
+            candidates += mutableClassDefBy(classDef)
         }
     }
     return candidates.firstOrNull { it.type == override } ?: candidates.firstOrNull()

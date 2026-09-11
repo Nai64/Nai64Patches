@@ -2,7 +2,7 @@ package patches.universal.ads
 
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.patch.BytecodePatchContext
-import patches.universal.ads.util.cloneMutableAndPreserveParameters
+import patches.universal.ads.util.cloneParameters
 import patches.universal.ads.util.fireRewardedAdCallbacks
 import java.util.logging.Logger
 
@@ -849,12 +849,11 @@ internal fun BytecodePatchContext.applyAdsFreeRewardsV1181(logger: Logger) {
         // Uses JsonUtils.putString (avoids JSONException), then calls
         // forwardUnityEvent to push through the MAX SDK callback pipeline.
         // The method is cloned with extra registers that hold copies of the
-        // parameters (see BytecodeUtils.cloneMutableAndPreserveParameters),
+        // parameters (see BytecodeUtils.cloneParameters),
         // so the injection only uses v0 + p0/p1/p2 and works with ANY
         // register layout (e.g. .registers 3 like Crowd Champs' showAd path).
-        val showClass = ShowRewardedAdFingerprint.classDefOrNull
-        val clonedShow = unityShow.cloneMutableAndPreserveParameters(showClass!!)
-        clonedShow.addInstructions(0, """
+        unityShow.cloneParameters().addInstructions(
+            0, """
             move-object v0, p1
             new-instance p0, Lorg/json/JSONObject;
             invoke-direct {p0}, Lorg/json/JSONObject;-><init>()V
@@ -896,7 +895,8 @@ internal fun BytecodePatchContext.applyAdsFreeRewardsV1181(logger: Logger) {
             invoke-static {p0, p1, p2}, Lcom/applovin/impl/sdk/utils/JsonUtils;->putString(Lorg/json/JSONObject;Ljava/lang/String;Ljava/lang/String;)V
             invoke-static {p0}, Lcom/applovin/mediation/unity/MaxUnityAdManager;->forwardUnityEvent(Lorg/json/JSONObject;)V
             return-void
-        """.trimIndent())
+        """.trimIndent()
+        )
 
         // Patch loadRewardedAd to fire OnRewardedAdLoadedEvent via forwardUnityEvent.
         // When the game C# IL2CPP side calls MaxSdk.LoadRewardedAd() and subscribes to
@@ -909,9 +909,8 @@ internal fun BytecodePatchContext.applyAdsFreeRewardsV1181(logger: Logger) {
         val unityLoad = LoadRewardedAdFingerprint.methodOrNull
         if (unityLoad != null) {
             logger.info("MAX Unity loadRewardedAd patching")
-            val loadClass = LoadRewardedAdFingerprint.classDefOrNull
-            val clonedLoad = unityLoad.cloneMutableAndPreserveParameters(loadClass!!)
-            clonedLoad.addInstructions(0, """
+            unityLoad.cloneParameters().addInstructions(
+                0, """
                 move-object v0, p1
                 new-instance p0, Lorg/json/JSONObject;
                 invoke-direct {p0}, Lorg/json/JSONObject;-><init>()V
@@ -925,7 +924,8 @@ internal fun BytecodePatchContext.applyAdsFreeRewardsV1181(logger: Logger) {
                 invoke-static {p0, p1, v1}, Lcom/applovin/impl/sdk/utils/JsonUtils;->putString(Lorg/json/JSONObject;Ljava/lang/String;Ljava/lang/String;)V
                 invoke-static {p0}, Lcom/applovin/mediation/unity/MaxUnityAdManager;->forwardUnityEvent(Lorg/json/JSONObject;)V
                 return-void
-            """.trimIndent())
+            """.trimIndent()
+            )
         }
         return
     }

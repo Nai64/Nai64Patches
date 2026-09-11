@@ -4,7 +4,7 @@ import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.patch.stringOption
 import java.util.logging.Logger
-import patches.universal.ads.util.cloneMutableAndPreserveParameters
+import patches.universal.ads.util.cloneParameters
 
 @Suppress("unused")
 val graphicsApiOverridePatch = bytecodePatch(
@@ -43,7 +43,7 @@ val graphicsApiOverridePatch = bytecodePatch(
 
         // v0..v2 may overlap p0/p1 in a small onCreate method. Add registers and
         // preserve the original parameters before using them as temporaries.
-        val method = matchedMethod.cloneMutableAndPreserveParameters(mutableClass)
+        val method = matchedMethod.cloneParameters(mutableClass)
         if ((method.implementation?.registerCount ?: 0) < 3) {
             logger.warning("Unity activity could not provide 3 temporary registers. No changes applied.")
             return@execute

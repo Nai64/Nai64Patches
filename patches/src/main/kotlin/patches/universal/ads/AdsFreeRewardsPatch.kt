@@ -2,11 +2,12 @@ package patches.universal.ads
 
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.removeInstructions
+import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.booleanOption
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.patch.stringOption
-import app.morphe.patcher.patch.BytecodePatchContext
-import patches.universal.ads.util.cloneMutableAndPreserveParameters
+import patches.universal.ads.util.cloneParameters
+import patches.universal.ads.util.findMutableMethodOf
 import patches.universal.ads.util.fireRewardedAdCallbacks
 import java.util.logging.Logger
 
@@ -196,8 +197,8 @@ private fun BytecodePatchContext.applyAdsFreeRewardsV1190(logger: Logger, reward
     if (useHuawei && instantReward == true && huaweiReady != null && huaweiShow != null) {
         val showClass = HuaweiRewardAdShowFingerprint.classDefOrNull
         if (showClass != null) {
-            val clonedShow = huaweiShow.cloneMutableAndPreserveParameters(showClass)
-            clonedShow.addInstructions(0, """
+            huaweiShow.cloneParameters().addInstructions(
+                0, """
                 if-eqz p2, :morphe_huawei_reward_done
                 invoke-virtual {p2}, Lcom/huawei/hms/ads/reward/RewardAdStatusListener;->onRewardAdOpened()V
                 sget-object v0, Lcom/huawei/hms/ads/reward/Reward;->DEFAULT:Lcom/huawei/hms/ads/reward/Reward;
@@ -205,7 +206,8 @@ private fun BytecodePatchContext.applyAdsFreeRewardsV1190(logger: Logger, reward
                 invoke-virtual {p2}, Lcom/huawei/hms/ads/reward/RewardAdStatusListener;->onRewardAdClosed()V
                 :morphe_huawei_reward_done
                 return-void
-            """.trimIndent())
+            """.trimIndent()
+            )
             logger.info("Huawei Ads Kit rewarded patch succeeded")
         } else {
             logger.warning("Ads Free Rewards: Huawei show class not found  -  skipping")
@@ -240,9 +242,8 @@ private fun BytecodePatchContext.applyMyTargetStrategy(logger: Logger) {
         logger.warning("Ads Free Rewards: skip MyTarget  -  low registerCount")
         return
     }
-    val showClass = MyTargetBaseInterstitialShowFingerprint.classDefOrNull ?: return
-    val cloned = myTargetShow.cloneMutableAndPreserveParameters(showClass)
-    cloned.addInstructions(0, """
+    myTargetShow.cloneParameters().addInstructions(
+        0, """
         instance-of v0, p0, Lcom/my/target/ads/RewardedAd;
         if-eqz v0, :morphe_rustore_mytarget_original_show
         check-cast p0, Lcom/my/target/ads/RewardedAd;
@@ -257,7 +258,8 @@ private fun BytecodePatchContext.applyMyTargetStrategy(logger: Logger) {
         :morphe_rustore_mytarget_done
         return-void
         :morphe_rustore_mytarget_original_show
-    """.trimIndent())
+    """.trimIndent()
+    )
     logger.info("Ads Free Rewards: RuStore / VK MyTarget rewarded patch succeeded")
 }
 
@@ -273,8 +275,7 @@ private fun BytecodePatchContext.applyYandexWrapperStrategy(logger: Logger) {
         :morphe_rustore_yandex_reward_done
         return-void
     """.trimIndent())
-    val showClass = YandexUnityRewardedWrapperShowFingerprint.classDefOrNull ?: return
-    val clonedShow = yandexRewardedShow.cloneMutableAndPreserveParameters(showClass)
+    val clonedShow = yandexRewardedShow.cloneParameters()
     // Replace the original method instead of prepending to it. Yandex's wrapper
     // can contain branch targets that become invalid when instructions are
     // inserted before its existing implementation, causing VerifyError at runtime.
@@ -337,9 +338,8 @@ private fun BytecodePatchContext.applyIronSourceAdsWrapperStrategy(logger: Logge
             const/4 v0, 0x1
             return v0
         """.trimIndent())
-        val showClass = IronSourceAdsRewardedShowPreciseFingerprint.classDefOrNull ?: return
-        val cloned = show.cloneMutableAndPreserveParameters(showClass)
-        cloned.addInstructions(0, """
+        show.cloneParameters().addInstructions(
+            0, """
             invoke-virtual {p0}, Lcom/unity3d/ironsourceads/rewarded/RewardedAd;->getListener()Lcom/unity3d/ironsourceads/rewarded/RewardedAdListener;
             move-result-object v0
             if-eqz v0, :morphe_isads_done
@@ -348,7 +348,8 @@ private fun BytecodePatchContext.applyIronSourceAdsWrapperStrategy(logger: Logge
             invoke-interface {v0, p0}, Lcom/unity3d/ironsourceads/rewarded/RewardedAdListener;->onRewardedAdDismissed(Lcom/unity3d/ironsourceads/rewarded/RewardedAd;)V
             :morphe_isads_done
             return-void
-        """.trimIndent())
+        """.trimIndent()
+        )
         logger.info("Ads Free Rewards: ironSourceAds wrapper patch succeeded (instant reward)")
     } catch (e: Exception) {
         logger.warning("Ads Free Rewards: ironSourceAds wrapper patch failed: ${e.message}")
@@ -377,9 +378,8 @@ private fun BytecodePatchContext.applyMadsStrategy(logger: Logger, useIronSource
         return
     }
     try {
-        val showClass = MadsWrapperShowAdFingerprint.classDefOrNull ?: return
-        val cloned = show.cloneMutableAndPreserveParameters(showClass)
-        cloned.addInstructions(0, """
+        show.cloneParameters().addInstructions(
+            0, """
             sget-object v0, Lcom/miniclip/madsunityplugin/utils/MAdsSDKWrapperUtils${'$'}MAdsWrapperAdFormat;->RewardedVideos:Lcom/miniclip/madsunityplugin/utils/MAdsSDKWrapperUtils${'$'}MAdsWrapperAdFormat;
             iget v0, v0, Lcom/miniclip/madsunityplugin/utils/MAdsSDKWrapperUtils${'$'}MAdsWrapperAdFormat;->id:I
             if-ne p1, v0, :morphe_mads_original
@@ -397,23 +397,22 @@ private fun BytecodePatchContext.applyMadsStrategy(logger: Logger, useIronSource
             const/4 v0, 0x1
             return v0
             :morphe_mads_original
-        """.trimIndent())
+        """.trimIndent()
+        )
         logger.info("Ads Free Rewards: MADS patch succeeded (instant reward)")
         val ready = MadsWrapperIsReadyFingerprint.methodOrNull
         if (ready != null) {
-            val readyClass = MadsWrapperIsReadyFingerprint.classDefOrNull
-            if (readyClass != null) {
-                val clonedReady = ready.cloneMutableAndPreserveParameters(readyClass)
-                clonedReady.addInstructions(0, """
-                    sget-object v0, Lcom/miniclip/madsunityplugin/utils/MAdsSDKWrapperUtils${'$'}MAdsWrapperAdFormat;->RewardedVideos:Lcom/miniclip/madsunityplugin/utils/MAdsSDKWrapperUtils${'$'}MAdsWrapperAdFormat;
-                    iget v0, v0, Lcom/miniclip/madsunityplugin/utils/MAdsSDKWrapperUtils${'$'}MAdsWrapperAdFormat;->id:I
-                    if-ne p1, v0, :morphe_mads_ready_original
-                    const/4 v0, 0x1
-                    return v0
-                    :morphe_mads_ready_original
-                """.trimIndent())
-                logger.info("Ads Free Rewards: MADS patch succeeded (fake ready)")
-            }
+            ready.cloneParameters().addInstructions(
+                0, """
+                sget-object v0, Lcom/miniclip/madsunityplugin/utils/MAdsSDKWrapperUtils${'$'}MAdsWrapperAdFormat;->RewardedVideos:Lcom/miniclip/madsunityplugin/utils/MAdsSDKWrapperUtils${'$'}MAdsWrapperAdFormat;
+                iget v0, v0, Lcom/miniclip/madsunityplugin/utils/MAdsSDKWrapperUtils${'$'}MAdsWrapperAdFormat;->id:I
+                if-ne p1, v0, :morphe_mads_ready_original
+                const/4 v0, 0x1
+                return v0
+                :morphe_mads_ready_original
+            """.trimIndent()
+            )
+            logger.info("Ads Free Rewards: MADS patch succeeded (fake ready)")
         }
     } catch (e: Exception) {
         logger.warning("Ads Free Rewards: MADS patch failed: ${e.message}")
@@ -430,9 +429,8 @@ private fun BytecodePatchContext.applyMaxUnityStrategy(logger: Logger, useMax: B
         return v0
     """.trimIndent())
     if (instantReward == true) {
-        val showClass = ShowRewardedAdFingerprint.classDefOrNull ?: return true
-        val clonedShow = unityShow.cloneMutableAndPreserveParameters(showClass)
-        clonedShow.addInstructions(0, """
+        unityShow.cloneParameters().addInstructions(
+            0, """
             move-object v0, p1
             new-instance p0, Lorg/json/JSONObject;
             invoke-direct {p0}, Lorg/json/JSONObject;-><init>()V
@@ -474,13 +472,13 @@ private fun BytecodePatchContext.applyMaxUnityStrategy(logger: Logger, useMax: B
             invoke-static {p0, p1, p2}, Lcom/applovin/impl/sdk/utils/JsonUtils;->putString(Lorg/json/JSONObject;Ljava/lang/String;Ljava/lang/String;)V
             invoke-static {p0}, Lcom/applovin/mediation/unity/MaxUnityAdManager;->forwardUnityEvent(Lorg/json/JSONObject;)V
             return-void
-        """.trimIndent())
+        """.trimIndent()
+        )
         val unityLoad = LoadRewardedAdFingerprint.methodOrNull
         if (unityLoad != null) {
             logger.info("Ads Free Rewards: MAX Unity loadRewardedAd patching")
-            val loadClass = LoadRewardedAdFingerprint.classDefOrNull ?: return true
-            val clonedLoad = unityLoad.cloneMutableAndPreserveParameters(loadClass)
-            clonedLoad.addInstructions(0, """
+            unityLoad.cloneParameters().addInstructions(
+                0, """
                 move-object v0, p1
                 new-instance p0, Lorg/json/JSONObject;
                 invoke-direct {p0}, Lorg/json/JSONObject;-><init>()V
@@ -494,7 +492,8 @@ private fun BytecodePatchContext.applyMaxUnityStrategy(logger: Logger, useMax: B
                 invoke-static {p0, p1, v1}, Lcom/applovin/impl/sdk/utils/JsonUtils;->putString(Lorg/json/JSONObject;Ljava/lang/String;Ljava/lang/String;)V
                 invoke-static {p0}, Lcom/applovin/mediation/unity/MaxUnityAdManager;->forwardUnityEvent(Lorg/json/JSONObject;)V
                 return-void
-            """.trimIndent())
+            """.trimIndent()
+            )
         }
     }
     return true
@@ -514,17 +513,12 @@ private fun BytecodePatchContext.applyNativeMaxStrategy(logger: Logger, useMax: 
         if (rc >= 7) {
             nativeShow.addInstructions(0, fireRewardedAdCallbacks())
         } else {
-            val showClass = MaxRewardedAdShowAdFingerprint.classDefOrNull
-            if (showClass != null) {
-                try {
-                    val cloned = nativeShow.cloneMutableAndPreserveParameters(showClass)
-                    cloned.addInstructions(0, fireRewardedAdCallbacks())
-                    logger.info("Ads Free Rewards: native MAX via clone (low regs $rc)")
-                } catch (e: Exception) {
-                    logger.warning("Ads Free Rewards: clone failed for native MAX: ${e.message}")
-                }
-            } else {
-                logger.warning("Ads Free Rewards: skip native MAX showAd()  -  registerCount $rc < 7")
+            try {
+                nativeShow.cloneParameters()
+                    .addInstructions(0, fireRewardedAdCallbacks())
+                logger.info("Ads Free Rewards: native MAX via clone (low regs $rc)")
+            } catch (e: Exception) {
+                logger.warning("Ads Free Rewards: clone failed for native MAX: ${e.message}")
             }
         }
     }
@@ -537,8 +531,12 @@ private fun BytecodePatchContext.applyAdMobRewardedStrategy(logger: Logger, useM
     classDefForEach { classDef ->
         val tl = classDef.type.lowercase()
         if (tl.contains("okhttp") || tl.contains("androidx") || tl.contains("com/google/android/gms/ads/rewarded")) return@classDefForEach
-        val mutableClass = try { mutableClassDefBy(classDef) } catch (_: Exception) { return@classDefForEach }
-        for (method in mutableClass.methods) {
+        // Must create mutable classes/methods only if required to prevent out of memory errors.
+        val mutableClass by lazy { mutableClassDefBy(classDef) }
+        for (method in classDef.methods) {
+            val mutableMethod by lazy {
+                mutableClass.findMutableMethodOf(method)
+            }
             val impl = method.implementation ?: continue
             val instructions = impl.instructions.toList()
             for ((index, insn) in instructions.withIndex()) {
@@ -565,7 +563,7 @@ private fun BytecodePatchContext.applyAdMobRewardedStrategy(logger: Logger, useM
                         }
                         else -> continue
                     }
-                    method.addInstructions(index, """
+                    mutableMethod.addInstructions(index, """
                         if-eqz v$listenerReg, :morphe_admob_skip_$index
                         const/4 v0, 0x0
                         invoke-interface {v$listenerReg, v0}, Lcom/google/android/gms/ads/OnUserEarnedRewardListener;->onUserEarnedReward(Lcom/google/android/gms/ads/rewarded/RewardItem;)V

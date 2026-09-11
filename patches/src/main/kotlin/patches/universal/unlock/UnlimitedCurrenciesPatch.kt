@@ -15,6 +15,7 @@ import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 import com.android.tools.smali.dexlib2.iface.reference.StringReference
+import patches.universal.ads.util.findMutableMethodOf
 import java.util.logging.Logger
 
 private val currencySubstrings = listOf(
@@ -201,8 +202,9 @@ val unlimitedCurrenciesPatch = bytecodePatch(
             }
             if (!foundPrefsCall) return@classDefForEach
 
-            val mutableClass = mutableClassDefBy(classDef)
-            for (method in mutableClass.methods) {
+            val mutableClass by lazy { mutableClassDefBy(classDef) }
+            for (method in classDef.methods) {
+                val mutableMethod by lazy { mutableClass.findMutableMethodOf(method) }
                 val impl = method.implementation ?: continue
                 val instructions: List<Instruction> = impl.instructions.toList()
                 for ((index, insn) in instructions.withIndex()) {
@@ -258,7 +260,7 @@ val unlimitedCurrenciesPatch = bytecodePatch(
                             else -> continue
                         }
                         try {
-                            method.addInstructions(index, "mul-int/lit8 v$valueReg, v$valueReg, $mult")
+                            mutableMethod.addInstructions(index, "mul-int/lit8 v$valueReg, v$valueReg, $mult")
                             affectedCurrencies.add(keyValue!!)
                             patched++
                         } catch (_: Exception) {}
@@ -274,15 +276,15 @@ val unlimitedCurrenciesPatch = bytecodePatch(
                                     target in -32768..32767 -> "const/16 v$r, $target"
                                     else -> "const v$r, $target"
                                 }
-                                method.replaceInstruction(index, instr)
-                                method.replaceInstruction(index + 1, "nop")
+                                mutableMethod.replaceInstruction(index, instr)
+                                mutableMethod.replaceInstruction(index + 1, "nop")
                             } else {
                                 val instr = when {
                                     target in -32768..32767 -> "const/16 v0, $target"
                                     else -> "const v0, $target"
                                 }
-                                method.replaceInstruction(index, instr)
-                                method.replaceInstruction(index + 1, "move v$r, v0")
+                                mutableMethod.replaceInstruction(index, instr)
+                                mutableMethod.replaceInstruction(index + 1, "move v$r, v0")
                             }
                             affectedCurrencies.add(keyValue!!)
                             patched++
@@ -291,11 +293,11 @@ val unlimitedCurrenciesPatch = bytecodePatch(
                             val r = (next as OneRegisterInstruction).registerA
                             val hex = "0x" + target.toString(16)
                             if (r <= 0xff) {
-                                method.replaceInstruction(index, "const-wide/32 v$r, $hex")
-                                method.replaceInstruction(index + 1, "nop")
+                                mutableMethod.replaceInstruction(index, "const-wide/32 v$r, $hex")
+                                mutableMethod.replaceInstruction(index + 1, "nop")
                             } else {
-                                method.replaceInstruction(index, "const-wide/32 v0, $hex")
-                                method.replaceInstruction(index + 1, "move-wide v$r, v0")
+                                mutableMethod.replaceInstruction(index, "const-wide/32 v0, $hex")
+                                mutableMethod.replaceInstruction(index + 1, "move-wide v$r, v0")
                             }
                             affectedCurrencies.add(keyValue!!)
                             patched++
@@ -305,11 +307,11 @@ val unlimitedCurrenciesPatch = bytecodePatch(
                             val bits = java.lang.Float.floatToRawIntBits(target.toFloat())
                             val hex = "0x" + Integer.toHexString(bits)
                             if (r <= 0xff) {
-                                method.replaceInstruction(index, "const v$r, $hex")
-                                method.replaceInstruction(index + 1, "nop")
+                                mutableMethod.replaceInstruction(index, "const v$r, $hex")
+                                mutableMethod.replaceInstruction(index + 1, "nop")
                             } else {
-                                method.replaceInstruction(index, "const v0, $hex")
-                                method.replaceInstruction(index + 1, "move v$r, v0")
+                                mutableMethod.replaceInstruction(index, "const v0, $hex")
+                                mutableMethod.replaceInstruction(index + 1, "move v$r, v0")
                             }
                             affectedCurrencies.add(keyValue!!)
                             patched++
@@ -317,14 +319,14 @@ val unlimitedCurrenciesPatch = bytecodePatch(
                         isGetString && next.opcode == Opcode.MOVE_RESULT_OBJECT -> {
                             val r = (next as OneRegisterInstruction).registerA
                             if (r <= 0xff) {
-                                method.replaceInstruction(index, "const-string v$r, \"$target\"")
-                                method.replaceInstruction(index + 1, "nop")
+                                mutableMethod.replaceInstruction(index, "const-string v$r, \"$target\"")
+                                mutableMethod.replaceInstruction(index + 1, "nop")
                             } else if (r <= 0xffff) {
-                                method.replaceInstruction(index, "const-string/jumbo v$r, \"$target\"")
-                                method.replaceInstruction(index + 1, "nop")
+                                mutableMethod.replaceInstruction(index, "const-string/jumbo v$r, \"$target\"")
+                                mutableMethod.replaceInstruction(index + 1, "nop")
                             } else {
-                                method.replaceInstruction(index, "const-string v0, \"$target\"")
-                                method.replaceInstruction(index + 1, "move-object v$r, v0")
+                                mutableMethod.replaceInstruction(index, "const-string v0, \"$target\"")
+                                mutableMethod.replaceInstruction(index + 1, "move-object v$r, v0")
                             }
                             affectedCurrencies.add(keyValue!!)
                             patched++
@@ -332,14 +334,14 @@ val unlimitedCurrenciesPatch = bytecodePatch(
                         isHasKey && next.opcode == Opcode.MOVE_RESULT -> {
                             val r = (next as OneRegisterInstruction).registerA
                             if (r <= 0xf) {
-                                method.replaceInstruction(index, "const/4 v$r, 0x1")
-                                method.replaceInstruction(index + 1, "nop")
+                                mutableMethod.replaceInstruction(index, "const/4 v$r, 0x1")
+                                mutableMethod.replaceInstruction(index + 1, "nop")
                             } else if (r <= 0xff) {
-                                method.replaceInstruction(index, "const/16 v$r, 0x1")
-                                method.replaceInstruction(index + 1, "nop")
+                                mutableMethod.replaceInstruction(index, "const/16 v$r, 0x1")
+                                mutableMethod.replaceInstruction(index + 1, "nop")
                             } else {
-                                method.replaceInstruction(index, "const/4 v0, 0x1")
-                                method.replaceInstruction(index + 1, "move v$r, v0")
+                                mutableMethod.replaceInstruction(index, "const/4 v0, 0x1")
+                                mutableMethod.replaceInstruction(index + 1, "move v$r, v0")
                             }
                             affectedCurrencies.add(keyValue!!)
                             patched++

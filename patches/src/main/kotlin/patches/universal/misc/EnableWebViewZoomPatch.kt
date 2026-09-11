@@ -4,13 +4,12 @@ import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.bytecodePatch
 import com.android.tools.smali.dexlib2.Opcode
-import com.android.tools.smali.dexlib2.iface.instruction.FiveRegisterInstruction
-import com.android.tools.smali.dexlib2.iface.instruction.Instruction
 import com.android.tools.smali.dexlib2.iface.instruction.NarrowLiteralInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
-import com.android.tools.smali.dexlib2.iface.instruction.RegisterRangeInstruction
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
+import patches.universal.ads.util.findMutableMethodOf
+import patches.universal.ads.util.registersUsed
 import java.util.logging.Logger
 
 private fun BytecodePatchContext.forceBooleanSetter(
@@ -21,8 +20,9 @@ private fun BytecodePatchContext.forceBooleanSetter(
     val literal = if (value) "0x1" else "0x0"
     var patched = 0
     classDefForEach { classDef ->
-        val mutableClass = mutableClassDefBy(classDef)
-        for (method in mutableClass.methods) {
+        val mutableClass by lazy { mutableClassDefBy(classDef) }
+        for (method in classDef.methods) {
+            val mutableMethod by lazy { mutableClass.findMutableMethodOf(method) }
             val impl = method.implementation ?: continue
             val instructions = impl.instructions.toList()
             for ((index, insn) in instructions.withIndex()) {
@@ -33,12 +33,7 @@ private fun BytecodePatchContext.forceBooleanSetter(
                 if (ref.returnType != "V") continue
                 if (ref.parameterTypes != listOf("Z")) continue
 
-                val reg = when (insn) {
-                    is FiveRegisterInstruction -> insn.registerD
-                    is RegisterRangeInstruction -> insn.startRegister + insn.registerCount - 1
-                    else -> continue
-                }
-
+                val reg = insn.registersUsed[1]
                 for (j in index - 1 downTo 0) {
                     val prev = instructions[j]
                     if (prev.opcode == Opcode.NOP) continue
@@ -46,7 +41,7 @@ private fun BytecodePatchContext.forceBooleanSetter(
                         prev is OneRegisterInstruction &&
                         prev.registerA == reg
                     ) {
-                        method.replaceInstruction(j, "const/4 v$reg, $literal")
+                        mutableMethod.replaceInstruction(j, "const/4 v$reg, $literal")
                         patched++
                         break
                     }

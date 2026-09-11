@@ -4,6 +4,7 @@ import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
 import app.morphe.patcher.patch.bytecodePatch
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
+import patches.universal.ads.util.findMutableMethodOf
 import java.util.logging.Logger
 
 @Suppress("unused")
@@ -21,8 +22,11 @@ val disableStrictModePatch = bytecodePatch(
 
         var patched = 0
         classDefForEach { classDef ->
-            val mutableClass = mutableClassDefBy(classDef)
-            for (method in mutableClass.methods) {
+            val mutableClass by lazy { mutableClassDefBy(classDef) }
+            for (method in classDef.methods) {
+                val mutableMethod by lazy {
+                    mutableClass.findMutableMethodOf(method)
+                }
                 val implementation = method.implementation ?: continue
                 val instructions = implementation.instructions.toList()
                 for ((index, instruction) in instructions.withIndex()) {
@@ -38,7 +42,7 @@ val disableStrictModePatch = bytecodePatch(
                         continue
                     }
 
-                    method.replaceInstruction(index, "nop")
+                    mutableMethod.replaceInstruction(index, "nop")
                     patched++
                 }
             }
