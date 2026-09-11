@@ -15,9 +15,7 @@ private val gmsCoreManifestPatch = resourcePatch(
     description = "Adds queries for MicroG and optional package name override for GmsCore routing",
     default = false,
 ) {
-    // Guarded: morphe-patcher < 1.13.0 has no category() and the bundle
-    // must still load there (ungrouped) instead of dying on linkage.
-    try { category("Google Services") } catch (_: NoSuchMethodError) {}
+    category("Google Services")
     execute {
         val logger = Logger.getLogger(this::class.java.name)
         document("AndroidManifest.xml").use { manifest ->
@@ -61,9 +59,7 @@ val gmsCoreSupportPatch = bytecodePatch(
 ) {
     dependsOn(gmsCoreManifestPatch)
 
-    // Guarded: morphe-patcher < 1.13.0 has no category() and the bundle
-    // must still load there (ungrouped) instead of dying on linkage.
-    try { category("Google Services") } catch (_: NoSuchMethodError) {}
+    category("Google Services")
     val gmsCorePackageName by stringOption(
         key = "gmsCorePackageName",
         default = "app.revanced.android.gms",

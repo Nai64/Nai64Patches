@@ -10,9 +10,7 @@ val apkJunkCleanupPatch = resourcePatch(
     description = "Removes unused CPU libraries to shrink the APK. Keep only your device's architecture.",
     default = false,
 ) {
-    // Guarded: morphe-patcher < 1.13.0 has no category() and the bundle
-    // must still load there (ungrouped) instead of dying on linkage.
-    try { category("Manifest") } catch (_: NoSuchMethodError) {}
+    category("Manifest")
     val keepArch by stringOption(
         title = "Keep architecture",
         default = "arm64-v8a",

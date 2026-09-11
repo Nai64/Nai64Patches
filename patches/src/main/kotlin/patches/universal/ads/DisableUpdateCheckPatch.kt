@@ -10,9 +10,7 @@ val disableUpdateCheckPatch = bytecodePatch(
     description = "Disables Play Core in-app update flow. Don't use with Bypass Forced Updates which already includes this.",
     default = false,
 ) {
-    // Guarded: morphe-patcher < 1.13.0 has no category() and the bundle
-    // must still load there (ungrouped) instead of dying on linkage.
-    try { category("Updates") } catch (_: NoSuchMethodError) {}
+    category("Updates")
     execute {
         val logger = Logger.getLogger(this::class.java.name)
 

@@ -10,9 +10,7 @@ val removePermissionsPatch = resourcePatch(
     description = "Remove permissions from the app manifest",
     default = false,
 ) {
-    // Guarded: morphe-patcher < 1.13.0 has no category() and the bundle
-    // must still load there (ungrouped) instead of dying on linkage.
-    try { category("Manifest") } catch (_: NoSuchMethodError) {}
+    category("Manifest")
     val removePermissions by stringOption(
         title = "Permissions to remove",
         default = "android.permission.SEND_SMS,android.permission.RECEIVE_SMS,android.permission.READ_SMS,android.permission.RECORD_AUDIO,android.permission.CAMERA",

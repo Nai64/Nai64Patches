@@ -10,9 +10,7 @@ val renameAppPatch = resourcePatch(
     description = "Overrides the launcher label of the app",
     default = false,
 ) {
-    // Guarded: morphe-patcher < 1.13.0 has no category() and the bundle
-    // must still load there (ungrouped) instead of dying on linkage.
-    try { category("Manifest") } catch (_: NoSuchMethodError) {}
+    category("Manifest")
     val label by stringOption(
         title = "App name",
         default = "",

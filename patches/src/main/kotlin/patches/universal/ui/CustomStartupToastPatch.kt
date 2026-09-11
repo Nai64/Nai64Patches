@@ -38,9 +38,7 @@ val customStartupToastPatch = bytecodePatch(
     description = "Shows a customizable toast message every time the app starts",
     default = false,
 ) {
-    // Guarded: morphe-patcher < 1.13.0 has no category() and the bundle
-    // must still load there (ungrouped) instead of dying on linkage.
-    try { category("Interface") } catch (_: NoSuchMethodError) {}
+    category("Interface")
     dependsOn(StartupHooks.resolveRealApplicationPatch)
 
     val message by stringOption(

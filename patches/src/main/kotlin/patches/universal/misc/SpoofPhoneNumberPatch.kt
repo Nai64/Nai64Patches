@@ -10,9 +10,7 @@ val spoofPhoneNumberPatch = bytecodePatch(
     description = "Reports a chosen phone number from TelephonyManager.getLine1Number() and getLine2Number() so apps cannot read the device's phone number.",
     default = false,
 ) {
-    // Guarded: morphe-patcher < 1.13.0 has no category() and the bundle
-    // must still load there (ungrouped) instead of dying on linkage.
-    try { category("Spoof") } catch (_: NoSuchMethodError) {}
+    category("Spoof")
     val number by stringOption(
         title = "Phone number",
         default = "",

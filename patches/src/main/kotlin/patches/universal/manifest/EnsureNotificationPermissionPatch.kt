@@ -12,9 +12,7 @@ val ensureNotificationPermissionPatch = resourcePatch(
     description = "Adds notification permission for old apps on Android 13+.",
     default = false,
 ) {
-    // Guarded: morphe-patcher < 1.13.0 has no category() and the bundle
-    // must still load there (ungrouped) instead of dying on linkage.
-    try { category("Manifest") } catch (_: NoSuchMethodError) {}
+    category("Manifest")
     execute {
         val logger = Logger.getLogger(this::class.java.name)
         var added = false

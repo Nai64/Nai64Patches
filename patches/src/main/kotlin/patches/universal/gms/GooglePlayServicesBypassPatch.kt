@@ -52,9 +52,7 @@ val bypassGooglePlayServicesCheckPatch = bytecodePatch(
     description = "Tricks the app into thinking Google Play Services is installed and working, so it does not disable features that depend on it.",
     default = false,
 ) {
-    // Guarded: morphe-patcher < 1.13.0 has no category() and the bundle
-    // must still load there (ungrouped) instead of dying on linkage.
-    try { category("Google Services") } catch (_: NoSuchMethodError) {}
+    category("Google Services")
     execute {
         val logger = Logger.getLogger(this::class.java.name)
 

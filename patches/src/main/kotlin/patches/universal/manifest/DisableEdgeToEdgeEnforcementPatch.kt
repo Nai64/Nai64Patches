@@ -11,9 +11,7 @@ val disableEdgeToEdgeEnforcementPatch = resourcePatch(
     description = "Opts out of Android 15 mandatory edge-to-edge so apps that break with enforced edge-to-edge render normally.",
     default = false,
 ) {
-    // Guarded: morphe-patcher < 1.13.0 has no category() and the bundle
-    // must still load there (ungrouped) instead of dying on linkage.
-    try { category("Manifest") } catch (_: NoSuchMethodError) {}
+    category("Manifest")
     val optOut by booleanOption(
         title = "Opt out",
         default = true,

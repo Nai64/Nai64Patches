@@ -10,9 +10,7 @@ val spoofGroupIdLevel1Patch = bytecodePatch(
     description = "Reports a chosen value from TelephonyManager.getGroupIdLevel1() so apps cannot read the real SIM GID1.",
     default = false,
 ) {
-    // Guarded: morphe-patcher < 1.13.0 has no category() and the bundle
-    // must still load there (ungrouped) instead of dying on linkage.
-    try { category("Spoof") } catch (_: NoSuchMethodError) {}
+    category("Spoof")
     val gid by stringOption(
         title = "GID1",
         default = "",

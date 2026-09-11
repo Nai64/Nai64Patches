@@ -59,9 +59,7 @@ val enableWebViewContentAccessPatch = bytecodePatch(
     description = "Forces WebSettings.setAllowContentAccess(true) so WebViews can access content providers.",
     default = false,
 ) {
-    // Guarded: morphe-patcher < 1.13.0 has no category() and the bundle
-    // must still load there (ungrouped) instead of dying on linkage.
-    try { category("Enable") } catch (_: NoSuchMethodError) {}
+    category("Enable")
     execute {
         val logger = Logger.getLogger(this::class.java.name)
         val patched = forceBooleanSetter("Landroid/webkit/WebSettings;", setOf("setAllowContentAccess"), true)

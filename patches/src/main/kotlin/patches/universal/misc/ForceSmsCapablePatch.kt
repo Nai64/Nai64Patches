@@ -9,9 +9,7 @@ val forceSmsCapablePatch = bytecodePatch(
     description = "Makes TelephonyManager.isSmsCapable() report true so apps that require SMS support run on devices without a cellular radio.",
     default = false,
 ) {
-    // Guarded: morphe-patcher < 1.13.0 has no category() and the bundle
-    // must still load there (ungrouped) instead of dying on linkage.
-    try { category("Force") } catch (_: NoSuchMethodError) {}
+    category("Force")
     execute {
         val logger = Logger.getLogger(this::class.java.name)
         val patched = foldBooleanReturns(

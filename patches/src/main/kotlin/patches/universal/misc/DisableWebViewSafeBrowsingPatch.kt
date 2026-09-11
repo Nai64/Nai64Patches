@@ -61,9 +61,7 @@ val disableWebViewSafeBrowsingPatch = bytecodePatch(
     description = "Forces WebSettings.setSafeBrowsingEnabled(false) to disable WebView Google Safe Browsing checks (complements the callback bypass).",
     default = false,
 ) {
-    // Guarded: morphe-patcher < 1.13.0 has no category() and the bundle
-    // must still load there (ungrouped) instead of dying on linkage.
-    try { category("Disable") } catch (_: NoSuchMethodError) {}
+    category("Disable")
     execute {
         val logger = Logger.getLogger(this::class.java.name)
         val patched = forceBooleanSetter("Landroid/webkit/WebSettings;", setOf("setSafeBrowsingEnabled"), false)

@@ -17,9 +17,7 @@ val fakeLocationAccuracyPatch = bytecodePatch(
     description = "Reports a chosen location accuracy through Location.getAccuracy() so apps that restrict features based on low accuracy stop doing so.",
     default = false,
 ) {
-    // Guarded: morphe-patcher < 1.13.0 has no category() and the bundle
-    // must still load there (ungrouped) instead of dying on linkage.
-    try { category("Fake") } catch (_: NoSuchMethodError) {}
+    category("Fake")
     val accuracy by intOption(
         title = "Accuracy (meters)",
         default = 1,

@@ -9,9 +9,7 @@ val forceSingleSimPatch = bytecodePatch(
     description = "Makes TelephonyManager.getSimCount() report 1 so apps that require or count multiple SIMs run on a single-SIM device.",
     default = false,
 ) {
-    // Guarded: morphe-patcher < 1.13.0 has no category() and the bundle
-    // must still load there (ungrouped) instead of dying on linkage.
-    try { category("Force") } catch (_: NoSuchMethodError) {}
+    category("Force")
     execute {
         val logger = Logger.getLogger(this::class.java.name)
         val patched = foldNoArgIntGetter(

@@ -9,9 +9,7 @@ val hideAccessibilityUsagePatch = bytecodePatch(
     description = "Makes AccessibilityManager.isEnabled() report false so apps cannot tell an accessibility service is running.",
     default = false,
 ) {
-    // Guarded: morphe-patcher < 1.13.0 has no category() and the bundle
-    // must still load there (ungrouped) instead of dying on linkage.
-    try { category("Hide") } catch (_: NoSuchMethodError) {}
+    category("Hide")
     execute {
         val logger = Logger.getLogger(this::class.java.name)
         val patched = foldBooleanReturns(

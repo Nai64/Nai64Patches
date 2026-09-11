@@ -11,9 +11,7 @@ val ignoreLocationServicesOffPatch = bytecodePatch(
             "run when location services are disabled keep working",
     default = false,
 ) {
-    // Guarded: morphe-patcher < 1.13.0 has no category() and the bundle
-    // must still load there (ungrouped) instead of dying on linkage.
-    try { category("Ignore") } catch (_: NoSuchMethodError) {}
+    category("Ignore")
     execute {
         val logger = Logger.getLogger(this::class.java.name)
 

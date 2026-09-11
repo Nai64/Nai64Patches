@@ -14,9 +14,7 @@ val spoofBuildSerialPatch = bytecodePatch(
     description = "Reports a chosen device serial through Build.getSerial() so apps that fingerprint by serial number see a constant value.",
     default = false,
 ) {
-    // Guarded: morphe-patcher < 1.13.0 has no category() and the bundle
-    // must still load there (ungrouped) instead of dying on linkage.
-    try { category("Spoof") } catch (_: NoSuchMethodError) {}
+    category("Spoof")
     val serial by stringOption(
         title = "Serial",
         default = "unknown",

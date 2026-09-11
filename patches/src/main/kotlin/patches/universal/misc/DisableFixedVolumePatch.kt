@@ -9,9 +9,7 @@ val disableFixedVolumePatch = bytecodePatch(
     description = "Makes AudioManager.isVolumeFixed() report false so volume keys and stream changes work even when an app pins the volume.",
     default = false,
 ) {
-    // Guarded: morphe-patcher < 1.13.0 has no category() and the bundle
-    // must still load there (ungrouped) instead of dying on linkage.
-    try { category("Disable") } catch (_: NoSuchMethodError) {}
+    category("Disable")
     execute {
         val logger = Logger.getLogger(this::class.java.name)
         val patched = foldBooleanReturns(

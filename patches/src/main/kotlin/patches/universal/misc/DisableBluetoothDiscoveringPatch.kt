@@ -9,9 +9,7 @@ val disableBluetoothDiscoveringPatch = bytecodePatch(
     description = "Makes BluetoothAdapter.isDiscovering() report false so apps cannot tell the adapter is in discovery mode.",
     default = false,
 ) {
-    // Guarded: morphe-patcher < 1.13.0 has no category() and the bundle
-    // must still load there (ungrouped) instead of dying on linkage.
-    try { category("Disable") } catch (_: NoSuchMethodError) {}
+    category("Disable")
     execute {
         val logger = Logger.getLogger(this::class.java.name)
         val patched = foldBooleanReturns(

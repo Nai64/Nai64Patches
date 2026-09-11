@@ -9,9 +9,7 @@ val forceDataCapablePatch = bytecodePatch(
     description = "Makes TelephonyManager.isDataCapable() report true so apps that require mobile-data support run on Wi-Fi-only devices.",
     default = false,
 ) {
-    // Guarded: morphe-patcher < 1.13.0 has no category() and the bundle
-    // must still load there (ungrouped) instead of dying on linkage.
-    try { category("Force") } catch (_: NoSuchMethodError) {}
+    category("Force")
     execute {
         val logger = Logger.getLogger(this::class.java.name)
         val patched = foldBooleanReturns(

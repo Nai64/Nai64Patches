@@ -10,9 +10,7 @@ val disableHardwareAccelerationPatch = resourcePatch(
     description = "Sets android:hardwareAccelerated=\"false\" on the <application> so the app renders on the software path (fixes some rendering/compat bugs).",
     default = false,
 ) {
-    // Guarded: morphe-patcher < 1.13.0 has no category() and the bundle
-    // must still load there (ungrouped) instead of dying on linkage.
-    try { category("Manifest") } catch (_: NoSuchMethodError) {}
+    category("Manifest")
     execute {
         val logger = Logger.getLogger(this::class.java.name)
         document("AndroidManifest.xml").use { manifest ->

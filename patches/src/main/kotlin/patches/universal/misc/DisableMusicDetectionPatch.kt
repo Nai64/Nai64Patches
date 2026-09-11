@@ -9,9 +9,7 @@ val disableMusicDetectionPatch = bytecodePatch(
     description = "Makes AudioManager.isMusicActive() report false so apps that react to playing music behave as if nothing is playing.",
     default = false,
 ) {
-    // Guarded: morphe-patcher < 1.13.0 has no category() and the bundle
-    // must still load there (ungrouped) instead of dying on linkage.
-    try { category("Disable") } catch (_: NoSuchMethodError) {}
+    category("Disable")
     execute {
         val logger = Logger.getLogger(this::class.java.name)
         val patched = foldBooleanReturns(

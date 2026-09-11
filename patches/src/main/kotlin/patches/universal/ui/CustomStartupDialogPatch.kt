@@ -20,9 +20,7 @@ val customStartupDialogPatch = bytecodePatch(
     description = "Shows a customizable dialog once when the app is opened",
     default = false,
 ) {
-    // Guarded: morphe-patcher < 1.13.0 has no category() and the bundle
-    // must still load there (ungrouped) instead of dying on linkage.
-    try { category("Interface") } catch (_: NoSuchMethodError) {}
+    category("Interface")
     dependsOn(StartupHooks.resolveRealApplicationPatch)
 
     val title by stringOption(

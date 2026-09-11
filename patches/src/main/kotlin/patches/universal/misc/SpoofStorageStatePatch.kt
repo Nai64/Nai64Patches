@@ -9,9 +9,7 @@ val spoofStorageStatePatch = bytecodePatch(
     description = "Reports 'mounted' from Environment.getExternalStorageState() so apps that require mounted external storage run normally.",
     default = false,
 ) {
-    // Guarded: morphe-patcher < 1.13.0 has no category() and the bundle
-    // must still load there (ungrouped) instead of dying on linkage.
-    try { category("Spoof") } catch (_: NoSuchMethodError) {}
+    category("Spoof")
     execute {
         val logger = Logger.getLogger(this::class.java.name)
         val patched = foldStringGetterConst(

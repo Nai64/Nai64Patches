@@ -12,9 +12,7 @@ val spoofSimOperatorPatch = bytecodePatch(
             "getNetworkOperator() so apps cannot read the real mobile network operator.",
     default = false,
 ) {
-    // Guarded: morphe-patcher < 1.13.0 has no category() and the bundle
-    // must still load there (ungrouped) instead of dying on linkage.
-    try { category("Spoof") } catch (_: NoSuchMethodError) {}
+    category("Spoof")
     val mccMnc by stringOption(
         title = "MCC+MNC",
         default = "310260",

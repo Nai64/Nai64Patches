@@ -20,9 +20,7 @@ val fakeAutoRotatePatch = bytecodePatch(
     description = "Reports a chosen auto-rotation state through Settings.System so apps that restrict features based on rotation lock stop doing so.",
     default = false,
 ) {
-    // Guarded: morphe-patcher < 1.13.0 has no category() and the bundle
-    // must still load there (ungrouped) instead of dying on linkage.
-    try { category("Fake") } catch (_: NoSuchMethodError) {}
+    category("Fake")
     val enabled by booleanOption(
         title = "Enable auto-rotate",
         default = true,

@@ -10,9 +10,7 @@ val fakeDeviceAdminPatch = bytecodePatch(
     description = "Report device admin as active.",
     default = false,
 ) {
-    // Guarded: morphe-patcher < 1.13.0 has no category() and the bundle
-    // must still load there (ungrouped) instead of dying on linkage.
-    try { category("Fake") } catch (_: NoSuchMethodError) {}
+    category("Fake")
     val active by booleanOption(
         title = "Report active",
         default = true,

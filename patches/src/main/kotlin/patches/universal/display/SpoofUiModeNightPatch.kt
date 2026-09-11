@@ -10,9 +10,7 @@ val spoofUiModeNightPatch = bytecodePatch(
     description = "Forces UiModeManager to report TYPE_NORMAL and night mode off so car/TV/night gates never trigger",
     default = false,
 ) {
-    // Guarded: morphe-patcher < 1.13.0 has no category() and the bundle
-    // must still load there (ungrouped) instead of dying on linkage.
-    try { category("Spoof") } catch (_: NoSuchMethodError) {}
+    category("Spoof")
     execute {
         val logger = Logger.getLogger(this::class.java.name)
         var patched = 0

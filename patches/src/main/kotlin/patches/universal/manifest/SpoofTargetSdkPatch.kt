@@ -23,9 +23,7 @@ val spoofTargetSdkPatch = resourcePatch(
     description = "Fixes install errors on newer Android versions.",
     default = false,
 ) {
-    // Guarded: morphe-patcher < 1.13.0 has no category() and the bundle
-    // must still load there (ungrouped) instead of dying on linkage.
-    try { category("Manifest") } catch (_: NoSuchMethodError) {}
+    category("Manifest")
     val targetSdk by intOption(
         title = "Target SDK version",
         default = 34,

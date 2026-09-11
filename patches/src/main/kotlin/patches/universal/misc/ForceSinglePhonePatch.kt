@@ -9,9 +9,7 @@ val forceSinglePhonePatch = bytecodePatch(
     description = "Makes TelephonyManager.getPhoneCount() report 1 so apps that branch on multiple phones/radios behave as a single-phone device.",
     default = false,
 ) {
-    // Guarded: morphe-patcher < 1.13.0 has no category() and the bundle
-    // must still load there (ungrouped) instead of dying on linkage.
-    try { category("Force") } catch (_: NoSuchMethodError) {}
+    category("Force")
     execute {
         val logger = Logger.getLogger(this::class.java.name)
         val patched = foldNoArgIntGetter(

@@ -11,9 +11,7 @@ val ignorePowerSaveModePatch = bytecodePatch(
             "do not throttle features or downloads while battery saver or Doze is active",
     default = false,
 ) {
-    // Guarded: morphe-patcher < 1.13.0 has no category() and the bundle
-    // must still load there (ungrouped) instead of dying on linkage.
-    try { category("Ignore") } catch (_: NoSuchMethodError) {}
+    category("Ignore")
     execute {
         val logger = Logger.getLogger(this::class.java.name)
 

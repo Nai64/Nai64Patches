@@ -9,9 +9,7 @@ val fakeCellInfoEmptyPatch = bytecodePatch(
     description = "Makes TelephonyManager.getAllCellInfo() return an empty list so apps cannot fingerprint nearby cell towers.",
     default = false,
 ) {
-    // Guarded: morphe-patcher < 1.13.0 has no category() and the bundle
-    // must still load there (ungrouped) instead of dying on linkage.
-    try { category("Fake") } catch (_: NoSuchMethodError) {}
+    category("Fake")
     execute {
         val logger = Logger.getLogger(this::class.java.name)
         val patched = replaceGetterWithStaticCall(

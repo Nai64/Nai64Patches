@@ -17,9 +17,7 @@ val tabletModePatch = bytecodePatch(
     description = "Spoof a tablet smallest width so apps render their tablet UI.",
     default = false,
 ) {
-    // Guarded: morphe-patcher < 1.13.0 has no category() and the bundle
-    // must still load there (ungrouped) instead of dying on linkage.
-    try { category("Resolution") } catch (_: NoSuchMethodError) {}
+    category("Resolution")
     val smallestWidth by intOption(
         title = "Smallest width (dp)",
         default = 600,

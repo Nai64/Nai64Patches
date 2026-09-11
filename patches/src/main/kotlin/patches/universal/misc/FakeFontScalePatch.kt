@@ -20,9 +20,7 @@ val fakeFontScalePatch = bytecodePatch(
     description = "Reports a chosen font scale through Settings.System so apps that restrict features based on font size stop doing so.",
     default = false,
 ) {
-    // Guarded: morphe-patcher < 1.13.0 has no category() and the bundle
-    // must still load there (ungrouped) instead of dying on linkage.
-    try { category("Fake") } catch (_: NoSuchMethodError) {}
+    category("Fake")
     val fontScale by intOption(
         title = "Font scale (×100)",
         default = 100,

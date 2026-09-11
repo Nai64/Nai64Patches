@@ -9,9 +9,7 @@ val bypassSafeModePatch = bytecodePatch(
     description = "Makes PackageManager.isSafeMode() report false so apps that disable functionality in safe mode behave normally.",
     default = false,
 ) {
-    // Guarded: morphe-patcher < 1.13.0 has no category() and the bundle
-    // must still load there (ungrouped) instead of dying on linkage.
-    try { category("Bypass") } catch (_: NoSuchMethodError) {}
+    category("Bypass")
     execute {
         val logger = Logger.getLogger(this::class.java.name)
         val patched = foldBooleanReturns(

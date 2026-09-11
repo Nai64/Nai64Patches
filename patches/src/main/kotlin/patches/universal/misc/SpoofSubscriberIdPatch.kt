@@ -10,9 +10,7 @@ val spoofSubscriberIdPatch = bytecodePatch(
     description = "Reports a chosen subscriber id (IMSI) through TelephonyManager.getSubscriberId() so apps that fingerprint by IMSI see a constant value.",
     default = false,
 ) {
-    // Guarded: morphe-patcher < 1.13.0 has no category() and the bundle
-    // must still load there (ungrouped) instead of dying on linkage.
-    try { category("Spoof") } catch (_: NoSuchMethodError) {}
+    category("Spoof")
     val imsi by stringOption(
         title = "IMSI",
         default = "000000000000000",

@@ -10,9 +10,7 @@ val disableAutofillPatch = bytecodePatch(
     description = "Makes AutofillManager report as disabled so apps stop showing autofill prompts.",
     default = false,
 ) {
-    // Guarded: morphe-patcher < 1.13.0 has no category() and the bundle
-    // must still load there (ungrouped) instead of dying on linkage.
-    try { category("Disable") } catch (_: NoSuchMethodError) {}
+    category("Disable")
     val disabled by booleanOption(
         title = "Disable",
         default = true,

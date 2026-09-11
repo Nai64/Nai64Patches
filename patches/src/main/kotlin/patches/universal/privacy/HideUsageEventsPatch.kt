@@ -10,9 +10,7 @@ val hideUsageEventsPatch = bytecodePatch(
     description = "Makes usage events appear empty so apps cannot read your app launch history.",
     default = false,
 ) {
-    // Guarded: morphe-patcher < 1.13.0 has no category() and the bundle
-    // must still load there (ungrouped) instead of dying on linkage.
-    try { category("Privacy") } catch (_: NoSuchMethodError) {}
+    category("Privacy")
     execute {
         val logger = Logger.getLogger(this::class.java.name)
         var patched = foldObjectGetterToNull(

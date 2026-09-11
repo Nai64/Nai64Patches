@@ -20,9 +20,7 @@ val forceBatteryHealthGoodPatch = bytecodePatch(
     description = "Reports battery health as good via BatteryManager so apps that check health stop warning.",
     default = false,
 ) {
-    // Guarded: morphe-patcher < 1.13.0 has no category() and the bundle
-    // must still load there (ungrouped) instead of dying on linkage.
-    try { category("Force") } catch (_: NoSuchMethodError) {}
+    category("Force")
     val health by stringOption(
         title = "Health",
         default = "Good",

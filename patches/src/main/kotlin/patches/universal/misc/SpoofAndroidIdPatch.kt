@@ -12,9 +12,7 @@ val spoofAndroidIdPatch = bytecodePatch(
             "app cannot be tracked across reinstalls or matched to a specific device.",
     default = false,
 ) {
-    // Guarded: morphe-patcher < 1.13.0 has no category() and the bundle
-    // must still load there (ungrouped) instead of dying on linkage.
-    try { category("Spoof") } catch (_: NoSuchMethodError) {}
+    category("Spoof")
     val androidId by stringOption(
         title = "Android ID",
         default = "0123456789abcdef",

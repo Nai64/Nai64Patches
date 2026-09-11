@@ -71,9 +71,7 @@ val disableForcedOnlineChecksPatch = bytecodePatch(
     description = "Lets the app start without internet.",
     default = false,
 ) {
-    // Guarded: morphe-patcher < 1.13.0 has no category() and the bundle
-    // must still load there (ungrouped) instead of dying on linkage.
-    try { category("Disable") } catch (_: NoSuchMethodError) {}
+    category("Disable")
     val autoMode by booleanOption(
         key = "autoMode",
         title = "Auto mode",

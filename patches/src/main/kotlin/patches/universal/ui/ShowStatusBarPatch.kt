@@ -51,9 +51,7 @@ val showStatusBarPatch = bytecodePatch(
     description = "Keep the status bar visible in fullscreen apps",
     default = false,
 ) {
-    // Guarded: morphe-patcher < 1.13.0 has no category() and the bundle
-    // must still load there (ungrouped) instead of dying on linkage.
-    try { category("Interface") } catch (_: NoSuchMethodError) {}
+    category("Interface")
     execute {
         val logger = Logger.getLogger(this::class.java.name)
 

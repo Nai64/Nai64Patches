@@ -17,9 +17,7 @@ val adsFreeRewardsPatch = bytecodePatch(
     description = "Get rewards without watching ads. Combine with No Ads for other formats, but keep No Ads' rewarded block off.",
     default = false,
 ) {
-    // Guarded: morphe-patcher < 1.13.0 has no category() and the bundle
-    // must still load there (ungrouped) instead of dying on linkage.
-    try { category("Featured") } catch (_: NoSuchMethodError) {}
+    category("Featured")
     val patchVersion by stringOption(
         key = "patchVersion",
         default = "1.41.0",

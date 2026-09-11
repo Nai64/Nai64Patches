@@ -18,9 +18,7 @@ val spoofSdkLevelPatch = bytecodePatch(
     description = "Reports a chosen Android version. Lower values can crash the app.",
     default = false,
 ) {
-    // Guarded: morphe-patcher < 1.13.0 has no category() and the bundle
-    // must still load there (ungrouped) instead of dying on linkage.
-    try { category("Spoof") } catch (_: NoSuchMethodError) {}
+    category("Spoof")
     val sdkInt by intOption(
         title = "SDK level",
         default = -1,

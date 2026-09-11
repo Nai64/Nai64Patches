@@ -10,9 +10,7 @@ val spoofImeiPatch = bytecodePatch(
     description = "Fakes the device IMEI.",
     default = false,
 ) {
-    // Guarded: morphe-patcher < 1.13.0 has no category() and the bundle
-    // must still load there (ungrouped) instead of dying on linkage.
-    try { category("Spoof") } catch (_: NoSuchMethodError) {}
+    category("Spoof")
     val imei by stringOption(
         title = "IMEI",
         default = "000000000000000",

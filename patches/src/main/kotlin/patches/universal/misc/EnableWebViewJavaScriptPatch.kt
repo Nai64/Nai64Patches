@@ -59,9 +59,7 @@ val enableWebViewJavaScriptPatch = bytecodePatch(
     description = "Forces WebSettings.setJavaScriptEnabled(true) so WebViews that disable JS still run scripts.",
     default = false,
 ) {
-    // Guarded: morphe-patcher < 1.13.0 has no category() and the bundle
-    // must still load there (ungrouped) instead of dying on linkage.
-    try { category("Enable") } catch (_: NoSuchMethodError) {}
+    category("Enable")
     execute {
         val logger = Logger.getLogger(this::class.java.name)
         val patched = forceBooleanSetter(

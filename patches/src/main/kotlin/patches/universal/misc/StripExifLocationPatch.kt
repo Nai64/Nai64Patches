@@ -10,9 +10,7 @@ val stripExifLocationPatch = bytecodePatch(
     description = "Makes ExifInterface.getLatLong return null so apps cannot read GPS from photos.",
     default = false,
 ) {
-    // Guarded: morphe-patcher < 1.13.0 has no category() and the bundle
-    // must still load there (ungrouped) instead of dying on linkage.
-    try { category("Strip") } catch (_: NoSuchMethodError) {}
+    category("Strip")
     val strip by booleanOption(
         title = "Strip location",
         default = true,

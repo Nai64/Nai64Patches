@@ -59,9 +59,7 @@ val enableWebViewImageLoadingPatch = bytecodePatch(
     description = "Forces WebViews to load images and never block network image or resource loads.",
     default = false,
 ) {
-    // Guarded: morphe-patcher < 1.13.0 has no category() and the bundle
-    // must still load there (ungrouped) instead of dying on linkage.
-    try { category("Enable") } catch (_: NoSuchMethodError) {}
+    category("Enable")
     execute {
         val logger = Logger.getLogger(this::class.java.name)
         val a = forceBooleanSetter("Landroid/webkit/WebSettings;", setOf("setLoadsImagesAutomatically"), true)

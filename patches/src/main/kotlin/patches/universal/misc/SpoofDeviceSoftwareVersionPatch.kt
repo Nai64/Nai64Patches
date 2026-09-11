@@ -10,9 +10,7 @@ val spoofDeviceSoftwareVersionPatch = bytecodePatch(
     description = "Reports a chosen value from TelephonyManager.getDeviceSoftwareVersion() so apps cannot read the real radio/software version.",
     default = false,
 ) {
-    // Guarded: morphe-patcher < 1.13.0 has no category() and the bundle
-    // must still load there (ungrouped) instead of dying on linkage.
-    try { category("Spoof") } catch (_: NoSuchMethodError) {}
+    category("Spoof")
     val version by stringOption(
         title = "Software version",
         default = "0",

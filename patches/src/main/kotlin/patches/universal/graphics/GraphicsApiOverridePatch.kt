@@ -12,9 +12,7 @@ val graphicsApiOverridePatch = bytecodePatch(
     description = "Forces a Unity game to use Vulkan or OpenGL via launch argument. Only for supported Unity games.",
     default = false,
 ) {
-    // Guarded: morphe-patcher < 1.13.0 has no category() and the bundle
-    // must still load there (ungrouped) instead of dying on linkage.
-    try { category("Graphics") } catch (_: NoSuchMethodError) {}
+    category("Graphics")
     val graphicsApi by stringOption(
         key = "graphicsApi",
         title = "Graphics API",

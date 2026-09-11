@@ -10,9 +10,7 @@ val spoofBssidPatch = bytecodePatch(
     description = "Reports a chosen value from WifiInfo.getBSSID() so apps cannot read the real access point MAC address.",
     default = false,
 ) {
-    // Guarded: morphe-patcher < 1.13.0 has no category() and the bundle
-    // must still load there (ungrouped) instead of dying on linkage.
-    try { category("Spoof") } catch (_: NoSuchMethodError) {}
+    category("Spoof")
     val bssid by stringOption(
         title = "BSSID",
         default = "02:00:00:00:00:00",

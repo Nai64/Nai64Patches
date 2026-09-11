@@ -12,16 +12,6 @@ patches {
     }
 }
 
-kotlin {
-    compilerOptions {
-        freeCompilerArgs.add("-Xcontext-parameters")
-        // morphe-patcher 1.13.0 metadata (Kotlin 2.4) is newer than the
-        // Kotlin version shipped by the Morphe Gradle plugin (2.2).
-        // Only plain APIs are used, so the version check is safe to skip.
-        freeCompilerArgs.add("-Xskip-metadata-version-check")
-    }
-}
-
 val patchListGeneratorClasspath: Configuration by configurations.creating
 
 dependencies {

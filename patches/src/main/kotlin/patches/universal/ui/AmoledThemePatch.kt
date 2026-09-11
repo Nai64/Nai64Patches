@@ -13,9 +13,7 @@ val amoledThemePatch = resourcePatch(
     description = "Makes dark mode pure black for AMOLED screens. Light mode stays normal.",
     default = false,
 ) {
-    // Guarded: morphe-patcher < 1.13.0 has no category() and the bundle
-    // must still load there (ungrouped) instead of dying on linkage.
-    try { category("Interface") } catch (_: NoSuchMethodError) {}
+    category("Interface")
     val amoledColor by stringOption(
         title = "AMOLED color",
         default = "#FF000000",

@@ -31,9 +31,7 @@ val disableCrashReportersPatch = bytecodePatch(
     description = "Blocks crash reporting so the app doesn't send crash logs.",
     default = false,
 ) {
-    // Guarded: morphe-patcher < 1.13.0 has no category() and the bundle
-    // must still load there (ungrouped) instead of dying on linkage.
-    try { category("Telemetry") } catch (_: NoSuchMethodError) {}
+    category("Telemetry")
     execute {
         val logger = Logger.getLogger(this::class.java.name)
 

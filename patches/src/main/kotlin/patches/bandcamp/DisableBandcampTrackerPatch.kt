@@ -10,9 +10,7 @@ val disableBandcampTrackerPatch = bytecodePatch(
     description = "Bandcamp: disables the first-party accessibility tracker that pings /api/tracker.",
     default = false,
 ) {
-    // Guarded: morphe-patcher < 1.13.0 has no category() and the bundle
-    // must still load there (ungrouped) instead of dying on linkage.
-    try { category("Bandcamp") } catch (_: NoSuchMethodError) {}
+    category("Bandcamp")
     compatibleWith("com.bandcamp.android")
 
     execute {

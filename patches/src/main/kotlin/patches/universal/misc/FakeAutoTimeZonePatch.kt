@@ -20,9 +20,7 @@ val fakeAutoTimeZonePatch = bytecodePatch(
     description = "Reports automatic time zone as enabled through Settings.Global so apps that flag manual time zone as suspicious stop doing so.",
     default = false,
 ) {
-    // Guarded: morphe-patcher < 1.13.0 has no category() and the bundle
-    // must still load there (ungrouped) instead of dying on linkage.
-    try { category("Fake") } catch (_: NoSuchMethodError) {}
+    category("Fake")
     val enabled by booleanOption(
         title = "Enable auto time zone",
         default = true,

@@ -10,9 +10,7 @@ val fakeDeviceIdleModePatch = bytecodePatch(
     description = "Makes PowerManager.isDeviceIdleMode() report a chosen state so apps that gate features behind device idle checks stop doing so.",
     default = false,
 ) {
-    // Guarded: morphe-patcher < 1.13.0 has no category() and the bundle
-    // must still load there (ungrouped) instead of dying on linkage.
-    try { category("Fake") } catch (_: NoSuchMethodError) {}
+    category("Fake")
     val idle by booleanOption(
         title = "Report idle",
         default = false,

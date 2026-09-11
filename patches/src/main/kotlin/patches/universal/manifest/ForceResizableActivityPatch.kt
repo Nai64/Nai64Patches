@@ -13,9 +13,7 @@ val forceResizableActivityPatch = resourcePatch(
             "app can run in split-screen, free-form windows, DeX, and Chromebooks",
     default = false,
 ) {
-    // Guarded: morphe-patcher < 1.13.0 has no category() and the bundle
-    // must still load there (ungrouped) instead of dying on linkage.
-    try { category("Manifest") } catch (_: NoSuchMethodError) {}
+    category("Manifest")
     val freeform by booleanOption(
         title = "Enable freeform",
         default = true,
