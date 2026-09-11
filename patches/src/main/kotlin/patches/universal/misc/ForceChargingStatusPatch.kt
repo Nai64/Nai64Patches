@@ -11,6 +11,7 @@ import com.android.tools.smali.dexlib2.iface.instruction.NarrowLiteralInstructio
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
+import patches.universal.ads.util.findMutableMethodOf
 import java.util.logging.Logger
 
 @Suppress("unused")
@@ -37,8 +38,9 @@ val forceChargingStatusPatch = bytecodePatch(
         val target = status?.toIntOrNull() ?: 2
         var patched = 0
         classDefForEach { classDef ->
-            val mutableClass = mutableClassDefBy(classDef)
-            for (method in mutableClass.methods) {
+            val mutableClass by lazy { mutableClassDefBy(classDef) }
+            for (method in classDef.methods) {
+                val mutableMethod by lazy { mutableClass.findMutableMethodOf(method) }
                 val implementation = method.implementation ?: continue
                 // Snapshot; one-for-one replacements keep indices valid.
                 val instructions: List<Instruction> = implementation.instructions.toList()
@@ -76,12 +78,12 @@ val forceChargingStatusPatch = bytecodePatch(
                     val next = instructions.getOrNull(index + 1)
                     if (next != null && next.opcode == Opcode.MOVE_RESULT) {
                         val resultRegister = (next as OneRegisterInstruction).registerA
-                        method.replaceInstruction(index, if (resultRegister <= 0xff) {
+                        mutableMethod.replaceInstruction(index, if (resultRegister <= 0xff) {
                             "const/4 v$resultRegister, $target"
                         } else {
                             "const/16 v$resultRegister, $target"
                         })
-                        method.replaceInstruction(index + 1, "nop")
+                        mutableMethod.replaceInstruction(index + 1, "nop")
                         patched++
                     }
                 }

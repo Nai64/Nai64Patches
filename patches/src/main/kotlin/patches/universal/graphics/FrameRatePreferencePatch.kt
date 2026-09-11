@@ -3,8 +3,8 @@ package patches.universal.graphics
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.patch.stringOption
+import patches.universal.ads.util.cloneParameters
 import java.util.logging.Logger
-import patches.universal.ads.util.cloneMutableAndPreserveParameters
 
 private val frameRateBits = mapOf(
     "24" to "0x41c00000",
@@ -75,8 +75,7 @@ val frameRatePreferencePatch = bytecodePatch(
         var patched = 0
         classDefForEach { classDef ->
             if (!isActivity(classDef.type)) return@classDefForEach
-            val mutableClass = mutableClassDefBy(classDef)
-            val methods = mutableClass.methods.toList()
+            val methods = classDef.methods.toList()
             for (matchedMethod in methods) {
                 if (matchedMethod.name != "onCreate" ||
                     matchedMethod.returnType != "V" ||
@@ -87,8 +86,7 @@ val frameRatePreferencePatch = bytecodePatch(
                 }
 
                 // Add temporary registers while preserving p0 (the Activity) and p1 (Bundle).
-                val method = matchedMethod.cloneMutableAndPreserveParameters(mutableClass)
-                method.addInstructions(
+                matchedMethod.cloneParameters().addInstructions(
                     0,
                     """
                     sget v0, Landroid/os/Build${'$'}VERSION;->SDK_INT:I

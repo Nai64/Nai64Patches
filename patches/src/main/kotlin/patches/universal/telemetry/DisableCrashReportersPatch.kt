@@ -4,6 +4,7 @@ import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
 import app.morphe.patcher.patch.booleanOption
 import app.morphe.patcher.patch.bytecodePatch
 import com.android.tools.smali.dexlib2.AccessFlags
+import patches.universal.ads.util.findMutableMethodOf
 import java.util.logging.Logger
 
 /** Class prefixes of the supported crash-reporting SDKs. */
@@ -39,15 +40,15 @@ val disableCrashReportersPatch = bytecodePatch(
             val sdkName = crashSdkPrefixes.entries.firstOrNull { classDef.type.startsWith(it.key) }?.value
                 ?: return@classDefForEach
 
-            val mutableClass = mutableClassDefBy(classDef)
-            for (method in mutableClass.methods) {
+            val mutableClass by lazy { mutableClassDefBy(classDef) }
+            for (method in classDef.methods) {
                 // Only static void bootstrap methods are touched: constructors and
                 // value-returning methods are never modified.
                 if (method.returnType != "V") continue
                 if (!AccessFlags.STATIC.isSet(method.accessFlags)) continue
                 if (method.name !in entryPointNames) continue
 
-                method.addInstruction(0, "return-void")
+                mutableClass.findMutableMethodOf(method).addInstruction(0, "return-void")
                 detected[sdkName] = (detected[sdkName] ?: 0) + 1
                 patched++
             }

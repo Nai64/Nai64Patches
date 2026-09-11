@@ -7,6 +7,7 @@ import app.morphe.patcher.patch.stringOption
 import app.morphe.patcher.util.proxy.mutableTypes.MutableClass
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import patches.universal.ads.util.cloneMutable
+import patches.universal.ads.util.findMutableMethodOf
 import patches.universal.ads.util.p0Register
 import java.util.logging.Logger
 
@@ -19,12 +20,14 @@ internal fun BytecodePatchContext.findApplicationOnCreate(): Pair<MutableClass, 
     var result: Pair<MutableClass, MutableMethod>? = null
     classDefForEach { classDef ->
         if (classDef.superclass != "Landroid/app/Application;") return@classDefForEach
-        val mutableClass = mutableClassDefBy(classDef)
-        val onCreate = mutableClass.methods.firstOrNull {
+        val onCreate = classDef.methods.firstOrNull {
             it.name == "onCreate" && it.returnType == "V" && it.parameterTypes.isEmpty()
         } ?: return@classDefForEach
         // Keep the first hit; later Application subclasses are ignored.
-        if (result == null) result = mutableClass to onCreate
+        if (result == null) {
+            val mutableClass = mutableClassDefBy(classDef)
+            result = mutableClass to mutableClass.findMutableMethodOf(onCreate)
+        }
     }
     return result
 }

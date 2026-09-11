@@ -7,6 +7,7 @@ import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
+import patches.universal.ads.util.findMutableMethodOf
 import java.util.logging.Logger
 
 private const val BUILD_CLASS = "Landroid/os/Build;"
@@ -58,8 +59,9 @@ val spoofDeviceModelPatch = bytecodePatch(
 
         var patched = 0
         classDefForEach { classDef ->
-            val mutableClass = mutableClassDefBy(classDef)
-            for (method in mutableClass.methods) {
+            val mutableClass by lazy { mutableClassDefBy(classDef) }
+            for (method in classDef.methods) {
+                val mutableMethod by lazy { mutableClass.findMutableMethodOf(method) }
                 val implementation = method.implementation ?: continue
                 // Snapshot; one-for-one replacements keep indices valid.
                 val instructions = implementation.instructions.toList()
@@ -71,11 +73,11 @@ val spoofDeviceModelPatch = bytecodePatch(
 
                     val next = instructions.getOrNull(index + 1) as? OneRegisterInstruction
                     if (next != null && next.opcode == Opcode.MOVE_RESULT_OBJECT) {
-                        method.replaceInstruction(
+                        mutableMethod.replaceInstruction(
                             index,
                             "const-string v${next.registerA}, \"${escapeSmali(replacements[field.name]!!)}\"",
                         )
-                        method.replaceInstruction(index + 1, "nop")
+                        mutableMethod.replaceInstruction(index + 1, "nop")
                         patched++
                     }
                 }

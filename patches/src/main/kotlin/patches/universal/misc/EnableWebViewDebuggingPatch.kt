@@ -2,11 +2,11 @@ package patches.universal.misc
 
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.patch.bytecodePatch
-import com.android.tools.smali.dexlib2.iface.instruction.FiveRegisterInstruction
-import com.android.tools.smali.dexlib2.iface.instruction.RegisterRangeInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 import patches.universal.ads.util.cloneMutable
+import patches.universal.ads.util.findMutableMethodOf
+import patches.universal.ads.util.registersUsed
 import patches.universal.ui.findApplicationOnCreate
 import java.util.logging.Logger
 
@@ -28,8 +28,9 @@ val enableWebViewDebuggingPatch = bytecodePatch(
         //    overwriting the boolean argument register before the invoke.
         var forced = 0
         classDefForEach { classDef ->
-            val mutableClass = mutableClassDefBy(classDef)
-            for (method in mutableClass.methods) {
+            val mutableClass by lazy { mutableClassDefBy(classDef) }
+            for (method in classDef.methods) {
+                val mutableMethod by lazy { mutableClass.findMutableMethodOf(method) }
                 val implementation = method.implementation ?: continue
                 val instructions = implementation.instructions.toList()
 
@@ -47,18 +48,13 @@ val enableWebViewDebuggingPatch = bytecodePatch(
                         continue
                     }
 
-                    val argRegister = when (instruction) {
-                        is FiveRegisterInstruction -> instruction.registerC
-                        is RegisterRangeInstruction -> instruction.startRegister
-                        else -> null
-                    } ?: continue
-
+                    val argRegister = instruction.registersUsed[0]
                     insertions += index to "const/4 v$argRegister, 0x1"
                 }
 
                 if (insertions.isNotEmpty()) {
                     insertions.sortedByDescending { it.first }.forEach { (at, smali) ->
-                        method.addInstructions(at, smali)
+                        mutableMethod.addInstructions(at, smali)
                     }
                     forced += insertions.size
                 }

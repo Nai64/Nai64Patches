@@ -4,6 +4,7 @@ import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.patch.booleanOption
 import app.morphe.patcher.patch.bytecodePatch
+import patches.universal.ads.util.findMutableMethodOf
 import java.util.logging.Logger
 
 private fun app.morphe.patcher.patch.BytecodePatchContext.safeEarlyReturn(fingerprint: app.morphe.patcher.Fingerprint): Boolean {
@@ -189,17 +190,19 @@ val disableTelemetryPatch = bytecodePatch(
                 val tl = classDef.type.lowercase()
                 if (!tl.contains("analytics") && !tl.contains("tracker") && !tl.contains("telemetry") && !tl.contains("event") && !tl.contains("metric")) return@classDefForEach
                 if (tl.contains("okhttp") || tl.contains("androidx") || tl.contains("com/google/android/gms")) return@classDefForEach
-                val mutableClass = try { mutableClassDefBy(classDef) } catch (_: Exception) { return@classDefForEach }
-                for (method in mutableClass.methods) {
+                val mutableClass by lazy { try { mutableClassDefBy(classDef) } catch (_: Exception) { null } }
+                for (method in classDef.methods) {
                     val n = method.name.lowercase()
                     if (!n.contains("logevent") && !n.contains("track") && !n.contains("send") && !n.contains("analytics")) continue
                     if (method.implementation == null) continue
+                    val mc = mutableClass ?: continue
+                    val mutableMethod = mc.findMutableMethodOf(method)
                     try {
                         val ret = method.returnType
                         when {
-                            ret == "V" -> method.addInstructions(0, "return-void")
-                            ret.startsWith("L") || ret.startsWith("[") -> method.addInstructions(0, "const/4 v0, 0x0\nreturn-object v0")
-                            else -> method.addInstructions(0, "const/4 v0, 0x0\nreturn v0")
+                            ret == "V" -> mutableMethod.addInstructions(0, "return-void")
+                            ret.startsWith("L") || ret.startsWith("[") -> mutableMethod.addInstructions(0, "const/4 v0, 0x0\nreturn-object v0")
+                            else -> mutableMethod.addInstructions(0, "const/4 v0, 0x0\nreturn v0")
                         }
                         genericPatched++
                     } catch (_: Exception) {}
