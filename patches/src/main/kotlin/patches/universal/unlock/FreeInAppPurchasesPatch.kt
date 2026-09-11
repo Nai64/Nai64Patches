@@ -9,7 +9,7 @@ import java.util.logging.Logger
 
 @Suppress("unused")
 val freeInAppPurchasesPatch = bytecodePatch(
-    name = "★ Free In-app Purchases",
+    name = "Free In-app Purchases",
     description = "Get paid items for free. Best for offline games.",
     default = false,
 ) {

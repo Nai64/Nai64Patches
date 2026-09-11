@@ -37,12 +37,12 @@ private fun generatePatchList(version: String, patches: Set<Patch<*>>) {
     val listJson = File("../patches-list.json")
 
     val patchOrder = listOf(
-        "★ Unlock Premium",
-        "★ Free In-app Purchases",
-        "★ No Ads",
-        "★ Ads Free Rewards",
-        "★ Unlimited Currencies",
-        "★ Pairip Bypass",
+        "Unlock Premium",
+        "Free In-app Purchases",
+        "No Ads",
+        "Ads Free Rewards",
+        "Unlimited Currencies",
+        "Pairip Bypass",
         "No Ads",
         "Skip Consent Popup",
         "Skip Rate-Us Prompt",

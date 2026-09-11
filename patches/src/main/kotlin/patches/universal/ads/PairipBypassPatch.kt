@@ -14,7 +14,7 @@ import patches.universal.manifest.applicationOrNull
 
 @Suppress("unused")
 val pairipBypassPatch = bytecodePatch(
-    name = "★ Pairip Bypass",
+    name = "Pairip Bypass",
     description = "Bypass app protection so the patched app can start.",
     default = false,
 ) {

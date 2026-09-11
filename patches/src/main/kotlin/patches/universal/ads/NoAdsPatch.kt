@@ -150,7 +150,7 @@ private fun BytecodePatchContext.patchWith(fingerprint: Fingerprint, smali: Stri
 
 @Suppress("unused")
 val noAdsPatch = bytecodePatch(
-    name = "★ No Ads",
+    name = "No Ads",
     description = "Blocks ads by type. Pick what to block. For rewarded ads use Ads Free Rewards instead.",
     default = false,
 ) {
