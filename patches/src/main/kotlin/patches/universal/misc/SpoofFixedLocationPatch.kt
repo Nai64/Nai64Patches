@@ -102,8 +102,8 @@ val spoofFixedLocationPatch = bytecodePatch(
                         // This is a bit hacky with register allocation, but we use resultReg as Location and resultReg+1 as temp wide
                         // Need to ensure we don't clobber p registers - assume resultReg is low enough
                         // For now, use a simpler approach: replace invoke with const and return via helper
-                        method.replaceInstruction(index, "const/4 v$resultReg, 0x0")
-                        method.replaceInstruction(index + 1, "nop")
+                        mutableMethod.replaceInstruction(index, "const/4 v$resultReg, 0x0")
+                        mutableMethod.replaceInstruction(index + 1, "nop")
                         // Actually we need to properly create Location - fallback to helper that uses addInstructions with labels
                         // Use the helper to inject full Location creation
                         // For now, just nop and return null to avoid crash, and rely on Fused path for real spoof
