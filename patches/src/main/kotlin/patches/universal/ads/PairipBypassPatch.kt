@@ -18,6 +18,9 @@ val pairipBypassPatch = bytecodePatch(
     description = "Bypass app protection so the patched app can start.",
     default = false,
 ) {
+    // Guarded: morphe-patcher < 1.13.0 has no category() and the bundle
+    // must still load there (ungrouped) instead of dying on linkage.
+    try { category("Featured") } catch (_: NoSuchMethodError) {}
     val localInstallerChecks by booleanOption(
         key = "localInstallerChecks",
         default = true,

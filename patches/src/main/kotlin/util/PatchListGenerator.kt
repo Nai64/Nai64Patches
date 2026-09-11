@@ -43,7 +43,6 @@ private fun generatePatchList(version: String, patches: Set<Patch<*>>) {
         "Ads Free Rewards",
         "Unlimited Currencies",
         "Pairip Bypass",
-        "No Ads",
         "Skip Consent Popup",
         "Skip Rate-Us Prompt",
         "Spoof Play Store Install Source",
@@ -137,6 +136,7 @@ private fun generatePatchList(version: String, patches: Set<Patch<*>>) {
             name = patch.name!!,
             description = patch.description,
             default = patch.default,
+            category = patch.category,
             dependencies = patch.dependencies.map { it.javaClass.simpleName },
             compatiblePackages = patch.compatibility?.map { compat ->
                 JsonCompatibility(
@@ -195,6 +195,7 @@ private class JsonPatch(
     val name: String? = null,
     val description: String? = null,
     val default: Boolean = true,
+    val category: String? = null,
     val dependencies: List<String>,
     val compatiblePackages: List<JsonCompatibility>? = null,
     val options: List<Option>,
