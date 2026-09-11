@@ -8,6 +8,7 @@ import com.android.tools.smali.dexlib2.iface.instruction.Instruction
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
+import patches.universal.ads.util.findMutableMethodOf
 import java.util.logging.Logger
 
 @Suppress("unused")
@@ -38,8 +39,9 @@ val fakeStorageAvailablePatch = bytecodePatch(
         )
         var patched = 0
         classDefForEach { classDef ->
-            val mutableClass = mutableClassDefBy(classDef)
-            for (method in mutableClass.methods) {
+            val mutableClass by lazy { mutableClassDefBy(classDef) }
+            for (method in classDef.methods) {
+                val mutableMethod by lazy { mutableClass.findMutableMethodOf(method) }
                 val implementation = method.implementation ?: continue
                 // Snapshot; one-for-one replacements keep indices valid.
                 val instructions: List<Instruction> = implementation.instructions.toList()
@@ -59,8 +61,8 @@ val fakeStorageAvailablePatch = bytecodePatch(
                         } else {
                             "const-wide v$resultRegister, $hex"
                         }
-                        method.replaceInstruction(index, replacement)
-                        method.replaceInstruction(index + 1, "nop")
+                        mutableMethod.replaceInstruction(index, replacement)
+                        mutableMethod.replaceInstruction(index + 1, "nop")
                         patched++
                     }
                 }

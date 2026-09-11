@@ -7,6 +7,7 @@ import app.morphe.patcher.patch.bytecodePatch
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction35c
 import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction3rc
+import com.android.tools.smali.dexlib2.iface.Method
 import com.android.tools.smali.dexlib2.iface.instruction.NarrowLiteralInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
@@ -15,6 +16,7 @@ import com.android.tools.smali.dexlib2.iface.reference.StringReference
 import java.util.Locale
 import java.util.logging.Logger
 import patches.universal.ads.AppUpdateManagerImplStartUpdateFlowFingerprint
+import patches.universal.ads.util.findMutableMethodOf
 
 private val updateTerms = listOf(
     "update required",
@@ -59,7 +61,7 @@ private fun String.normalized() = lowercase(Locale.ROOT)
 private fun MethodReference.isVoidCall(name: String): Boolean =
     this.name == name && returnType == "V"
 
-private fun methodEvidence(method: app.morphe.patcher.util.proxy.mutableTypes.MutableMethod): Evidence {
+private fun methodEvidence(method: Method): Evidence {
     val implementation = method.implementation ?: return Evidence()
     val strings = implementation.instructions.mapNotNull { instruction ->
         ((instruction as? ReferenceInstruction)?.reference as? StringReference)?.string
@@ -178,13 +180,14 @@ val bypassForcedUpdatesPatch = bytecodePatch(
         }
 
         classDefForEach { classDef ->
-            val mutableClass = mutableClassDefBy(classDef)
-            for (method in mutableClass.methods) {
+            val mutableClass by lazy { mutableClassDefBy(classDef) }
+            for (method in classDef.methods) {
+                val mutableMethod by lazy { mutableClass.findMutableMethodOf(method) }
                 val implementation = method.implementation ?: continue
                 val evidence = methodEvidence(method)
                 if (evidence.score < 4) continue
 
-                if (bypassUpdateGate == true && falseBooleanGate(method, evidence)) {
+                if (bypassUpdateGate == true && falseBooleanGate(mutableMethod, evidence)) {
                     gates++
                     continue
                 }
@@ -202,7 +205,7 @@ val bypassForcedUpdatesPatch = bytecodePatch(
                         val register = booleanArgumentRegister(instruction)
                         val previous = instructions.getOrNull(index - 1)
                         if (register != null && isFalseConstant(previous, register)) {
-                            method.replaceInstruction(index - 1, "const/4 v$register, 0x1")
+                            mutableMethod.replaceInstruction(index - 1, "const/4 v$register, 0x1")
                             dialogs++
                         }
                     }
@@ -214,7 +217,7 @@ val bypassForcedUpdatesPatch = bytecodePatch(
                                 reference.isVoidCall("finishAndRemoveTask"))) ||
                             (reference.definingClass == "Ljava/lang/System;" && reference.isVoidCall("exit")))
                     ) {
-                        method.replaceInstruction(index, "nop")
+                        mutableMethod.replaceInstruction(index, "nop")
                         exits++
                     }
 
@@ -223,7 +226,7 @@ val bypassForcedUpdatesPatch = bytecodePatch(
                         reference.name in setOf("startActivity", "startActivityForResult") &&
                         reference.returnType == "V"
                     ) {
-                        method.replaceInstruction(index, "nop")
+                        mutableMethod.replaceInstruction(index, "nop")
                         redirects++
                     }
                 }

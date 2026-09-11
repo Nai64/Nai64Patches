@@ -6,14 +6,13 @@ import app.morphe.patcher.patch.booleanOption
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.patch.stringOption
 import com.android.tools.smali.dexlib2.Opcode
-import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction35c
-import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction3rc
 import com.android.tools.smali.dexlib2.iface.instruction.Instruction
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 import com.android.tools.smali.dexlib2.iface.reference.StringReference
+import patches.universal.ads.util.findMutableMethodOf
 import patches.universal.ui.StartupHooks.escapeSmali
 import java.util.logging.Logger
 
@@ -47,8 +46,11 @@ private val BUILD_STRING_FIELDS = setOf(
 internal fun BytecodePatchContext.foldBuildStringFields(values: Map<String, String>): Int {
     var patched = 0
     classDefForEach { classDef ->
-        val mutableClass = mutableClassDefBy(classDef)
-        for (method in mutableClass.methods) {
+        val mutableClass by lazy { mutableClassDefBy(classDef) }
+        for (method in classDef.methods) {
+            val mutableMethod by lazy {
+                mutableClass.findMutableMethodOf(method)
+            }
             val implementation = method.implementation ?: continue
             val instructions: List<Instruction> = implementation.instructions.toList()
             for ((index, instruction) in instructions.withIndex()) {
@@ -61,7 +63,7 @@ internal fun BytecodePatchContext.foldBuildStringFields(values: Map<String, Stri
                 val value = values[reference.name] ?: continue
 
                 val register = (instruction as? OneRegisterInstruction)?.registerA ?: continue
-                method.replaceInstruction(
+                mutableMethod.replaceInstruction(
                     index,
                     "const-string v$register, \"${escapeSmali(value)}\"",
                 )
@@ -80,8 +82,11 @@ internal fun BytecodePatchContext.foldBuildStringFields(values: Map<String, Stri
 internal fun BytecodePatchContext.foldBuildGetSerial(value: String): Int {
     var patched = 0
     classDefForEach { classDef ->
-        val mutableClass = mutableClassDefBy(classDef)
-        for (method in mutableClass.methods) {
+        val mutableClass by lazy { mutableClassDefBy(classDef) }
+        for (method in classDef.methods) {
+            val mutableMethod by lazy {
+                mutableClass.findMutableMethodOf(method)
+            }
             val implementation = method.implementation ?: continue
             val instructions: List<Instruction> = implementation.instructions.toList()
             for ((index, instruction) in instructions.withIndex()) {
@@ -97,10 +102,10 @@ internal fun BytecodePatchContext.foldBuildGetSerial(value: String): Int {
                     (next.opcode == Opcode.MOVE_RESULT ||
                         next.opcode == Opcode.MOVE_RESULT_OBJECT)
                 ) {
-                    method.replaceInstruction(index, "const-string v$register, \"${escapeSmali(value)}\"")
-                    method.replaceInstruction(index + 1, "nop")
+                    mutableMethod.replaceInstruction(index, "const-string v$register, \"${escapeSmali(value)}\"")
+                    mutableMethod.replaceInstruction(index + 1, "nop")
                 } else {
-                    method.replaceInstruction(index, "nop")
+                    mutableMethod.replaceInstruction(index, "nop")
                 }
                 patched++
             }
@@ -123,8 +128,11 @@ internal fun BytecodePatchContext.foldBuildGetSerial(value: String): Int {
 internal fun BytecodePatchContext.foldSystemPropertyMap(properties: Map<String, String>): Int {
     var patched = 0
     classDefForEach { classDef ->
-        val mutableClass = mutableClassDefBy(classDef)
-        for (method in mutableClass.methods) {
+        val mutableClass by lazy { mutableClassDefBy(classDef) }
+        for (method in classDef.methods) {
+            val mutableMethod by lazy {
+                mutableClass.findMutableMethodOf(method)
+            }
             val implementation = method.implementation ?: continue
             val instructions: List<Instruction> = implementation.instructions.toList()
             for ((index, instruction) in instructions.withIndex()) {
@@ -151,10 +159,10 @@ internal fun BytecodePatchContext.foldSystemPropertyMap(properties: Map<String, 
                     (next.opcode == Opcode.MOVE_RESULT ||
                         next.opcode == Opcode.MOVE_RESULT_OBJECT)
                 ) {
-                    method.replaceInstruction(index, "const-string v$register, \"${escapeSmali(value)}\"")
-                    method.replaceInstruction(index + 1, "nop")
+                    mutableMethod.replaceInstruction(index, "const-string v$register, \"${escapeSmali(value)}\"")
+                    mutableMethod.replaceInstruction(index + 1, "nop")
                 } else {
-                    method.replaceInstruction(index, "nop")
+                    mutableMethod.replaceInstruction(index, "nop")
                 }
                 patched++
             }
@@ -177,8 +185,11 @@ internal fun BytecodePatchContext.foldQemuProperties(properties: Set<String>, va
 internal fun BytecodePatchContext.foldBuildMethodResult(methodName: String, value: String): Int {
     var patched = 0
     classDefForEach { classDef ->
-        val mutableClass = mutableClassDefBy(classDef)
-        for (method in mutableClass.methods) {
+        val mutableClass by lazy { mutableClassDefBy(classDef) }
+        for (method in classDef.methods) {
+            val mutableMethod by lazy {
+                mutableClass.findMutableMethodOf(method)
+            }
             val implementation = method.implementation ?: continue
             val instructions: List<Instruction> = implementation.instructions.toList()
             for ((index, instruction) in instructions.withIndex()) {
@@ -195,10 +206,10 @@ internal fun BytecodePatchContext.foldBuildMethodResult(methodName: String, valu
                     (next.opcode == Opcode.MOVE_RESULT ||
                         next.opcode == Opcode.MOVE_RESULT_OBJECT)
                 ) {
-                    method.replaceInstruction(index, "const-string v$register, \"${escapeSmali(value)}\"")
-                    method.replaceInstruction(index + 1, "nop")
+                    mutableMethod.replaceInstruction(index, "const-string v$register, \"${escapeSmali(value)}\"")
+                    mutableMethod.replaceInstruction(index + 1, "nop")
                 } else {
-                    method.replaceInstruction(index, "nop")
+                    mutableMethod.replaceInstruction(index, "nop")
                 }
                 patched++
             }
@@ -220,8 +231,11 @@ internal fun BytecodePatchContext.foldBuildGetRadioVersion(value: String): Int =
 internal fun BytecodePatchContext.foldPhoneType(value: Int): Int {
     var patched = 0
     classDefForEach { classDef ->
-        val mutableClass = mutableClassDefBy(classDef)
-        for (method in mutableClass.methods) {
+        val mutableClass by lazy { mutableClassDefBy(classDef) }
+        for (method in classDef.methods) {
+            val mutableMethod by lazy {
+                mutableClass.findMutableMethodOf(method)
+            }
             val implementation = method.implementation ?: continue
             val instructions: List<Instruction> = implementation.instructions.toList()
             for ((index, instruction) in instructions.withIndex()) {
@@ -238,10 +252,10 @@ internal fun BytecodePatchContext.foldPhoneType(value: Int): Int {
                     (next.opcode == Opcode.MOVE_RESULT ||
                         next.opcode == Opcode.MOVE_RESULT_OBJECT)
                 ) {
-                    method.replaceInstruction(index, "const/4 v$register, ${value.and(0xf)}")
-                    method.replaceInstruction(index + 1, "nop")
+                    mutableMethod.replaceInstruction(index, "const/4 v$register, ${value.and(0xf)}")
+                    mutableMethod.replaceInstruction(index + 1, "nop")
                 } else {
-                    method.replaceInstruction(index, "nop")
+                    mutableMethod.replaceInstruction(index, "nop")
                 }
                 patched++
             }

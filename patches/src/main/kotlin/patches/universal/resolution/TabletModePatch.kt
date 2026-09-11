@@ -8,6 +8,7 @@ import com.android.tools.smali.dexlib2.iface.instruction.Instruction
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
+import patches.universal.ads.util.findMutableMethodOf
 import java.util.logging.Logger
 
 @Suppress("unused")
@@ -45,8 +46,9 @@ val tabletModePatch = bytecodePatch(
                 if (hasRef) break
             }
             if (!hasRef) return@classDefForEach
-            val mutableClass = mutableClassDefBy(classDef)
-            for (method in mutableClass.methods) {
+            val mutableClass by lazy { mutableClassDefBy(classDef) }
+            for (method in classDef.methods) {
+                val mutableMethod by lazy { mutableClass.findMutableMethodOf(method) }
                 val implementation = method.implementation ?: continue
                 val instructions: List<Instruction> = implementation.instructions.toList()
                 for ((index, instruction) in instructions.withIndex()) {
@@ -59,7 +61,7 @@ val tabletModePatch = bytecodePatch(
                     if (reference.type != "I") continue
 
                     val register = (instruction as? OneRegisterInstruction)?.registerA ?: continue
-                    method.replaceInstruction(index, "const/16 v$register, 0x${width.toString(16)}")
+                    mutableMethod.replaceInstruction(index, "const/16 v$register, 0x${width.toString(16)}")
                     patched++
                 }
             }

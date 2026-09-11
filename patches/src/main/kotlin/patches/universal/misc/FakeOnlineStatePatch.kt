@@ -6,6 +6,7 @@ import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
+import patches.universal.ads.util.findMutableMethodOf
 import java.util.logging.Logger
 
 @Suppress("unused")
@@ -35,8 +36,9 @@ val fakeOnlineStatePatch = bytecodePatch(
 
         var patched = 0
         classDefForEach { classDef ->
-            val mutableClass = mutableClassDefBy(classDef)
-            for (method in mutableClass.methods) {
+            val mutableClass by lazy { mutableClassDefBy(classDef) }
+            for (method in classDef.methods) {
+                val mutableMethod by lazy { mutableClass.findMutableMethodOf(method) }
                 val implementation = method.implementation ?: continue
                 // Snapshot; one-for-one replacements keep indices valid.
                 val instructions = implementation.instructions.toList()
@@ -49,11 +51,11 @@ val fakeOnlineStatePatch = bytecodePatch(
                     val next = instructions.getOrNull(index + 1) as? OneRegisterInstruction
                     if (next != null && next.opcode == Opcode.MOVE_RESULT) {
                         // Fold invoke + move-result into a single constant.
-                        method.replaceInstruction(index, "const/4 v${next.registerA}, 0x1")
-                        method.replaceInstruction(index + 1, "nop")
+                        mutableMethod.replaceInstruction(index, "const/4 v${next.registerA}, 0x1")
+                        mutableMethod.replaceInstruction(index + 1, "nop")
                     } else {
                         // Result unused: dropping the call entirely is safe.
-                        method.replaceInstruction(index, "nop")
+                        mutableMethod.replaceInstruction(index, "nop")
                     }
                     patched++
                 }

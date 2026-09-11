@@ -10,13 +10,18 @@ import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 import com.android.tools.smali.dexlib2.iface.reference.StringReference
+import patches.universal.ads.util.findMutableMethodOf
 import java.util.logging.Logger
 
 private fun BytecodePatchContext.foldShowSearchResultScore(): Int {
     var patched = 0
     classDefForEach { classDef ->
-        val mutableClass = mutableClassDefBy(classDef)
-        for (method in mutableClass.methods) {
+        // Must create mutable classes/methods only if required to prevent out of memory errors.
+        val mutableClass by lazy { mutableClassDefBy(classDef) }
+        for (method in classDef.methods) {
+            val mutableMethod by lazy {
+                mutableClass.findMutableMethodOf(method)
+            }
             val impl = method.implementation ?: continue
             val instructions = impl.instructions.toList()
             for ((index, insn) in instructions.withIndex()) {
@@ -60,12 +65,12 @@ private fun BytecodePatchContext.foldShowSearchResultScore(): Int {
                 val next = instructions.getOrNull(index + 1)
                 if (next != null && next.opcode == Opcode.MOVE_RESULT) {
                     val resReg = (next as OneRegisterInstruction).registerA
-                    method.replaceInstruction(index, "const/4 v$resReg, 0x1")
-                    method.replaceInstruction(index + 1, "nop")
+                    mutableMethod.replaceInstruction(index, "const/4 v$resReg, 0x1")
+                    mutableMethod.replaceInstruction(index + 1, "nop")
                     patched++
                 } else if (next == null || next.opcode != Opcode.MOVE_RESULT) {
                     // no move-result (unused)  -  just nop the invoke
-                    method.replaceInstruction(index, "nop")
+                    mutableMethod.replaceInstruction(index, "nop")
                     patched++
                 }
             }

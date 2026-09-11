@@ -3,14 +3,14 @@ package patches.universal.misc
 import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
 import app.morphe.patcher.patch.BytecodePatchContext
+import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction35c
 import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction3rc
-import com.android.tools.smali.dexlib2.iface.instruction.Instruction
 import com.android.tools.smali.dexlib2.iface.instruction.NarrowLiteralInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
-import com.android.tools.smali.dexlib2.Opcode
+import patches.universal.ads.util.findMutableMethodOf
 
 private val LOAD_OPCODES = setOf(
     Opcode.CONST, Opcode.CONST_4, Opcode.CONST_16, Opcode.CONST_WIDE,
@@ -33,8 +33,9 @@ internal fun BytecodePatchContext.noOpVoidInvoke(
 ): Int {
     var patched = 0
     classDefForEach { classDef ->
-        val mutableClass = mutableClassDefBy(classDef)
-        for (method in mutableClass.methods) {
+        val mutableClass by lazy { mutableClassDefBy(classDef) }
+        for (method in classDef.methods) {
+            val mutableMethod by lazy { mutableClass.findMutableMethodOf(method) }
             val impl = method.implementation ?: continue
             val instructions = impl.instructions.toList()
             for ((index, insn) in instructions.withIndex()) {
@@ -43,7 +44,7 @@ internal fun BytecodePatchContext.noOpVoidInvoke(
                 if (ref.definingClass != targetClass) continue
                 if (ref.name !in methods) continue
                 if (ref.returnType != "V") continue
-                method.replaceInstruction(index, "nop")
+                mutableMethod.replaceInstruction(index, "nop")
                 patched++
             }
         }
@@ -67,8 +68,9 @@ internal fun BytecodePatchContext.forceNullParam(
 ): Int {
     var patched = 0
     classDefForEach { classDef ->
-        val mutableClass = mutableClassDefBy(classDef)
-        for (method in mutableClass.methods) {
+        val mutableClass by lazy { mutableClassDefBy(classDef) }
+        for (method in classDef.methods) {
+            val mutableMethod by lazy { mutableClass.findMutableMethodOf(method) }
             val impl = method.implementation ?: continue
             val instructions = impl.instructions.toList()
             for ((index, insn) in instructions.withIndex()) {
@@ -88,7 +90,7 @@ internal fun BytecodePatchContext.forceNullParam(
                     prev.registerA == nullReg &&
                     prev.opcode in LOAD_OPCODES
                 ) {
-                    method.replaceInstruction(index - 1, "const/4 v$nullReg, 0x0")
+                    mutableMethod.replaceInstruction(index - 1, "const/4 v$nullReg, 0x0")
                     patched++
                 }
             }
@@ -117,8 +119,9 @@ internal fun BytecodePatchContext.replaceArrayGetterWithEmpty(
 ): Int {
     var patched = 0
     classDefForEach { classDef ->
-        val mutableClass = mutableClassDefBy(classDef)
-        for (method in mutableClass.methods) {
+        val mutableClass by lazy { mutableClassDefBy(classDef) }
+        for (method in classDef.methods) {
+            val mutableMethod by lazy { mutableClass.findMutableMethodOf(method) }
             val impl = method.implementation ?: continue
             val instructions = impl.instructions.toList()
             for ((index, insn) in instructions.withIndex()) {
@@ -132,12 +135,12 @@ internal fun BytecodePatchContext.replaceArrayGetterWithEmpty(
                 if (next !is OneRegisterInstruction || next.opcode != Opcode.MOVE_RESULT_OBJECT) continue
                 val resultReg = next.registerA
 
-                method.replaceInstruction(index, "const/4 v$resultReg, 0x0")
-                method.addInstruction(
+                mutableMethod.replaceInstruction(index, "const/4 v$resultReg, 0x0")
+                mutableMethod.addInstruction(
                     index + 1,
                     "new-array v$resultReg, v$resultReg, [$elementType",
                 )
-                method.replaceInstruction(index + 2, "nop")
+                mutableMethod.replaceInstruction(index + 2, "nop")
                 patched++
             }
         }
@@ -153,8 +156,9 @@ private fun BytecodePatchContext.forceSetterLiteral(
 ): Int {
     var patched = 0
     classDefForEach { classDef ->
-        val mutableClass = mutableClassDefBy(classDef)
-        for (method in mutableClass.methods) {
+        val mutableClass by lazy { mutableClassDefBy(classDef) }
+        for (method in classDef.methods) {
+            val mutableMethod by lazy { mutableClass.findMutableMethodOf(method) }
             val impl = method.implementation ?: continue
             val instructions = impl.instructions.toList()
             for ((index, insn) in instructions.withIndex()) {
@@ -178,7 +182,7 @@ private fun BytecodePatchContext.forceSetterLiteral(
                         prev is OneRegisterInstruction &&
                         prev.registerA == reg
                     ) {
-                        method.replaceInstruction(j, "const/4 v$reg, $literal")
+                        mutableMethod.replaceInstruction(j, "const/4 v$reg, $literal")
                         patched++
                         break
                     }

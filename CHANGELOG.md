@@ -1,3 +1,19 @@
+## [1.46.0](https://github.com/Nai64/Nai64Patches/compare/1.45.0...1.46.0) (2026-09-07)
+
+### Bug Fixes
+
+* avoid param-slot collision in RevenueCat injections ([cefa13b](https://github.com/Nai64/Nai64Patches/commit/cefa13b19c2138a2e07be420c7d3f3f52f4eee53))
+* repair billing setup flow and cover unity native purchase bridge ([6c14eba](https://github.com/Nai64/Nai64Patches/commit/6c14eba571ea0cecd7e1f60e52f797db64a35783))
+* skip ignore-style flags in premium prefs matching ([47d48fe](https://github.com/Nai64/Nai64Patches/commit/47d48fe8386174346dcb5fb9fca1e74624156605))
+
+### New Features
+
+* add strategy checkboxes and Firebase cleanup to Pairip Bypass ([675c971](https://github.com/Nai64/Nai64Patches/commit/675c9719a8ddecc2cdef1a0cf96de97d8561eaa3))
+* cover paywall flags and two-state status enums in unlock premium ([6108d21](https://github.com/Nai64/Nai64Patches/commit/6108d212a5d9262b9882e2b8d377609b621d378b))
+* drop experimental suffix from featured patches ([4e45b46](https://github.com/Nai64/Nai64Patches/commit/4e45b46f26aa79c456b4d44d4ad880b56eb50229))
+* fake RevenueCat purchase callbacks in Free IAP ([9c5149a](https://github.com/Nai64/Nai64Patches/commit/9c5149ac83c8766ecf4122904762c1d30904884e))
+* star featured patches and pin them atop the patch list ([ce227b6](https://github.com/Nai64/Nai64Patches/commit/ce227b6306dfc3053aa3712540e865e818153218))
+
 ## [1.45.0](https://github.com/Nai64/Nai64Patches/compare/1.44.0...1.45.0) (2026-09-06)
 
 ### Bug Fixes

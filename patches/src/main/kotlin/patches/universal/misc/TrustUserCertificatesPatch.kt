@@ -2,6 +2,7 @@ package patches.universal.misc
 
 import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
 import app.morphe.patcher.patch.bytecodePatch
+import patches.universal.ads.util.findMutableMethodOf
 import java.util.logging.Logger
 
 private const val TRUST_MANAGER = "Ljavax/net/ssl/X509TrustManager;"
@@ -28,14 +29,14 @@ val trustUserCertificatesPatch = bytecodePatch(
             // Only classes that directly implement the trust manager interface.
             if (classDef.interfaces.none { it == TRUST_MANAGER }) return@classDefForEach
 
-            val mutableClass = mutableClassDefBy(classDef)
+            val mutableClass by lazy { mutableClassDefBy(classDef) }
             var changed = false
-            for (method in mutableClass.methods) {
+            for (method in classDef.methods) {
                 // Both check methods are void; an immediate return accepts every chain.
                 if (method.returnType != "V") continue
                 if (method.name !in checkMethods) continue
 
-                method.addInstruction(0, "return-void")
+                mutableClass.findMutableMethodOf(method).addInstruction(0, "return-void")
                 changed = true
                 patchedMethods++
             }

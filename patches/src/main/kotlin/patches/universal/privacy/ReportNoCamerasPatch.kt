@@ -8,6 +8,7 @@ import com.android.tools.smali.dexlib2.iface.instruction.Instruction
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
+import patches.universal.ads.util.findMutableMethodOf
 import java.util.logging.Logger
 
 @Suppress("unused")
@@ -47,8 +48,9 @@ val reportNoCamerasPatch = bytecodePatch(
                 if (hasRef) break
             }
             if (!hasRef) return@classDefForEach
-            val mutableClass = mutableClassDefBy(classDef)
-            for (method in mutableClass.methods) {
+            val mutableClass by lazy { mutableClassDefBy(classDef) }
+            for (method in classDef.methods) {
+                val mutableMethod by lazy { mutableClass.findMutableMethodOf(method) }
                 val implementation = method.implementation ?: continue
                 val instructions: List<Instruction> = implementation.instructions.toList()
                 for ((index, instruction) in instructions.withIndex()) {
@@ -62,8 +64,8 @@ val reportNoCamerasPatch = bytecodePatch(
                     val next = instructions.getOrNull(index + 1)
                     if (next != null && next.opcode == Opcode.MOVE_RESULT_OBJECT) {
                         val resultRegister = (next as OneRegisterInstruction).registerA
-                        method.replaceInstruction(index, "const/4 v$resultRegister, 0x0")
-                        method.replaceInstruction(index + 1, "new-array v$resultRegister, v$resultRegister, [Ljava/lang/String;")
+                        mutableMethod.replaceInstruction(index, "const/4 v$resultRegister, 0x0")
+                        mutableMethod.replaceInstruction(index + 1, "new-array v$resultRegister, v$resultRegister, [Ljava/lang/String;")
                         patched++
                     }
                 }

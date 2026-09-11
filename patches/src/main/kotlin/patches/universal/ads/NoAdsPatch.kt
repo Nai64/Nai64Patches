@@ -2,14 +2,15 @@ package patches.universal.ads
 
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
+import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.booleanOption
 import app.morphe.patcher.patch.bytecodePatch
-import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.stringOption
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
-import java.util.logging.Logger
-import patches.universal.ads.util.cloneMutableAndPreserveParameters
+import patches.universal.ads.util.cloneParameters
+import patches.universal.ads.util.findMutableMethodOf
 import patches.universal.ads.util.fireHiddenCallbacks
+import java.util.logging.Logger
 
 private val logger = Logger.getLogger("patches.universal.ads.NoAdsPatch")
 
@@ -71,7 +72,7 @@ private fun BytecodePatchContext.patchVoid(fingerprint: Fingerprint): Int {
                 if (!isAd) continue
             }
             val mutableClass = mutableClassDefByOrNull(classDef.type) ?: return@classDefForEach
-            val mutableMethod = mutableClass.methods.find { it.name == name && it.returnType == ret && it.parameterTypes.map { p -> p.toString() } == params } ?: return@classDefForEach
+            val mutableMethod = mutableClass.findMutableMethodOf(m)
             if (mutableMethod.implementation == null) return@classDefForEach
             mutableMethod.addInstructions(0, "return-void")
             patched++
@@ -111,7 +112,7 @@ private fun BytecodePatchContext.patchReturnFalse(fingerprint: Fingerprint): Int
                 if (!isAd) continue
             }
             val mutableClass = mutableClassDefByOrNull(classDef.type) ?: return@classDefForEach
-            val mutableMethod = mutableClass.methods.find { it.name == name && it.returnType == ret && it.parameterTypes.map { p -> p.toString() } == params } ?: return@classDefForEach
+            val mutableMethod = mutableClass.findMutableMethodOf(m)
             if (mutableMethod.implementation == null) return@classDefForEach
             mutableMethod.addInstructions(0, "const/4 v0, 0x0\nreturn v0")
             patched++
@@ -126,16 +127,12 @@ private fun BytecodePatchContext.patchWith(fingerprint: Fingerprint, smali: Stri
     if (exact != null && exact.implementation != null) {
         val rc = exact.implementation?.registerCount ?: 0
         if ((fingerprint === MaxInterstitialAdShowAdFingerprint || fingerprint === MaxAppOpenAdShowAdFingerprint || fingerprint === MaxRewardedAdShowAdFingerprint) && rc < 7) {
-            val classDef = fingerprint.classDefOrNull
-            if (classDef != null) {
-                try {
-                    val cloned = exact.cloneMutableAndPreserveParameters(classDef)
-                    cloned.addInstructions(0, smali)
-                    logger.info("No Ads: patched ${fingerprint.name} via clone (low regs $rc) in ${exact.definingClass}")
-                    return 1
-                } catch (e: Exception) {
-                    logger.warning("No Ads: clone failed for ${fingerprint.name}: ${e.message}")
-                }
+            try {
+                exact.cloneParameters().addInstructions(0, smali)
+                logger.info("No Ads: patched ${fingerprint.name} via clone (low regs $rc) in ${exact.definingClass}")
+                return 1
+            } catch (e: Exception) {
+                logger.warning("No Ads: clone failed for ${fingerprint.name}: ${e.message}")
             }
             logger.warning("No Ads: skipping ${fingerprint.name} in ${exact.definingClass}: register count $rc < 7")
             return 0
@@ -596,17 +593,20 @@ val noAdsPatch = bytecodePatch(
             if (!tl.contains("song") && !tl.contains("station") && !tl.contains("stream") && !tl.contains("ad")) return@classDefForEach
             if (tl.contains("okhttp") || tl.contains("androidx")) return@classDefForEach
             try {
-                val mutableClass = mutableClassDefBy(classDef)
-                for (method in mutableClass.methods) {
+                val mutableClass by lazy { mutableClassDefBy(classDef) }
+                for (method in classDef.methods) {
+                    val mutableMethod by lazy {
+                        mutableClass.findMutableMethodOf(method)
+                    }
                     val n = method.name.lowercase()
                     val isAdToken = n.contains("adsidentitytoken") || n.contains("adsresponse") || n.contains("adsduration") || n.contains("cuepoints") || n.contains("adsid")
                     if (!isAdToken) continue
                     try {
                         if (method.returnType == "Ljava/lang/String;" && method.implementation != null) {
-                            method.addInstructions(0, "const-string v0, \"\"\nreturn-object v0")
+                            mutableMethod.addInstructions(0, "const-string v0, \"\"\nreturn-object v0")
                             totalPatched++
                         } else if ((method.returnType.contains("List") || method.returnType.contains("Collection")) && method.implementation != null) {
-                            method.addInstructions(0, "invoke-static {}, Ljava/util/Collections;->emptyList()Ljava/util/List;\nmove-result-object v0\nreturn-object v0")
+                            mutableMethod.addInstructions(0, "invoke-static {}, Ljava/util/Collections;->emptyList()Ljava/util/List;\nmove-result-object v0\nreturn-object v0")
                             totalPatched++
                         }
                     } catch (_: Exception) {}

@@ -3,9 +3,6 @@ package patches.universal.misc
 import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.bytecodePatch
-import app.morphe.patcher.patch.resourcePatch
-import patches.universal.manifest.NS_ANDROID
-import patches.universal.manifest.applicationOrNull
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction35c
 import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction3rc
@@ -15,6 +12,10 @@ import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 import com.android.tools.smali.dexlib2.iface.reference.StringReference
+import app.morphe.patcher.util.proxy.mutableTypes.MutableClass
+import patches.universal.ads.util.findMutableMethodOf
+import patches.universal.manifest.NS_ANDROID
+import patches.universal.manifest.applicationOrNull
 import java.util.logging.Logger
 
 /**
@@ -55,8 +56,9 @@ internal fun BytecodePatchContext.foldSettingsGetters(
 ): Int {
     var patched = 0
     classDefForEach { classDef ->
-        val mutableClass = mutableClassDefBy(classDef)
-        for (method in mutableClass.methods) {
+        val mutableClass by lazy { mutableClassDefBy(classDef) }
+        for (method in classDef.methods) {
+            val mutableMethod by lazy { mutableClass.findMutableMethodOf(method) }
             val implementation = method.implementation ?: continue
             // Snapshot; one-for-one replacements keep indices valid.
             val instructions: List<Instruction> = implementation.instructions.toList()
@@ -120,10 +122,10 @@ internal fun BytecodePatchContext.foldSettingsGetters(
                     } else {
                         "const-string v$resultRegister, \"\""
                     }
-                    method.replaceInstruction(index, replacement)
-                    method.replaceInstruction(index + 1, "nop")
+                    mutableMethod.replaceInstruction(index, replacement)
+                    mutableMethod.replaceInstruction(index + 1, "nop")
                 } else {
-                    method.replaceInstruction(index, "nop")
+                    mutableMethod.replaceInstruction(index, "nop")
                 }
                 patched++
             }

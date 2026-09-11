@@ -3,6 +3,7 @@ package patches.universal.privacy
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.patch.bytecodePatch
 import patches.universal.ads.util.cloneMutable
+import patches.universal.ads.util.findMutableMethodOf
 import patches.universal.ads.util.p0Register
 import java.util.logging.Logger
 
@@ -26,15 +27,16 @@ val blockScreenshotDetectionPatch = bytecodePatch(
         classDefForEach { classDef ->
             if (classDef.superclass?.endsWith("Activity;") != true) return@classDefForEach
 
-            val mutableClass = mutableClassDefBy(classDef)
-            val onCreate = mutableClass.methods.firstOrNull {
+            val mutableClass by lazy { mutableClassDefBy(classDef) }
+            val onCreate = classDef.methods.firstOrNull {
                 it.name == "onCreate" && it.returnType == "V" &&
                     it.parameterTypes == listOf("Landroid/os/Bundle;")
             } ?: return@classDefForEach
 
+            val mutableOnCreate = mutableClass.findMutableMethodOf(onCreate)
             val contextReg = onCreate.p0Register
             val b = onCreate.implementation!!.registerCount
-            val cloned = onCreate.cloneMutable(additionalRegisters = 3)
+            val cloned = mutableOnCreate.cloneMutable(additionalRegisters = 3)
 
             cloned.addInstructions(
                 0,
@@ -46,7 +48,7 @@ val blockScreenshotDetectionPatch = bytecodePatch(
                 """.trimIndent(),
             )
 
-            mutableClass.methods.remove(onCreate)
+            mutableClass.methods.remove(mutableOnCreate)
             mutableClass.methods.add(cloned)
             patchedActivities++
         }

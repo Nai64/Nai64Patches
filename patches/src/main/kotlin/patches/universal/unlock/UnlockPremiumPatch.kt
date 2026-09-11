@@ -6,6 +6,7 @@ import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.patch.stringOption
 import patches.universal.ads.util.cloneMutable
+import patches.universal.ads.util.findMutableMethodOf
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
@@ -294,8 +295,8 @@ val unlockPremiumPatch = bytecodePatch(
             val tl = classDef.type.lowercase()
             if (!tl.contains("revenuecat") && !tl.contains("purchases")) return@classDefForEach
             if (tl.contains("okhttp") || tl.contains("ssl")) return@classDefForEach
-            val mutableClass = try { mutableClassDefBy(classDef) } catch (_: Exception) { return@classDefForEach }
-            for (method in mutableClass.methods) {
+            val mutableClass by lazy { try { mutableClassDefBy(classDef) } catch (_: Exception) { null } }
+            for (method in classDef.methods) {
                 if (method.returnType != "Z") continue
                 val n = method.name.lowercase()
                 if (n.contains("provider") || n.contains("product") || n.contains("progress")) continue
@@ -303,7 +304,8 @@ val unlockPremiumPatch = bytecodePatch(
                 if (!isEntitlementCheck) continue
                 try {
                     if (method.implementation == null) continue
-                    method.addInstructions(0, "const/4 v0, 0x1\nreturn v0")
+                    val mc = mutableClass ?: continue
+                    mc.findMutableMethodOf(method).addInstructions(0, "const/4 v0, 0x1\nreturn v0")
                     patched++
                     patchedMethods.add("RC:${method.name}")
                 } catch (_: Exception) {}
@@ -314,14 +316,15 @@ val unlockPremiumPatch = bytecodePatch(
         classDefForEach { classDef ->
             val tl = classDef.type.lowercase()
             if (!tl.contains("revenuecat") || !tl.contains("verification")) return@classDefForEach
-            val mutableClass = try { mutableClassDefBy(classDef) } catch (_: Exception) { return@classDefForEach }
-            for (method in mutableClass.methods) {
+            val mutableClass by lazy { try { mutableClassDefBy(classDef) } catch (_: Exception) { null } }
+            for (method in classDef.methods) {
                 if (method.returnType != "Z") continue
                 val n = method.name.lowercase()
                 if (n.contains("verify") || n.contains("enforced") || n.contains("informational")) {
                     try {
                         if (method.implementation == null) continue
-                        method.addInstructions(0, "const/4 v0, 0x1\nreturn v0")
+                        val mc = mutableClass ?: continue
+                        mc.findMutableMethodOf(method).addInstructions(0, "const/4 v0, 0x1\nreturn v0")
                         patched++
                         patchedMethods.add("RC:verify:${method.name}")
                     } catch (_: Exception) {}
@@ -462,22 +465,24 @@ val unlockPremiumPatch = bytecodePatch(
                             (m.name == "getValue" && m.returnType == "I" && activeConst.containsKey(classDef.type)))
                     }
                     if (!hasCandidate) return@classDefForEach
-                    val mutableClass = try { mutableClassDefBy(classDef) } catch (_: Exception) { return@classDefForEach }
-                    for (method in mutableClass.methods) {
+                    val mutableClass by lazy { try { mutableClassDefBy(classDef) } catch (_: Exception) { null } }
+                    for (method in classDef.methods) {
                         try {
                             if (method.implementation == null || method.parameterTypes.isNotEmpty()) continue
                             val ret = method.returnType
                             val activeField = activeConst[ret]
+                            val mc = mutableClass ?: continue
+                            val mutableMethod = mc.findMutableMethodOf(method)
                             if (activeField != null) {
                                 if (method.name == "values" || method.name == "valueOf" || method.name == "getEntries") continue
-                                method.addInstructions(0, "sget-object v0, $ret->$activeField:$ret\nreturn-object v0")
+                                mutableMethod.addInstructions(0, "sget-object v0, $ret->$activeField:$ret\nreturn-object v0")
                                 patched++
                                 patchedMethods.add("EnumStatus:${method.name}->$activeField")
                             } else if (method.name == "getValue" && ret == "I" && activeConst.containsKey(classDef.type)) {
                                 val intField = constIntField[classDef.type] ?: continue
                                 val enumType = classDef.type
                                 val field = activeConst[enumType] ?: continue
-                                method.addInstructions(0, "sget-object v0, $enumType->$field:$enumType\niget v0, v0, $enumType->$intField:I\nreturn v0")
+                                mutableMethod.addInstructions(0, "sget-object v0, $enumType->$field:$enumType\niget v0, v0, $enumType->$intField:I\nreturn v0")
                                 patched++
                                 patchedMethods.add("EnumStatus:getValue->$field")
                             }
@@ -528,10 +533,10 @@ val unlockPremiumPatch = bytecodePatch(
                 }
             }
 
-            val mutableClass = try { mutableClassDefBy(classDef) } catch (_: Exception) { return@classDefForEach }
+            val mutableClass by lazy { try { mutableClassDefBy(classDef) } catch (_: Exception) { null } }
 
             // 2a) Generic premium Z methods (hasPremiumAccess etc.) in this class
-            for (method in mutableClass.methods) {
+            for (method in classDef.methods) {
                 if (method.returnType != "Z") continue
                 val n = method.name.lowercase()
                 if (n.length < 3 || n.length > 40) continue
@@ -542,8 +547,8 @@ val unlockPremiumPatch = bytecodePatch(
                 if (n == "ispro" || n == "haspro" || n == "isprouser" || n == "hasprouser" || n.contains("premium")) {
                     try {
                         if (method.implementation == null) continue
-                        // avoid double-patching if already patched via Fingerprint
-                        method.addInstructions(0, "const/4 v0, 0x1\nreturn v0")
+                        val mc = mutableClass ?: continue
+                        mc.findMutableMethodOf(method).addInstructions(0, "const/4 v0, 0x1\nreturn v0")
                         patched++
                         patchedMethods.add("Generic:${method.name}")
                     } catch (_: Exception) {}
@@ -551,7 +556,8 @@ val unlockPremiumPatch = bytecodePatch(
             }
 
             // 2b) Prefs/DataStore getBoolean/getInt/contains -> premium keys
-            for (method in mutableClass.methods) {
+            for (method in classDef.methods) {
+                val mutableMethod by lazy { mutableClass?.findMutableMethodOf(method) }
                 val impl = method.implementation ?: continue
                 val instructions = impl.instructions.toList()
                 for ((index, insn) in instructions.withIndex()) {
@@ -604,18 +610,19 @@ val unlockPremiumPatch = bytecodePatch(
                     if (keyValue == null || !isPremiumKey(keyValue!!.lowercase())) continue
 
                     val next = instructions.getOrNull(index + 1) ?: continue
+                    val mm = mutableMethod ?: continue
                     when {
                         isGetBoolean && next.opcode == Opcode.MOVE_RESULT -> {
                             val r = (next as com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction).registerA
                             if (r <= 0xf) {
-                                method.replaceInstruction(index, "const/4 v$r, 0x1")
-                                method.replaceInstruction(index + 1, "nop")
+                                mm.replaceInstruction(index, "const/4 v$r, 0x1")
+                                mm.replaceInstruction(index + 1, "nop")
                             } else if (r <= 0xff) {
-                                method.replaceInstruction(index, "const/16 v$r, 0x1")
-                                method.replaceInstruction(index + 1, "nop")
+                                mm.replaceInstruction(index, "const/16 v$r, 0x1")
+                                mm.replaceInstruction(index + 1, "nop")
                             } else {
-                                method.replaceInstruction(index, "const/4 v0, 0x1")
-                                method.replaceInstruction(index + 1, "move v$r, v0")
+                                mm.replaceInstruction(index, "const/4 v0, 0x1")
+                                mm.replaceInstruction(index + 1, "move v$r, v0")
                             }
                             patchedMethods.add("Prefs:${keyValue}:getBoolean")
                             patched++
@@ -623,14 +630,14 @@ val unlockPremiumPatch = bytecodePatch(
                         isHasKey && next.opcode == Opcode.MOVE_RESULT -> {
                             val r = (next as com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction).registerA
                             if (r <= 0xf) {
-                                method.replaceInstruction(index, "const/4 v$r, 0x1")
-                                method.replaceInstruction(index + 1, "nop")
+                                mm.replaceInstruction(index, "const/4 v$r, 0x1")
+                                mm.replaceInstruction(index + 1, "nop")
                             } else if (r <= 0xff) {
-                                method.replaceInstruction(index, "const/16 v$r, 0x1")
-                                method.replaceInstruction(index + 1, "nop")
+                                mm.replaceInstruction(index, "const/16 v$r, 0x1")
+                                mm.replaceInstruction(index + 1, "nop")
                             } else {
-                                method.replaceInstruction(index, "const/4 v0, 0x1")
-                                method.replaceInstruction(index + 1, "move v$r, v0")
+                                mm.replaceInstruction(index, "const/4 v0, 0x1")
+                                mm.replaceInstruction(index + 1, "move v$r, v0")
                             }
                             patchedMethods.add("Prefs:${keyValue}:contains")
                             patched++
@@ -638,14 +645,14 @@ val unlockPremiumPatch = bytecodePatch(
                         isGetInt && next.opcode == Opcode.MOVE_RESULT -> {
                             val r = (next as com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction).registerA
                             if (r <= 0xf) {
-                                method.replaceInstruction(index, "const/4 v$r, 0x1")
-                                method.replaceInstruction(index + 1, "nop")
+                                mm.replaceInstruction(index, "const/4 v$r, 0x1")
+                                mm.replaceInstruction(index + 1, "nop")
                             } else if (r <= 0xff) {
-                                method.replaceInstruction(index, "const/16 v$r, 0x1")
-                                method.replaceInstruction(index + 1, "nop")
+                                mm.replaceInstruction(index, "const/16 v$r, 0x1")
+                                mm.replaceInstruction(index + 1, "nop")
                             } else {
-                                method.replaceInstruction(index, "const/4 v0, 0x1")
-                                method.replaceInstruction(index + 1, "move v$r, v0")
+                                mm.replaceInstruction(index, "const/4 v0, 0x1")
+                                mm.replaceInstruction(index + 1, "move v$r, v0")
                             }
                             patchedMethods.add("Prefs:${keyValue}:getInt")
                             patched++
@@ -653,11 +660,11 @@ val unlockPremiumPatch = bytecodePatch(
                         isGetLong && next.opcode == Opcode.MOVE_RESULT_WIDE -> {
                             val r = (next as com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction).registerA
                             if (r <= 0xff) {
-                                method.replaceInstruction(index, "const-wide/16 v$r, 0x1")
-                                method.replaceInstruction(index + 1, "nop")
+                                mm.replaceInstruction(index, "const-wide/16 v$r, 0x1")
+                                mm.replaceInstruction(index + 1, "nop")
                             } else {
-                                method.replaceInstruction(index, "const-wide/16 v0, 0x1")
-                                method.replaceInstruction(index + 1, "move-wide v$r, v0")
+                                mm.replaceInstruction(index, "const-wide/16 v0, 0x1")
+                                mm.replaceInstruction(index + 1, "move-wide v$r, v0")
                             }
                             patchedMethods.add("Prefs:${keyValue}:getLong")
                             patched++
@@ -665,14 +672,14 @@ val unlockPremiumPatch = bytecodePatch(
                         isGetString && next.opcode == Opcode.MOVE_RESULT_OBJECT -> {
                             val r = (next as com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction).registerA
                             if (r <= 0xff) {
-                                method.replaceInstruction(index, "const-string v$r, \"premium\"")
-                                method.replaceInstruction(index + 1, "nop")
+                                mm.replaceInstruction(index, "const-string v$r, \"premium\"")
+                                mm.replaceInstruction(index + 1, "nop")
                             } else if (r <= 0xffff) {
-                                method.replaceInstruction(index, "const-string/jumbo v$r, \"premium\"")
-                                method.replaceInstruction(index + 1, "nop")
+                                mm.replaceInstruction(index, "const-string/jumbo v$r, \"premium\"")
+                                mm.replaceInstruction(index + 1, "nop")
                             } else {
-                                method.replaceInstruction(index, "const-string v0, \"premium\"")
-                                method.replaceInstruction(index + 1, "move-object v$r, v0")
+                                mm.replaceInstruction(index, "const-string v0, \"premium\"")
+                                mm.replaceInstruction(index + 1, "move-object v$r, v0")
                             }
                             patchedMethods.add("Prefs:${keyValue}:getString")
                             patched++
@@ -685,7 +692,7 @@ val unlockPremiumPatch = bytecodePatch(
                             }
                             if (valueReg == null) continue
                             try {
-                                method.addInstructions(index, "const/4 v$valueReg, 0x1")
+                                mm.addInstructions(index, "const/4 v$valueReg, 0x1")
                                 patchedMethods.add("Prefs:${keyValue}:putBoolean->true")
                                 patched++
                             } catch (_: Exception) {}
@@ -701,9 +708,9 @@ val unlockPremiumPatch = bytecodePatch(
                                 // for sku_cache_price_premium, put a fake price
                                 val fakePrice = if (keyValue!!.contains("price")) "9.99" else "premium"
                                 if (valueReg <= 0xff) {
-                                    method.addInstructions(index, "const-string v$valueReg, \"$fakePrice\"")
+                                    mm.addInstructions(index, "const-string v$valueReg, \"$fakePrice\"")
                                 } else {
-                                    method.addInstructions(index, "const-string v0, \"$fakePrice\"\nmove-object v$valueReg, v0")
+                                    mm.addInstructions(index, "const-string v0, \"$fakePrice\"\nmove-object v$valueReg, v0")
                                 }
                                 patchedMethods.add("Prefs:${keyValue}:putString")
                                 patched++

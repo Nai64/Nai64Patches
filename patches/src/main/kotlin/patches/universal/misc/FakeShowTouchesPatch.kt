@@ -11,6 +11,7 @@ import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 import com.android.tools.smali.dexlib2.iface.reference.StringReference
+import patches.universal.ads.util.findMutableMethodOf
 import java.util.logging.Logger
 
 @Suppress("unused")
@@ -34,8 +35,9 @@ val fakeShowTouchesPatch = bytecodePatch(
         val target = if (enabled == true) 1 else 0
         var patched = 0
         classDefForEach { classDef ->
-            val mutableClass = mutableClassDefBy(classDef)
-            for (method in mutableClass.methods) {
+            val mutableClass by lazy { mutableClassDefBy(classDef) }
+            for (method in classDef.methods) {
+                val mutableMethod by lazy { mutableClass.findMutableMethodOf(method) }
                 val impl = method.implementation ?: continue
                 val instructions: List<Instruction> = impl.instructions.toList()
                 for ((index, insn) in instructions.withIndex()) {
@@ -65,8 +67,8 @@ val fakeShowTouchesPatch = bytecodePatch(
                     val next = instructions.getOrNull(index + 1)
                     if (next != null && next.opcode == Opcode.MOVE_RESULT) {
                         val resultRegister = (next as OneRegisterInstruction).registerA
-                        method.replaceInstruction(index, "const/4 v$resultRegister, $target")
-                        method.replaceInstruction(index + 1, "nop")
+                        mutableMethod.replaceInstruction(index, "const/4 v$resultRegister, $target")
+                        mutableMethod.replaceInstruction(index + 1, "nop")
                         patched++
                     }
                 }

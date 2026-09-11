@@ -6,6 +6,7 @@ import app.morphe.patcher.patch.bytecodePatch
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
 import com.android.tools.smali.dexlib2.iface.reference.StringReference
 import java.util.Locale
+import patches.universal.ads.util.findMutableMethodOf
 import java.util.logging.Logger
 import patches.universal.misc.foldBooleanReturns
 
@@ -150,8 +151,9 @@ val disableForcedOnlineChecksPatch = bytecodePatch(
             classDefForEach { classDef ->
                 if (!useGeneric && !detectedSelectedEngine) return@classDefForEach
 
-                val mutableClass = mutableClassDefBy(classDef)
-                for (method in mutableClass.methods) {
+                val mutableClass by lazy { mutableClassDefBy(classDef) }
+                for (method in classDef.methods) {
+                    val mutableMethod by lazy { mutableClass.findMutableMethodOf(method) }
                     if (method.returnType != "Z") continue
                     val implementation = method.implementation ?: continue
                     val methodName = method.name.normalized()
@@ -166,7 +168,7 @@ val disableForcedOnlineChecksPatch = bytecodePatch(
                     if (implementation.registerCount < 1) continue
 
                     val value = if (positive) "0x1" else "0x0"
-                    method.addInstructions(0, "const/4 v0, $value\nreturn v0")
+                    mutableMethod.addInstructions(0, "const/4 v0, $value\nreturn v0")
                     patched++
                 }
             }

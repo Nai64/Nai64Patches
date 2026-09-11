@@ -6,6 +6,7 @@ import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
+import patches.universal.ads.util.findMutableMethodOf
 import java.util.logging.Logger
 
 @Suppress("unused")
@@ -24,8 +25,9 @@ val unlockNotificationChannelsPatch = bytecodePatch(
         // Merged to 1 scan to fix #59 Truecaller 1024 MB OOM.
         var patched = 0
         classDefForEach { classDef ->
-            val mutableClass = mutableClassDefBy(classDef)
-            for (method in mutableClass.methods) {
+            val mutableClass by lazy { mutableClassDefBy(classDef) }
+            for (method in classDef.methods) {
+                val mutableMethod by lazy { mutableClass.findMutableMethodOf(method) }
                 val impl = method.implementation ?: continue
                 val instructions = impl.instructions.toList()
                 for ((index, insn) in instructions.withIndex()) {
@@ -39,10 +41,10 @@ val unlockNotificationChannelsPatch = bytecodePatch(
                     }
                     val next = instructions.getOrNull(index + 1) as? OneRegisterInstruction
                     if (next != null && next.opcode == Opcode.MOVE_RESULT) {
-                        method.replaceInstruction(index, "const/4 v${next.registerA}, $value")
-                        method.replaceInstruction(index + 1, "nop")
+                        mutableMethod.replaceInstruction(index, "const/4 v${next.registerA}, $value")
+                        mutableMethod.replaceInstruction(index + 1, "nop")
                     } else {
-                        method.replaceInstruction(index, "nop")
+                        mutableMethod.replaceInstruction(index, "nop")
                     }
                     patched++
                 }

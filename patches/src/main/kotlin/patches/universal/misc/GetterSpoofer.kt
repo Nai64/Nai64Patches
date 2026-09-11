@@ -12,6 +12,7 @@ import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 import com.android.tools.smali.dexlib2.iface.reference.StringReference
+import patches.universal.ads.util.findMutableMethodOf
 
 private fun escapeSmali(value: String): String =
     value
@@ -65,8 +66,9 @@ internal fun BytecodePatchContext.foldSettingsGetterConst(
             if (hasRef) break
         }
         if (!hasRef) return@classDefForEach
-        val mutableClass = mutableClassDefBy(classDef)
-        for (method in mutableClass.methods) {
+        val mutableClass by lazy { mutableClassDefBy(classDef) }
+        for (method in classDef.methods) {
+            val mutableMethod by lazy { mutableClass.findMutableMethodOf(method) }
             val implementation = method.implementation ?: continue
             // Snapshot; one-for-one replacements keep indices valid.
             val instructions: List<Instruction> = implementation.instructions.toList()
@@ -145,10 +147,10 @@ internal fun BytecodePatchContext.foldSettingsGetterConst(
                         }
                         else -> constString(resultRegister, stringValue)
                     }
-                    method.replaceInstruction(index, replacement)
-                    method.replaceInstruction(index + 1, "nop")
+                    mutableMethod.replaceInstruction(index, replacement)
+                    mutableMethod.replaceInstruction(index + 1, "nop")
                 } else {
-                    method.replaceInstruction(index, "nop")
+                    mutableMethod.replaceInstruction(index, "nop")
                 }
                 patched++
             }
@@ -181,8 +183,9 @@ internal fun BytecodePatchContext.foldNoArgStringGetter(
             if (hasRef) break
         }
         if (!hasRef) return@classDefForEach
-        val mutableClass = mutableClassDefBy(classDef)
-        for (method in mutableClass.methods) {
+        val mutableClass by lazy { mutableClassDefBy(classDef) }
+        for (method in classDef.methods) {
+            val mutableMethod by lazy { mutableClass.findMutableMethodOf(method) }
             val implementation = method.implementation ?: continue
             val instructions: List<Instruction> = implementation.instructions.toList()
             for ((index, instruction) in instructions.withIndex()) {
@@ -197,8 +200,8 @@ internal fun BytecodePatchContext.foldNoArgStringGetter(
                 val next = instructions.getOrNull(index + 1)
                 if (next != null && next.opcode == Opcode.MOVE_RESULT_OBJECT) {
                     val resultRegister = (next as OneRegisterInstruction).registerA
-                    method.replaceInstruction(index, constString(resultRegister, value))
-                    method.replaceInstruction(index + 1, "nop")
+                    mutableMethod.replaceInstruction(index, constString(resultRegister, value))
+                    mutableMethod.replaceInstruction(index + 1, "nop")
                     patched++
                 }
             }
@@ -231,8 +234,9 @@ internal fun BytecodePatchContext.foldNoArgIntGetter(
             if (hasRef) break
         }
         if (!hasRef) return@classDefForEach
-        val mutableClass = mutableClassDefBy(classDef)
-        for (method in mutableClass.methods) {
+        val mutableClass by lazy { mutableClassDefBy(classDef) }
+        for (method in classDef.methods) {
+            val mutableMethod by lazy { mutableClass.findMutableMethodOf(method) }
             val implementation = method.implementation ?: continue
             val instructions: List<Instruction> = implementation.instructions.toList()
             for ((index, instruction) in instructions.withIndex()) {
@@ -252,8 +256,8 @@ internal fun BytecodePatchContext.foldNoArgIntGetter(
                     } else {
                         "const/16 v$resultRegister, $value"
                     }
-                    method.replaceInstruction(index, const)
-                    method.replaceInstruction(index + 1, "nop")
+                    mutableMethod.replaceInstruction(index, const)
+                    mutableMethod.replaceInstruction(index + 1, "nop")
                     patched++
                 }
             }
@@ -285,8 +289,9 @@ internal fun BytecodePatchContext.foldLocaleGetDefault(tag: String): Int {
             if (hasRef) break
         }
         if (!hasRef) return@classDefForEach
-        val mutableClass = mutableClassDefBy(classDef)
-        for (method in mutableClass.methods) {
+        val mutableClass by lazy { mutableClassDefBy(classDef) }
+        for (method in classDef.methods) {
+            val mutableMethod by lazy { mutableClass.findMutableMethodOf(method) }
             val implementation = method.implementation ?: continue
             val instructions: List<Instruction> = implementation.instructions.toList()
 
@@ -310,11 +315,11 @@ internal fun BytecodePatchContext.foldLocaleGetDefault(tag: String): Int {
             }
 
             for ((index, resultRegister) in matches.asReversed()) {
-                method.replaceInstruction(
+                mutableMethod.replaceInstruction(
                     index,
                     "const-string v$resultRegister, \"${escapeSmali(tag)}\"",
                 )
-                method.addInstruction(
+                mutableMethod.addInstruction(
                     index + 1,
                     "invoke-static {v$resultRegister}, " +
                         "Ljava/util/Locale;->forLanguageTag(Ljava/lang/String;)Ljava/util/Locale;",
@@ -348,8 +353,9 @@ internal fun BytecodePatchContext.foldStringGetterConst(
             if (hasRef) break
         }
         if (!hasRef) return@classDefForEach
-        val mutableClass = mutableClassDefBy(classDef)
-        for (method in mutableClass.methods) {
+        val mutableClass by lazy { mutableClassDefBy(classDef) }
+        for (method in classDef.methods) {
+            val mutableMethod by lazy { mutableClass.findMutableMethodOf(method) }
             val implementation = method.implementation ?: continue
             val instructions: List<Instruction> = implementation.instructions.toList()
             for ((index, instruction) in instructions.withIndex()) {
@@ -363,8 +369,8 @@ internal fun BytecodePatchContext.foldStringGetterConst(
                 val next = instructions.getOrNull(index + 1)
                 if (next != null && next.opcode == Opcode.MOVE_RESULT_OBJECT) {
                     val resultRegister = (next as OneRegisterInstruction).registerA
-                    method.replaceInstruction(index, constString(resultRegister, value))
-                    method.replaceInstruction(index + 1, "nop")
+                    mutableMethod.replaceInstruction(index, constString(resultRegister, value))
+                    mutableMethod.replaceInstruction(index + 1, "nop")
                     patched++
                 }
             }
@@ -394,8 +400,9 @@ internal fun BytecodePatchContext.foldBooleanGetterConst(
             if (hasRef) break
         }
         if (!hasRef) return@classDefForEach
-        val mutableClass = mutableClassDefBy(classDef)
-        for (method in mutableClass.methods) {
+        val mutableClass by lazy { mutableClassDefBy(classDef) }
+        for (method in classDef.methods) {
+            val mutableMethod by lazy { mutableClass.findMutableMethodOf(method) }
             val implementation = method.implementation ?: continue
             val instructions: List<Instruction> = implementation.instructions.toList()
             for ((index, instruction) in instructions.withIndex()) {
@@ -414,8 +421,8 @@ internal fun BytecodePatchContext.foldBooleanGetterConst(
                     } else {
                         "const/4 v$resultRegister, 0x0"
                     }
-                    method.replaceInstruction(index, const)
-                    method.replaceInstruction(index + 1, "nop")
+                    mutableMethod.replaceInstruction(index, const)
+                    mutableMethod.replaceInstruction(index + 1, "nop")
                     patched++
                 }
             }
@@ -446,8 +453,9 @@ internal fun BytecodePatchContext.foldIntGetterConst(
             if (hasRef) break
         }
         if (!hasRef) return@classDefForEach
-        val mutableClass = mutableClassDefBy(classDef)
-        for (method in mutableClass.methods) {
+        val mutableClass by lazy { mutableClassDefBy(classDef) }
+        for (method in classDef.methods) {
+            val mutableMethod by lazy { mutableClass.findMutableMethodOf(method) }
             val implementation = method.implementation ?: continue
             val instructions: List<Instruction> = implementation.instructions.toList()
             for ((index, instruction) in instructions.withIndex()) {
@@ -466,8 +474,8 @@ internal fun BytecodePatchContext.foldIntGetterConst(
                     } else {
                         "const/16 v$resultRegister, 0x${value.and(0xffff).toString(16)}"
                     }
-                    method.replaceInstruction(index, const)
-                    method.replaceInstruction(index + 1, "nop")
+                    mutableMethod.replaceInstruction(index, const)
+                    mutableMethod.replaceInstruction(index + 1, "nop")
                     patched++
                 }
             }
@@ -496,8 +504,9 @@ internal fun BytecodePatchContext.foldObjectGetterToNull(
             if (hasRef) break
         }
         if (!hasRef) return@classDefForEach
-        val mutableClass = mutableClassDefBy(classDef)
-        for (method in mutableClass.methods) {
+        val mutableClass by lazy { mutableClassDefBy(classDef) }
+        for (method in classDef.methods) {
+            val mutableMethod by lazy { mutableClass.findMutableMethodOf(method) }
             val implementation = method.implementation ?: continue
             val instructions: List<Instruction> = implementation.instructions.toList()
             for ((index, instruction) in instructions.withIndex()) {
@@ -511,8 +520,8 @@ internal fun BytecodePatchContext.foldObjectGetterToNull(
                 val next = instructions.getOrNull(index + 1)
                 if (next != null && next.opcode == Opcode.MOVE_RESULT_OBJECT) {
                     val resultRegister = (next as OneRegisterInstruction).registerA
-                    method.replaceInstruction(index, "const/4 v$resultRegister, 0x0")
-                    method.replaceInstruction(index + 1, "nop")
+                    mutableMethod.replaceInstruction(index, "const/4 v$resultRegister, 0x0")
+                    mutableMethod.replaceInstruction(index + 1, "nop")
                     patched++
                 }
             }
@@ -545,8 +554,9 @@ internal fun BytecodePatchContext.replaceGetterWithStaticCall(
             if (hasRef) break
         }
         if (!hasRef) return@classDefForEach
-        val mutableClass = mutableClassDefBy(classDef)
-        for (method in mutableClass.methods) {
+        val mutableClass by lazy { mutableClassDefBy(classDef) }
+        for (method in classDef.methods) {
+            val mutableMethod by lazy { mutableClass.findMutableMethodOf(method) }
             val implementation = method.implementation ?: continue
             val instructions: List<Instruction> = implementation.instructions.toList()
             for ((index, instruction) in instructions.withIndex()) {
@@ -559,7 +569,7 @@ internal fun BytecodePatchContext.replaceGetterWithStaticCall(
 
                 val next = instructions.getOrNull(index + 1)
                 if (next != null && next.opcode == Opcode.MOVE_RESULT_OBJECT) {
-                    method.replaceInstruction(index, replacementInvoke)
+                    mutableMethod.replaceInstruction(index, replacementInvoke)
                     patched++
                 }
             }
@@ -592,8 +602,9 @@ internal fun BytecodePatchContext.foldStaticStringField(
             if (hasRef) break
         }
         if (!hasRef) return@classDefForEach
-        val mutableClass = mutableClassDefBy(classDef)
-        for (method in mutableClass.methods) {
+        val mutableClass by lazy { mutableClassDefBy(classDef) }
+        for (method in classDef.methods) {
+            val mutableMethod by lazy { mutableClass.findMutableMethodOf(method) }
             val implementation = method.implementation ?: continue
             val instructions: List<Instruction> = implementation.instructions.toList()
             for ((index, instruction) in instructions.withIndex()) {
@@ -606,7 +617,7 @@ internal fun BytecodePatchContext.foldStaticStringField(
                 val value = values[reference.name] ?: continue
 
                 val register = (instruction as? OneRegisterInstruction)?.registerA ?: continue
-                method.replaceInstruction(
+                mutableMethod.replaceInstruction(
                     index,
                     "const-string v$register, \"${escapeSmali(value)}\"",
                 )

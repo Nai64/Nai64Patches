@@ -9,6 +9,7 @@ import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction3rc
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
+import patches.universal.ads.util.findMutableMethodOf
 import java.util.logging.Logger
 
 @Suppress("unused")
@@ -35,8 +36,9 @@ val enableUnrestrictedBackgroundWorkPatch = bytecodePatch(
         }
         var patched = 0
         classDefForEach { classDef ->
-            val mutableClass = mutableClassDefBy(classDef)
-            for (method in mutableClass.methods) {
+            val mutableClass by lazy { mutableClassDefBy(classDef) }
+            for (method in classDef.methods) {
+                val mutableMethod by lazy { mutableClass.findMutableMethodOf(method) }
                 val impl = method.implementation ?: continue
                 val instructions = impl.instructions.toList()
                 for ((index, insn) in instructions.withIndex()) {
@@ -63,7 +65,7 @@ val enableUnrestrictedBackgroundWorkPatch = bytecodePatch(
                         val reg = (prev as? OneRegisterInstruction)?.registerA ?: continue
                         if (reg != argRegister) continue
                         val constInstr = if (reg <= 0xf) "const/4 v$reg, 0x0" else "const/16 v$reg, 0x0"
-                        method.replaceInstruction(j, constInstr)
+                        mutableMethod.replaceInstruction(j, constInstr)
                         patched++
                         break
                     }

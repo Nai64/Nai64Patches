@@ -135,16 +135,7 @@ val customStartupSoundPatch = bytecodePatch(
             if (cls != null && m != null) cls to m else null
         } else null
 
-        val (mutableClass, onCreate) = appAndMethod ?: run {
-            var result: Pair<MutableClass, MutableMethod>? = null
-            classDefForEach { classDef ->
-                if (classDef.superclass != "Landroid/app/Application;") return@classDefForEach
-                val mc = mutableClassDefBy(classDef)
-                val m = mc.methods.firstOrNull { it.name == "onCreate" && it.returnType == "V" && it.parameterTypes.isEmpty() }
-                if (m != null && result == null) result = mc to m
-            }
-            result
-        } ?: run {
+        val (mutableClass, onCreate) = appAndMethod ?: findApplicationOnCreate() ?: run {
             logger.warning("No Application.onCreate found. No changes applied.")
             return@execute
         }

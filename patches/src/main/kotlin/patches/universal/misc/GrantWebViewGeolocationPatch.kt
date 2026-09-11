@@ -2,6 +2,7 @@ package patches.universal.misc
 
 import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
 import app.morphe.patcher.patch.bytecodePatch
+import patches.universal.ads.util.findMutableMethodOf
 import java.util.logging.Logger
 
 @Suppress("unused")
@@ -17,8 +18,8 @@ val grantWebViewGeolocationPatch = bytecodePatch(
         val logger = Logger.getLogger(this::class.java.name)
         var patched = 0
         classDefForEach { classDef ->
-            val mutableClass = mutableClassDefBy(classDef)
-            for (method in mutableClass.methods) {
+            val mutableClass by lazy { mutableClassDefBy(classDef) }
+            for (method in classDef.methods) {
                 if (method.returnType != "V") continue
                 if (method.name != "onGeolocationPermissionsShowPrompt") continue
                 if (method.parameterTypes != listOf(
@@ -26,14 +27,15 @@ val grantWebViewGeolocationPatch = bytecodePatch(
                         "Landroid/webkit/GeolocationPermissions\$Callback;",
                     )
                 ) continue
-                method.addInstruction(0, "const/4 v0, 0x1")
-                method.addInstruction(1, "const/4 v1, 0x0")
-                method.addInstruction(
+                val mutableMethod = mutableClass.findMutableMethodOf(method)
+                mutableMethod.addInstruction(0, "const/4 v0, 0x1")
+                mutableMethod.addInstruction(1, "const/4 v1, 0x0")
+                mutableMethod.addInstruction(
                     2,
                     "invoke-virtual {p2, p1, v0, v1}, " +
                         "Landroid/webkit/GeolocationPermissions\$Callback;->invoke(Ljava/lang/String;ZZ)V",
                 )
-                method.addInstruction(3, "return-void")
+                mutableMethod.addInstruction(3, "return-void")
                 patched++
             }
         }

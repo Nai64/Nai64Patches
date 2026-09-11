@@ -8,6 +8,7 @@ import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
+import patches.universal.ads.util.findMutableMethodOf
 import java.util.logging.Logger
 
 @Suppress("unused")
@@ -43,8 +44,9 @@ val spoofAppSignaturePatch = bytecodePatch(
         val override = packageNameOverride.orEmpty().trim()
 
         classDefForEach { classDef ->
-            val mutableClass = mutableClassDefBy(classDef)
-            for (method in mutableClass.methods) {
+            val mutableClass by lazy { mutableClassDefBy(classDef) }
+            for (method in classDef.methods) {
+                val mutableMethod by lazy { mutableClass.findMutableMethodOf(method) }
                 val impl = method.implementation ?: continue
                 val instructions = impl.instructions.toList()
                 for ((index, insn) in instructions.withIndex()) {
@@ -67,32 +69,13 @@ val spoofAppSignaturePatch = bytecodePatch(
                         val next = instructions.getOrNull(index + 1) as? OneRegisterInstruction
                         if (next != null && next.opcode == Opcode.MOVE_RESULT_OBJECT) {
                             val reg = next.registerA
-                            // const-string vReg, "override"
                             val escaped = override.replace("\\", "\\\\").replace("\"", "\\\"")
-                            method.replaceInstruction(index, "const-string v$reg, \"$escaped\"")
-                            method.replaceInstruction(index + 1, "nop")
-                            // Need to keep original invoke? Actually we replaced invoke with const-string, so nop the invoke and keep move-result as nop
-                            // Our replace above already handled invoke->const, move->nop, so we need to ensure invoke is nop'd
-                            // The loop will handle next iteration, but we already did
+                            mutableMethod.replaceInstruction(index, "const-string v$reg, \"$escaped\"")
+                            mutableMethod.replaceInstruction(index + 1, "nop")
                             patched++
                         }
                         continue
                     }
-
-                    // Signature spoof: for getPackageInfo with signature flags, we want to
-                    // make the returned PackageInfo appear signed with original cert.
-                    // Simplest generic bypass: if the app checks signatures via
-                    // PackageInfo.signatures/signingInfo, we can make the PackageInfo
-                    // field access return a spoofed value. However we don't know the
-                    // original cert, so we hook the field access itself via
-                    // sget/iput? Instead, we hook the method that retrieves PackageInfo
-                    // and clear the signatures field to null, causing most checks
-                    // that do `signatures[0].equals(expected)` to NPE or skip.
-                    // Safer generic: do nothing here and rely on checkSignatures spoof
-                    // already handled by SpoofSignatureMatch. This patch focuses on
-                    // package name override for now; signature spoof via checkSignatures
-                    // is already covered, and full cert spoof would need per-app cert.
-                    // We log that signature spoof is enabled but handled via checkSignatures.
                 }
             }
         }
@@ -101,8 +84,9 @@ val spoofAppSignaturePatch = bytecodePatch(
         if (spoofSignature == true) {
             var sigPatched = 0
             classDefForEach { classDef ->
-                val mutableClass = mutableClassDefBy(classDef)
-                for (method in mutableClass.methods) {
+                val mutableClass by lazy { mutableClassDefBy(classDef) }
+                for (method in classDef.methods) {
+                    val mutableMethod by lazy { mutableClass.findMutableMethodOf(method) }
                     val impl = method.implementation ?: continue
                     val instructions = impl.instructions.toList()
                     for ((index, insn) in instructions.withIndex()) {
@@ -110,11 +94,11 @@ val spoofAppSignaturePatch = bytecodePatch(
                         if (ref.definingClass != "Landroid/content/pm/PackageManager;" || ref.name != "checkSignatures" || ref.returnType != "I") continue
                         val next = instructions.getOrNull(index + 1) as? OneRegisterInstruction
                         if (next != null && next.opcode == Opcode.MOVE_RESULT) {
-                            method.replaceInstruction(index, "const/4 v${next.registerA}, 0x0")
-                            method.replaceInstruction(index + 1, "nop")
+                            mutableMethod.replaceInstruction(index, "const/4 v${next.registerA}, 0x0")
+                            mutableMethod.replaceInstruction(index + 1, "nop")
                             sigPatched++
                         } else {
-                            method.replaceInstruction(index, "nop")
+                            mutableMethod.replaceInstruction(index, "nop")
                             sigPatched++
                         }
                     }

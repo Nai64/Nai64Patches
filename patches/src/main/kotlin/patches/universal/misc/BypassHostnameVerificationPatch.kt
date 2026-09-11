@@ -2,6 +2,7 @@ package patches.universal.misc
 
 import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
 import app.morphe.patcher.patch.bytecodePatch
+import patches.universal.ads.util.findMutableMethodOf
 import java.util.logging.Logger
 
 @Suppress("unused")
@@ -18,14 +19,17 @@ val bypassHostnameVerificationPatch = bytecodePatch(
         var patched = 0
         classDefForEach { classDef ->
             if (classDef.interfaces.none { it == "Ljavax/net/ssl/HostnameVerifier;" }) return@classDefForEach
-            val mutableClass = mutableClassDefBy(classDef)
-            for (method in mutableClass.methods) {
+            val mutableClass by lazy { mutableClassDefBy(classDef) }
+            for (method in classDef.methods) {
+                val mutableMethod by lazy {
+                    mutableClass.findMutableMethodOf(method)
+                }
                 val impl = method.implementation ?: continue
                 if (method.returnType != "Z") continue
                 if (method.name != "verify") continue
                 if (method.parameterTypes != listOf("Ljava/lang/String;", "Ljavax/net/ssl/SSLSession;")) continue
-                method.addInstruction(0, "const/4 v0, 0x1")
-                method.addInstruction(1, "return v0")
+                mutableMethod.addInstruction(0, "const/4 v0, 0x1")
+                mutableMethod.addInstruction(1, "return v0")
                 patched++
             }
         }

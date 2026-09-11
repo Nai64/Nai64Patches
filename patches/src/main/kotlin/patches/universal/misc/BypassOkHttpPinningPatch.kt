@@ -2,6 +2,7 @@ package patches.universal.misc
 
 import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
 import app.morphe.patcher.patch.bytecodePatch
+import patches.universal.ads.util.findMutableMethodOf
 import java.util.logging.Logger
 
 /** OkHttp2/OkHttp3 CertificatePinner variants. */
@@ -31,14 +32,15 @@ val bypassOkHttpPinningPatch = bytecodePatch(
         classDefForEach { classDef ->
             if (pinnerClasses.none { classDef.type.startsWith(it) }) return@classDefForEach
 
-            val mutableClass = mutableClassDefBy(classDef)
-            for (method in mutableClass.methods) {
+            val mutableClass by lazy { mutableClassDefBy(classDef) }
+            for (method in classDef.methods) {
                 // Only void check methods are touched; they throw instead of returning values,
                 // so an immediate return disables rejection entirely.
                 if (method.returnType != "V") continue
                 if (method.name !in checkMethods) continue
 
-                method.addInstruction(0, "return-void")
+                mutableClass.findMutableMethodOf(method)
+                    .addInstruction(0, "return-void")
                 patched++
             }
         }
