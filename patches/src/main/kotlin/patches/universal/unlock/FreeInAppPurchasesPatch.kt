@@ -19,7 +19,38 @@ val freeInAppPurchasesPatch = bytecodePatch(
         var patched = 0
         val patchedMethods = mutableSetOf<String>()
 
-        fun patchAll(fp: Fingerprint, label: String, injector: (app.morphe.patcher.util.proxy.mutableTypes.MutableMethod) -> Unit) {
+        // Minimum registers a frame provably holds: param slots (J/D count
+        // double) plus this for instance methods. Injected blocks use fixed
+        // low regs, and writing past the frame fails verification for the
+        // whole class (frozen loading screens), so every injection below is
+        // gated on the frame holding it.
+        fun minRegs(m: app.morphe.patcher.util.proxy.mutableTypes.MutableMethod): Int {
+            return try {
+                var slots = 0
+                if (!com.android.tools.smali.dexlib2.AccessFlags.STATIC.isSet(m.accessFlags)) slots += 1
+                for (p in m.parameterTypes) slots += if (p == "J" || p == "D") 2 else 1
+                slots
+            } catch (_: Exception) { 0 }
+        }
+        // Frame expansion for injections needing more regs than the frame
+        // holds: clone with extra registers and swap the clone in. The
+        // prologue cloneMutable adds is harmless because expanded injections
+        // always return before the original body runs.
+        fun expandSwap(m: app.morphe.patcher.util.proxy.mutableTypes.MutableMethod, block: String): Boolean {
+            return try {
+                val owner = mutableClassDefByOrNull(m.definingClass) ?: return false
+                val target = owner.methods.firstOrNull {
+                    it.name == m.name && it.parameterTypes == m.parameterTypes && it.returnType == m.returnType
+                } ?: return false
+                val cloned = m.cloneMutable(additionalRegisters = 4)
+                owner.methods.remove(target)
+                cloned.addInstructions(0, block)
+                owner.methods.add(cloned)
+                logger.info("FreeIAP expanded frame: ${m.definingClass}->${m.name}")
+                true
+            } catch (_: Exception) { false }
+        }
+        fun patchAll(fp: Fingerprint, label: String, needRegs: Int = 1, injector: (app.morphe.patcher.util.proxy.mutableTypes.MutableMethod) -> Unit) {
             // try multi-match first via context receiver
             try {
                 val matches: List<app.morphe.patcher.Match> = try {
@@ -32,6 +63,10 @@ val freeInAppPurchasesPatch = bytecodePatch(
                         try {
                             val method = m.method
                             if (method.implementation == null) continue
+                            if (minRegs(method) < needRegs) {
+                                logger.info("FreeIAP skipped tiny frame: ${method.definingClass}->${method.name} regs=${minRegs(method)} need=$needRegs label=$label")
+                                continue
+                            }
                             injector(method)
                             patched++
                             patchedMethods.add(label)
@@ -44,6 +79,7 @@ val freeInAppPurchasesPatch = bytecodePatch(
             val single = try { with(this@execute) { fp.matchOrNull() }?.method } catch (_: Exception) { null } ?: try { fp.methodOrNull } catch (_: Exception) { null }
             if (single?.implementation != null) {
                 try {
+                    if (minRegs(single) < needRegs) return
                     injector(single)
                     patched++
                     patchedMethods.add(label)
@@ -66,7 +102,7 @@ val freeInAppPurchasesPatch = bytecodePatch(
         // GOOGLE PLAY BILLING
         // ──────────────────────────────────────────────
 
-        patchAll(Fingerprint(name = "launchBillingFlow", custom = { m, _ -> m.returnType.contains("BillingResult") }), "launchBillingFlow") {
+        patchAll(Fingerprint(name = "launchBillingFlow", custom = { m, _ -> m.returnType.contains("BillingResult") }), "launchBillingFlow", 2) {
             try {
                 it.addInstructions(0, okBillingResult)
             } catch (_: Exception) {
@@ -76,7 +112,7 @@ val freeInAppPurchasesPatch = bytecodePatch(
 
         // Unity IL2CPP native bridge (BillingClientImpl.launchBillingFlowCpp):
         // exact-name fingerprint above misses it, so cover by return type.
-        patchAll(Fingerprint(name = "launchBillingFlowCpp"), "launchBillingFlowCpp") {
+        patchAll(Fingerprint(name = "launchBillingFlowCpp"), "launchBillingFlowCpp", 2) {
             when {
                 it.returnType.contains("BillingResult") -> try {
                     it.addInstructions(0, okBillingResult)
@@ -102,7 +138,7 @@ val freeInAppPurchasesPatch = bytecodePatch(
         // overload (e.g. the native (J) bridge used by Unity IL2CPP games)
         // is left completely untouched: voiding it strands native setup
         // with no callback and freezes the app on its loading screen.
-        patchAll(Fingerprint(name = "startConnection", custom = { _, c -> c.type.contains("BillingClient") }), "BillingClient.startConnection") {
+        patchAll(Fingerprint(name = "startConnection", custom = { _, c -> c.type.contains("BillingClient")         }), "BillingClient.startConnection", 2) {
             if (it.parameterTypes == listOf("Lcom/android/billingclient/api/BillingClientStateListener;") && it.returnType == "V") {
                 it.addInstructions(0, """
                     invoke-static {}, Lcom/android/billingclient/api/BillingResult;->newBuilder()Lcom/android/billingclient/api/BillingResult${'$'}Builder;
@@ -125,7 +161,7 @@ val freeInAppPurchasesPatch = bytecodePatch(
         // delivered via queryPurchasesAsync / launchBillingFlow callbacks below.
 
         // getBuyIntent -> OK bundle (legacy AIDL v5/v7)
-        patchAll(Fingerprint(name = "getBuyIntent", returnType = "Landroid/os/Bundle;"), "getBuyIntent") {
+        patchAll(Fingerprint(name = "getBuyIntent", returnType = "Landroid/os/Bundle;"), "getBuyIntent", 3) {
             if (it.parameterTypes.size >= 2) {
                 it.addInstructions(0, """
                     new-instance v0, Landroid/os/Bundle;
@@ -147,13 +183,16 @@ val freeInAppPurchasesPatch = bytecodePatch(
         // getPurchases / queryPurchases -> empty list or empty bundle,
         // or fire listener callback with a fake PURCHASED purchase (startup/resume grant path)
         for (qn in listOf("getPurchases", "queryPurchases", "queryPurchasesAsync", "queryPurchaseHistory", "queryPurchaseHistoryAsync", "queryPurchasesHistory")) {
-            patchAll(Fingerprint(name = qn, custom = { m, c -> c.type.contains("BillingClient") || m.definingClass.contains("billing") || c.type.lowercase().contains("billing") }), qn) {
+            patchAll(Fingerprint(name = qn, custom = { m, c -> c.type.contains("BillingClient") || m.definingClass.contains("billing") || c.type.lowercase().contains("billing") }), qn, 3) {
                 val listenerIdx = it.parameterTypes.indexOfFirst { p -> p.contains("PurchasesResponseListener") || p.contains("PurchaseHistoryResponseListener") }
                 if (listenerIdx >= 0 && it.returnType == "V") {
                     val isHistory = it.parameterTypes[listenerIdx].contains("History")
                     val listenerReg = "p${listenerIdx + 1}"
-                    if (isHistory) {
-                        it.addInstructions(0, """
+                    // v0..v3: expanded into a grown frame via expandSwap so
+                    // tiny delegate frames (e.g. 3-reg BillingClientImpl
+                    // methods) verify instead of killing their class.
+                    val block = if (isHistory) {
+                        """
                             invoke-static {}, Lcom/android/billingclient/api/BillingResult;->newBuilder()Lcom/android/billingclient/api/BillingResult${'$'}Builder;
                             move-result-object v0
                             const/4 v1, 0x0
@@ -171,9 +210,9 @@ val freeInAppPurchasesPatch = bytecodePatch(
                             move-object v3, $listenerReg
                             invoke-interface {v3, v0, v1}, Lcom/android/billingclient/api/PurchaseHistoryResponseListener;->onPurchaseHistoryResponse(Lcom/android/billingclient/api/BillingResult;Ljava/util/List;)V
                             return-void
-                        """.trimIndent())
+                        """.trimIndent()
                     } else {
-                        it.addInstructions(0, """
+                        """
                             invoke-static {}, Lcom/android/billingclient/api/BillingResult;->newBuilder()Lcom/android/billingclient/api/BillingResult${'$'}Builder;
                             move-result-object v0
                             const/4 v1, 0x0
@@ -189,7 +228,10 @@ val freeInAppPurchasesPatch = bytecodePatch(
                             move-object v3, $listenerReg
                             invoke-interface {v3, v0, v1}, Lcom/android/billingclient/api/PurchasesResponseListener;->onQueryPurchasesResponse(Lcom/android/billingclient/api/BillingResult;Ljava/util/List;)V
                             return-void
-                        """.trimIndent())
+                        """.trimIndent()
+                    }
+                    if (!expandSwap(it, block) && minRegs(it) >= 4) {
+                        it.addInstructions(0, block)
                     }
                 } else when {
                     it.returnType.contains("List") -> it.addInstructions(0, "invoke-static {}, Ljava/util/Collections;->emptyList()Ljava/util/List;\nmove-result-object v0\nreturn-object v0")
@@ -215,7 +257,7 @@ val freeInAppPurchasesPatch = bytecodePatch(
         // waiting for products); sync variants returning List get emptyList
         // (voiding those would crash verification).
         for (qn in listOf("querySkuDetailsAsync", "queryProductDetailsAsync", "querySkuDetails", "queryProductDetails", "queryProductDetailsAsyncWithListener")) {
-            patchAll(Fingerprint(name = qn), qn) {
+            patchAll(Fingerprint(name = qn), qn, 3) {
                 val listenerIdx = it.parameterTypes.indexOfFirst { p -> p.contains("ProductDetailsResponseListener") || p.contains("SkuDetailsResponseListener") }
                 if (listenerIdx >= 0 && it.returnType == "V") {
                     val isSku = it.parameterTypes[listenerIdx].contains("SkuDetails")
@@ -246,7 +288,7 @@ val freeInAppPurchasesPatch = bytecodePatch(
 
         // getSkuDetails / getProductDetails AIDL
         for (qn in listOf("getSkuDetails", "getProductDetails")) {
-            patchAll(Fingerprint(name = qn, returnType = "Landroid/os/Bundle;"), qn) {
+            patchAll(Fingerprint(name = qn, returnType = "Landroid/os/Bundle;"), qn, 3) {
                 it.addInstructions(0, """
                     new-instance v0, Landroid/os/Bundle;
                     invoke-direct {v0}, Landroid/os/Bundle;-><init>()V
@@ -260,7 +302,7 @@ val freeInAppPurchasesPatch = bytecodePatch(
 
         // consumePurchase / consumeAsync -> fire listener callback with OK, else spoof return
         for (cn in listOf("consumePurchase", "consumeAsync", "consumePurchaseAsync")) {
-            patchAll(Fingerprint(name = cn), cn) {
+            patchAll(Fingerprint(name = cn), cn, 3) {
                 val listenerIdx = it.parameterTypes.indexOfFirst { p -> p.contains("ConsumeResponseListener") }
                 if (listenerIdx == 1 && it.parameterTypes.size == 2 && it.parameterTypes[0].contains("ConsumeParams") && it.returnType == "V") {
                     val listenerReg = "p${listenerIdx + 1}"
@@ -297,7 +339,7 @@ val freeInAppPurchasesPatch = bytecodePatch(
             }
         }
 
-        patchAll(Fingerprint(name = "acknowledgePurchase"), "acknowledgePurchase") {
+        patchAll(Fingerprint(name = "acknowledgePurchase"), "acknowledgePurchase", 2) {
             val listenerIdx = it.parameterTypes.indexOfFirst { p -> p.contains("AcknowledgePurchaseResponseListener") }
             if (listenerIdx == 1 && it.parameterTypes.size == 2 && it.parameterTypes[0].contains("AcknowledgePurchaseParams") && it.returnType == "V") {
                 val listenerReg = "p${listenerIdx + 1}"
@@ -320,7 +362,7 @@ val freeInAppPurchasesPatch = bytecodePatch(
             }
         }
 
-        patchAll(Fingerprint(name = "getBillingConfig"), "getBillingConfig") {
+        patchAll(Fingerprint(name = "getBillingConfig"), "getBillingConfig", 2) {
             when {
                 it.returnType.contains("BillingResult") -> it.addInstructions(0, okBillingResult)
                 else -> it.addInstructions(0, "return-void")
@@ -334,10 +376,10 @@ val freeInAppPurchasesPatch = bytecodePatch(
             }
         }
         // OneTimePurchaseOfferDetails / SubscriptionOfferDetails micros
-        patchAll(Fingerprint(name = "getPriceAmountMicros", returnType = "J"), "getPriceAmountMicros") {
+        patchAll(Fingerprint(name = "getPriceAmountMicros", returnType = "J"), "getPriceAmountMicros", 2) {
             it.addInstructions(0, "const-wide/16 v0, 0x0\nreturn-wide v0")
         }
-        patchAll(Fingerprint(name = "getPriceAmountMicros", custom = { _, c -> c.type.lowercase().contains("offer") }), "Offer.getPriceAmountMicros") {
+        patchAll(Fingerprint(name = "getPriceAmountMicros", custom = { _, c -> c.type.lowercase().contains("offer") }), "Offer.getPriceAmountMicros", 2) {
             if (it.returnType == "J") it.addInstructions(0, "const-wide/16 v0, 0x0\nreturn-wide v0")
         }
         // getOriginalJson -> fake json
@@ -368,7 +410,7 @@ val freeInAppPurchasesPatch = bytecodePatch(
             it.addInstructions(0, "const-string v0, \"morphe_fake\"\ninvoke-static {v0}, Ljava/util/Collections;->singletonList(Ljava/lang/Object;)Ljava/util/List;\nmove-result-object v0\nreturn-object v0")
         }
 
-        patchAll(Fingerprint(name = "isFeatureSupported"), "isFeatureSupported") {
+        patchAll(Fingerprint(name = "isFeatureSupported"), "isFeatureSupported", 2) {
             when {
                 it.returnType.contains("BillingResult") -> it.addInstructions(0, okBillingResult)
                 it.returnType == "I" -> it.addInstructions(0, "const/4 v0, 0x0\nreturn v0")
