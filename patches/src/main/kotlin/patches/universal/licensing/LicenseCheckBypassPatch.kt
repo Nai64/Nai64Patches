@@ -41,7 +41,8 @@ val bypassLicenseVerificationPatch = bytecodePatch(
             0,
             """
             const/16 v0, 0x100
-            invoke-interface {p1, v0}, Lcom/google/android/vending/licensing/LicenseCheckerCallback;->allow(I)V
+            move-object/from16 v1, p1
+            invoke-interface {v1, v0}, Lcom/google/android/vending/licensing/LicenseCheckerCallback;->allow(I)V
             return-void
             """.trimIndent(),
         )
