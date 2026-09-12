@@ -1,6 +1,6 @@
 {
   "NOTE": "Do NOT manually edit this file. This file is automatically updated when semantic release (release.yml) runs. Manually editing this file can break your releases and break third party tools that use this file.",
-  "version": "1.48.0",
+  "version": "1.49.0",
   "patches": [
     {
       "name": "Unlock Premium",
@@ -23,12 +23,22 @@
     },
     {
       "name": "Free In-app Purchases",
-      "description": "Get paid items for free. Best for offline games.",
+      "description": "Get paid items free: buying grants items without charging. Best for offline games.",
       "default": false,
       "category": "Featured",
       "dependencies": [],
       "compatiblePackages": null,
-      "options": []
+      "options": [
+        {
+          "key": "fakeStartupPurchases",
+          "title": "Fake owned purchases at startup",
+          "description": "Deliver a fake owned purchase on every inventory query. Helps games that only grant at boot, but can stall strict Unity titles. Leave off if a game hangs on loading.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        }
+      ]
     },
     {
       "name": "No Ads",
@@ -5172,6 +5182,52 @@
       "dependencies": [],
       "compatiblePackages": null,
       "options": []
+    },
+    {
+      "name": "Legacy App Reviver",
+      "description": "Revives Android 1.0-5.0 era apps on modern Android: restores the removed Apache HTTP stack, and declares the foreground-service, exact-alarm and Bluetooth permissions that old apps assume. Combine with SpoofTargetSdk (28), AllowCleartextTraffic, LegacyExternalStorage, SupportAllScreens, UnlockMaxAspectRatio, RelaxSharedLibraries, SpoofImei, Bypass Play License Check, Bypass Google Play Services Check, DisableHeapPointerTagging and VmSafeMode. Cannot fix armeabi-only native code on 64-bit-only devices or shut-down game servers.",
+      "default": false,
+      "category": "Enable",
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": [
+        {
+          "key": "apacheLegacy",
+          "title": "Apache HTTP legacy library",
+          "description": "Adds org.apache.http.legacy as an optional shared library. Fixes instant crashes in pre-2015 apps using HttpClient or AndroidHttpClient.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": true,
+          "values": null
+        },
+        {
+          "key": "foregroundService",
+          "title": "Foreground service permission",
+          "description": "Declares FOREGROUND_SERVICE, required since Android 9 for apps playing music or tracking in the background.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": true,
+          "values": null
+        },
+        {
+          "key": "exactAlarms",
+          "title": "Exact alarm permissions",
+          "description": "Declares SCHEDULE_EXACT_ALARM and USE_EXACT_ALARM for old reminder and alarm apps.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": true,
+          "values": null
+        },
+        {
+          "key": "bluetooth",
+          "title": "Bluetooth permissions",
+          "description": "Declares BLUETOOTH_CONNECT and BLUETOOTH_SCAN for old Bluetooth apps and companion-device flows.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": true,
+          "values": null
+        }
+      ]
     },
     {
       "name": "Nai64Patches Universal Overlay Patch v1.0 (Experimental)",
