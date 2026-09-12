@@ -4,16 +4,23 @@ import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.booleanOption
 import patches.universal.ads.util.cloneMutable
 import java.util.logging.Logger
 
 @Suppress("unused")
 val freeInAppPurchasesPatch = bytecodePatch(
     name = "Free In-app Purchases",
-    description = "Get paid items for free. Best for offline games.",
+    description = "Get paid items free: buying grants items without charging. Best for offline games.",
     default = false,
 ) {
     category("Featured")
+    val fakeStartupPurchases by booleanOption(
+        title = "Fake owned purchases at startup",
+        default = false,
+        key = "fakeStartupPurchases",
+        description = "Deliver a fake owned purchase on every inventory query. Helps games that only grant at boot, but can stall strict Unity titles. Leave off if a game hangs on loading.",
+    )
     execute {
         val logger = Logger.getLogger(this::class.java.name)
         var patched = 0
@@ -102,8 +109,100 @@ val freeInAppPurchasesPatch = bytecodePatch(
         // GOOGLE PLAY BILLING
         // ──────────────────────────────────────────────
 
+        // Resolve iget chain loading the PurchasesUpdatedListener into v0
+        // on a BillingClient impl. Billing 5-7 holds it directly; billing
+        // 8+ buries it in a holder (e.g. zze:zzn -> zzn.zzb). Field names
+        // are obfuscated per version, so resolve by TYPE at patch time.
+        fun listenerIget(defClass: String): String? {
+            return try {
+                val cls = mutableClassDefByOrNull(defClass) ?: return null
+                val direct = cls.fields.firstOrNull {
+                    it.type == "Lcom/android/billingclient/api/PurchasesUpdatedListener;"
+                }
+                if (direct != null) {
+                    return "iget-object v0, v0, $defClass->${direct.name}:${direct.type}"
+                }
+                for (f in cls.fields) {
+                    val holder = f.type
+                    if (!holder.startsWith("Lcom/android/billingclient/api/")) continue
+                    if (holder.contains("Listener;")) continue
+                    val holderCls = try { mutableClassDefByOrNull(holder) } catch (_: Exception) { null } ?: continue
+                    val inner = holderCls.fields.firstOrNull {
+                        it.type == "Lcom/android/billingclient/api/PurchasesUpdatedListener;"
+                    } ?: continue
+                    return "iget-object v0, v0, $defClass->${f.name}:${f.type}\n" +
+                        "iget-object v0, v0, $holder->${inner.name}:${inner.type}"
+                }
+                null
+            } catch (_: Exception) { null }
+        }
+        // Buy-time grant block for launchBillingFlow (v0..v3, instance
+        // methods only): fire onPurchasesUpdated(OK, [fake PURCHASED]) on
+        // the client's own listener, then return OK. Null listener falls
+        // through to OK-only. This mirrors native MOD-menu behavior: the
+        // grant happens when the user buys, while init/query/catalog paths
+        // stay stock so strict titles keep booting.
+        // NOTE (morphe inline-smali quirk, verified by assembling test
+        // fragments): p-regs resolving above v15 FAIL to assemble in
+        // methods with big frames, and the failed line is silently
+        // dropped. Every injection below therefore copies params with
+        // move-*/from16 (which assembles in any frame) and otherwise
+        // touches only v-regs. NEVER use a narrow opcode with a p-reg.
+        fun buyGrantBlock(igetTail: String): String {
+            return """
+                move-object/from16 v0, p0
+                $igetTail
+                if-eqz v0, :morphe_iap_nocb
+                const-string v1, "{\"orderId\":\"morphe_fake\",\"packageName\":\"morphe_fake\",\"productId\":\"morphe_fake\",\"purchaseTime\":0,\"purchaseState\":1,\"purchaseToken\":\"morphe_fake\",\"quantity\":1,\"acknowledged\":true}"
+                const-string v2, "morphe_fake"
+                new-instance v3, Lcom/android/billingclient/api/Purchase;
+                invoke-direct {v3, v1, v2}, Lcom/android/billingclient/api/Purchase;-><init>(Ljava/lang/String;Ljava/lang/String;)V
+                new-instance v1, Ljava/util/ArrayList;
+                invoke-direct {v1}, Ljava/util/ArrayList;-><init>()V
+                invoke-virtual {v1, v3}, Ljava/util/ArrayList;->add(Ljava/lang/Object;)Z
+                move-object v3, v1
+                invoke-static {}, Lcom/android/billingclient/api/BillingResult;->newBuilder()Lcom/android/billingclient/api/BillingResult${'$'}Builder;
+                move-result-object v1
+                const/4 v2, 0x0
+                invoke-virtual {v1, v2}, Lcom/android/billingclient/api/BillingResult${'$'}Builder;->setResponseCode(I)Lcom/android/billingclient/api/BillingResult${'$'}Builder;
+                move-result-object v1
+                invoke-virtual {v1}, Lcom/android/billingclient/api/BillingResult${'$'}Builder;->build()Lcom/android/billingclient/api/BillingResult;
+                move-result-object v1
+                invoke-interface {v0, v1, v3}, Lcom/android/billingclient/api/PurchasesUpdatedListener;->onPurchasesUpdated(Lcom/android/billingclient/api/BillingResult;Ljava/util/List;)V
+                goto :morphe_iap_done
+                :morphe_iap_nocb
+                invoke-static {}, Lcom/android/billingclient/api/BillingResult;->newBuilder()Lcom/android/billingclient/api/BillingResult${'$'}Builder;
+                move-result-object v1
+                const/4 v2, 0x0
+                invoke-virtual {v1, v2}, Lcom/android/billingclient/api/BillingResult${'$'}Builder;->setResponseCode(I)Lcom/android/billingclient/api/BillingResult${'$'}Builder;
+                move-result-object v1
+                invoke-virtual {v1}, Lcom/android/billingclient/api/BillingResult${'$'}Builder;->build()Lcom/android/billingclient/api/BillingResult;
+                move-result-object v1
+                :morphe_iap_done
+                return-object v1
+            """.trimIndent()
+        }
+
         patchAll(Fingerprint(name = "launchBillingFlow", custom = { m, _ -> m.returnType.contains("BillingResult") }), "launchBillingFlow", 2) {
-            try {
+            val isStatic = try {
+                com.android.tools.smali.dexlib2.AccessFlags.STATIC.isSet(it.accessFlags)
+            } catch (_: Exception) { true }
+            val field = if (!isStatic) listenerIget(it.definingClass) else null
+            if (field != null) {
+                val block = buyGrantBlock(field)
+                var granted = false
+                if (minRegs(it) >= 4) {
+                    try { it.addInstructions(0, block); granted = true } catch (_: Exception) {}
+                }
+                if (!granted) {
+                    try { granted = expandSwap(it, block) } catch (_: Exception) {}
+                }
+                if (granted) {
+                    logger.info("FreeIAP buy-time grant: ${it.definingClass}->${it.name}")
+                } else try {
+                    it.addInstructions(0, okBillingResult)
+                } catch (_: Exception) {}
+            } else try {
                 it.addInstructions(0, okBillingResult)
             } catch (_: Exception) {
                 try { it.addInstructions(0, "const/4 v0, 0x0\nreturn-object v0") } catch (_: Exception) {}
@@ -113,6 +212,28 @@ val freeInAppPurchasesPatch = bytecodePatch(
         // Unity IL2CPP native bridge (BillingClientImpl.launchBillingFlowCpp):
         // exact-name fingerprint above misses it, so cover by return type.
         patchAll(Fingerprint(name = "launchBillingFlowCpp"), "launchBillingFlowCpp", 2) {
+            val isStatic = try {
+                com.android.tools.smali.dexlib2.AccessFlags.STATIC.isSet(it.accessFlags)
+            } catch (_: Exception) { true }
+            val field = if (!isStatic) listenerIget(it.definingClass) else null
+            if (field != null && it.returnType.contains("BillingResult")) {
+                val block = buyGrantBlock(field)
+                var granted = false
+                if (minRegs(it) >= 4) {
+                    try { it.addInstructions(0, block); granted = true } catch (_: Exception) {}
+                }
+                if (!granted) {
+                    try { granted = expandSwap(it, block) } catch (_: Exception) {}
+                }
+                if (granted) {
+                    logger.info("FreeIAP buy-time grant: ${it.definingClass}->${it.name}")
+                    return@patchAll
+                }
+                try {
+                    it.addInstructions(0, okBillingResult)
+                    return@patchAll
+                } catch (_: Exception) {}
+            }
             when {
                 it.returnType.contains("BillingResult") -> try {
                     it.addInstructions(0, okBillingResult)
@@ -133,11 +254,14 @@ val freeInAppPurchasesPatch = bytecodePatch(
         }
 
         // startConnection(BillingClientStateListener) -> fire
-        // onBillingSetupFinished(OK) on the listener, otherwise the app
-        // waits for setup forever and billing never inits. Any other
-        // overload (e.g. the native (J) bridge used by Unity IL2CPP games)
-        // is left completely untouched: voiding it strands native setup
-        // with no callback and freezes the app on its loading screen.
+        // onBillingSetupFinished(OK) on the listener, then FALL THROUGH to
+        // the real body (no return): the real connection still runs, so the
+        // untouched product catalog below keeps working on devices with
+        // Play, while no-Play devices boot on the early OK instead of
+        // waiting for setup forever. Any other overload (e.g. the native
+        // (J) bridge used by Unity IL2CPP games) is left completely
+        // untouched: voiding it strands native setup with no callback and
+        // freezes the app on its loading screen.
         patchAll(Fingerprint(name = "startConnection", custom = { _, c -> c.type.contains("BillingClient")         }), "BillingClient.startConnection", 2) {
             if (it.parameterTypes == listOf("Lcom/android/billingclient/api/BillingClientStateListener;") && it.returnType == "V") {
                 it.addInstructions(0, """
@@ -148,17 +272,16 @@ val freeInAppPurchasesPatch = bytecodePatch(
                     move-result-object v0
                     invoke-virtual {v0}, Lcom/android/billingclient/api/BillingResult${'$'}Builder;->build()Lcom/android/billingclient/api/BillingResult;
                     move-result-object v0
-                    move-object v1, p1
+                    move-object/from16 v1, p1
                     invoke-interface {v1, v0}, Lcom/android/billingclient/api/BillingClientStateListener;->onBillingSetupFinished(Lcom/android/billingclient/api/BillingResult;)V
-                    return-void
                 """.trimIndent())
             }
             // else: leave the overload alone (see comment above)
         }
 
-        // onPurchasesUpdated is intentionally left intact: the game grants items in its
-        // own listener, so suppressing it would prevent granting. Fake purchases are
-        // delivered via queryPurchasesAsync / launchBillingFlow callbacks below.
+        // onPurchasesUpdated is fired by the buy-time grant in
+        // launchBillingFlow above and intentionally left intact elsewhere:
+        // the game grants items in its own listener.
 
         // getBuyIntent -> OK bundle (legacy AIDL v5/v7)
         patchAll(Fingerprint(name = "getBuyIntent", returnType = "Landroid/os/Bundle;"), "getBuyIntent", 3) {
@@ -180,14 +303,33 @@ val freeInAppPurchasesPatch = bytecodePatch(
             else if (it.returnType == "Z") it.addInstructions(0, "const/4 v0, 0x1\nreturn v0")
         }
 
-        // getPurchases / queryPurchases -> empty list or empty bundle,
-        // or fire listener callback with a fake PURCHASED purchase (startup/resume grant path)
+        // getPurchases / queryPurchases -> empty list or empty bundle.
+        // Listener callbacks get OK + EMPTY list by default (MOD-menu
+        // behavior: inventory restores nothing, the grant happens at buy
+        // time). The fakeStartupPurchases option restores the old fake
+        // PURCHASED delivery for games that only grant at boot.
         for (qn in listOf("getPurchases", "queryPurchases", "queryPurchasesAsync", "queryPurchaseHistory", "queryPurchaseHistoryAsync", "queryPurchasesHistory")) {
             patchAll(Fingerprint(name = qn, custom = { m, c -> c.type.contains("BillingClient") || m.definingClass.contains("billing") || c.type.lowercase().contains("billing") }), qn, 3) {
                 val listenerIdx = it.parameterTypes.indexOfFirst { p -> p.contains("PurchasesResponseListener") || p.contains("PurchaseHistoryResponseListener") }
                 if (listenerIdx >= 0 && it.returnType == "V") {
                     val isHistory = it.parameterTypes[listenerIdx].contains("History")
                     val listenerReg = "p${listenerIdx + 1}"
+                    val iface = if (isHistory) "Lcom/android/billingclient/api/PurchaseHistoryResponseListener;" else "Lcom/android/billingclient/api/PurchasesResponseListener;"
+                    val cb = if (isHistory) "onPurchaseHistoryResponse" else "onQueryPurchasesResponse"
+                    if (fakeStartupPurchases != true) {
+                        it.addInstructions(0, """
+                            invoke-static {}, Lcom/android/billingclient/api/BillingResult;->newBuilder()Lcom/android/billingclient/api/BillingResult${'$'}Builder;
+                            move-result-object v0
+                            const/4 v1, 0x0
+                            invoke-virtual {v0, v1}, Lcom/android/billingclient/api/BillingResult${'$'}Builder;->setResponseCode(I)Lcom/android/billingclient/api/BillingResult${'$'}Builder;
+                            move-result-object v0
+                            invoke-static {}, Ljava/util/Collections;->emptyList()Ljava/util/List;
+                            move-result-object v1
+                            move-object/from16 v2, $listenerReg
+                            invoke-interface {v2, v0, v1}, $iface->$cb(Lcom/android/billingclient/api/BillingResult;Ljava/util/List;)V
+                            return-void
+                        """.trimIndent())
+                    } else {
                     // v0..v3: expanded into a grown frame via expandSwap so
                     // tiny delegate frames (e.g. 3-reg BillingClientImpl
                     // methods) verify instead of killing their class.
@@ -207,7 +349,7 @@ val freeInAppPurchasesPatch = bytecodePatch(
                             new-instance v1, Ljava/util/ArrayList;
                             invoke-direct {v1}, Ljava/util/ArrayList;-><init>()V
                             invoke-virtual {v1, v3}, Ljava/util/ArrayList;->add(Ljava/lang/Object;)Z
-                            move-object v3, $listenerReg
+                            move-object/from16 v3, $listenerReg
                             invoke-interface {v3, v0, v1}, Lcom/android/billingclient/api/PurchaseHistoryResponseListener;->onPurchaseHistoryResponse(Lcom/android/billingclient/api/BillingResult;Ljava/util/List;)V
                             return-void
                         """.trimIndent()
@@ -225,13 +367,14 @@ val freeInAppPurchasesPatch = bytecodePatch(
                             new-instance v1, Ljava/util/ArrayList;
                             invoke-direct {v1}, Ljava/util/ArrayList;-><init>()V
                             invoke-virtual {v1, v3}, Ljava/util/ArrayList;->add(Ljava/lang/Object;)Z
-                            move-object v3, $listenerReg
+                            move-object/from16 v3, $listenerReg
                             invoke-interface {v3, v0, v1}, Lcom/android/billingclient/api/PurchasesResponseListener;->onQueryPurchasesResponse(Lcom/android/billingclient/api/BillingResult;Ljava/util/List;)V
                             return-void
                         """.trimIndent()
                     }
                     if (!expandSwap(it, block) && minRegs(it) >= 4) {
                         it.addInstructions(0, block)
+                    }
                     }
                 } else when {
                     it.returnType.contains("List") -> it.addInstructions(0, "invoke-static {}, Ljava/util/Collections;->emptyList()Ljava/util/List;\nmove-result-object v0\nreturn-object v0")
@@ -252,39 +395,11 @@ val freeInAppPurchasesPatch = bytecodePatch(
             }
         }
 
-        // querySkuDetailsAsync / queryProductDetailsAsync -> fire the details
-        // listener with OK + empty list (a bare return-void hangs shop UIs
-        // waiting for products); sync variants returning List get emptyList
-        // (voiding those would crash verification).
-        for (qn in listOf("querySkuDetailsAsync", "queryProductDetailsAsync", "querySkuDetails", "queryProductDetails", "queryProductDetailsAsyncWithListener")) {
-            patchAll(Fingerprint(name = qn), qn, 3) {
-                val listenerIdx = it.parameterTypes.indexOfFirst { p -> p.contains("ProductDetailsResponseListener") || p.contains("SkuDetailsResponseListener") }
-                if (listenerIdx >= 0 && it.returnType == "V") {
-                    val isSku = it.parameterTypes[listenerIdx].contains("SkuDetails")
-                    val iface = if (isSku) "Lcom/android/billingclient/api/SkuDetailsResponseListener;" else "Lcom/android/billingclient/api/ProductDetailsResponseListener;"
-                    val cb = if (isSku) "onSkuDetailsResponse" else "onProductDetailsResponse"
-                    val listenerReg = "p${listenerIdx + 1}"
-                    it.addInstructions(0, """
-                        invoke-static {}, Lcom/android/billingclient/api/BillingResult;->newBuilder()Lcom/android/billingclient/api/BillingResult${'$'}Builder;
-                        move-result-object v0
-                        const/4 v1, 0x0
-                        invoke-virtual {v0, v1}, Lcom/android/billingclient/api/BillingResult${'$'}Builder;->setResponseCode(I)Lcom/android/billingclient/api/BillingResult${'$'}Builder;
-                        move-result-object v0
-                        invoke-virtual {v0}, Lcom/android/billingclient/api/BillingResult${'$'}Builder;->build()Lcom/android/billingclient/api/BillingResult;
-                        move-result-object v0
-                        invoke-static {}, Ljava/util/Collections;->emptyList()Ljava/util/List;
-                        move-result-object v1
-                        move-object v2, $listenerReg
-                        invoke-interface {v2, v0, v1}, $iface->$cb(Lcom/android/billingclient/api/BillingResult;Ljava/util/List;)V
-                        return-void
-                    """.trimIndent())
-                } else if (it.returnType.contains("List")) {
-                    it.addInstructions(0, "invoke-static {}, Ljava/util/Collections;->emptyList()Ljava/util/List;\nmove-result-object v0\nreturn-object v0")
-                } else if (it.returnType == "V") {
-                    it.addInstructions(0, "return-void")
-                }
-            }
-        }
+        // querySkuDetailsAsync / queryProductDetailsAsync and their sync
+        // List variants are intentionally LEFT STOCK: faking an empty
+        // catalog stalls Unity shop init on loading screens (native MOD
+        // menus never touch the catalog either). The grant happens at buy
+        // time via launchBillingFlow above.
 
         // getSkuDetails / getProductDetails AIDL
         for (qn in listOf("getSkuDetails", "getProductDetails")) {
@@ -315,10 +430,10 @@ val freeInAppPurchasesPatch = bytecodePatch(
                         move-result-object v0
                         invoke-virtual {v0}, Lcom/android/billingclient/api/BillingResult${'$'}Builder;->build()Lcom/android/billingclient/api/BillingResult;
                         move-result-object v0
-                        move-object v1, p1
+                        move-object/from16 v1, p1
                         invoke-virtual {v1}, Lcom/android/billingclient/api/ConsumeParams;->getPurchaseToken()Ljava/lang/String;
                         move-result-object v1
-                        move-object v2, $listenerReg
+                        move-object/from16 v2, $listenerReg
                         invoke-interface {v2, v0, v1}, Lcom/android/billingclient/api/ConsumeResponseListener;->onConsumeResponse(Lcom/android/billingclient/api/BillingResult;Ljava/lang/String;)V
                         return-void
                     """.trimIndent())
@@ -351,7 +466,7 @@ val freeInAppPurchasesPatch = bytecodePatch(
                     move-result-object v0
                     invoke-virtual {v0}, Lcom/android/billingclient/api/BillingResult${'$'}Builder;->build()Lcom/android/billingclient/api/BillingResult;
                     move-result-object v0
-                    move-object v1, $listenerReg
+                    move-object/from16 v1, $listenerReg
                     invoke-interface {v1, v0}, Lcom/android/billingclient/api/AcknowledgePurchaseResponseListener;->onAcknowledgePurchaseResponse(Lcom/android/billingclient/api/BillingResult;)V
                     return-void
                 """.trimIndent())
