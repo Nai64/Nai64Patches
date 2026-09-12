@@ -62,7 +62,8 @@ val skipConsentPopupPatch = bytecodePatch(
             0,
             """
             const/4 v0, 0x0
-            invoke-interface {p2, v0}, Lcom/google/android/ump/ConsentFormOnShowListener;->onConsentFormDismissed(Lcom/google/android/ump/FormError;)V
+            move-object/from16 v1, p2
+            invoke-interface {v1, v0}, Lcom/google/android/ump/ConsentFormOnShowListener;->onConsentFormDismissed(Lcom/google/android/ump/FormError;)V
             return-void
             """.trimIndent(),
         )
