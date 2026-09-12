@@ -118,7 +118,8 @@ val customResolutionPatch = bytecodePatch(
         // Assumes standard register layout: p0=this, p1=Bundle
         // Use v0/v1 for loaded values, v2 for window reference
         match.addInstructions(0, """
-            invoke-virtual {p0}, Landroid/app/Activity;->getWindow()Landroid/view/Window;
+            move-object/from16 v2, p0
+            invoke-virtual {v2}, Landroid/app/Activity;->getWindow()Landroid/view/Window;
             move-result-object v2
             const v0, ${w}
             const v1, ${h}
