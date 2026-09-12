@@ -27,9 +27,10 @@ internal object MapsInitCallbackFingerprint : Fingerprint(
 
 // Report SUCCESS and, for the callback overload, fire
 // onMapsSdkInitialized(LATEST) so map loading continues on MicroG.
-private const val MAPS_CALLBACK_SMALI =
-    "sget-object v0, Lcom/google/android/gms/maps/MapsInitializer" + "$" + "Renderer;->LATEST:Lcom/google/android/gms/maps/MapsInitializer" + "$" + "Renderer;\n" +
-        "invoke-interface {p2, v0}, Lcom/google/android/gms/maps/OnMapsSdkInitializedCallback;->onMapsSdkInitialized(Lcom/google/android/gms/maps/MapsInitializer" + "$" + "Renderer;)V\n" +
+private const val MAPS_CALLBACK_HEAD =
+    "move-object/from16 v2, p2\n" +
+        "sget-object v0, Lcom/google/android/gms/maps/MapsInitializer" + "$" + "Renderer;->LATEST:Lcom/google/android/gms/maps/MapsInitializer" + "$" + "Renderer;\n" +
+        "invoke-interface {v2, v0}, Lcom/google/android/gms/maps/OnMapsSdkInitializedCallback;->onMapsSdkInitialized(Lcom/google/android/gms/maps/MapsInitializer" + "$" + "Renderer;)V\n" +
         "const/4 v0, 0x0\nreturn v0"
 
 private fun BytecodePatchContext.patchMapsInit(logger: Logger): Int {
@@ -57,7 +58,7 @@ private fun BytecodePatchContext.patchMapsInit(logger: Logger): Int {
             try {
                 val method = m.method
                 if (method.implementation == null || method.returnType != "I") continue
-                method.addInstructions(0, MAPS_CALLBACK_SMALI)
+                method.addInstructions(0, MAPS_CALLBACK_HEAD)
                 patched++
             } catch (_: Exception) {}
         }
