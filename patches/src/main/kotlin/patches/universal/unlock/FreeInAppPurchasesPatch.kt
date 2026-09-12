@@ -96,8 +96,12 @@ val freeInAppPurchasesPatch = bytecodePatch(
             it.addInstructions(0, "return-void")
         }
 
-        // startConnection -> fire onBillingSetupFinished(OK) on the listener,
-        // otherwise the app waits for setup forever and billing never inits
+        // startConnection(BillingClientStateListener) -> fire
+        // onBillingSetupFinished(OK) on the listener, otherwise the app
+        // waits for setup forever and billing never inits. Any other
+        // overload (e.g. the native (J) bridge used by Unity IL2CPP games)
+        // is left completely untouched: voiding it strands native setup
+        // with no callback and freezes the app on its loading screen.
         patchAll(Fingerprint(name = "startConnection", custom = { _, c -> c.type.contains("BillingClient") }), "BillingClient.startConnection") {
             if (it.parameterTypes == listOf("Lcom/android/billingclient/api/BillingClientStateListener;") && it.returnType == "V") {
                 it.addInstructions(0, """
@@ -112,9 +116,8 @@ val freeInAppPurchasesPatch = bytecodePatch(
                     invoke-interface {v1, v0}, Lcom/android/billingclient/api/BillingClientStateListener;->onBillingSetupFinished(Lcom/android/billingclient/api/BillingResult;)V
                     return-void
                 """.trimIndent())
-            } else {
-                it.addInstructions(0, "return-void")
             }
+            // else: leave the overload alone (see comment above)
         }
 
         // onPurchasesUpdated is intentionally left intact: the game grants items in its
