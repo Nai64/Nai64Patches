@@ -1062,6 +1062,101 @@ internal object AdMobLegacyRewardedVideoShowFingerprint : Fingerprint(
     parameters = emptyList(),
 )
 
+// -- Ad SDK init killers (Disable Ad SDK Init patch) --
+// All init entry points return void; matched by name + defining class across
+// overloads (params intentionally unconstrained). A wrong guess simply does
+// not apply on a given app.
+
+internal object AdMobInitFingerprint : Fingerprint(
+    definingClass = "Lcom/google/android/gms/ads/MobileAds;",
+    name = "initialize",
+    returnType = "V",
+)
+
+internal object MaxInitSdkFingerprint : Fingerprint(
+    definingClass = "Lcom/applovin/sdk/AppLovinSdk;",
+    name = "initializeSdk",
+    returnType = "V",
+)
+
+internal object UnityAdsInitFingerprint : Fingerprint(
+    definingClass = "Lcom/unity3d/ads/UnityAds;",
+    name = "initialize",
+    returnType = "V",
+)
+
+internal object IronSourceInitFingerprint : Fingerprint(
+    definingClass = "Lcom/ironsource/mediationsdk/IronSource;",
+    name = "init",
+    returnType = "V",
+)
+
+internal object PangleInitFingerprint : Fingerprint(
+    definingClass = "Lcom/bytedance/sdk/openadsdk/TTAdSdk;",
+    name = "init",
+    returnType = "V",
+)
+
+internal object MetaInitFingerprint : Fingerprint(
+    definingClass = "Lcom/facebook/ads/AudienceNetworkAds;",
+    name = "initialize",
+    returnType = "V",
+)
+
+internal object VungleInitFingerprint : Fingerprint(
+    definingClass = "Lcom/vungle/ads/VungleAds;",
+    name = "init",
+    returnType = "V",
+)
+
+internal object VungleLegacyInitFingerprint : Fingerprint(
+    definingClass = "Lcom/vungle/warren/Vungle;",
+    name = "init",
+    returnType = "V",
+)
+
+internal object HuaweiInitFingerprint : Fingerprint(
+    definingClass = "Lcom/huawei/hms/ads/HwAds;",
+    name = "init",
+    returnType = "V",
+)
+
+internal object YandexInitFingerprint : Fingerprint(
+    definingClass = "Lcom/yandex/mobile/ads/common/MobileAds;",
+    name = "initialize",
+    returnType = "V",
+)
+
+internal object MyTargetInitFingerprint : Fingerprint(
+    definingClass = "Lcom/my/target/ads/MyTarget;",
+    name = "init",
+    returnType = "V",
+)
+
+internal object StartAppInitFingerprint : Fingerprint(
+    name = "init",
+    returnType = "V",
+    strings = listOf("com.startapp", "StartAppSDK"),
+)
+
+internal object ChartboostInitFingerprint : Fingerprint(
+    definingClass = "Lcom/chartboost/sdk/Chartboost;",
+    name = "startWithAppId",
+    returnType = "V",
+)
+
+internal object InMobiInitFingerprint : Fingerprint(
+    definingClass = "Lcom/inmobi/sdk/InMobiSdk;",
+    name = "init",
+    returnType = "V",
+)
+
+internal object MintegralInitFingerprint : Fingerprint(
+    name = "init",
+    returnType = "V",
+    strings = listOf("com.mintegral"),
+)
+
 // -- Ad "available / ready" gates (Fake Ad Availability patch) --
 // These report whether an ad can currently be shown. Forcing them to
 // return true makes the game's UI treat ads as available, so it proceeds
