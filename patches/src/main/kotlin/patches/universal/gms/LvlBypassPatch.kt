@@ -17,7 +17,7 @@ internal object LvlCheckAccessFingerprint : Fingerprint(
 // Classic LVL bypass: answer the license check directly with LICENSED (0)
 // on the app's own result listener, skipping the Play license server.
 private const val LVL_ALLOW_SMALI =
-    "const/4 v0, 0x0\ninvoke-interface {p1, v0}, Lcom/google/android/vending/licensing/ILicenseResultListener;->allow(I)V\nreturn-void"
+    "const/4 v0, 0x0\nmove-object/from16 v1, p1\ninvoke-interface {v1, v0}, Lcom/google/android/vending/licensing/ILicenseResultListener;->allow(I)V\nreturn-void"
 
 private fun BytecodePatchContext.lvlAllow(logger: Logger): Int {
     var patched = 0
