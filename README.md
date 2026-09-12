@@ -6,7 +6,7 @@
 <div align="center">
 
 ![Morphe](https://img.shields.io/badge/Morphe-Patcher-9b59b6?style=for-the-badge)
-![Patches](https://img.shields.io/badge/250%20Patches-2ecc71?style=for-the-badge)
+![Patches](https://img.shields.io/badge/436%20Patches-2ecc71?style=for-the-badge)
 ![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)
 ![Platform](https://img.shields.io/badge/Android-Apps%20%26%20Games-ff7f50?style=for-the-badge)
 
@@ -175,6 +175,46 @@ Some patches are highly configurable. Expand a section to see its options.
 | Block App Open | Toggle | On | Ads shown on app start |
 | Block MREC | Toggle | On | Medium rectangle banner ads |
 | Block Rewarded | Toggle | On | Rewarded ads, may disable features that require watching them |
+
+</details>
+
+<details>
+<summary><b>Disable Ad SDK Init</b></summary>
+
+| Option | Type | Default | Notes |
+| :--- | :--- | :--- | :--- |
+| AdMob | Toggle | Off | Kills MobileAds.initialize |
+| MAX | Toggle | Off | Kills AppLovinSdk.initializeSdk |
+| Unity Ads | Toggle | Off | Kills UnityAds.initialize |
+| ironSource | Toggle | Off | Kills IronSource.init |
+| Pangle | Toggle | Off | Kills TTAdSdk.init |
+| Meta | Toggle | Off | Kills AudienceNetworkAds.initialize |
+| Vungle | Toggle | Off | Kills Vungle init (new + legacy API) |
+| Huawei Ads | Toggle | Off | Kills HwAds.init |
+| Yandex | Toggle | Off | Kills Yandex MobileAds.initialize |
+| Other networks | Toggle | Off | Kills MyTarget, StartApp, Chartboost, InMobi and Mintegral init |
+
+Aggressive: apps gating content on init callbacks may hang. Do not combine with Ads Free Rewards, which needs live SDKs.
+
+</details>
+
+<details>
+<summary><b>Google Services patches</b></summary>
+
+Simple on/off patches with no options. All default to Off.
+
+| Patch | What it does |
+| :--- | :--- |
+| Silence Play Services Errors | Kills error dialogs, notifications and resolvable-error flags |
+| Spoof Play Services Version | Reports version 25000000 to stop update nags, helps on MicroG |
+| Disable Firebase Auto-Init | Manifest switches plus removal of measurement components |
+| Bypass Play License Check | Answers legacy LVL checks with LICENSED |
+| Fix Maps on MicroG | Reports Maps init SUCCESS and fires the initialized callback |
+| Null Play Location | Location calls resolve empty, updates complete instantly |
+| Disable Remote Config Fetch | Apps run on bundled defaults, server kill switches never land |
+| Disable Google Pay | Reports GPay unavailable so its buttons never appear |
+| Disable Firebase Performance | Noops traces and HTTP metrics |
+| Force Google Signed-Out | Forces guest/offline state instead of sign-in nags |
 
 </details>
 
