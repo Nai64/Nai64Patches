@@ -1,0 +1,86 @@
+package patches.universal.misc
+
+import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
+import app.morphe.patcher.patch.booleanOption
+import app.morphe.patcher.patch.bytecodePatch
+import com.android.tools.smali.dexlib2.Opcode
+import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction35c
+import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction3rc
+import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
+import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
+import com.android.tools.smali.dexlib2.iface.reference.MethodReference
+import com.android.tools.smali.dexlib2.iface.reference.StringReference
+import patches.universal.ads.util.findMutableMethodOf
+import java.util.logging.Logger
+
+@Suppress("unused")
+val spoofDeviceProvisionedPatch = bytecodePatch(
+    name = "Spoof Device Provisioned",
+    description = "Reports a chosen setup state so apps that gate on setup completion keep working.",
+    default = false,
+) {
+    category("Spoof")
+    val provisioned by booleanOption(
+        title = "Provisioned",
+        default = true,
+        key = "deviceProvisioned",
+        description = "Report the device as set up (true) or not (false).",
+    )
+
+    execute {
+        val logger = Logger.getLogger(this::class.java.name)
+        val target = if (provisioned == true) 1 else 0
+
+        var patched = 0
+        classDefForEach { classDef ->
+            val mutableClass by lazy { mutableClassDefBy(classDef) }
+            for (method in classDef.methods) {
+                val mutableMethod by lazy { mutableClass.findMutableMethodOf(method) }
+                val implementation = method.implementation ?: continue
+                val instructions = implementation.instructions.toList()
+                for ((index, instruction) in instructions.withIndex()) {
+                    val reference =
+                        (instruction as? ReferenceInstruction)?.reference as? MethodReference
+                            ?: continue
+                    if (reference.definingClass != "Landroid/provider/Settings\$Global;") continue
+                    if (reference.name != "getInt") continue
+                    if (reference.returnType != "I") continue
+                    val params = reference.parameterTypes
+                    if (params.size < 2) continue
+                    if (params[0] != "Landroid/content/ContentResolver;") continue
+                    if (params[1] != "Ljava/lang/String;") continue
+
+                    val keyRegister = when (instruction) {
+                        is BuilderInstruction35c -> when (instruction.registerCount) {
+                            1 -> instruction.registerC
+                            else -> instruction.registerD
+                        }
+                        is BuilderInstruction3rc -> instruction.startRegister + 1
+                        else -> continue
+                    }
+                    var keyValue: String? = null
+                    for (j in index - 1 downTo 0) {
+                        val prev = instructions[j]
+                        if (prev.opcode != Opcode.CONST_STRING) continue
+                        val reg = (prev as? OneRegisterInstruction)?.registerA ?: continue
+                        if (reg != keyRegister) continue
+                        keyValue = ((prev as? ReferenceInstruction)?.reference as? StringReference)?.string
+                        break
+                    }
+                    if (keyValue != "device_provisioned") continue
+
+                    val next = instructions.getOrNull(index + 1)
+                    if (next != null && next.opcode == Opcode.MOVE_RESULT) {
+                        val resultRegister = (next as OneRegisterInstruction).registerA
+                        mutableMethod.replaceInstruction(index, "const/4 v$resultRegister, $target")
+                        mutableMethod.replaceInstruction(index + 1, "nop")
+                        patched++
+                    }
+                }
+            }
+        }
+
+        if (patched > 0) logger.info("Spoofed $patched provisioned check(s) to $target")
+        else logger.warning("No provisioned checks found. No changes applied.")
+    }
+}
