@@ -1,3 +1,22 @@
+## [1.49.0](https://github.com/Nai64/Nai64Patches/compare/1.48.0...1.49.0) (2026-09-12)
+
+### Bug Fixes
+
+* copy activity to v-reg in resolution patch ([6f64285](https://github.com/Nai64/Nai64Patches/commit/6f6428500c73c7cc3049822be1f4ef9ef7b0a14f))
+* copy callback to v-reg in license bypass ([111ea99](https://github.com/Nai64/Nai64Patches/commit/111ea993d8e82199bfb77c4be2ce393a2837655b))
+* copy callback to v-reg in Maps fix ([43c87f1](https://github.com/Nai64/Nai64Patches/commit/43c87f12236c8dd8b6f9816bbe63f785628afb22))
+* copy listener to v-reg in consent skip ([038e1f7](https://github.com/Nai64/Nai64Patches/commit/038e1f784094ed7ef2670acf974174af3cb8b220))
+* copy listener to v-reg in LVL bypass ([68bf23d](https://github.com/Nai64/Nai64Patches/commit/68bf23d47caaa390b197b15499c59fd04b1d71ad))
+* copy params to v-regs in rewards shims ([c198c00](https://github.com/Nai64/Nai64Patches/commit/c198c002c2f39776f3c0b8750481ca5efbfe98fd))
+* copy React params to v-regs in premium shim ([52f9fe3](https://github.com/Nai64/Nai64Patches/commit/52f9fe31ebd66e5bd3d0d8053c0d8bdeff18643d))
+* copy this to v-reg in MAX callback shims ([f066496](https://github.com/Nai64/Nai64Patches/commit/f0664960087a66388f071eb55109172e1acd5c46))
+* copy this to v-reg in NoAds MyTarget block ([0fd542c](https://github.com/Nai64/Nai64Patches/commit/0fd542c1c4dab4559e76c7a136a36b8e65d9dac6))
+* grant free purchases at buy time like native mods ([3c7e42c](https://github.com/Nai64/Nai64Patches/commit/3c7e42cc50de692d70e0a5c6132c20ff12e5a7ce))
+
+### New Features
+
+* add Legacy App Reviver patch ([224f4e2](https://github.com/Nai64/Nai64Patches/commit/224f4e28095b551f29d1e30fc00a9b4bd79827c0))
+
 ## [1.48.0](https://github.com/Nai64/Nai64Patches/compare/1.47.0...1.48.0) (2026-09-12)
 
 ### Bug Fixes
