@@ -1,3 +1,10 @@
+## [1.49.1](https://github.com/Nai64/Nai64Patches/compare/1.49.0...1.49.1) (2026-09-18)
+
+### Bug Fixes
+
+* grant free IAP with the real requested product id ([d5cb0f9](https://github.com/Nai64/Nai64Patches/commit/d5cb0f988c2770c5e9ecec3c55ea2bcce623995a))
+* use unique order and token ids per free IAP grant ([e508eb9](https://github.com/Nai64/Nai64Patches/commit/e508eb9718869d318ca82b73fe5cc51d2d538063))
+
 ## [1.49.0](https://github.com/Nai64/Nai64Patches/compare/1.48.0...1.49.0) (2026-09-12)
 
 ### Bug Fixes
