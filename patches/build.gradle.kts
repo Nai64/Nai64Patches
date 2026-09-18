@@ -23,13 +23,21 @@ tasks {
     // Ensure the Android DEX is built when building the MPP.
     // Without buildAndroid, the MPP only contains JVM .class files,
     // which the Morphe Android app cannot load (Android uses DEX format).
-    build { dependsOn("buildAndroid") }
+    build {
+        dependsOn("buildAndroid")
+        doLast {
+            logger.warn("Most patches moved to Nai64/Nai64ExtraPatches. Add it as a Morphe source to get them back.")
+        }
+    }
 
     register<JavaExec>("generatePatchesList") {
         description = "Build patch with patch list"
         dependsOn(build)
         classpath = sourceSets["main"].runtimeClasspath + patchListGeneratorClasspath
         mainClass.set("util.PatchListGeneratorKt")
+        doFirst {
+            logger.warn("Most patches moved to Nai64/Nai64ExtraPatches. Add it as a Morphe source to get them back.")
+        }
     }
 
     publish {
