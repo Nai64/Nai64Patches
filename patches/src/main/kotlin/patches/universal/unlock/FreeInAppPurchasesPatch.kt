@@ -148,12 +148,92 @@ val freeInAppPurchasesPatch = bytecodePatch(
         // dropped. Every injection below therefore copies params with
         // move-*/from16 (which assembles in any frame) and otherwise
         // touches only v-regs. NEVER use a narrow opcode with a p-reg.
-        fun buyGrantBlock(igetTail: String): String {
+        //
+        // The fake purchase carries the REAL requested product id read
+        // from the BillingFlowParams at runtime (Billing 5+ details list,
+        // legacy SkuDetails, ancient direct getSku, in that order). Games
+        // grant items by matching purchase.productId against their catalog,
+        // so a hardcoded id matches nothing and the tap silently does
+        // nothing (e.g. Subway Surfers City). Which API exists is resolved
+        // at PATCH time against the app's BillingFlowParams class, so no
+        // missing-method crash is possible at runtime. flowReg is the p-reg
+        // holding BillingFlowParams (null when unknown, e.g. the native
+        // launchBillingFlowCpp bridge) and falls back to "morphe_fake".
+        fun billingApiHas(mName: String): Boolean {
+            return try {
+                mutableClassDefByOrNull("Lcom/android/billingclient/api/BillingFlowParams;")?.methods?.any { it.name == mName } == true
+            } catch (_: Exception) { false }
+        }
+        fun flowParamsReg(m: app.morphe.patcher.util.proxy.mutableTypes.MutableMethod, isStatic: Boolean): String? {
+            val idx = m.parameterTypes.indexOfFirst { it.contains("BillingFlowParams") }
+            if (idx < 0) return null
+            return "p${idx + (if (isStatic) 0 else 1)}"
+        }
+        fun buyGrantBlock(igetTail: String, flowReg: String?): String {
+            // Product-id prelude -> v3, using v1 as scratch (v0/v2 kept).
+            val pid = if (flowReg == null) {
+                "const-string v3, \"morphe_fake\""
+            } else {
+                val sb = StringBuilder()
+                sb.appendLine("move-object/from16 v3, $flowReg")
+                if (billingApiHas("getProductDetailsParamsList")) {
+                    sb.appendLine("invoke-virtual {v3}, Lcom/android/billingclient/api/BillingFlowParams;->getProductDetailsParamsList()Ljava/util/List;")
+                    sb.appendLine("move-result-object v3")
+                    sb.appendLine("if-eqz v3, :morphe_iap_pid_fake")
+                    sb.appendLine("invoke-interface {v3}, Ljava/util/List;->isEmpty()Z")
+                    sb.appendLine("move-result v1")
+                    sb.appendLine("if-eqz v1, :morphe_iap_pid_hasitem")
+                    sb.appendLine("goto :morphe_iap_pid_fake")
+                    sb.appendLine(":morphe_iap_pid_hasitem")
+                    sb.appendLine("const/4 v1, 0x0")
+                    sb.appendLine("invoke-interface {v3, v1}, Ljava/util/List;->get(I)Ljava/lang/Object;")
+                    sb.appendLine("move-result-object v3")
+                    sb.appendLine("check-cast v3, Lcom/android/billingclient/api/ProductDetailsParams;")
+                    sb.appendLine("invoke-virtual {v3}, Lcom/android/billingclient/api/ProductDetailsParams;->getProductDetails()Lcom/android/billingclient/api/ProductDetails;")
+                    sb.appendLine("move-result-object v3")
+                    sb.appendLine("if-eqz v3, :morphe_iap_pid_fake")
+                    sb.appendLine("invoke-virtual {v3}, Lcom/android/billingclient/api/ProductDetails;->getProductId()Ljava/lang/String;")
+                    sb.appendLine("move-result-object v3")
+                    sb.appendLine("if-nez v3, :morphe_iap_pid_done")
+                }
+                if (billingApiHas("getSkuDetails")) {
+                    sb.appendLine("move-object/from16 v3, $flowReg")
+                    sb.appendLine("invoke-virtual {v3}, Lcom/android/billingclient/api/BillingFlowParams;->getSkuDetails()Lcom/android/billingclient/api/SkuDetails;")
+                    sb.appendLine("move-result-object v3")
+                    sb.appendLine("if-eqz v3, :morphe_iap_pid_fake")
+                    sb.appendLine("invoke-virtual {v3}, Lcom/android/billingclient/api/SkuDetails;->getSku()Ljava/lang/String;")
+                    sb.appendLine("move-result-object v3")
+                    sb.appendLine("if-nez v3, :morphe_iap_pid_done")
+                } else if (billingApiHas("getSku")) {
+                    sb.appendLine("move-object/from16 v3, $flowReg")
+                    sb.appendLine("invoke-virtual {v3}, Lcom/android/billingclient/api/BillingFlowParams;->getSku()Ljava/lang/String;")
+                    sb.appendLine("move-result-object v3")
+                    sb.appendLine("if-nez v3, :morphe_iap_pid_done")
+                }
+                sb.appendLine(":morphe_iap_pid_fake")
+                sb.appendLine("const-string v3, \"morphe_fake\"")
+                sb.appendLine(":morphe_iap_pid_done")
+                sb.toString()
+            }
             return """
                 move-object/from16 v0, p0
                 $igetTail
                 if-eqz v0, :morphe_iap_nocb
-                const-string v1, "{\"orderId\":\"morphe_fake\",\"packageName\":\"morphe_fake\",\"productId\":\"morphe_fake\",\"purchaseTime\":0,\"purchaseState\":1,\"purchaseToken\":\"morphe_fake\",\"quantity\":1,\"acknowledged\":true}"
+                $pid
+                new-instance v1, Ljava/lang/StringBuilder;
+                invoke-direct {v1}, Ljava/lang/StringBuilder;-><init>()V
+                const-string v0, "{\"orderId\":\"morphe_fake\",\"packageName\":\"morphe_fake\",\"productId\":\""
+                invoke-virtual {v1, v0}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+                move-result-object v1
+                invoke-virtual {v1, v3}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+                move-result-object v1
+                const-string v0, "\",\"purchaseTime\":0,\"purchaseState\":1,\"purchaseToken\":\"morphe_fake\",\"quantity\":1,\"acknowledged\":true}"
+                invoke-virtual {v1, v0}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+                move-result-object v1
+                invoke-virtual {v1}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
+                move-result-object v1
+                move-object/from16 v0, p0
+                $igetTail
                 const-string v2, "morphe_fake"
                 new-instance v3, Lcom/android/billingclient/api/Purchase;
                 invoke-direct {v3, v1, v2}, Lcom/android/billingclient/api/Purchase;-><init>(Ljava/lang/String;Ljava/lang/String;)V
@@ -166,7 +246,7 @@ val freeInAppPurchasesPatch = bytecodePatch(
                 const/4 v2, 0x0
                 invoke-virtual {v1, v2}, Lcom/android/billingclient/api/BillingResult${'$'}Builder;->setResponseCode(I)Lcom/android/billingclient/api/BillingResult${'$'}Builder;
                 move-result-object v1
-                invoke-virtual {v1}, Lcom/android/billingclient/api/BillingResult${'$'}Builder;->build()Lcom/android/billingclient/api/BillingResult;
+                invoke-virtual {v1}, Lcom/android/billingclient/api/BillingResult;->build()Lcom/android/billingclient/api/BillingResult;
                 move-result-object v1
                 invoke-interface {v0, v1, v3}, Lcom/android/billingclient/api/PurchasesUpdatedListener;->onPurchasesUpdated(Lcom/android/billingclient/api/BillingResult;Ljava/util/List;)V
                 goto :morphe_iap_done
@@ -176,7 +256,7 @@ val freeInAppPurchasesPatch = bytecodePatch(
                 const/4 v2, 0x0
                 invoke-virtual {v1, v2}, Lcom/android/billingclient/api/BillingResult${'$'}Builder;->setResponseCode(I)Lcom/android/billingclient/api/BillingResult${'$'}Builder;
                 move-result-object v1
-                invoke-virtual {v1}, Lcom/android/billingclient/api/BillingResult${'$'}Builder;->build()Lcom/android/billingclient/api/BillingResult;
+                invoke-virtual {v1}, Lcom/android/billingclient/api/BillingResult;->build()Lcom/android/billingclient/api/BillingResult;
                 move-result-object v1
                 :morphe_iap_done
                 return-object v1
@@ -189,7 +269,7 @@ val freeInAppPurchasesPatch = bytecodePatch(
             } catch (_: Exception) { true }
             val field = if (!isStatic) listenerIget(it.definingClass) else null
             if (field != null) {
-                val block = buyGrantBlock(field)
+                val block = buyGrantBlock(field, flowParamsReg(it, isStatic))
                 var granted = false
                 if (minRegs(it) >= 4) {
                     try { it.addInstructions(0, block); granted = true } catch (_: Exception) {}
@@ -217,7 +297,8 @@ val freeInAppPurchasesPatch = bytecodePatch(
             } catch (_: Exception) { true }
             val field = if (!isStatic) listenerIget(it.definingClass) else null
             if (field != null && it.returnType.contains("BillingResult")) {
-                val block = buyGrantBlock(field)
+                // Native bridge params are opaque: keep the static fallback id.
+                val block = buyGrantBlock(field, null)
                 var granted = false
                 if (minRegs(it) >= 4) {
                     try { it.addInstructions(0, block); granted = true } catch (_: Exception) {}
