@@ -220,14 +220,33 @@ val freeInAppPurchasesPatch = bytecodePatch(
                 $igetTail
                 if-eqz v0, :morphe_iap_nocb
                 $pid
+                invoke-static {}, Ljava/lang/System;->currentTimeMillis()J
+                move-result-wide v1
+                invoke-static {v1, v2}, Ljava/lang/String;->valueOf(J)Ljava/lang/String;
+                move-result-object v2
                 new-instance v1, Ljava/lang/StringBuilder;
                 invoke-direct {v1}, Ljava/lang/StringBuilder;-><init>()V
-                const-string v0, "{\"orderId\":\"morphe_fake\",\"packageName\":\"morphe_fake\",\"productId\":\""
+                const-string v0, "{\"orderId\":\"morphe-"
+                invoke-virtual {v1, v0}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+                move-result-object v1
+                invoke-virtual {v1, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+                move-result-object v1
+                const-string v0, "\",\"packageName\":\"morphe_fake\",\"productId\":\""
                 invoke-virtual {v1, v0}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
                 move-result-object v1
                 invoke-virtual {v1, v3}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
                 move-result-object v1
-                const-string v0, "\",\"purchaseTime\":0,\"purchaseState\":1,\"purchaseToken\":\"morphe_fake\",\"quantity\":1,\"acknowledged\":true}"
+                const-string v0, "\",\"purchaseTime\":"
+                invoke-virtual {v1, v0}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+                move-result-object v1
+                invoke-virtual {v1, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+                move-result-object v1
+                const-string v0, ",\"purchaseState\":1,\"purchaseToken\":\"morphe-"
+                invoke-virtual {v1, v0}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+                move-result-object v1
+                invoke-virtual {v1, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+                move-result-object v1
+                const-string v0, "\",\"quantity\":1,\"acknowledged\":true}"
                 invoke-virtual {v1, v0}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
                 move-result-object v1
                 invoke-virtual {v1}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
