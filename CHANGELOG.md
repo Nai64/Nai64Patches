@@ -1,3 +1,9 @@
+## [1.49.2](https://github.com/Nai64/Nai64Patches/compare/1.49.1...1.49.2) (2026-09-18)
+
+### Bug Fixes
+
+* resolve obfuscated billing accessors by signature for free IAP product id ([8dc07d1](https://github.com/Nai64/Nai64Patches/commit/8dc07d18680b3d5e2765546d79e20030c2db6255))
+
 ## [1.49.1](https://github.com/Nai64/Nai64Patches/compare/1.49.0...1.49.1) (2026-09-18)
 
 ### Bug Fixes

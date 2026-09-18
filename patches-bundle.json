@@ -1,7 +1,7 @@
 {
-  "created_at": "2026-09-18T17:56:19",
-  "description": "## [1.49.1](https://github.com/Nai64/Nai64Patches/compare/1.49.0...1.49.1) (2026-09-18)\n\n### Bug Fixes\n\n* grant free IAP with the real requested product id ([d5cb0f9](https://github.com/Nai64/Nai64Patches/commit/d5cb0f988c2770c5e9ecec3c55ea2bcce623995a))\n* use unique order and token ids per free IAP grant ([e508eb9](https://github.com/Nai64/Nai64Patches/commit/e508eb9718869d318ca82b73fe5cc51d2d538063))",
-  "download_url": "https://github.com/Nai64/Nai64Patches/releases/download/1.49.1/patches-1.49.1.mpp",
+  "created_at": "2026-09-18T18:37:52",
+  "description": "## [1.49.2](https://github.com/Nai64/Nai64Patches/compare/1.49.1...1.49.2) (2026-09-18)\n\n### Bug Fixes\n\n* resolve obfuscated billing accessors by signature for free IAP product id ([8dc07d1](https://github.com/Nai64/Nai64Patches/commit/8dc07d18680b3d5e2765546d79e20030c2db6255))",
+  "download_url": "https://github.com/Nai64/Nai64Patches/releases/download/1.49.2/patches-1.49.2.mpp",
   "signature_download_url": "",
-  "version": "1.49.1"
+  "version": "1.49.2"
 }
