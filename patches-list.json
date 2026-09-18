@@ -190,61 +190,6 @@
       ]
     },
     {
-      "name": "Unlimited Currencies",
-      "description": "Get unlimited coins, gems and other currencies. Works on most games. Not supported on newer Unity games.",
-      "default": false,
-      "category": "Featured",
-      "dependencies": [],
-      "compatiblePackages": null,
-      "options": [
-        {
-          "key": "currencyAmount",
-          "title": "Amount",
-          "description": "Amount to report for currency. Price fields will be 0.",
-          "required": false,
-          "type": "kotlin.Int",
-          "default": 999999,
-          "values": null
-        },
-        {
-          "key": "currencyCustomKeys",
-          "title": "Extra keys",
-          "description": "Comma-separated extra keys to spoof (e.g. my_gem,my_coin). Leave empty for default list.",
-          "required": false,
-          "type": "kotlin.String",
-          "default": "",
-          "values": null
-        },
-        {
-          "key": "infiniteMode",
-          "title": "Infinite mode",
-          "description": "ON: all currencies set to huge amount. OFF: currencies set to the Amount value above.",
-          "required": false,
-          "type": "kotlin.Boolean",
-          "default": true,
-          "values": null
-        },
-        {
-          "key": "multiplyMode",
-          "title": "Multiply income",
-          "description": "When ON, every time a currency is saved it gets multiplied by the Multiplier value. Useful when infinite mode doesn't work.",
-          "required": false,
-          "type": "kotlin.Boolean",
-          "default": false,
-          "values": null
-        },
-        {
-          "key": "currencyMultiplier",
-          "title": "Multiplier",
-          "description": "Multiplier value used in Multiply income mode.",
-          "required": false,
-          "type": "kotlin.Int",
-          "default": 10,
-          "values": null
-        }
-      ]
-    },
-    {
       "name": "Pairip Bypass",
       "description": "Bypass app protection so the patched app can start.",
       "default": false,

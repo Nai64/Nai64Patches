@@ -6,14 +6,14 @@
 <div align="center">
 
 ![Morphe](https://img.shields.io/badge/Morphe-Patcher-9b59b6?style=for-the-badge)
-![Patches](https://img.shields.io/badge/6%20Patches-2ecc71?style=for-the-badge)
+![Patches](https://img.shields.io/badge/5%20Patches-2ecc71?style=for-the-badge)
 ![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)
 ![Platform](https://img.shields.io/badge/Android-Apps%20%26%20Games-ff7f50?style=for-the-badge)
 [![Discord](https://img.shields.io/badge/Discord-Join-7289DA?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/an9uXxMNyc)
 
 # Nai's Patches
 
-A curated collection of Morphe patches that tune, unlock and declutter Android apps and games. This source ships the 6 Featured patches: Unlock Premium, Free In-app Purchases, No Ads, Ads Free Rewards, Unlimited Currencies and Pairip Bypass.
+A curated collection of Morphe patches that tune, unlock and declutter Android apps and games. This source ships the 5 Featured patches: Unlock Premium, Free In-app Purchases, No Ads, Ads Free Rewards and Pairip Bypass.
 
 > [!NOTE]
 > Looking for the other 430 patches (spoofing, manifest tweaks, telemetry blocks, UI tweaks and more)? Add the companion source **[Nai's Extra Patches](https://github.com/Nai64/Nai64ExtraPatches)** alongside this one.
@@ -74,7 +74,6 @@ This source ships the 6 Featured patches only.
 | Free In-app Purchases | Get paid items for free, best for offline games |
 | No Ads | Blocks ads by type, pick what to block |
 | Ads Free Rewards | Get rewards without watching ads |
-| Unlimited Currencies | Unlimited coins, gems and other currencies in most games |
 | Pairip Bypass | Bypass app protection so the patched app can start |
 
 > [!TIP]
