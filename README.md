@@ -172,7 +172,14 @@ Some patches are highly configurable. Expand a section to see its options.
 <a name="disclaimer"></a>
 ![Disclaimer](images/header-disclaimer.png)
 
-Nai's Patches is provided as is, without warranty of any kind. It is intended for learning, accessibility and personal customization of software you legally own. It is not a piracy tool and should not be used to bypass paid content you have not licensed.
+Nai's Patches is provided as is, without warranty of any kind, for **educational and personal use only**.
+
+- **You must legally own every app you patch.** These patches are for studying, accessibility tweaks, and personal customization of software you already own or that is free. They are not a piracy tool: do not use them to obtain paid apps, subscriptions, or content you have not licensed, and do not redistribute patched copies of anyone's apps.
+- **No cracked apps are distributed here.** This repository contains only patch definitions (small bytecode recipes applied on your own device by the Morphe patcher). No APKs, no paid content, no activation keys, and no circumvention services are hosted or sold.
+- **Non-commercial project.** There are no paid tiers, no ads, and nothing for sale. Do not sell these patches or patched apps, and be wary of anyone who does.
+- **Use at your own risk.** Modifying apps can violate their terms of service and may lead to account restrictions, bans, data loss, or apps that no longer work. The authors accept no liability for any consequences of using these patches, and provide no guarantee they work on any particular app or version.
+- **No affiliation.** This project is not affiliated with, endorsed by, or connected to Google, Morphe, or any app developer. All trademarks belong to their respective owners.
+- **Abuse reports / takedown requests:** if you are a rights holder and believe specific content here infringes your rights, open an issue with the exact file or patch name and a description of the concern, and it will be reviewed promptly and in good faith.
 
 ---
 
