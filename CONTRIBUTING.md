@@ -30,10 +30,9 @@ git checkout -- patches-list.json
 
 ## Patch style
 
-* Universal patches live in `patches/universal/<category>/YourPatch.kt`. Use `bytecodePatch` or `resourcePatch`, leave `compatibleWith` out for universal patches or scope it when needed, set `default = false`, and add `booleanOption` or `stringOption` when you need configurability. See `CustomStartupDialogPatch.kt:24` for a good example.
-* Reuse the shared helpers in `patches/universal/misc/InvokeHelpers.kt` (`noOpVoidInvoke`, `foldBooleanReturns`) and `GetterSpoofer.kt`. Please do not copy and paste per-file `forceBooleanSetter` variants.
-* For Universal Overlay modules, read [UNIVERSAL_OVERLAY_MODULES.md](UNIVERSAL_OVERLAY_MODULES.md) before adding or changing a module. It documents runtime boundaries, configuration wiring, lifecycle rules, and isolation requirements.
-* For the complete Universal Overlay architecture and file map, read [UNIVERSAL_OVERLAY.md](UNIVERSAL_OVERLAY.md).
+* This source ships the 6 Featured patches only. New universal (non-Featured) patches belong in the companion repo **Nai64ExtraPatches**. Featured patches live in `patches/universal/ads/` and `patches/universal/unlock/`. Use `bytecodePatch` or `resourcePatch`, leave `compatibleWith` out for universal patches or scope it when needed, set `default = false`, and add `booleanOption` or `stringOption` when you need configurability. See `patches/universal/ads/NoAdsPatch.kt` for a good example.
+* Reuse the shared helpers in `patches/universal/ads/util/` (`BytecodeUtils.kt`, `SmaliUtils.kt`) and `patches/universal/manifest/ManifestUtils.kt`. Please do not copy and paste per-file variants.
+* Universal Overlay work happens in **Nai64ExtraPatches** — see `UNIVERSAL_OVERLAY_MODULES.md` and `UNIVERSAL_OVERLAY.md` over there.
 
 ## PR checklist
 
