@@ -9,6 +9,7 @@
 ![Patches](https://img.shields.io/badge/6%20Patches-2ecc71?style=for-the-badge)
 ![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)
 ![Platform](https://img.shields.io/badge/Android-Apps%20%26%20Games-ff7f50?style=for-the-badge)
+[![Discord](https://img.shields.io/badge/Discord-Join-7289DA?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/an9uXxMNyc)
 
 # Nai's Patches
 

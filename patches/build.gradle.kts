@@ -26,7 +26,7 @@ tasks {
     build {
         dependsOn("buildAndroid")
         doLast {
-            logger.warn("Most patches moved to Nai64/Nai64ExtraPatches. Add it as a Morphe source to get them back.")
+            logger.warn("Join the discord server https://discord.gg/an9uXxMNyc for updates")
         }
     }
 
@@ -36,7 +36,7 @@ tasks {
         classpath = sourceSets["main"].runtimeClasspath + patchListGeneratorClasspath
         mainClass.set("util.PatchListGeneratorKt")
         doFirst {
-            logger.warn("Most patches moved to Nai64/Nai64ExtraPatches. Add it as a Morphe source to get them back.")
+            logger.warn("Join the discord server https://discord.gg/an9uXxMNyc for updates")
         }
     }
 
