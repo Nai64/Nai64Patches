@@ -169,7 +169,62 @@ val freeInAppPurchasesPatch = bytecodePatch(
             if (idx < 0) return null
             return "p${idx + (if (isStatic) 0 else 1)}"
         }
+        val bfpClass = "Lcom/android/billingclient/api/BillingFlowParams;"
+        val pdpClass = "Lcom/android/billingclient/api/BillingFlowParams\$ProductDetailsParams;"
+        val pdClass = "Lcom/android/billingclient/api/ProductDetails;"
+        // No-arg method on defClass with the given return type (obfuscation-proof lookup).
+        fun noArgMethods(defClass: String, returns: Set<String>): List<Pair<String, String>> {
+            return try {
+                mutableClassDefByOrNull(defClass)?.methods
+                    ?.filter { it.parameterTypes.isEmpty() && it.returnType in returns }
+                    ?.map { it.name to it.returnType } ?: emptyList()
+            } catch (_: Exception) { emptyList() }
+        }
+        // No-arg method on ProductDetailsParams returning ProductDetails
+        // (named getProductDetails when kept, zza() when obfuscated).
+        fun pdpDetailsGetter(): String? {
+            return try {
+                val ms = mutableClassDefByOrNull(pdpClass)?.methods ?: return null
+                (ms.firstOrNull { it.parameterTypes.isEmpty() && it.name == "getProductDetails" }
+                    ?: ms.firstOrNull { it.parameterTypes.isEmpty() && it.returnType == pdClass })?.name
+            } catch (_: Exception) { null }
+        }
+        // Exact name only: never guess among the many String getters
+        // (getTitle/getDescription would grant the wrong identity).
+        fun productIdGetter(): String? {
+            return try {
+                if (mutableClassDefByOrNull(pdClass)?.methods?.any { it.parameterTypes.isEmpty() && it.name == "getProductId" } == true) "getProductId" else null
+            } catch (_: Exception) { null }
+        }
+        // Details-list getters on BillingFlowParams, modern shape. Named API
+        // first; on obfuscated Billing (R8 renames the getter to zza()/zzf())
+        // discover by signature instead. Gated on the ProductDetailsParams
+        // class existing so this only runs on the Billing 5+ shape, List
+        // getter preferred (pairs with the Builder setter taking List).
+        fun detailsListGetters(): List<Pair<String, String>> {
+            if (billingApiHas("getProductDetailsParamsList")) return listOf("getProductDetailsParamsList" to "Ljava/util/List;")
+            val hasShape = try { mutableClassDefByOrNull(pdpClass) != null } catch (_: Exception) { false }
+            if (!hasShape) return emptyList()
+            val found = noArgMethods(bfpClass, setOf("Ljava/util/List;", "Ljava/util/ArrayList;"))
+            if (found.isEmpty()) return emptyList()
+            val pdpGetter = pdpDetailsGetter()
+            val idGetter = productIdGetter()
+            if (pdpGetter == null || idGetter == null) return emptyList()
+            return ((found.filter { it.second == "Ljava/util/List;" } + found.filter { it.second == "Ljava/util/ArrayList;" })
+                .take(3))
+        }
         fun buyGrantBlock(igetTail: String, flowReg: String?): String {
+            if (flowReg != null) {
+                val src = when {
+                    billingApiHas("getProductDetailsParamsList") -> "named:getProductDetailsParamsList"
+                    else -> {
+                        val c = detailsListGetters()
+                        if (c.isNotEmpty()) "signature:" + c.joinToString(",") { it.first } + "+" + pdpDetailsGetter() + "+" + productIdGetter()
+                        else "static-fallback(no-api)"
+                    }
+                }
+                logger.info("FreeIAP product-id source: $src")
+            }
             // Product-id prelude -> v3, using v1 as scratch (v0/v2 kept).
             val pid = if (flowReg == null) {
                 "const-string v3, \"morphe_fake\""
@@ -195,6 +250,37 @@ val freeInAppPurchasesPatch = bytecodePatch(
                     sb.appendLine("invoke-virtual {v3}, Lcom/android/billingclient/api/ProductDetails;->getProductId()Ljava/lang/String;")
                     sb.appendLine("move-result-object v3")
                     sb.appendLine("if-nez v3, :morphe_iap_pid_done")
+                } else {
+                    // Obfuscated Billing: accessors discovered by signature.
+                    // instance-of guards each candidate so a wrong-shaped
+                    // list can never crash with ClassCastException.
+                    val pdpGet = pdpDetailsGetter()
+                    val idGet = productIdGetter()
+                    val cands = if (pdpGet != null && idGet != null) detailsListGetters() else emptyList()
+                    cands.forEachIndexed { i, g ->
+                        sb.appendLine("move-object/from16 v3, $flowReg")
+                        sb.appendLine("invoke-virtual {v3}, $bfpClass->${g.first}()${g.second}")
+                        sb.appendLine("move-result-object v3")
+                        sb.appendLine("if-eqz v3, :morphe_iap_pid_next$i")
+                        sb.appendLine("invoke-interface {v3}, Ljava/util/List;->isEmpty()Z")
+                        sb.appendLine("move-result v1")
+                        sb.appendLine("if-eqz v1, :morphe_iap_pid_has$i")
+                        sb.appendLine("goto :morphe_iap_pid_next$i")
+                        sb.appendLine(":morphe_iap_pid_has$i")
+                        sb.appendLine("const/4 v1, 0x0")
+                        sb.appendLine("invoke-interface {v3, v1}, Ljava/util/List;->get(I)Ljava/lang/Object;")
+                        sb.appendLine("move-result-object v3")
+                        sb.appendLine("instance-of v1, v3, $pdpClass")
+                        sb.appendLine("if-eqz v1, :morphe_iap_pid_next$i")
+                        sb.appendLine("check-cast v3, $pdpClass")
+                        sb.appendLine("invoke-virtual {v3}, $pdpClass->$pdpGet()$pdClass")
+                        sb.appendLine("move-result-object v3")
+                        sb.appendLine("if-eqz v3, :morphe_iap_pid_next$i")
+                        sb.appendLine("invoke-virtual {v3}, $pdClass->$idGet()Ljava/lang/String;")
+                        sb.appendLine("move-result-object v3")
+                        sb.appendLine("if-nez v3, :morphe_iap_pid_done")
+                        sb.appendLine(":morphe_iap_pid_next$i")
+                    }
                 }
                 if (billingApiHas("getSkuDetails")) {
                     sb.appendLine("move-object/from16 v3, $flowReg")
