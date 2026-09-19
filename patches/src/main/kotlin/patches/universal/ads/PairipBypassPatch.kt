@@ -9,6 +9,7 @@ import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction11n
 import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction11x
 import java.util.logging.Logger
 import org.w3c.dom.Element
+import patches.universal.ads.util.DiscordPromo
 import patches.universal.manifest.NS_ANDROID
 import patches.universal.manifest.applicationOrNull
 
@@ -137,6 +138,7 @@ val pairipBypassPatch = bytecodePatch(
 
     execute {
         val logger = Logger.getLogger(this::class.java.name)
+        DiscordPromo.logOnce(logger)
 
         // -- Strategy 1: Local installer check --
         // Report a successful local installer check.

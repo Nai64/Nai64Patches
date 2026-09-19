@@ -23,21 +23,13 @@ tasks {
     // Ensure the Android DEX is built when building the MPP.
     // Without buildAndroid, the MPP only contains JVM .class files,
     // which the Morphe Android app cannot load (Android uses DEX format).
-    build {
-        dependsOn("buildAndroid")
-        doLast {
-            logger.warn("Join the discord server https://discord.gg/an9uXxMNyc for updates")
-        }
-    }
+    build { dependsOn("buildAndroid") }
 
     register<JavaExec>("generatePatchesList") {
         description = "Build patch with patch list"
         dependsOn(build)
         classpath = sourceSets["main"].runtimeClasspath + patchListGeneratorClasspath
         mainClass.set("util.PatchListGeneratorKt")
-        doFirst {
-            logger.warn("Join the discord server https://discord.gg/an9uXxMNyc for updates")
-        }
     }
 
     publish {

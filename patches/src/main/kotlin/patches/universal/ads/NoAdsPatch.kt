@@ -11,6 +11,7 @@ import patches.universal.ads.util.cloneParameters
 import patches.universal.ads.util.findMutableMethodOf
 import patches.universal.ads.util.fireHiddenCallbacks
 import java.util.logging.Logger
+import patches.universal.ads.util.DiscordPromo
 
 private val logger = Logger.getLogger("patches.universal.ads.NoAdsPatch")
 
@@ -202,6 +203,7 @@ val noAdsPatch = bytecodePatch(
 
     execute {
         val detectionLogger = Logger.getLogger(this::class.java.name)
+        DiscordPromo.logOnce(detectionLogger)
 
         // Apply preset logic
         val effectiveBlockInterstitials = when (preset) {

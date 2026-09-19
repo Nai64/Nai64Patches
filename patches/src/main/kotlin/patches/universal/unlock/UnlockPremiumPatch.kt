@@ -12,6 +12,7 @@ import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 import com.android.tools.smali.dexlib2.iface.reference.StringReference
 import java.util.logging.Logger
+import patches.universal.ads.util.DiscordPromo
 
 @Suppress("unused")
 val unlockPremiumPatch = bytecodePatch(
@@ -29,6 +30,7 @@ val unlockPremiumPatch = bytecodePatch(
 
     execute {
         val logger = Logger.getLogger(this::class.java.name)
+        DiscordPromo.logOnce(logger)
         var patched = 0
         val patchedMethods = mutableSetOf<String>()
         val extraSet = (extraKeys ?: "").split(",").map { it.trim().lowercase() }.filter { it.isNotEmpty() }.toSet()

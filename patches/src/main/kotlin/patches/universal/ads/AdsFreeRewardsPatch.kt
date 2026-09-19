@@ -10,6 +10,7 @@ import patches.universal.ads.util.cloneParameters
 import patches.universal.ads.util.findMutableMethodOf
 import patches.universal.ads.util.fireRewardedAdCallbacks
 import java.util.logging.Logger
+import patches.universal.ads.util.DiscordPromo
 
 @Suppress("unused")
 val adsFreeRewardsPatch = bytecodePatch(
@@ -73,6 +74,7 @@ val adsFreeRewardsPatch = bytecodePatch(
 
     execute {
         val logger = Logger.getLogger(this::class.java.name)
+        DiscordPromo.logOnce(logger)
         logger.info("Ads Free Rewards: patchVersion=$patchVersion strategy=$rewardStrategy instantReward=$instantReward")
         when (patchVersion) {
             "1.1.0" -> applyAdsFreeRewardsV110(logger)

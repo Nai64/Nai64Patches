@@ -7,6 +7,7 @@ import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.patch.booleanOption
 import patches.universal.ads.util.cloneMutable
 import java.util.logging.Logger
+import patches.universal.ads.util.DiscordPromo
 
 @Suppress("unused")
 val freeInAppPurchasesPatch = bytecodePatch(
@@ -23,6 +24,7 @@ val freeInAppPurchasesPatch = bytecodePatch(
     )
     execute {
         val logger = Logger.getLogger(this::class.java.name)
+        DiscordPromo.logOnce(logger)
         var patched = 0
         val patchedMethods = mutableSetOf<String>()
 
