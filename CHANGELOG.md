@@ -1,3 +1,14 @@
+## [1.50.0](https://github.com/Nai64/Nai64Patches/compare/1.49.2...1.50.0) (2026-09-19)
+
+### Bug Fixes
+
+* fire buy-time grant in int-returning billing bridges too ([903ffb6](https://github.com/Nai64/Nai64Patches/commit/903ffb618f4438b8ede3af09958c21d3716ad2c0))
+* make free IAP injections pass ART bytecode verification ([28c5314](https://github.com/Nai64/Nai64Patches/commit/28c5314ead297b009b976d8330d8052358897729))
+
+### New Features
+
+* synthesize product catalog for billing queries that never resolve ([7bcd840](https://github.com/Nai64/Nai64Patches/commit/7bcd8406fb423da81d442e92ab1ed32a98ea4ca6))
+
 ## [1.49.2](https://github.com/Nai64/Nai64Patches/compare/1.49.1...1.49.2) (2026-09-18)
 
 ### Bug Fixes
