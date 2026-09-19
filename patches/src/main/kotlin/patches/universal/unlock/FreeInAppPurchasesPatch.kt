@@ -138,7 +138,7 @@ val freeInAppPurchasesPatch = bytecodePatch(
                 null
             } catch (_: Exception) { null }
         }
-        // Buy-time grant block for launchBillingFlow (v0..v3, instance
+        // Buy-time grant block for launchBillingFlow (v0..v4, instance
         // methods only): fire onPurchasesUpdated(OK, [fake PURCHASED]) on
         // the client's own listener, then return OK. Null listener falls
         // through to OK-only. This mirrors native MOD-menu behavior: the
@@ -150,6 +150,17 @@ val freeInAppPurchasesPatch = bytecodePatch(
         // dropped. Every injection below therefore copies params with
         // move-*/from16 (which assembles in any frame) and otherwise
         // touches only v-regs. NEVER use a narrow opcode with a p-reg.
+        //
+        // VERIFIER RULE (learned from on-device VerifyError killing the
+        // whole BillingClientImpl on Nice Dice 3D): ART rejects a method
+        // when one register holds an int at one branch join and a
+        // reference at another, or when fall-through code retypes regs
+        // the original body still expects. So: v0..v3 hold OBJECTS ONLY,
+        // v4 holds INTS ONLY, every path returns directly (no shared
+        // :done join merging mismatched types), and fall-through
+        // injections go through cloneMutable (see startConnection below).
+        // Uniqueness comes from UUID (object ops only) instead of
+        // currentTimeMillis (wide pair would need a 6th register).
         //
         // The fake purchase carries the REAL requested product id read
         // from the BillingFlowParams at runtime (Billing 5+ details list,
@@ -219,6 +230,20 @@ val freeInAppPurchasesPatch = bytecodePatch(
         // (e.g. BillingClientImpl.launchBillingFlowCpp -> I): same grant,
         // then 0 (OK) instead of a BillingResult object.
         fun buyGrantBlock(igetTail: String, flowReg: String?, intReturn: Boolean = false): String {
+            // Tails are plain strings (no nested triple-quotes: those would
+            // terminate the outer smali block early and break compilation).
+            // Both paths return directly so no cross-path :done join can
+            // merge mismatched register types (ART VerifyError).
+            val grantTail = if (intReturn) "const/4 v0, 0x0\nreturn v0" else "return-object v1"
+            val nocbTail = if (intReturn) "const/4 v0, 0x0\nreturn v0" else
+                "invoke-static {}, Lcom/android/billingclient/api/BillingResult;->newBuilder()Lcom/android/billingclient/api/BillingResult\$Builder;\n" +
+                "move-result-object v1\n" +
+                "const/4 v4, 0x0\n" +
+                "invoke-virtual {v1, v4}, Lcom/android/billingclient/api/BillingResult\$Builder;->setResponseCode(I)Lcom/android/billingclient/api/BillingResult\$Builder;\n" +
+                "move-result-object v1\n" +
+                "invoke-virtual {v1}, Lcom/android/billingclient/api/BillingResult\$Builder;->build()Lcom/android/billingclient/api/BillingResult;\n" +
+                "move-result-object v1\n" +
+                "return-object v1"
             if (flowReg != null) {
                 val src = when {
                     billingApiHas("getProductDetailsParamsList") -> "named:getProductDetailsParamsList"
@@ -241,12 +266,12 @@ val freeInAppPurchasesPatch = bytecodePatch(
                     sb.appendLine("move-result-object v3")
                     sb.appendLine("if-eqz v3, :morphe_iap_pid_fake")
                     sb.appendLine("invoke-interface {v3}, Ljava/util/List;->isEmpty()Z")
-                    sb.appendLine("move-result v1")
-                    sb.appendLine("if-eqz v1, :morphe_iap_pid_hasitem")
+                    sb.appendLine("move-result v4")
+                    sb.appendLine("if-eqz v4, :morphe_iap_pid_hasitem")
                     sb.appendLine("goto :morphe_iap_pid_fake")
                     sb.appendLine(":morphe_iap_pid_hasitem")
-                    sb.appendLine("const/4 v1, 0x0")
-                    sb.appendLine("invoke-interface {v3, v1}, Ljava/util/List;->get(I)Ljava/lang/Object;")
+                    sb.appendLine("const/4 v4, 0x0")
+                    sb.appendLine("invoke-interface {v3, v4}, Ljava/util/List;->get(I)Ljava/lang/Object;")
                     sb.appendLine("move-result-object v3")
                     sb.appendLine("check-cast v3, Lcom/android/billingclient/api/ProductDetailsParams;")
                     sb.appendLine("invoke-virtual {v3}, Lcom/android/billingclient/api/ProductDetailsParams;->getProductDetails()Lcom/android/billingclient/api/ProductDetails;")
@@ -268,15 +293,15 @@ val freeInAppPurchasesPatch = bytecodePatch(
                         sb.appendLine("move-result-object v3")
                         sb.appendLine("if-eqz v3, :morphe_iap_pid_next$i")
                         sb.appendLine("invoke-interface {v3}, Ljava/util/List;->isEmpty()Z")
-                        sb.appendLine("move-result v1")
-                        sb.appendLine("if-eqz v1, :morphe_iap_pid_has$i")
+                        sb.appendLine("move-result v4")
+                        sb.appendLine("if-eqz v4, :morphe_iap_pid_has$i")
                         sb.appendLine("goto :morphe_iap_pid_next$i")
                         sb.appendLine(":morphe_iap_pid_has$i")
-                        sb.appendLine("const/4 v1, 0x0")
-                        sb.appendLine("invoke-interface {v3, v1}, Ljava/util/List;->get(I)Ljava/lang/Object;")
+                        sb.appendLine("const/4 v4, 0x0")
+                        sb.appendLine("invoke-interface {v3, v4}, Ljava/util/List;->get(I)Ljava/lang/Object;")
                         sb.appendLine("move-result-object v3")
-                        sb.appendLine("instance-of v1, v3, $pdpClass")
-                        sb.appendLine("if-eqz v1, :morphe_iap_pid_next$i")
+                        sb.appendLine("instance-of v4, v3, $pdpClass")
+                        sb.appendLine("if-eqz v4, :morphe_iap_pid_next$i")
                         sb.appendLine("check-cast v3, $pdpClass")
                         sb.appendLine("invoke-virtual {v3}, $pdpClass->$pdpGet()$pdClass")
                         sb.appendLine("move-result-object v3")
@@ -311,9 +336,9 @@ val freeInAppPurchasesPatch = bytecodePatch(
                 $igetTail
                 if-eqz v0, :morphe_iap_nocb
                 $pid
-                invoke-static {}, Ljava/lang/System;->currentTimeMillis()J
-                move-result-wide v1
-                invoke-static {v1, v2}, Ljava/lang/String;->valueOf(J)Ljava/lang/String;
+                invoke-static {}, Ljava/util/UUID;->randomUUID()Ljava/util/UUID;
+                move-result-object v2
+                invoke-virtual {v2}, Ljava/util/UUID;->toString()Ljava/lang/String;
                 move-result-object v2
                 new-instance v1, Ljava/lang/StringBuilder;
                 invoke-direct {v1}, Ljava/lang/StringBuilder;-><init>()V
@@ -327,12 +352,7 @@ val freeInAppPurchasesPatch = bytecodePatch(
                 move-result-object v1
                 invoke-virtual {v1, v3}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
                 move-result-object v1
-                const-string v0, "\",\"purchaseTime\":"
-                invoke-virtual {v1, v0}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
-                move-result-object v1
-                invoke-virtual {v1, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
-                move-result-object v1
-                const-string v0, ",\"purchaseState\":1,\"purchaseToken\":\"morphe-"
+                const-string v0, "\",\"purchaseTime\":0,\"purchaseState\":1,\"purchaseToken\":\"morphe-"
                 invoke-virtual {v1, v0}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
                 move-result-object v1
                 invoke-virtual {v1, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
@@ -353,24 +373,15 @@ val freeInAppPurchasesPatch = bytecodePatch(
                 move-object v3, v1
                 invoke-static {}, Lcom/android/billingclient/api/BillingResult;->newBuilder()Lcom/android/billingclient/api/BillingResult${'$'}Builder;
                 move-result-object v1
-                const/4 v2, 0x0
-                invoke-virtual {v1, v2}, Lcom/android/billingclient/api/BillingResult${'$'}Builder;->setResponseCode(I)Lcom/android/billingclient/api/BillingResult${'$'}Builder;
+                const/4 v4, 0x0
+                invoke-virtual {v1, v4}, Lcom/android/billingclient/api/BillingResult${'$'}Builder;->setResponseCode(I)Lcom/android/billingclient/api/BillingResult${'$'}Builder;
                 move-result-object v1
-                invoke-virtual {v1}, Lcom/android/billingclient/api/BillingResult;->build()Lcom/android/billingclient/api/BillingResult;
+                invoke-virtual {v1}, Lcom/android/billingclient/api/BillingResult${'$'}Builder;->build()Lcom/android/billingclient/api/BillingResult;
                 move-result-object v1
                 invoke-interface {v0, v1, v3}, Lcom/android/billingclient/api/PurchasesUpdatedListener;->onPurchasesUpdated(Lcom/android/billingclient/api/BillingResult;Ljava/util/List;)V
-                ${if (intReturn) "const/4 v0, 0x0\nreturn v0" else "goto :morphe_iap_done"}
+                $grantTail
                 :morphe_iap_nocb
-                ${if (intReturn) "const/4 v0, 0x0\nreturn v0" else """
-                invoke-static {}, Lcom/android/billingclient/api/BillingResult;->newBuilder()Lcom/android/billingclient/api/BillingResult${'$'}Builder;
-                move-result-object v1
-                const/4 v2, 0x0
-                invoke-virtual {v1, v2}, Lcom/android/billingclient/api/BillingResult${'$'}Builder;->setResponseCode(I)Lcom/android/billingclient/api/BillingResult${'$'}Builder;
-                move-result-object v1
-                invoke-virtual {v1}, Lcom/android/billingclient/api/BillingResult;->build()Lcom/android/billingclient/api/BillingResult;
-                move-result-object v1
-                :morphe_iap_done
-                return-object v1"""}
+                $nocbTail
             """.trimIndent()
         }
 
@@ -382,7 +393,7 @@ val freeInAppPurchasesPatch = bytecodePatch(
             if (field != null) {
                 val block = buyGrantBlock(field, flowParamsReg(it, isStatic))
                 var granted = false
-                if (minRegs(it) >= 4) {
+                if (minRegs(it) >= 5) {
                     try { it.addInstructions(0, block); granted = true } catch (_: Exception) {}
                 }
                 if (!granted) {
@@ -411,7 +422,7 @@ val freeInAppPurchasesPatch = bytecodePatch(
                 // Native bridge params are opaque: keep the static fallback id.
                 val block = buyGrantBlock(field, null)
                 var granted = false
-                if (minRegs(it) >= 4) {
+                if (minRegs(it) >= 5) {
                     try { it.addInstructions(0, block); granted = true } catch (_: Exception) {}
                 }
                 if (!granted) {
@@ -433,24 +444,11 @@ val freeInAppPurchasesPatch = bytecodePatch(
                     try { it.addInstructions(0, "const/4 v0, 0x0\nreturn-object v0") } catch (_: Exception) {}
                 }
                 // Int-returning native bridge (e.g. launchBillingFlowCpp ->
-                // I): grant with the real product id when the flow params
-                // are visible, then return OK. Previously OK-only with no
-                // grant, so Unity-bridged taps silently did nothing.
-                it.returnType == "I" && field != null && flowParamsReg(it, isStatic) != null -> {
-                    val block = buyGrantBlock(field, flowParamsReg(it, isStatic), intReturn = true)
-                    var granted = false
-                    if (minRegs(it) >= 4) {
-                        try { it.addInstructions(0, block); granted = true } catch (_: Exception) {}
-                    }
-                    if (!granted) {
-                        try { granted = expandSwap(it, block) } catch (_: Exception) {}
-                    }
-                    if (granted) {
-                        logger.info("FreeIAP buy-time grant (int bridge): ${it.definingClass}->${it.name}")
-                    } else try {
-                        it.addInstructions(0, "const/4 v0, 0x0\nreturn v0")
-                    } catch (_: Exception) {}
-                }
+                // I): OK-only for now. A grant block here goes through the
+                // clone path (tiny frame) and ART rejects the result
+                // (VerifyError on the whole class, seen on Nice Dice 3D),
+                // while the Java launchBillingFlow grant above covers the
+                // JNI-bridged Unity/Defold purchase path.
                 it.returnType == "I" -> it.addInstructions(0, "const/4 v0, 0x0\nreturn v0")
                 it.returnType == "V" -> it.addInstructions(0, "return-void")
             }
@@ -473,9 +471,14 @@ val freeInAppPurchasesPatch = bytecodePatch(
         // (J) bridge used by Unity IL2CPP games) is left completely
         // untouched: voiding it strands native setup with no callback and
         // freezes the app on its loading screen.
+        // VERIFIER RULE: fall-through injections MUST go through
+        // cloneMutable (expandSwap): direct prepending retypes v0/v1 for
+        // the original body below and ART rejects the whole class
+        // (seen on Nice Dice 3D). If the frame cannot grow, skip rather
+        // than inject unsafely.
         patchAll(Fingerprint(name = "startConnection", custom = { _, c -> c.type.contains("BillingClient")         }), "BillingClient.startConnection", 2) {
             if (it.parameterTypes == listOf("Lcom/android/billingclient/api/BillingClientStateListener;") && it.returnType == "V") {
-                it.addInstructions(0, """
+                val block = """
                     invoke-static {}, Lcom/android/billingclient/api/BillingResult;->newBuilder()Lcom/android/billingclient/api/BillingResult${'$'}Builder;
                     move-result-object v0
                     const/4 v1, 0x0
@@ -485,7 +488,10 @@ val freeInAppPurchasesPatch = bytecodePatch(
                     move-result-object v0
                     move-object/from16 v1, p1
                     invoke-interface {v1, v0}, Lcom/android/billingclient/api/BillingClientStateListener;->onBillingSetupFinished(Lcom/android/billingclient/api/BillingResult;)V
-                """.trimIndent())
+                """.trimIndent()
+                if (!expandSwap(it, block)) {
+                    logger.warning("FreeIAP startConnection left stock (frame too small to clone safely)")
+                }
             }
             // else: leave the overload alone (see comment above)
         }
@@ -533,6 +539,8 @@ val freeInAppPurchasesPatch = bytecodePatch(
                             move-result-object v0
                             const/4 v1, 0x0
                             invoke-virtual {v0, v1}, Lcom/android/billingclient/api/BillingResult${'$'}Builder;->setResponseCode(I)Lcom/android/billingclient/api/BillingResult${'$'}Builder;
+                            move-result-object v0
+                            invoke-virtual {v0}, Lcom/android/billingclient/api/BillingResult${'$'}Builder;->build()Lcom/android/billingclient/api/BillingResult;
                             move-result-object v0
                             invoke-static {}, Ljava/util/Collections;->emptyList()Ljava/util/List;
                             move-result-object v1
