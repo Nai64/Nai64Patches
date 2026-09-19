@@ -2,12 +2,14 @@ package patches.universal.unlock
 
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
+import app.morphe.patcher.extensions.InstructionExtensions.removeInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.patch.booleanOption
 import patches.universal.ads.util.cloneMutable
 import java.util.logging.Logger
 import patches.universal.ads.util.DiscordPromo
+import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod.Companion.toMutable
 
 @Suppress("unused")
 val freeInAppPurchasesPatch = bytecodePatch(
@@ -45,6 +47,12 @@ val freeInAppPurchasesPatch = bytecodePatch(
         // holds: clone with extra registers and swap the clone in. The
         // prologue cloneMutable adds is harmless because expanded injections
         // always return before the original body runs.
+        // dropTryBlocks: the clone keeps the original try blocks VERBATIM,
+        // but prepending shifts every instruction, so stale ranges cover
+        // the injected code and ART merges handler states into it
+        // (VerifyError on the whole class, seen on Nice Dice 3D). Only
+        // safe when the block returns before the original body (which then
+        // is dead anyway); fall-through injections must keep them.
         fun expandSwap(m: app.morphe.patcher.util.proxy.mutableTypes.MutableMethod, block: String): Boolean {
             return try {
                 val owner = mutableClassDefByOrNull(m.definingClass) ?: return false
@@ -619,6 +627,290 @@ val freeInAppPurchasesPatch = bytecodePatch(
         // catalog stalls Unity shop init on loading screens (native MOD
         // menus never touch the catalog either). The grant happens at buy
         // time via launchBillingFlow above.
+
+        // ── Synthetic product catalog (Billing 5+ only) ──
+        // Some setups never resolve the catalog at all: no working Play
+        // backend (e.g. MicroG-only devices) means queryProductDetailsAsync
+        // goes nowhere, Unity IAP initializes with zero products, and every
+        // tap dies in C# with "unknown product" before our buy-time grant
+        // can fire (seen on Nice Dice 3D). Answer the query ourselves with
+        // one ProductDetails per requested id, built from the ids the game
+        // asked for. All names resolve at patch time (exact names first,
+        // signature fallback for obfuscated Billing); the labeled loop
+        // lives in an injected catch-free helper (labels + try blocks in
+        // the target method don't mix), the call site stays straight-line.
+        // VERIFIER RULE (same as the grant block): v0..v3/v5/v6 hold
+        // OBJECTS ONLY, v4 holds INTS ONLY, and the helper returns the
+        // list (empty when the request is null) instead of branching out.
+        try {
+            val qppClass = "Lcom/android/billingclient/api/QueryProductDetailsParams;"
+            val qpClass = "Lcom/android/billingclient/api/QueryProductDetailsParams\$Product;"
+            val catPdClass = "Lcom/android/billingclient/api/ProductDetails;"
+            val catListener = "Lcom/android/billingclient/api/ProductDetailsResponseListener;"
+            // Candidate request-list accessors on QueryProductDetailsParams.
+            // Exact name first; otherwise every no-arg internal-holder
+            // getter (obfuscated Billing hides the list behind e.g. zza()
+            // returning a zzbt). The helper tries each at runtime behind
+            // instance-of guards, so a wrong pick degrades to the next
+            // candidate instead of crashing. No patch-time interface proof
+            // needed: internal holders may not even load as mutable types.
+            val listGetters = try {
+                val ms = mutableClassDefByOrNull(qppClass)?.methods ?: emptyList()
+                val exact = ms.firstOrNull { it.parameterTypes.isEmpty() && it.name == "getProductList" }
+                if (exact != null) {
+                    listOf(exact.name to exact.returnType)
+                } else {
+                    val found = (ms.filter { it.parameterTypes.isEmpty() && it.returnType == "Ljava/util/List;" } +
+                        ms.filter { it.parameterTypes.isEmpty() && it.returnType == "Ljava/util/ArrayList;" } +
+                        ms.filter {
+                            it.parameterTypes.isEmpty() &&
+                                it.returnType.startsWith("Lcom/google/android/gms/internal/play_billing/")
+                        }).map { it.name to it.returnType }.take(4)
+                    found
+                }
+            } catch (_: Exception) { emptyList() }
+            // Product id/type accessors. Exact names first; on obfuscated
+            // Billing neither exists, so fall back to dynamic resolution:
+            // call the String getters and decide at runtime which value
+            // is the type (equals "inapp"/"subs") and which is the id.
+            // Never guesses blindly: a wrong identity would grant nothing.
+            val qpMethods = try {
+                mutableClassDefByOrNull(qpClass)?.methods ?: emptyList()
+            } catch (_: Exception) { emptyList() }
+            val qpIdExact = qpMethods.firstOrNull { it.parameterTypes.isEmpty() && it.name == "getProductId" }?.name
+            val qpTypeExact = qpMethods.firstOrNull { it.parameterTypes.isEmpty() && it.name == "getProductType" }?.name
+            val qpStrGetters = qpMethods
+                .filter { it.parameterTypes.isEmpty() && it.returnType == "Ljava/lang/String;" }
+                .map { it.name }
+                .filter { it != "toString" && it != "hashCode" }
+                .take(2)
+            val hasPdCtor = try {
+                mutableClassDefByOrNull(catPdClass)?.methods
+                    ?.any { it.name == "<init>" && it.parameterTypes == listOf("Ljava/lang/String;") } == true
+            } catch (_: Exception) { false }
+            val hasIdSource = qpIdExact != null || qpStrGetters.isNotEmpty()
+            if (listGetters.isNotEmpty() && hasIdSource && hasPdCtor) {
+                // Emits code leaving product id in v2 and product type in
+                // v3 (v2/v3/v4/v6 discipline per the verifier rule above).
+                val idTypeLines = if (qpIdExact != null) {
+                    val t = if (qpTypeExact != null) {
+                        "invoke-virtual {v2}, $qpClass->$qpTypeExact()Ljava/lang/String;\nmove-result-object v3"
+                    } else {
+                        "const-string v3, \"inapp\""
+                    }
+                    "$t\ninvoke-virtual {v2}, $qpClass->$qpIdExact()Ljava/lang/String;\nmove-result-object v2"
+                } else if (qpStrGetters.size >= 2) {
+                    val a = qpStrGetters[0]
+                    val b = qpStrGetters[1]
+                    """
+                    invoke-virtual {v2}, $qpClass->$a()Ljava/lang/String;
+                    move-result-object v3
+                    if-eqz v3, :morphe_cat_loop
+                    invoke-virtual {v2}, $qpClass->$b()Ljava/lang/String;
+                    move-result-object v2
+                    const-string v6, "inapp"
+                    invoke-virtual {v3, v6}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+                    move-result v4
+                    if-nez v4, :morphe_cat_havetype
+                    const-string v6, "subs"
+                    invoke-virtual {v3, v6}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+                    move-result v4
+                    if-nez v4, :morphe_cat_havetype
+                    move-object v6, v2
+                    move-object v2, v3
+                    move-object v3, v6
+                    :morphe_cat_havetype
+                    """.trimIndent()
+                } else {
+                    "invoke-virtual {v2}, $qpClass->${qpStrGetters[0]}()Ljava/lang/String;\n" +
+                        "move-result-object v2\nconst-string v3, \"inapp\""
+                }
+                patchAll(Fingerprint(name = "queryProductDetailsAsync", custom = { m, c ->
+                    c.type.contains("BillingClient") && m.returnType == "V" &&
+                        m.parameterTypes.any { it.contains("QueryProductDetailsParams") } &&
+                        m.parameterTypes.any { it.contains("ProductDetailsResponseListener") }
+                }), "queryProductDetailsAsync", 3) {
+                    val isStatic = try {
+                        com.android.tools.smali.dexlib2.AccessFlags.STATIC.isSet(it.accessFlags)
+                    } catch (_: Exception) { true }
+                    val pOff = if (isStatic) 0 else 1
+                    val paramsIdx = it.parameterTypes.indexOfFirst { p -> p.contains("QueryProductDetailsParams") }
+                    val listenerIdx = it.parameterTypes.indexOfFirst { p -> p.contains("ProductDetailsResponseListener") }
+                    if (paramsIdx < 0 || listenerIdx < 0) return@patchAll
+                    val paramsReg = "p${paramsIdx + pOff}"
+                    val listenerReg = "p${listenerIdx + pOff}"
+                    // Install the loop helper once per owner class.
+                    try {
+                        val owner = mutableClassDefByOrNull(it.definingClass)
+                        if (owner != null && owner.methods.none { m -> m.name == "morpheFakeProductList" }) {
+                            val candsSmali = StringBuilder()
+                            listGetters.forEachIndexed { i, g ->
+                                candsSmali.appendLine("move-object/from16 v1, p0")
+                                candsSmali.appendLine("invoke-virtual {v1}, $qppClass->${g.first}()${g.second}")
+                                candsSmali.appendLine("move-result-object v1")
+                                candsSmali.appendLine("instance-of v4, v1, Ljava/util/List;")
+                                candsSmali.appendLine("if-eqz v4, :morphe_cat_next$i")
+                                candsSmali.appendLine("check-cast v1, Ljava/util/List;")
+                                candsSmali.appendLine("invoke-interface {v1}, Ljava/util/List;->isEmpty()Z")
+                                candsSmali.appendLine("move-result v4")
+                                candsSmali.appendLine("if-eqz v4, :morphe_cat_fill")
+                                candsSmali.appendLine(":morphe_cat_next$i")
+                            }
+                            // Clone a donor static method instead of building an
+                            // ImmutableMethod from scratch: cloned methods
+                            // are proven dex-writable in this toolchain.
+                            val donor = owner.methods.firstOrNull { m ->
+                                try {
+                                    com.android.tools.smali.dexlib2.AccessFlags.STATIC.isSet(m.accessFlags) &&
+                                        m.implementation != null
+                                } catch (_: Exception) { false }
+                            } ?: run {
+                                logger.warning("FreeIAP synthetic catalog helper skipped: no static donor")
+                                return@patchAll
+                            }
+                            val helper = donor.cloneMutable(
+                                name = "morpheFakeProductList",
+                                parameters = listOf(
+                                    com.android.tools.smali.dexlib2.immutable.ImmutableMethodParameter(
+                                        qppClass, null, null,
+                                    ),
+                                ),
+                                returnType = "Ljava/util/List;",
+                                additionalRegisters = 8,
+                            )
+                            helper.implementation?.let { impl ->
+                                try { impl.removeInstructions(impl.instructions.size) } catch (_: Exception) {}
+                            }
+                            owner.methods.add(helper)
+                            val dbgText = """
+                                new-instance v0, Ljava/util/ArrayList;
+                                invoke-direct {v0}, Ljava/util/ArrayList;-><init>()V
+                                if-eqz p0, :morphe_cat_done
+                                $candsSmali goto :morphe_cat_done
+                                :morphe_cat_fill
+                                invoke-interface {v1}, Ljava/util/List;->iterator()Ljava/util/Iterator;
+                                move-result-object v1
+                                const/4 v4, 0x0
+                                :morphe_cat_loop
+                                invoke-interface {v1}, Ljava/util/Iterator;->hasNext()Z
+                                move-result v4
+                                if-eqz v4, :morphe_cat_done
+                                invoke-interface {v1}, Ljava/util/Iterator;->next()Ljava/lang/Object;
+                                move-result-object v2
+                                instance-of v4, v2, $qpClass
+                                if-eqz v4, :morphe_cat_loop
+                                check-cast v2, $qpClass
+                                $idTypeLines
+                                if-eqz v2, :morphe_cat_loop
+                                new-instance v5, Ljava/lang/StringBuilder;
+                                invoke-direct {v5}, Ljava/lang/StringBuilder;-><init>()V
+                                const-string v6, "{\"productId\":\""
+                                invoke-virtual {v5, v6}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+                                move-result-object v5
+                                invoke-virtual {v5, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+                                move-result-object v5
+                                const-string v6, "\",\"type\":\""
+                                invoke-virtual {v5, v6}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+                                move-result-object v5
+                                invoke-virtual {v5, v3}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+                                move-result-object v5
+                                const-string v6, "\",\"title\":\""
+                                invoke-virtual {v5, v6}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+                                move-result-object v5
+                                invoke-virtual {v5, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+                                move-result-object v5
+                                const-string v6, "\",\"name\":\""
+                                invoke-virtual {v5, v6}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+                                move-result-object v5
+                                invoke-virtual {v5, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+                                move-result-object v5
+                                const-string v6, "\",\"description\":\""
+                                invoke-virtual {v5, v6}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+                                move-result-object v5
+                                invoke-virtual {v5, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+                                move-result-object v5
+                                const-string v6, "\"}"
+                                invoke-virtual {v5, v6}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+                                move-result-object v5
+                                invoke-virtual {v5}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
+                                move-result-object v6
+                                new-instance v2, $catPdClass
+                                invoke-direct {v2, v6}, $catPdClass-><init>(Ljava/lang/String;)V
+                                invoke-interface {v0, v2}, Ljava/util/List;->add(Ljava/lang/Object;)Z
+                                goto :morphe_cat_loop
+                                :morphe_cat_done
+                                return-object v0
+                                nop
+                            """.trimIndent()
+                            helper.addInstructionsWithLabels(0, dbgText)
+                            logger.info("FreeIAP synthetic catalog helper installed in ${it.definingClass}")
+                        }
+                    } catch (e: Exception) {
+                        logger.warning("FreeIAP synthetic catalog helper skipped: ${e.message}")
+                        return@patchAll
+                    }
+                    val helperRef = "${it.definingClass}->morpheFakeProductList($qppClass)Ljava/util/List;"
+                    logger.info("FreeIAP synthetic catalog sources: " + listGetters.joinToString(",") { it.first })
+                    // NOTE: the callback goes through java.lang.reflect
+                    // (getClass/getMethod/invoke) instead of a direct
+                    // interface invoke: morphe's inline lexer rejects the
+                    // ProductDetailsResponseListener method ref outright.
+                    // Straight-line, no labels: clone-safe. Needs v0..v6.
+                    val block = """
+                        move-object/from16 v0, $paramsReg
+                        invoke-static {v0}, $helperRef
+                        move-result-object v1
+                        invoke-static {}, Lcom/android/billingclient/api/BillingResult;->newBuilder()Lcom/android/billingclient/api/BillingResult${'$'}Builder;
+                        move-result-object v0
+                        const/4 v4, 0x0
+                        invoke-virtual {v0, v4}, Lcom/android/billingclient/api/BillingResult${'$'}Builder;->setResponseCode(I)Lcom/android/billingclient/api/BillingResult${'$'}Builder;
+                        move-result-object v0
+                        invoke-virtual {v0}, Lcom/android/billingclient/api/BillingResult${'$'}Builder;->build()Lcom/android/billingclient/api/BillingResult;
+                        move-result-object v0
+                        move-object/from16 v2, $listenerReg
+                        invoke-virtual {v2}, Ljava/lang/Object;->getClass()Ljava/lang/Class;
+                        move-result-object v3
+                        const-string v5, "onProductDetailsResponse"
+                        const/4 v4, 0x2
+                        new-array v6, v4, [Ljava/lang/Class;
+                        const-class v5, Lcom/android/billingclient/api/BillingResult;
+                        const/4 v4, 0x0
+                        aput-object v6, v4, v5
+                        const-class v5, Ljava/util/List;
+                        const/4 v4, 0x1
+                        aput-object v6, v4, v5
+                        const-string v5, "onProductDetailsResponse"
+                        invoke-virtual {v3, v5, v6}, Ljava/lang/Class;->getMethod(Ljava/lang/String;[Ljava/lang/Class;)Ljava/lang/reflect/Method;
+                        move-result-object v3
+                        const/4 v4, 0x2
+                        new-array v5, v4, [Ljava/lang/Object;
+                        const/4 v4, 0x0
+                        aput-object v5, v4, v0
+                        const/4 v4, 0x1
+                        aput-object v5, v4, v1
+                        invoke-virtual {v3, v2, v5}, Ljava/lang/reflect/Method;->invoke(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;
+                        move-result-object v3
+                        return-void
+                    """.trimIndent()
+                    var done = false
+                    if (minRegs(it) >= 7) {
+                        try { it.addInstructions(0, block); done = true } catch (_: Exception) {}
+                    }
+                    if (!done) {
+                        try { done = expandSwap(it, block) } catch (_: Exception) {}
+                    }
+                    if (done) {
+                        logger.info("FreeIAP synthetic catalog: ${it.definingClass}->${it.name}")
+                    } else {
+                        logger.warning("FreeIAP synthetic catalog NOT applied to ${it.definingClass}->${it.name}")
+                    }
+                }
+            } else {
+                logger.info("FreeIAP synthetic catalog skipped (query API shape not found)")
+            }
+        } catch (e: Exception) {
+            logger.warning("FreeIAP synthetic catalog skipped: ${e.message}")
+        }
 
         // getSkuDetails / getProductDetails AIDL
         for (qn in listOf("getSkuDetails", "getProductDetails")) {
