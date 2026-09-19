@@ -215,7 +215,10 @@ val freeInAppPurchasesPatch = bytecodePatch(
             return ((found.filter { it.second == "Ljava/util/List;" } + found.filter { it.second == "Ljava/util/ArrayList;" })
                 .take(3))
         }
-        fun buyGrantBlock(igetTail: String, flowReg: String?): String {
+        // intReturn covers native bridges returning a response CODE int
+        // (e.g. BillingClientImpl.launchBillingFlowCpp -> I): same grant,
+        // then 0 (OK) instead of a BillingResult object.
+        fun buyGrantBlock(igetTail: String, flowReg: String?, intReturn: Boolean = false): String {
             if (flowReg != null) {
                 val src = when {
                     billingApiHas("getProductDetailsParamsList") -> "named:getProductDetailsParamsList"
@@ -356,8 +359,9 @@ val freeInAppPurchasesPatch = bytecodePatch(
                 invoke-virtual {v1}, Lcom/android/billingclient/api/BillingResult;->build()Lcom/android/billingclient/api/BillingResult;
                 move-result-object v1
                 invoke-interface {v0, v1, v3}, Lcom/android/billingclient/api/PurchasesUpdatedListener;->onPurchasesUpdated(Lcom/android/billingclient/api/BillingResult;Ljava/util/List;)V
-                goto :morphe_iap_done
+                ${if (intReturn) "const/4 v0, 0x0\nreturn v0" else "goto :morphe_iap_done"}
                 :morphe_iap_nocb
+                ${if (intReturn) "const/4 v0, 0x0\nreturn v0" else """
                 invoke-static {}, Lcom/android/billingclient/api/BillingResult;->newBuilder()Lcom/android/billingclient/api/BillingResult${'$'}Builder;
                 move-result-object v1
                 const/4 v2, 0x0
@@ -366,7 +370,7 @@ val freeInAppPurchasesPatch = bytecodePatch(
                 invoke-virtual {v1}, Lcom/android/billingclient/api/BillingResult;->build()Lcom/android/billingclient/api/BillingResult;
                 move-result-object v1
                 :morphe_iap_done
-                return-object v1
+                return-object v1"""}
             """.trimIndent()
         }
 
@@ -427,6 +431,25 @@ val freeInAppPurchasesPatch = bytecodePatch(
                     it.addInstructions(0, okBillingResult)
                 } catch (_: Exception) {
                     try { it.addInstructions(0, "const/4 v0, 0x0\nreturn-object v0") } catch (_: Exception) {}
+                }
+                // Int-returning native bridge (e.g. launchBillingFlowCpp ->
+                // I): grant with the real product id when the flow params
+                // are visible, then return OK. Previously OK-only with no
+                // grant, so Unity-bridged taps silently did nothing.
+                it.returnType == "I" && field != null && flowParamsReg(it, isStatic) != null -> {
+                    val block = buyGrantBlock(field, flowParamsReg(it, isStatic), intReturn = true)
+                    var granted = false
+                    if (minRegs(it) >= 4) {
+                        try { it.addInstructions(0, block); granted = true } catch (_: Exception) {}
+                    }
+                    if (!granted) {
+                        try { granted = expandSwap(it, block) } catch (_: Exception) {}
+                    }
+                    if (granted) {
+                        logger.info("FreeIAP buy-time grant (int bridge): ${it.definingClass}->${it.name}")
+                    } else try {
+                        it.addInstructions(0, "const/4 v0, 0x0\nreturn v0")
+                    } catch (_: Exception) {}
                 }
                 it.returnType == "I" -> it.addInstructions(0, "const/4 v0, 0x0\nreturn v0")
                 it.returnType == "V" -> it.addInstructions(0, "return-void")
