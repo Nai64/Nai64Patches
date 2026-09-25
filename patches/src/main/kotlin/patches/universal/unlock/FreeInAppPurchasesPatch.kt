@@ -53,13 +53,29 @@ val freeInAppPurchasesPatch = bytecodePatch(
         // (VerifyError on the whole class, seen on Nice Dice 3D). Only
         // safe when the block returns before the original body (which then
         // is dead anyway); fall-through injections must keep them.
-        fun expandSwap(m: app.morphe.patcher.util.proxy.mutableTypes.MutableMethod, block: String): Boolean {
+        fun expandSwap(m: app.morphe.patcher.util.proxy.mutableTypes.MutableMethod, block: String, wipeBody: Boolean = false): Boolean {
             return try {
                 val owner = mutableClassDefByOrNull(m.definingClass) ?: return false
                 val target = owner.methods.firstOrNull {
                     it.name == m.name && it.parameterTypes == m.parameterTypes && it.returnType == m.returnType
                 } ?: return false
                 val cloned = m.cloneMutable(additionalRegisters = 4)
+                // wipeBody: for return-terminated injections, drop the
+                // original body entirely. Inserting at 0 shifts every PC,
+                // which silently corrupts PC-relative payloads
+                // (packed/sparse-switch tables, fill-array-data) in the
+                // original body; ART then verifies garbage and rejects the
+                // whole class (seen on Nice Dice 3D). Dead code needs no
+                // preservation. Only for blocks that return (never fall
+                // through into the original body).
+                if (wipeBody) {
+                    try {
+                        val impl = cloned.implementation ?: return false
+                        impl.removeInstructions(impl.instructions.size)
+                    } catch (_: Exception) {
+                        return false
+                    }
+                }
                 owner.methods.remove(target)
                 cloned.addInstructions(0, block)
                 owner.methods.add(cloned)
@@ -897,7 +913,7 @@ val freeInAppPurchasesPatch = bytecodePatch(
                         try { it.addInstructions(0, block); done = true } catch (_: Exception) {}
                     }
                     if (!done) {
-                        try { done = expandSwap(it, block) } catch (_: Exception) {}
+                        try { done = expandSwap(it, block, wipeBody = true) } catch (_: Exception) {}
                     }
                     if (done) {
                         logger.info("FreeIAP synthetic catalog: ${it.definingClass}->${it.name}")
