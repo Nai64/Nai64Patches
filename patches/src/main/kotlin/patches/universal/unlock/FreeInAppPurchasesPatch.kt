@@ -870,11 +870,7 @@ val freeInAppPurchasesPatch = bytecodePatch(
                     }
                     val helperRef = "${it.definingClass}->morpheFakeProductList($qppClass)Ljava/util/List;"
                     logger.info("FreeIAP synthetic catalog sources: " + listGetters.joinToString(",") { it.first })
-                    // NOTE: the callback goes through java.lang.reflect
-                    // (getClass/getMethod/invoke) instead of a direct
-                    // interface invoke: morphe's inline lexer rejects the
-                    // ProductDetailsResponseListener method ref outright.
-                    // Straight-line, no labels: clone-safe. Needs v0..v6.
+                    // Straight-line, no labels: clone-safe. Needs v0..v4.
                     val block = """
                         move-object/from16 v0, $paramsReg
                         invoke-static {v0}, $helperRef
@@ -887,28 +883,7 @@ val freeInAppPurchasesPatch = bytecodePatch(
                         invoke-virtual {v0}, Lcom/android/billingclient/api/BillingResult${'$'}Builder;->build()Lcom/android/billingclient/api/BillingResult;
                         move-result-object v0
                         move-object/from16 v2, $listenerReg
-                        invoke-virtual {v2}, Ljava/lang/Object;->getClass()Ljava/lang/Class;
-                        move-result-object v3
-                        const-string v5, "onProductDetailsResponse"
-                        const/4 v4, 0x2
-                        new-array v6, v4, [Ljava/lang/Class;
-                        const-class v5, Lcom/android/billingclient/api/BillingResult;
-                        const/4 v4, 0x0
-                        aput-object v6, v4, v5
-                        const-class v5, Ljava/util/List;
-                        const/4 v4, 0x1
-                        aput-object v6, v4, v5
-                        const-string v5, "onProductDetailsResponse"
-                        invoke-virtual {v3, v5, v6}, Ljava/lang/Class;->getMethod(Ljava/lang/String;[Ljava/lang/Class;)Ljava/lang/reflect/Method;
-                        move-result-object v3
-                        const/4 v4, 0x2
-                        new-array v5, v4, [Ljava/lang/Object;
-                        const/4 v4, 0x0
-                        aput-object v5, v4, v0
-                        const/4 v4, 0x1
-                        aput-object v5, v4, v1
-                        invoke-virtual {v3, v2, v5}, Ljava/lang/reflect/Method;->invoke(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;
-                        move-result-object v3
+                        invoke-interface {v2, v0, v1}, Lcom/android/billingclient/api/ProductDetailsResponseListener;->onProductDetailsResponse(Lcom/android/billingclient/api/BillingResult;Ljava/util/List;)V
                         return-void
                     """.trimIndent()
                     var done = false
