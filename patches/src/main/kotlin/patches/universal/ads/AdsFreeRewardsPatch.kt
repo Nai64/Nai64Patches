@@ -52,6 +52,12 @@ val adsFreeRewardsPatch = bytecodePatch(
         title = "Reward multiplier",
         description = "Grant the ad reward this many times per ad button press (1-50). Applies to the instant reward granted without watching an ad. 1 keeps the normal single reward.",
     )
+    val repeatAdBreak by booleanOption(
+        key = "repeatAdBreak",
+        default = false,
+        title = "Repeat full ad break",
+        description = "Deliver each repeat as its own displayed/reward/hidden ad break. Turn this on for games that ignore extra reward events and only pay out once per ad break. Leave off for games that pay per reward event, which would then pay the multiplier squared times.",
+    )
 
     execute {
         val logger = Logger.getLogger(this::class.java.name)
@@ -75,7 +81,7 @@ val adsFreeRewardsPatch = bytecodePatch(
             else -> parsed
         }
         logger.info("Ads Free Rewards: rewardMultiplier=$multiplier")
-        applyAdsFreeRewardsV1190(logger, rewardStrategy, instantReward, multiplier)
+        applyAdsFreeRewardsV1190(logger, rewardStrategy, instantReward, multiplier, repeatAdBreak)
         if (fakeAdAvailability == true) {
             val faked = forceAdAvailability(logger)
             if (faked > 0) logger.info("Ads Free Rewards: faked availability for $faked SDK check(s)")
@@ -133,7 +139,7 @@ private fun BytecodePatchContext.forceAdAvailability(logger: Logger): Int {
     return patched
 }
 
-private fun BytecodePatchContext.applyAdsFreeRewardsV1190(logger: Logger, rewardStrategy: String?, instantReward: Boolean?, multiplier: Int) {
+private fun BytecodePatchContext.applyAdsFreeRewardsV1190(logger: Logger, rewardStrategy: String?, instantReward: Boolean?, multiplier: Int, repeatAdBreak: Boolean?) {
     val strategy = rewardStrategy
     val useMax = strategy == "auto" || strategy == "max"
     val useUnityAds = strategy == "auto" || strategy == "unityAds"
@@ -211,7 +217,7 @@ private fun BytecodePatchContext.applyAdsFreeRewardsV1190(logger: Logger, reward
         applyMyTargetStrategy(logger, multiplier)
         applyYandexWrapperStrategy(logger, multiplier)
     }
-    if (applyMaxUnityStrategy(logger, useMax, instantReward, multiplier)) return
+    if (applyMaxUnityStrategy(logger, useMax, instantReward, multiplier, repeatAdBreak)) return
     applyNativeMaxStrategy(logger, useMax, instantReward, multiplier)
     applyInMobiRewardedStrategy(logger, useMax, instantReward, multiplier)
     applyIronSourceAdsStrategy(logger, useIronSource, instantReward, multiplier)
@@ -421,11 +427,11 @@ private fun BytecodePatchContext.applyMadsStrategy(logger: Logger, useIronSource
     }
 }
 
-private fun BytecodePatchContext.applyMaxUnityStrategy(logger: Logger, useMax: Boolean, instantReward: Boolean?, multiplier: Int): Boolean {
+private fun BytecodePatchContext.applyMaxUnityStrategy(logger: Logger, useMax: Boolean, instantReward: Boolean?, multiplier: Int, repeatAdSession: Boolean?): Boolean {
     val unityShow = ShowRewardedAdFingerprint.methodOrNull
     val unityReady = IsRewardedAdReadyFingerprint.methodOrNull
     if (!useMax || unityShow == null || unityReady == null) return false
-    logger.info("Ads Free Rewards: MAX Unity Ad wrapper patch succeeded${if (instantReward == true && multiplier > 1) " (reward x$multiplier)" else ""}")
+    logger.info("Ads Free Rewards: MAX Unity Ad wrapper patch succeeded${if (instantReward == true && multiplier > 1) " (reward x$multiplier${if (repeatAdSession == true) ", repeated ad breaks" else ""})" else ""}")
     unityReady.addInstructions(0, """
         const/4 v0, 0x1
         return v0
@@ -450,9 +456,7 @@ private fun BytecodePatchContext.applyMaxUnityStrategy(logger: Logger, useMax: B
             invoke-static {v1, v2, v3}, Lcom/applovin/impl/sdk/utils/JsonUtils;->putString(Lorg/json/JSONObject;Ljava/lang/String;Ljava/lang/String;)V
             invoke-static {v1}, Lcom/applovin/mediation/unity/MaxUnityAdManager;->forwardUnityEvent(Lorg/json/JSONObject;)V
         """.trimIndent()
-        unityShow.cloneParameters().addInstructions(
-            0, """
-            move-object/from16 v0, p1
+        val unityDisplayedEvent = """
             new-instance v1, Lorg/json/JSONObject;
             invoke-direct {v1}, Lorg/json/JSONObject;-><init>()V
             const-string v2, "name"
@@ -464,7 +468,8 @@ private fun BytecodePatchContext.applyMaxUnityStrategy(logger: Logger, useMax: B
             const-string v3, "rewarded"
             invoke-static {v1, v2, v3}, Lcom/applovin/impl/sdk/utils/JsonUtils;->putString(Lorg/json/JSONObject;Ljava/lang/String;Ljava/lang/String;)V
             invoke-static {v1}, Lcom/applovin/mediation/unity/MaxUnityAdManager;->forwardUnityEvent(Lorg/json/JSONObject;)V
-            ${repeatLines(multiplier, "            ", unityRewardEvent)}
+        """.trimIndent()
+        val unityHiddenEvent = """
             new-instance v1, Lorg/json/JSONObject;
             invoke-direct {v1}, Lorg/json/JSONObject;-><init>()V
             const-string v2, "name"
@@ -476,6 +481,22 @@ private fun BytecodePatchContext.applyMaxUnityStrategy(logger: Logger, useMax: B
             const-string v3, "rewarded"
             invoke-static {v1, v2, v3}, Lcom/applovin/impl/sdk/utils/JsonUtils;->putString(Lorg/json/JSONObject;Ljava/lang/String;Ljava/lang/String;)V
             invoke-static {v1}, Lcom/applovin/mediation/unity/MaxUnityAdManager;->forwardUnityEvent(Lorg/json/JSONObject;)V
+        """.trimIndent()
+        // Some games only pay out once per ad break and ignore further reward
+        // events until the next one starts. Repeating the whole
+        // displayed/reward/hidden cycle presents each payout as its own ad
+        // break, which those games accept. Others pay per reward event, so
+        // repeating the full cycle there would pay multiplier squared times.
+        val adBreak = "$unityDisplayedEvent\n$unityRewardEvent\n$unityHiddenEvent"
+        val body = if (repeatAdSession == true) {
+            repeatLines(multiplier, "            ", adBreak)
+        } else {
+            "$unityDisplayedEvent\n${repeatLines(multiplier, "            ", unityRewardEvent)}\n$unityHiddenEvent"
+        }
+        unityShow.cloneParameters().addInstructions(
+            0, """
+            move-object/from16 v0, p1
+            $body
             return-void
         """.trimIndent()
         )
