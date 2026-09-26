@@ -1300,7 +1300,7 @@ val freeInAppPurchasesPatch = bytecodePatch(
                     }
                 }
             }
-        } else {
+        } else if (mutableClassDefByOrNull(rcPurchases) != null) {
             logger.warning("Free In-app Purchases: RevenueCat unsafe fake skipped (fields not found)")
         }
 
