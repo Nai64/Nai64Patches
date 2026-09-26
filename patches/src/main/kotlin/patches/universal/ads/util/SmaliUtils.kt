@@ -1,6 +1,26 @@
 package patches.universal.ads.util
 
 /**
+ * Emits [block] [count] times, every line prefixed with [indent].
+ *
+ * The multiplier repeats the SDK's reward callback instead of scaling the
+ * reward amount it reports. Unity-bridged networks (AppLovin MAX, Unity Ads)
+ * hand the amount to the game as a plain value in a JSON event, and games
+ * typically ignore it and grant their own hardcoded reward, so a larger
+ * amount buys nothing. Only the reward callback is repeated - the
+ * shown/started/hidden lifecycle still fires once so the ad flow completes
+ * normally.
+ *
+ * The repeat is unrolled at patch time rather than looped, so no branch
+ * targets or extra registers are introduced and the injection stays
+ * verifier-safe.
+ */
+fun repeatLines(count: Int, indent: String, block: String): String =
+    (1..count.coerceIn(1, 50)).joinToString("\n") { copy ->
+        block.lineSequence().joinToString("\n") { "$indent$it" }
+    }
+
+/**
  * Generates Smali bytecode that uses reflection to find the
  * MaxRewardedAdListener field on `this`, then fires the full callback
  * chain: onAdDisplayed -> onRewardedVideoStarted -> onUserRewarded ->
@@ -13,8 +33,12 @@ package patches.universal.ads.util
  * position when they resolve above v15 (the line is silently dropped), so
  * `this` is copied with from16 into v0 (dead after the field-search loop)
  * and only v-regs are used afterwards.
+ *
+ * [multiplier] repeats onUserRewarded that many times, each carrying the
+ * SDK's native single-unit reward, so a multiplier of 1 reproduces the
+ * original behaviour exactly.
  */
-fun fireRewardedAdCallbacks(): String = """
+fun fireRewardedAdCallbacks(multiplier: Int = 1): String = """
     const-class v0, Lcom/applovin/mediation/ads/MaxRewardedAd;
     invoke-virtual {v0}, Ljava/lang/Class;->getDeclaredFields()[Ljava/lang/reflect/Field;
     move-result-object v0
@@ -49,7 +73,7 @@ fun fireRewardedAdCallbacks(): String = """
     const-string v6, "reward"
     invoke-static {v5, v6}, Lcom/applovin/mediation/MaxReward;->create(ILjava/lang/String;)Lcom/applovin/mediation/MaxReward;
     move-result-object v5
-    invoke-interface {v4, v0, v5}, Lcom/applovin/mediation/MaxRewardedAdListener;->onUserRewarded(Lcom/applovin/mediation/MaxAd;Lcom/applovin/mediation/MaxReward;)V
+    ${repeatLines(multiplier, "    ", "invoke-interface {v4, v0, v5}, Lcom/applovin/mediation/MaxRewardedAdListener;->onUserRewarded(Lcom/applovin/mediation/MaxAd;Lcom/applovin/mediation/MaxReward;)V")}
     invoke-interface {v4, v0}, Lcom/applovin/mediation/MaxRewardedAdListener;->onRewardedVideoCompleted(Lcom/applovin/mediation/MaxAd;)V
     invoke-interface {v4, v0}, Lcom/applovin/mediation/MaxRewardedAdListener;->onAdHidden(Lcom/applovin/mediation/MaxAd;)V
     :loop_done

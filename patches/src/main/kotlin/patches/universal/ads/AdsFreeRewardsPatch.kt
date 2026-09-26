@@ -9,6 +9,7 @@ import app.morphe.patcher.patch.stringOption
 import patches.universal.ads.util.cloneParameters
 import patches.universal.ads.util.findMutableMethodOf
 import patches.universal.ads.util.fireRewardedAdCallbacks
+import patches.universal.ads.util.repeatLines
 import java.util.logging.Logger
 import patches.universal.ads.util.DiscordPromo
 
@@ -71,11 +72,38 @@ val adsFreeRewardsPatch = bytecodePatch(
         title = "Fake ad availability",
         description = "Force ad SDKs to report ads as available so the reward flow triggers (needed when no real ad can fill)",
     )
+    val rewardMultiplier by stringOption(
+        key = "rewardMultiplier",
+        default = "1",
+        title = "Reward multiplier",
+        description = "Grant the ad reward this many times per ad button press (1-50). Applies to the instant reward granted without watching an ad. 1 keeps the normal single reward.",
+    )
 
     execute {
         val logger = Logger.getLogger(this::class.java.name)
         DiscordPromo.logOnce(logger)
         logger.info("Ads Free Rewards: patchVersion=$patchVersion strategy=$rewardStrategy instantReward=$instantReward")
+        val requested = (rewardMultiplier ?: "1").trim()
+        val parsed = requested.toIntOrNull()
+        val multiplier = when {
+            parsed == null -> {
+                logger.warning("Ads Free Rewards: rewardMultiplier '$requested' is not a number - using 1")
+                1
+            }
+            parsed < 1 -> {
+                logger.warning("Ads Free Rewards: rewardMultiplier $parsed is below 1 - using 1")
+                1
+            }
+            parsed > 50 -> {
+                logger.warning("Ads Free Rewards: rewardMultiplier $parsed is above the 50 limit - using 50")
+                50
+            }
+            else -> parsed
+        }
+        logger.info("Ads Free Rewards: rewardMultiplier=$multiplier")
+        if (multiplier != 1 && patchVersion in setOf("1.1.0", "1.15.0", "1.16.0", "1.17.0", "1.18.0", "1.18.1")) {
+            logger.warning("Ads Free Rewards: rewardMultiplier needs patch version 1.19.0 or newer (selected $patchVersion) - multiplier ignored")
+        }
         when (patchVersion) {
             "1.1.0" -> applyAdsFreeRewardsV110(logger)
             "1.15.0" -> applyAdsFreeRewardsV1150(logger)
@@ -83,18 +111,18 @@ val adsFreeRewardsPatch = bytecodePatch(
             "1.17.0" -> applyAdsFreeRewardsV1170(logger)
             "1.18.0" -> applyAdsFreeRewardsV1180(logger)
             "1.18.1" -> applyAdsFreeRewardsV1181(logger)
-            "1.19.0" -> applyAdsFreeRewardsV1190(logger, rewardStrategy, instantReward)
-            "1.20.0" -> applyAdsFreeRewardsV1200(logger, rewardStrategy, instantReward)
-            "1.21.0" -> applyAdsFreeRewardsV1210(logger, rewardStrategy, instantReward)
-            "1.22.0" -> applyAdsFreeRewardsV1220(logger, rewardStrategy, instantReward)
-            "1.30.0" -> applyAdsFreeRewardsV1300(logger, rewardStrategy, instantReward)
-            "1.31.0" -> applyAdsFreeRewardsV1310(logger, rewardStrategy, instantReward)
-            "1.33.0" -> applyAdsFreeRewardsV1330(logger, rewardStrategy, instantReward)
-            "1.34.0" -> applyAdsFreeRewardsV1340(logger, rewardStrategy, instantReward)
-            "1.38.0" -> applyAdsFreeRewardsV1380(logger, rewardStrategy, instantReward)
-            "1.40.0" -> applyAdsFreeRewardsV1400(logger, rewardStrategy, instantReward)
-            "1.41.0" -> applyAdsFreeRewardsV1410(logger, rewardStrategy, instantReward)
-            else -> applyAdsFreeRewardsV1320(logger, rewardStrategy, instantReward)
+            "1.19.0" -> applyAdsFreeRewardsV1190(logger, rewardStrategy, instantReward, multiplier)
+            "1.20.0" -> applyAdsFreeRewardsV1200(logger, rewardStrategy, instantReward, multiplier)
+            "1.21.0" -> applyAdsFreeRewardsV1210(logger, rewardStrategy, instantReward, multiplier)
+            "1.22.0" -> applyAdsFreeRewardsV1220(logger, rewardStrategy, instantReward, multiplier)
+            "1.30.0" -> applyAdsFreeRewardsV1300(logger, rewardStrategy, instantReward, multiplier)
+            "1.31.0" -> applyAdsFreeRewardsV1310(logger, rewardStrategy, instantReward, multiplier)
+            "1.33.0" -> applyAdsFreeRewardsV1330(logger, rewardStrategy, instantReward, multiplier)
+            "1.34.0" -> applyAdsFreeRewardsV1340(logger, rewardStrategy, instantReward, multiplier)
+            "1.38.0" -> applyAdsFreeRewardsV1380(logger, rewardStrategy, instantReward, multiplier)
+            "1.40.0" -> applyAdsFreeRewardsV1400(logger, rewardStrategy, instantReward, multiplier)
+            "1.41.0" -> applyAdsFreeRewardsV1410(logger, rewardStrategy, instantReward, multiplier)
+            else -> applyAdsFreeRewardsV1320(logger, rewardStrategy, instantReward, multiplier)
         }
         if (fakeAdAvailability == true) {
             val faked = forceAdAvailability(logger)
@@ -153,7 +181,7 @@ private fun BytecodePatchContext.forceAdAvailability(logger: Logger): Int {
     return patched
 }
 
-private fun BytecodePatchContext.applyAdsFreeRewardsV1190(logger: Logger, rewardStrategy: String?, instantReward: Boolean?) {
+private fun BytecodePatchContext.applyAdsFreeRewardsV1190(logger: Logger, rewardStrategy: String?, instantReward: Boolean?, multiplier: Int) {
     val strategy = rewardStrategy
     val useMax = strategy == "auto" || strategy == "max"
     val useUnityAds = strategy == "auto" || strategy == "unityAds"
@@ -161,7 +189,7 @@ private fun BytecodePatchContext.applyAdsFreeRewardsV1190(logger: Logger, reward
     val useRustore = strategy == "auto" || strategy == "rustore"
     val useHuawei = strategy == "auto" || strategy == "huawei"
 
-    logger.info("Ads Free Rewards: strategy=$strategy instantReward=$instantReward fakeAdAvailability=true")
+    logger.info("Ads Free Rewards: strategy=$strategy instantReward=$instantReward fakeAdAvailability=true rewardMultiplier=$multiplier")
 
     val hasMaxUnity = ShowRewardedAdFingerprint.methodOrNull != null &&
         IsRewardedAdReadyFingerprint.methodOrNull != null
@@ -185,6 +213,10 @@ private fun BytecodePatchContext.applyAdsFreeRewardsV1190(logger: Logger, reward
     val hasMads = MadsWrapperShowAdFingerprint.methodOrNull != null &&
         MadsRvHandlerOnRewardedFingerprint.methodOrNull != null
 
+    if (multiplier != 1) {
+        logger.info("Ads Free Rewards: reward multiplier $multiplier - repeating the reward callback $multiplier times, shown/hidden lifecycle still fires once")
+    }
+
     logger.info("Ads Free Rewards: detected SDKs  -  MAX Unity=$hasMaxUnity native MAX=$hasNativeMax UnityAds=$hasUnityAds UnityAdsV4=$hasUnityAdsV4 LevelPlay=$hasLevelPlay ironSourceBridge=$hasIronSourceUnityBridge MyTarget=$hasMyTarget Yandex=$hasYandexUnityRewarded Huawei=$hasHuawei AdMob=$hasAdMob InMobi=$hasInMobi InMobiRewarded=$hasInMobiRewarded IronSourceAds=$hasIronSourceAds MADS=$hasMads")
 
     if (!hasMaxUnity && !hasNativeMax && !hasUnityAds && !hasUnityAdsV4 && !hasLevelPlay && !hasIronSourceUnityBridge && !hasMyTarget && !hasYandexUnityRewarded && !hasHuawei && !hasAdMob && !hasInMobiRewarded && !hasIronSourceAds && !hasMads) {
@@ -200,19 +232,20 @@ private fun BytecodePatchContext.applyAdsFreeRewardsV1190(logger: Logger, reward
     if (useHuawei && instantReward == true && huaweiReady != null && huaweiShow != null) {
         val showClass = HuaweiRewardAdShowFingerprint.classDefOrNull
         if (showClass != null) {
+            val huaweiOnRewarded = "invoke-virtual {v1, v0}, Lcom/huawei/hms/ads/reward/RewardAdStatusListener;->onRewarded(Lcom/huawei/hms/ads/reward/Reward;)V"
             huaweiShow.cloneParameters().addInstructions(
                 0, """
                 move-object/from16 v1, p2
                 if-eqz v1, :morphe_huawei_reward_done
                 invoke-virtual {v1}, Lcom/huawei/hms/ads/reward/RewardAdStatusListener;->onRewardAdOpened()V
                 sget-object v0, Lcom/huawei/hms/ads/reward/Reward;->DEFAULT:Lcom/huawei/hms/ads/reward/Reward;
-                invoke-virtual {v1, v0}, Lcom/huawei/hms/ads/reward/RewardAdStatusListener;->onRewarded(Lcom/huawei/hms/ads/reward/Reward;)V
+                ${repeatLines(multiplier, "                ", huaweiOnRewarded)}
                 invoke-virtual {v1}, Lcom/huawei/hms/ads/reward/RewardAdStatusListener;->onRewardAdClosed()V
                 :morphe_huawei_reward_done
                 return-void
             """.trimIndent()
             )
-            logger.info("Huawei Ads Kit rewarded patch succeeded")
+            logger.info("Huawei Ads Kit rewarded patch succeeded${if (multiplier > 1) " (reward x$multiplier)" else ""}")
         } else {
             logger.warning("Ads Free Rewards: Huawei show class not found  -  skipping")
         }
@@ -223,29 +256,30 @@ private fun BytecodePatchContext.applyAdsFreeRewardsV1190(logger: Logger, reward
     }
 
     if (useRustore && instantReward == true) {
-        applyMyTargetStrategy(logger)
-        applyYandexWrapperStrategy(logger)
+        applyMyTargetStrategy(logger, multiplier)
+        applyYandexWrapperStrategy(logger, multiplier)
     }
-    if (applyMaxUnityStrategy(logger, useMax, instantReward)) return
-    applyNativeMaxStrategy(logger, useMax, instantReward)
-    applyInMobiRewardedStrategy(logger, useMax, instantReward)
-    applyIronSourceAdsStrategy(logger, useIronSource, instantReward)
+    if (applyMaxUnityStrategy(logger, useMax, instantReward, multiplier)) return
+    applyNativeMaxStrategy(logger, useMax, instantReward, multiplier)
+    applyInMobiRewardedStrategy(logger, useMax, instantReward, multiplier)
+    applyIronSourceAdsStrategy(logger, useIronSource, instantReward, multiplier)
     applyIronSourceAdsWrapperStrategy(logger, useIronSource, instantReward)
-    applyMadsStrategy(logger, useIronSource, instantReward)
-    applyAdMobRewardedStrategy(logger, useMax, instantReward)
+    applyMadsStrategy(logger, useIronSource, instantReward, multiplier)
+    applyAdMobRewardedStrategy(logger, useMax, instantReward, multiplier)
     applyLevelPlayStrategy(logger, useIronSource)
-    if (applyIronSourceBridgeStrategy(logger, useIronSource, instantReward)) return
-    applyUnityAdsStrategy(logger, useUnityAds, instantReward)
-    applyUnityAdsV4Strategy(logger, useUnityAds, instantReward)
+    if (applyIronSourceBridgeStrategy(logger, useIronSource, instantReward, multiplier)) return
+    applyUnityAdsStrategy(logger, useUnityAds, instantReward, multiplier)
+    applyUnityAdsV4Strategy(logger, useUnityAds, instantReward, multiplier)
 }
 
-private fun BytecodePatchContext.applyMyTargetStrategy(logger: Logger) {
+private fun BytecodePatchContext.applyMyTargetStrategy(logger: Logger, multiplier: Int) {
     val myTargetShow = MyTargetBaseInterstitialShowFingerprint.methodOrNull ?: return
     val hasShow = myTargetShow.implementation?.registerCount ?: 0 >= 2
     if (!hasShow) {
         logger.warning("Ads Free Rewards: skip MyTarget  -  low registerCount")
         return
     }
+    val myTargetOnReward = "invoke-interface {v0, v2, v1}, Lcom/my/target/ads/RewardedAd\$RewardedAdListener;->onReward(Lcom/my/target/ads/Reward;Lcom/my/target/ads/RewardedAd;)V"
     myTargetShow.cloneParameters().addInstructions(
         0, """
         move-object/from16 v1, p0
@@ -258,26 +292,27 @@ private fun BytecodePatchContext.applyMyTargetStrategy(logger: Logger) {
         invoke-interface {v0, v1}, Lcom/my/target/ads/RewardedAd${'$'}RewardedAdListener;->onDisplay(Lcom/my/target/ads/RewardedAd;)V
         invoke-static {}, Lcom/my/target/ads/Reward;->getDefault()Lcom/my/target/ads/Reward;
         move-result-object v2
-        invoke-interface {v0, v2, v1}, Lcom/my/target/ads/RewardedAd${'$'}RewardedAdListener;->onReward(Lcom/my/target/ads/Reward;Lcom/my/target/ads/RewardedAd;)V
+        ${repeatLines(multiplier, "        ", myTargetOnReward)}
         invoke-interface {v0, v1}, Lcom/my/target/ads/RewardedAd${'$'}RewardedAdListener;->onDismiss(Lcom/my/target/ads/RewardedAd;)V
         :morphe_rustore_mytarget_done
         return-void
         :morphe_rustore_mytarget_original_show
     """.trimIndent()
     )
-    logger.info("Ads Free Rewards: RuStore / VK MyTarget rewarded patch succeeded")
+    logger.info("Ads Free Rewards: RuStore / VK MyTarget rewarded patch succeeded${if (multiplier > 1) " (reward x$multiplier)" else ""}")
 }
 
-private fun BytecodePatchContext.applyYandexWrapperStrategy(logger: Logger) {
+private fun BytecodePatchContext.applyYandexWrapperStrategy(logger: Logger, multiplier: Int) {
     val yandexRewardedShow = YandexUnityRewardedWrapperShowFingerprint.methodOrNull ?: return
     val yandexOnRewarded = YandexUnityRewardedListenerOnRewardedFingerprint.methodOrNull ?: return
+    val yandexOnRewardedCall = "invoke-interface {v0, v1, v2}, Lcom/yandex/mobile/ads/unity/wrapper/rewarded/UnityRewardedAdListener;->onRewarded(ILjava/lang/String;)V"
     yandexOnRewarded.cloneParameters().addInstructions(0, """
         move-object/from16 v2, p0
         iget-object v0, v2, Lcom/yandex/mobile/ads/unity/wrapper/rewarded/a;->b:Lcom/yandex/mobile/ads/unity/wrapper/rewarded/UnityRewardedAdListener;
         if-eqz v0, :morphe_rustore_yandex_reward_done
         const/4 v1, 0x1
         const-string v2, "default"
-        invoke-interface {v0, v1, v2}, Lcom/yandex/mobile/ads/unity/wrapper/rewarded/UnityRewardedAdListener;->onRewarded(ILjava/lang/String;)V
+        ${repeatLines(multiplier, "        ", yandexOnRewardedCall)}
         :morphe_rustore_yandex_reward_done
         return-void
     """.trimIndent())
@@ -298,11 +333,12 @@ private fun BytecodePatchContext.applyYandexWrapperStrategy(logger: Logger) {
         :morphe_rustore_yandex_show_done
         return-void
     """.trimIndent())
-    logger.info("Ads Free Rewards: RuStore / Yandex Unity rewarded patch succeeded")
+    logger.info("Ads Free Rewards: RuStore / Yandex Unity rewarded patch succeeded${if (multiplier > 1) " (reward x$multiplier)" else ""}")
 }
 
-private fun BytecodePatchContext.applyInMobiRewardedStrategy(logger: Logger, useMax: Boolean, instantReward: Boolean?) {
+private fun BytecodePatchContext.applyInMobiRewardedStrategy(logger: Logger, useMax: Boolean, instantReward: Boolean?, multiplier: Int) {
     if (instantReward != true) return
+    if (multiplier > 1) logger.warning("Ads Free Rewards: InMobi reports no reward amount - rewardMultiplier has no effect for this network")
     val inMobiShow = InMobiInterstitialShowFingerprint.methodOrNull ?: InMobiRewardedShowFingerprint.methodOrNull ?: return
     // InMobi mediated via AppLovin MAX - patching the show to instantly reward covers both interstitial and rewarded
     // Use the rewarded fingerprint if available, otherwise fallback to interstitial
@@ -318,8 +354,9 @@ private fun BytecodePatchContext.applyInMobiRewardedStrategy(logger: Logger, use
     }
 }
 
-private fun BytecodePatchContext.applyIronSourceAdsStrategy(logger: Logger, useIronSource: Boolean, instantReward: Boolean?) {
+private fun BytecodePatchContext.applyIronSourceAdsStrategy(logger: Logger, useIronSource: Boolean, instantReward: Boolean?, multiplier: Int) {
     if (instantReward != true || !useIronSource) return
+    if (multiplier > 1) logger.warning("Ads Free Rewards: ironSourceAds reports no reward amount - rewardMultiplier has no effect for this network")
     val ironAds = IronSourceAdsRewardedShowFingerprint.methodOrNull ?: return
     try {
         ironAds.addInstructions(0, """
@@ -370,7 +407,7 @@ private fun BytecodePatchContext.applyIronSourceAdsWrapperStrategy(logger: Logge
 // format against the RewardedVideos enum id and falls through to the
 // original body for other formats. Reward fires via the RV handler
 // singleton with a fresh info + reward payload.
-private fun BytecodePatchContext.applyMadsStrategy(logger: Logger, useIronSource: Boolean, instantReward: Boolean?) {
+private fun BytecodePatchContext.applyMadsStrategy(logger: Logger, useIronSource: Boolean, instantReward: Boolean?, multiplier: Int) {
     if (instantReward != true || !useIronSource) return
     val show = MadsWrapperShowAdFingerprint.methodOrNull ?: return
     if (MadsRvHandlerOnRewardedFingerprint.methodOrNull == null) return
@@ -386,12 +423,7 @@ private fun BytecodePatchContext.applyMadsStrategy(logger: Logger, useIronSource
         return
     }
     try {
-        show.cloneParameters().addInstructions(
-            0, """
-            sget-object v0, Lcom/miniclip/madsunityplugin/utils/MAdsSDKWrapperUtils${'$'}MAdsWrapperAdFormat;->RewardedVideos:Lcom/miniclip/madsunityplugin/utils/MAdsSDKWrapperUtils${'$'}MAdsWrapperAdFormat;
-            iget v0, v0, Lcom/miniclip/madsunityplugin/utils/MAdsSDKWrapperUtils${'$'}MAdsWrapperAdFormat;->id:I
-            move/from16 v4, p1
-            if-ne v4, v0, :morphe_mads_original
+        val madsReward = """
             sget-object v0, Lcom/miniclip/madsandroidsdk/base/adunit/RewardedVideosAdHandler;->INSTANCE:Lcom/miniclip/madsandroidsdk/base/adunit/RewardedVideosAdHandler;
             new-instance v1, Lcom/miniclip/madsandroidsdk/base/MediationAdInfo;
             invoke-direct {v1}, Lcom/miniclip/madsandroidsdk/base/MediationAdInfo;-><init>()V
@@ -403,12 +435,20 @@ private fun BytecodePatchContext.applyMadsStrategy(logger: Logger, useIronSource
             invoke-direct {v2, v3, v6, v7}, Lcom/miniclip/madsandroidsdk/base/Reward;-><init>(Ljava/lang/String;D)V
             move-object/from16 v3, p2
             invoke-virtual {v0, v1, v2, v3}, Lcom/miniclip/madsandroidsdk/base/adunit/RewardedVideosAdHandler;->onAdRewarded(Lcom/miniclip/madsandroidsdk/base/MediationAdInfo;Lcom/miniclip/madsandroidsdk/base/Reward;Ljava/lang/String;)V
+        """.trimIndent()
+        show.cloneParameters().addInstructions(
+            0, """
+            sget-object v0, Lcom/miniclip/madsunityplugin/utils/MAdsSDKWrapperUtils${'$'}MAdsWrapperAdFormat;->RewardedVideos:Lcom/miniclip/madsunityplugin/utils/MAdsSDKWrapperUtils${'$'}MAdsWrapperAdFormat;
+            iget v0, v0, Lcom/miniclip/madsunityplugin/utils/MAdsSDKWrapperUtils${'$'}MAdsWrapperAdFormat;->id:I
+            move/from16 v4, p1
+            if-ne v4, v0, :morphe_mads_original
+            ${repeatLines(multiplier, "            ", madsReward)}
             const/4 v0, 0x1
             return v0
             :morphe_mads_original
         """.trimIndent()
         )
-        logger.info("Ads Free Rewards: MADS patch succeeded (instant reward)")
+        logger.info("Ads Free Rewards: MADS patch succeeded (instant reward${if (multiplier > 1) ", reward x$multiplier" else ""})")
         val ready = MadsWrapperIsReadyFingerprint.methodOrNull
         if (ready != null) {
             ready.cloneParameters().addInstructions(
@@ -429,30 +469,17 @@ private fun BytecodePatchContext.applyMadsStrategy(logger: Logger, useIronSource
     }
 }
 
-private fun BytecodePatchContext.applyMaxUnityStrategy(logger: Logger, useMax: Boolean, instantReward: Boolean?): Boolean {
+private fun BytecodePatchContext.applyMaxUnityStrategy(logger: Logger, useMax: Boolean, instantReward: Boolean?, multiplier: Int): Boolean {
     val unityShow = ShowRewardedAdFingerprint.methodOrNull
     val unityReady = IsRewardedAdReadyFingerprint.methodOrNull
     if (!useMax || unityShow == null || unityReady == null) return false
-    logger.info("Ads Free Rewards: MAX Unity Ad wrapper patch succeeded")
+    logger.info("Ads Free Rewards: MAX Unity Ad wrapper patch succeeded${if (instantReward == true && multiplier > 1) " (reward x$multiplier)" else ""}")
     unityReady.addInstructions(0, """
         const/4 v0, 0x1
         return v0
     """.trimIndent())
     if (instantReward == true) {
-        unityShow.cloneParameters().addInstructions(
-            0, """
-            move-object/from16 v0, p1
-            new-instance v1, Lorg/json/JSONObject;
-            invoke-direct {v1}, Lorg/json/JSONObject;-><init>()V
-            const-string v2, "name"
-            const-string v3, "OnRewardedAdDisplayedEvent"
-            invoke-static {v1, v2, v3}, Lcom/applovin/impl/sdk/utils/JsonUtils;->putString(Lorg/json/JSONObject;Ljava/lang/String;Ljava/lang/String;)V
-            const-string v2, "adUnitId"
-            invoke-static {v1, v2, v0}, Lcom/applovin/impl/sdk/utils/JsonUtils;->putString(Lorg/json/JSONObject;Ljava/lang/String;Ljava/lang/String;)V
-            const-string v2, "adFormat"
-            const-string v3, "rewarded"
-            invoke-static {v1, v2, v3}, Lcom/applovin/impl/sdk/utils/JsonUtils;->putString(Lorg/json/JSONObject;Ljava/lang/String;Ljava/lang/String;)V
-            invoke-static {v1}, Lcom/applovin/mediation/unity/MaxUnityAdManager;->forwardUnityEvent(Lorg/json/JSONObject;)V
+        val unityRewardEvent = """
             new-instance v1, Lorg/json/JSONObject;
             invoke-direct {v1}, Lorg/json/JSONObject;-><init>()V
             const-string v2, "name"
@@ -470,6 +497,22 @@ private fun BytecodePatchContext.applyMaxUnityStrategy(logger: Logger, useMax: B
             const-string v3, "1"
             invoke-static {v1, v2, v3}, Lcom/applovin/impl/sdk/utils/JsonUtils;->putString(Lorg/json/JSONObject;Ljava/lang/String;Ljava/lang/String;)V
             invoke-static {v1}, Lcom/applovin/mediation/unity/MaxUnityAdManager;->forwardUnityEvent(Lorg/json/JSONObject;)V
+        """.trimIndent()
+        unityShow.cloneParameters().addInstructions(
+            0, """
+            move-object/from16 v0, p1
+            new-instance v1, Lorg/json/JSONObject;
+            invoke-direct {v1}, Lorg/json/JSONObject;-><init>()V
+            const-string v2, "name"
+            const-string v3, "OnRewardedAdDisplayedEvent"
+            invoke-static {v1, v2, v3}, Lcom/applovin/impl/sdk/utils/JsonUtils;->putString(Lorg/json/JSONObject;Ljava/lang/String;Ljava/lang/String;)V
+            const-string v2, "adUnitId"
+            invoke-static {v1, v2, v0}, Lcom/applovin/impl/sdk/utils/JsonUtils;->putString(Lorg/json/JSONObject;Ljava/lang/String;Ljava/lang/String;)V
+            const-string v2, "adFormat"
+            const-string v3, "rewarded"
+            invoke-static {v1, v2, v3}, Lcom/applovin/impl/sdk/utils/JsonUtils;->putString(Lorg/json/JSONObject;Ljava/lang/String;Ljava/lang/String;)V
+            invoke-static {v1}, Lcom/applovin/mediation/unity/MaxUnityAdManager;->forwardUnityEvent(Lorg/json/JSONObject;)V
+            ${repeatLines(multiplier, "            ", unityRewardEvent)}
             new-instance v1, Lorg/json/JSONObject;
             invoke-direct {v1}, Lorg/json/JSONObject;-><init>()V
             const-string v2, "name"
@@ -509,11 +552,11 @@ private fun BytecodePatchContext.applyMaxUnityStrategy(logger: Logger, useMax: B
     return true
 }
 
-private fun BytecodePatchContext.applyNativeMaxStrategy(logger: Logger, useMax: Boolean, instantReward: Boolean?) {
+private fun BytecodePatchContext.applyNativeMaxStrategy(logger: Logger, useMax: Boolean, instantReward: Boolean?, multiplier: Int) {
     val nativeReady = MaxRewardedAdIsReadyFingerprint.methodOrNull
     val nativeShow = MaxRewardedAdShowAdFingerprint.methodOrNull
     if (!useMax || nativeReady == null || nativeShow == null) return
-    logger.info("Ads Free Rewards: native MAX patch succeeded")
+    logger.info("Ads Free Rewards: native MAX patch succeeded${if (instantReward == true && multiplier > 1) " (reward x$multiplier)" else ""}")
     nativeReady.addInstructions(0, """
         const/4 v0, 0x1
         return v0
@@ -521,11 +564,11 @@ private fun BytecodePatchContext.applyNativeMaxStrategy(logger: Logger, useMax: 
     if (instantReward == true) {
         val rc = nativeShow.implementation?.registerCount ?: 0
         if (rc >= 7) {
-            nativeShow.addInstructions(0, fireRewardedAdCallbacks())
+            nativeShow.addInstructions(0, fireRewardedAdCallbacks(multiplier))
         } else {
             try {
                 nativeShow.cloneParameters()
-                    .addInstructions(0, fireRewardedAdCallbacks())
+                    .addInstructions(0, fireRewardedAdCallbacks(multiplier))
                 logger.info("Ads Free Rewards: native MAX via clone (low regs $rc)")
             } catch (e: Exception) {
                 logger.warning("Ads Free Rewards: clone failed for native MAX: ${e.message}")
@@ -534,7 +577,7 @@ private fun BytecodePatchContext.applyNativeMaxStrategy(logger: Logger, useMax: 
     }
 }
 
-private fun BytecodePatchContext.applyAdMobRewardedStrategy(logger: Logger, useMax: Boolean, instantReward: Boolean?) {
+private fun BytecodePatchContext.applyAdMobRewardedStrategy(logger: Logger, useMax: Boolean, instantReward: Boolean?, multiplier: Int) {
     if (!useMax || instantReward != true) return
     // AdMob RewardedAd is from GMS (not in app dex), so patch call sites instead of definition
     var patchedCallSites = 0
@@ -555,30 +598,35 @@ private fun BytecodePatchContext.applyAdMobRewardedStrategy(logger: Logger, useM
                 if (ref.parameterTypes.size != 2 || ref.parameterTypes[1] != "Lcom/google/android/gms/ads/OnUserEarnedRewardListener;") continue
                 // Found call site: RewardedAd.show(Activity, OnUserEarnedRewardListener)
                 // Replace it with direct reward: if p2 != null, p2.onUserEarnedReward(null)
-                try {
-                    // Determine registers for Activity and listener (35c or 3rc)
-                    val (activityReg, listenerReg) = when (insn) {
-                        is com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction35c -> {
+                    try {
+                        // Determine registers for Activity and listener (35c or 3rc)
+                        val (activityReg, listenerReg) = when (insn) {
                             // invoke-virtual {v0, v1, v2}, RewardedAd.show
                             // v0 = this (RewardedAd), v1 = Activity, v2 = listener
                             // Need to parse: for 35c, registerCount, registers C/D/E etc.
                             // For show with 3 regs (this, activity, listener), C=this, D=activity, E=listener
-                            if (insn.registerCount < 3) continue
-                            Pair(insn.registerD, insn.registerE)
+                            is com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction35c -> {
+                                // invoke-virtual/range {v0..v2}
+                                if (insn.registerCount < 3) continue
+                                Pair(insn.registerD, insn.registerE)
+                            }
+                            is com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction3rc -> {
+                                val start = insn.startRegister
+                                Pair(start + 1, start + 2)
+                            }
+                            else -> continue
                         }
-                        is com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction3rc -> {
-                            // invoke-virtual/range {v0..v2}
-                            val start = insn.startRegister
-                            Pair(start + 1, start + 2)
+                        // RewardedAd reports no amount, so the reward callback is repeated instead. Each
+                        // repetition needs its own label to stay unique inside the enclosing method.
+                        val rewardCalls = (1..multiplier).joinToString("\n") { iteration ->
+                            """
+                            if-eqz v$listenerReg, :morphe_admob_skip_${index}_$iteration
+                            const/4 v0, 0x0
+                            invoke-interface {v$listenerReg, v0}, Lcom/google/android/gms/ads/OnUserEarnedRewardListener;->onUserEarnedReward(Lcom/google/android/gms/ads/rewarded/RewardItem;)V
+                            :morphe_admob_skip_${index}_$iteration
+                            """.trimIndent().prependIndent("                        ")
                         }
-                        else -> continue
-                    }
-                    mutableMethod.addInstructions(index, """
-                        if-eqz v$listenerReg, :morphe_admob_skip_$index
-                        const/4 v0, 0x0
-                        invoke-interface {v$listenerReg, v0}, Lcom/google/android/gms/ads/OnUserEarnedRewardListener;->onUserEarnedReward(Lcom/google/android/gms/ads/rewarded/RewardItem;)V
-                        :morphe_admob_skip_$index
-                    """.trimIndent())
+                        mutableMethod.addInstructions(index, rewardCalls)
                     // Keep original invoke as well? Actually we want to skip the ad, so we should nop the original invoke
                     // Instead, we just inserted reward before, and let original show still run  -  it will show ad but also give reward instantly
                     // To fully skip ad, we could nop the invoke, but that may break flow; for now we give instant reward plus still show ad (user sees ad but also gets reward)
@@ -605,16 +653,23 @@ private fun BytecodePatchContext.applyLevelPlayStrategy(logger: Logger, useIronS
     logger.info("Ads Free Rewards: LevelPlay patch succeeded")
 }
 
-private fun BytecodePatchContext.applyIronSourceBridgeStrategy(logger: Logger, useIronSource: Boolean, instantReward: Boolean?): Boolean {
+private fun BytecodePatchContext.applyIronSourceBridgeStrategy(logger: Logger, useIronSource: Boolean, instantReward: Boolean?, multiplier: Int): Boolean {
     val bridgeReady = IronSourceUnityRewardedAdIsReadyFingerprint.methodOrNull
     val bridgeShow = IronSourceLevelPlayFullScreenShowAdFingerprint.methodOrNull
     if (!useIronSource || bridgeReady == null || bridgeShow == null) return false
-    logger.info("Ads Free Rewards: IronSource patch succeeded")
+    logger.info("Ads Free Rewards: IronSource patch succeeded${if (instantReward == true && multiplier > 1) " (reward x$multiplier)" else ""}")
     bridgeReady.addInstructions(0, """
         const/4 v0, 0x1
         return v0
     """.trimIndent())
     if (instantReward == true) {
+        val ironSourceReward = """
+            new-instance v4, Lcom/unity3d/mediation/rewarded/LevelPlayReward;
+            const-string v2, "reward"
+            const/4 v3, 0x1
+            invoke-direct {v4, v2, v3}, Lcom/unity3d/mediation/rewarded/LevelPlayReward;-><init>(Ljava/lang/String;I)V
+            invoke-interface {v0, v4, v1}, Lcom/ironsource/Za;->onAdRewarded(Lcom/unity3d/mediation/rewarded/LevelPlayReward;Lcom/unity3d/mediation/LevelPlayAdInfo;)V
+        """.trimIndent()
         bridgeShow.cloneParameters().addInstructions(0, """
             move-object/from16 v3, p0
             iget-object v0, v3, Lcom/ironsource/Ya;->k:Lcom/ironsource/Za;
@@ -623,11 +678,7 @@ private fun BytecodePatchContext.applyIronSourceBridgeStrategy(logger: Logger, u
             invoke-interface {v1}, Lcom/ironsource/q6;->b()Lcom/unity3d/mediation/LevelPlayAdInfo;
             move-result-object v1
             invoke-interface {v0, v1}, Lcom/ironsource/Za;->onAdDisplayed(Lcom/unity3d/mediation/LevelPlayAdInfo;)V
-            new-instance v4, Lcom/unity3d/mediation/rewarded/LevelPlayReward;
-            const-string v2, "reward"
-            const/4 v3, 0x1
-            invoke-direct {v4, v2, v3}, Lcom/unity3d/mediation/rewarded/LevelPlayReward;-><init>(Ljava/lang/String;I)V
-            invoke-interface {v0, v4, v1}, Lcom/ironsource/Za;->onAdRewarded(Lcom/unity3d/mediation/rewarded/LevelPlayReward;Lcom/unity3d/mediation/LevelPlayAdInfo;)V
+            ${repeatLines(multiplier, "            ", ironSourceReward)}
             invoke-interface {v0, v1}, Lcom/ironsource/Za;->onAdClosed(Lcom/unity3d/mediation/LevelPlayAdInfo;)V
             :morphe_ads_free_rewards_done
             return-void
@@ -636,23 +687,25 @@ private fun BytecodePatchContext.applyIronSourceBridgeStrategy(logger: Logger, u
     return true
 }
 
-private fun BytecodePatchContext.applyUnityAdsStrategy(logger: Logger, useUnityAds: Boolean, instantReward: Boolean?) {
+private fun BytecodePatchContext.applyUnityAdsStrategy(logger: Logger, useUnityAds: Boolean, instantReward: Boolean?, multiplier: Int) {
     val adsShow = UnityRewardedAdShowFingerprint.methodOrNull ?: return
     if (!useUnityAds || instantReward != true) return
+    val unityOnRewarded = "invoke-interface {v0, v1}, Lcom/unity3d/ads/RewardedShowListener;->onRewarded(Lcom/unity3d/ads/RewardedAd;)V"
     adsShow.addInstructions(0, """
         move-object/from16 v0, p3
         move-object/from16 v1, p0
-        invoke-interface {v0, v1}, Lcom/unity3d/ads/RewardedShowListener;->onRewarded(Lcom/unity3d/ads/RewardedAd;)V
+        ${repeatLines(multiplier, "        ", unityOnRewarded)}
         invoke-interface {v0, v1}, Lcom/unity3d/ads/ShowListener;->onStarted(Ljava/lang/Object;)V
         sget-object v2, Lcom/unity3d/ads/ShowFinishState;->COMPLETED:Lcom/unity3d/ads/ShowFinishState;
         invoke-interface {v0, v1, v2}, Lcom/unity3d/ads/ShowListener;->onCompleted(Ljava/lang/Object;Lcom/unity3d/ads/ShowFinishState;)V
         return-void
     """.trimIndent())
-    logger.info("Ads Free Rewards: Unity Ads patch succeeded")
+    logger.info("Ads Free Rewards: Unity Ads patch succeeded${if (multiplier > 1) " (reward x$multiplier)" else ""}")
 }
 
-private fun BytecodePatchContext.applyUnityAdsV4Strategy(logger: Logger, useUnityAds: Boolean, instantReward: Boolean?) {
+private fun BytecodePatchContext.applyUnityAdsV4Strategy(logger: Logger, useUnityAds: Boolean, instantReward: Boolean?, multiplier: Int) {
     if (!useUnityAds || instantReward != true) return
+    val unityAdsOnComplete = "invoke-interface {v1, v2, v0}, Lcom/unity3d/ads/IUnityAdsShowListener;->onUnityAdsShowComplete(Ljava/lang/String;Lcom/unity3d/ads/UnityAds${'$'}UnityAdsShowCompletionState;)V"
     val v4Show3 = UnityAdsV4Show3ArgFingerprint.methodOrNull
     if (v4Show3 != null) {
         v4Show3.addInstructions(0, """
@@ -660,10 +713,10 @@ private fun BytecodePatchContext.applyUnityAdsV4Strategy(logger: Logger, useUnit
             move-object/from16 v2, p1
             invoke-interface {v1, v2}, Lcom/unity3d/ads/IUnityAdsShowListener;->onUnityAdsShowStart(Ljava/lang/String;)V
             sget-object v0, Lcom/unity3d/ads/UnityAds${'$'}UnityAdsShowCompletionState;->COMPLETED:Lcom/unity3d/ads/UnityAds${'$'}UnityAdsShowCompletionState;
-            invoke-interface {v1, v2, v0}, Lcom/unity3d/ads/IUnityAdsShowListener;->onUnityAdsShowComplete(Ljava/lang/String;Lcom/unity3d/ads/UnityAds${'$'}UnityAdsShowCompletionState;)V
+            ${repeatLines(multiplier, "            ", unityAdsOnComplete)}
             return-void
         """.trimIndent())
-        logger.info("Ads Free Rewards: Unity Ads v4 patch succeeded (3-arg show)")
+        logger.info("Ads Free Rewards: Unity Ads v4 patch succeeded (3-arg show${if (multiplier > 1) ", reward x$multiplier" else ""})")
     }
     val v4Show4 = UnityAdsV4Show4ArgFingerprint.methodOrNull
     if (v4Show4 != null) {
@@ -672,57 +725,57 @@ private fun BytecodePatchContext.applyUnityAdsV4Strategy(logger: Logger, useUnit
             move-object/from16 v2, p1
             invoke-interface {v1, v2}, Lcom/unity3d/ads/IUnityAdsShowListener;->onUnityAdsShowStart(Ljava/lang/String;)V
             sget-object v0, Lcom/unity3d/ads/UnityAds${'$'}UnityAdsShowCompletionState;->COMPLETED:Lcom/unity3d/ads/UnityAds${'$'}UnityAdsShowCompletionState;
-            invoke-interface {v1, v2, v0}, Lcom/unity3d/ads/IUnityAdsShowListener;->onUnityAdsShowComplete(Ljava/lang/String;Lcom/unity3d/ads/UnityAds${'$'}UnityAdsShowCompletionState;)V
+            ${repeatLines(multiplier, "            ", unityAdsOnComplete)}
             return-void
         """.trimIndent())
-        logger.info("Ads Free Rewards: Unity Ads v4 patch succeeded (4-arg show)")
+        logger.info("Ads Free Rewards: Unity Ads v4 patch succeeded (4-arg show${if (multiplier > 1) ", reward x$multiplier" else ""})")
     }
 }
 
 // Historical snapshots - each version is a frozen copy.
 // Newer entries delegate to the current implementation for now; future
 // bundle releases can diverge them with version-specific fixes.
-private fun BytecodePatchContext.applyAdsFreeRewardsV1200(logger: Logger, rewardStrategy: String?, instantReward: Boolean?) {
+private fun BytecodePatchContext.applyAdsFreeRewardsV1200(logger: Logger, rewardStrategy: String?, instantReward: Boolean?, multiplier: Int) {
     logger.info("Ads Free Rewards v1.20.0 selected")
-    applyAdsFreeRewardsV1190(logger, rewardStrategy, instantReward)
+    applyAdsFreeRewardsV1190(logger, rewardStrategy, instantReward, multiplier)
 }
-private fun BytecodePatchContext.applyAdsFreeRewardsV1210(logger: Logger, rewardStrategy: String?, instantReward: Boolean?) {
+private fun BytecodePatchContext.applyAdsFreeRewardsV1210(logger: Logger, rewardStrategy: String?, instantReward: Boolean?, multiplier: Int) {
     logger.info("Ads Free Rewards v1.21.0 selected")
-    applyAdsFreeRewardsV1190(logger, rewardStrategy, instantReward)
+    applyAdsFreeRewardsV1190(logger, rewardStrategy, instantReward, multiplier)
 }
-private fun BytecodePatchContext.applyAdsFreeRewardsV1220(logger: Logger, rewardStrategy: String?, instantReward: Boolean?) {
+private fun BytecodePatchContext.applyAdsFreeRewardsV1220(logger: Logger, rewardStrategy: String?, instantReward: Boolean?, multiplier: Int) {
     logger.info("Ads Free Rewards v1.22.0 selected")
-    applyAdsFreeRewardsV1190(logger, rewardStrategy, instantReward)
+    applyAdsFreeRewardsV1190(logger, rewardStrategy, instantReward, multiplier)
 }
-private fun BytecodePatchContext.applyAdsFreeRewardsV1300(logger: Logger, rewardStrategy: String?, instantReward: Boolean?) {
+private fun BytecodePatchContext.applyAdsFreeRewardsV1300(logger: Logger, rewardStrategy: String?, instantReward: Boolean?, multiplier: Int) {
     logger.info("Ads Free Rewards v1.30.0 selected")
-    applyAdsFreeRewardsV1190(logger, rewardStrategy, instantReward)
+    applyAdsFreeRewardsV1190(logger, rewardStrategy, instantReward, multiplier)
 }
-private fun BytecodePatchContext.applyAdsFreeRewardsV1310(logger: Logger, rewardStrategy: String?, instantReward: Boolean?) {
+private fun BytecodePatchContext.applyAdsFreeRewardsV1310(logger: Logger, rewardStrategy: String?, instantReward: Boolean?, multiplier: Int) {
     logger.info("Ads Free Rewards v1.31.0 selected")
-    applyAdsFreeRewardsV1190(logger, rewardStrategy, instantReward)
+    applyAdsFreeRewardsV1190(logger, rewardStrategy, instantReward, multiplier)
 }
-private fun BytecodePatchContext.applyAdsFreeRewardsV1320(logger: Logger, rewardStrategy: String?, instantReward: Boolean?) {
+private fun BytecodePatchContext.applyAdsFreeRewardsV1320(logger: Logger, rewardStrategy: String?, instantReward: Boolean?, multiplier: Int) {
     logger.info("Ads Free Rewards v1.32.0 selected")
-    applyAdsFreeRewardsV1190(logger, rewardStrategy, instantReward)
+    applyAdsFreeRewardsV1190(logger, rewardStrategy, instantReward, multiplier)
 }
-private fun BytecodePatchContext.applyAdsFreeRewardsV1330(logger: Logger, rewardStrategy: String?, instantReward: Boolean?) {
+private fun BytecodePatchContext.applyAdsFreeRewardsV1330(logger: Logger, rewardStrategy: String?, instantReward: Boolean?, multiplier: Int) {
     logger.info("Ads Free Rewards v1.33.0 selected")
-    applyAdsFreeRewardsV1190(logger, rewardStrategy, instantReward)
+    applyAdsFreeRewardsV1190(logger, rewardStrategy, instantReward, multiplier)
 }
-private fun BytecodePatchContext.applyAdsFreeRewardsV1340(logger: Logger, rewardStrategy: String?, instantReward: Boolean?) {
+private fun BytecodePatchContext.applyAdsFreeRewardsV1340(logger: Logger, rewardStrategy: String?, instantReward: Boolean?, multiplier: Int) {
     logger.info("Ads Free Rewards v1.34.0 selected")
-    applyAdsFreeRewardsV1190(logger, rewardStrategy, instantReward)
+    applyAdsFreeRewardsV1190(logger, rewardStrategy, instantReward, multiplier)
 }
-private fun BytecodePatchContext.applyAdsFreeRewardsV1380(logger: Logger, rewardStrategy: String?, instantReward: Boolean?) {
+private fun BytecodePatchContext.applyAdsFreeRewardsV1380(logger: Logger, rewardStrategy: String?, instantReward: Boolean?, multiplier: Int) {
     logger.info("Ads Free Rewards v1.38.0 selected")
-    applyAdsFreeRewardsV1190(logger, rewardStrategy, instantReward)
+    applyAdsFreeRewardsV1190(logger, rewardStrategy, instantReward, multiplier)
 }
-private fun BytecodePatchContext.applyAdsFreeRewardsV1400(logger: Logger, rewardStrategy: String?, instantReward: Boolean?) {
+private fun BytecodePatchContext.applyAdsFreeRewardsV1400(logger: Logger, rewardStrategy: String?, instantReward: Boolean?, multiplier: Int) {
     logger.info("Ads Free Rewards v1.40.0 selected")
-    applyAdsFreeRewardsV1190(logger, rewardStrategy, instantReward)
+    applyAdsFreeRewardsV1190(logger, rewardStrategy, instantReward, multiplier)
 }
-private fun BytecodePatchContext.applyAdsFreeRewardsV1410(logger: Logger, rewardStrategy: String?, instantReward: Boolean?) {
+private fun BytecodePatchContext.applyAdsFreeRewardsV1410(logger: Logger, rewardStrategy: String?, instantReward: Boolean?, multiplier: Int) {
     logger.info("Ads Free Rewards v1.41.0 selected")
-    applyAdsFreeRewardsV1190(logger, rewardStrategy, instantReward)
+    applyAdsFreeRewardsV1190(logger, rewardStrategy, instantReward, multiplier)
 }
