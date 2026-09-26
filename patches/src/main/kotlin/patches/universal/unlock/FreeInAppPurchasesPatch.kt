@@ -778,7 +778,8 @@ val freeInAppPurchasesPatch = bytecodePatch(
                             val donor = owner.methods.firstOrNull { m ->
                                 try {
                                     com.android.tools.smali.dexlib2.AccessFlags.STATIC.isSet(m.accessFlags) &&
-                                        m.implementation != null
+                                        m.implementation != null &&
+                                        !m.name.startsWith("<")
                                 } catch (_: Exception) { false }
                             } ?: run {
                                 logger.warning("FreeIAP synthetic catalog helper skipped: no static donor")
@@ -786,6 +787,8 @@ val freeInAppPurchasesPatch = bytecodePatch(
                             }
                             val helper = donor.cloneMutable(
                                 name = "morpheFakeProductList",
+                                accessFlags = com.android.tools.smali.dexlib2.AccessFlags.PUBLIC.getValue() or
+                                    com.android.tools.smali.dexlib2.AccessFlags.STATIC.getValue(),
                                 parameters = listOf(
                                     com.android.tools.smali.dexlib2.immutable.ImmutableMethodParameter(
                                         qppClass, null, null,
