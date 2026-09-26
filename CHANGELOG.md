@@ -1,3 +1,9 @@
+## [1.50.1](https://github.com/Nai64/Nai64Patches/compare/1.50.0...1.50.1) (2026-09-26)
+
+### Bug Fixes
+
+* wipe dead method body when cloning for return-terminated injections ([82151f5](https://github.com/Nai64/Nai64Patches/commit/82151f580eb5477ac4e96735da6c0b19813d9e01))
+
 ## [1.50.0](https://github.com/Nai64/Nai64Patches/compare/1.49.2...1.50.0) (2026-09-19)
 
 ### Bug Fixes
