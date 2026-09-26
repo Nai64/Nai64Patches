@@ -20,32 +20,6 @@ val adsFreeRewardsPatch = bytecodePatch(
     default = false,
 ) {
     category("Featured")
-    val patchVersion by stringOption(
-        key = "patchVersion",
-        default = "1.41.0",
-        title = "Patch version",
-        description = "Choose the implementation to use. Each version is a snapshot - newer ones support more networks. If the latest does not work for your app, try an older version.",
-        values = linkedMapOf(
-            "1.41.0" to "1.41.0",
-            "1.40.0" to "1.40.0",
-            "1.38.0" to "1.38.0",
-            "1.34.0" to "1.34.0",
-            "1.33.0" to "1.33.0",
-            "1.32.0" to "1.32.0",
-            "1.31.0" to "1.31.0",
-            "1.30.0" to "1.30.0",
-            "1.22.0" to "1.22.0",
-            "1.21.0" to "1.21.0",
-            "1.20.0" to "1.20.0",
-            "1.19.0" to "1.19.0",
-            "1.18.1" to "1.18.1",
-            "1.18.0" to "1.18.0",
-            "1.17.0" to "1.17.0",
-            "1.16.0" to "1.16.0",
-            "1.15.0" to "1.15.0",
-            "1.1.0 (Original)" to "1.1.0",
-        ),
-    )
     val rewardStrategy by stringOption(
         key = "rewardStrategy",
         default = "auto",
@@ -82,7 +56,7 @@ val adsFreeRewardsPatch = bytecodePatch(
     execute {
         val logger = Logger.getLogger(this::class.java.name)
         DiscordPromo.logOnce(logger)
-        logger.info("Ads Free Rewards: patchVersion=$patchVersion strategy=$rewardStrategy instantReward=$instantReward")
+        logger.info("Ads Free Rewards: strategy=$rewardStrategy instantReward=$instantReward")
         val requested = (rewardMultiplier ?: "1").trim()
         val parsed = requested.toIntOrNull()
         val multiplier = when {
@@ -101,29 +75,7 @@ val adsFreeRewardsPatch = bytecodePatch(
             else -> parsed
         }
         logger.info("Ads Free Rewards: rewardMultiplier=$multiplier")
-        if (multiplier != 1 && patchVersion in setOf("1.1.0", "1.15.0", "1.16.0", "1.17.0", "1.18.0", "1.18.1")) {
-            logger.warning("Ads Free Rewards: rewardMultiplier needs patch version 1.19.0 or newer (selected $patchVersion) - multiplier ignored")
-        }
-        when (patchVersion) {
-            "1.1.0" -> applyAdsFreeRewardsV110(logger)
-            "1.15.0" -> applyAdsFreeRewardsV1150(logger)
-            "1.16.0" -> applyAdsFreeRewardsV1160(logger)
-            "1.17.0" -> applyAdsFreeRewardsV1170(logger)
-            "1.18.0" -> applyAdsFreeRewardsV1180(logger)
-            "1.18.1" -> applyAdsFreeRewardsV1181(logger)
-            "1.19.0" -> applyAdsFreeRewardsV1190(logger, rewardStrategy, instantReward, multiplier)
-            "1.20.0" -> applyAdsFreeRewardsV1200(logger, rewardStrategy, instantReward, multiplier)
-            "1.21.0" -> applyAdsFreeRewardsV1210(logger, rewardStrategy, instantReward, multiplier)
-            "1.22.0" -> applyAdsFreeRewardsV1220(logger, rewardStrategy, instantReward, multiplier)
-            "1.30.0" -> applyAdsFreeRewardsV1300(logger, rewardStrategy, instantReward, multiplier)
-            "1.31.0" -> applyAdsFreeRewardsV1310(logger, rewardStrategy, instantReward, multiplier)
-            "1.33.0" -> applyAdsFreeRewardsV1330(logger, rewardStrategy, instantReward, multiplier)
-            "1.34.0" -> applyAdsFreeRewardsV1340(logger, rewardStrategy, instantReward, multiplier)
-            "1.38.0" -> applyAdsFreeRewardsV1380(logger, rewardStrategy, instantReward, multiplier)
-            "1.40.0" -> applyAdsFreeRewardsV1400(logger, rewardStrategy, instantReward, multiplier)
-            "1.41.0" -> applyAdsFreeRewardsV1410(logger, rewardStrategy, instantReward, multiplier)
-            else -> applyAdsFreeRewardsV1320(logger, rewardStrategy, instantReward, multiplier)
-        }
+        applyAdsFreeRewardsV1190(logger, rewardStrategy, instantReward, multiplier)
         if (fakeAdAvailability == true) {
             val faked = forceAdAvailability(logger)
             if (faked > 0) logger.info("Ads Free Rewards: faked availability for $faked SDK check(s)")
@@ -730,52 +682,4 @@ private fun BytecodePatchContext.applyUnityAdsV4Strategy(logger: Logger, useUnit
         """.trimIndent())
         logger.info("Ads Free Rewards: Unity Ads v4 patch succeeded (4-arg show${if (multiplier > 1) ", reward x$multiplier" else ""})")
     }
-}
-
-// Historical snapshots - each version is a frozen copy.
-// Newer entries delegate to the current implementation for now; future
-// bundle releases can diverge them with version-specific fixes.
-private fun BytecodePatchContext.applyAdsFreeRewardsV1200(logger: Logger, rewardStrategy: String?, instantReward: Boolean?, multiplier: Int) {
-    logger.info("Ads Free Rewards v1.20.0 selected")
-    applyAdsFreeRewardsV1190(logger, rewardStrategy, instantReward, multiplier)
-}
-private fun BytecodePatchContext.applyAdsFreeRewardsV1210(logger: Logger, rewardStrategy: String?, instantReward: Boolean?, multiplier: Int) {
-    logger.info("Ads Free Rewards v1.21.0 selected")
-    applyAdsFreeRewardsV1190(logger, rewardStrategy, instantReward, multiplier)
-}
-private fun BytecodePatchContext.applyAdsFreeRewardsV1220(logger: Logger, rewardStrategy: String?, instantReward: Boolean?, multiplier: Int) {
-    logger.info("Ads Free Rewards v1.22.0 selected")
-    applyAdsFreeRewardsV1190(logger, rewardStrategy, instantReward, multiplier)
-}
-private fun BytecodePatchContext.applyAdsFreeRewardsV1300(logger: Logger, rewardStrategy: String?, instantReward: Boolean?, multiplier: Int) {
-    logger.info("Ads Free Rewards v1.30.0 selected")
-    applyAdsFreeRewardsV1190(logger, rewardStrategy, instantReward, multiplier)
-}
-private fun BytecodePatchContext.applyAdsFreeRewardsV1310(logger: Logger, rewardStrategy: String?, instantReward: Boolean?, multiplier: Int) {
-    logger.info("Ads Free Rewards v1.31.0 selected")
-    applyAdsFreeRewardsV1190(logger, rewardStrategy, instantReward, multiplier)
-}
-private fun BytecodePatchContext.applyAdsFreeRewardsV1320(logger: Logger, rewardStrategy: String?, instantReward: Boolean?, multiplier: Int) {
-    logger.info("Ads Free Rewards v1.32.0 selected")
-    applyAdsFreeRewardsV1190(logger, rewardStrategy, instantReward, multiplier)
-}
-private fun BytecodePatchContext.applyAdsFreeRewardsV1330(logger: Logger, rewardStrategy: String?, instantReward: Boolean?, multiplier: Int) {
-    logger.info("Ads Free Rewards v1.33.0 selected")
-    applyAdsFreeRewardsV1190(logger, rewardStrategy, instantReward, multiplier)
-}
-private fun BytecodePatchContext.applyAdsFreeRewardsV1340(logger: Logger, rewardStrategy: String?, instantReward: Boolean?, multiplier: Int) {
-    logger.info("Ads Free Rewards v1.34.0 selected")
-    applyAdsFreeRewardsV1190(logger, rewardStrategy, instantReward, multiplier)
-}
-private fun BytecodePatchContext.applyAdsFreeRewardsV1380(logger: Logger, rewardStrategy: String?, instantReward: Boolean?, multiplier: Int) {
-    logger.info("Ads Free Rewards v1.38.0 selected")
-    applyAdsFreeRewardsV1190(logger, rewardStrategy, instantReward, multiplier)
-}
-private fun BytecodePatchContext.applyAdsFreeRewardsV1400(logger: Logger, rewardStrategy: String?, instantReward: Boolean?, multiplier: Int) {
-    logger.info("Ads Free Rewards v1.40.0 selected")
-    applyAdsFreeRewardsV1190(logger, rewardStrategy, instantReward, multiplier)
-}
-private fun BytecodePatchContext.applyAdsFreeRewardsV1410(logger: Logger, rewardStrategy: String?, instantReward: Boolean?, multiplier: Int) {
-    logger.info("Ads Free Rewards v1.41.0 selected")
-    applyAdsFreeRewardsV1190(logger, rewardStrategy, instantReward, multiplier)
 }
