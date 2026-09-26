@@ -156,7 +156,16 @@ val freeInAppPurchasesPatch = bytecodePatch(
                     val inner = holderCls.fields.firstOrNull {
                         it.type == "Lcom/android/billingclient/api/PurchasesUpdatedListener;"
                     } ?: continue
+                    // Guard the intermediate hop. The holder is only populated once the
+                    // client is really connected, so when the connection never
+                    // completes the second iget throws a NullPointerException from
+                    // inside our own injection. That escapes launchBillingFlow, the
+                    // caller never gets a result, and the game waits on its purchase
+                    // spinner forever - no success and no failure callback. Bailing
+                    // out here lets the caller's own null check fall through to the
+                    // OK-only path instead.
                     return "iget-object v0, v0, $defClass->${f.name}:${f.type}\n" +
+                        "if-eqz v0, :morphe_iap_nocb\n" +
                         "iget-object v0, v0, $holder->${inner.name}:${inner.type}"
                 }
                 null
