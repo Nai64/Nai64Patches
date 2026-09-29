@@ -269,6 +269,9 @@ val freeInAppPurchasesPatch = bytecodePatch(
             // merge mismatched register types (ART VerifyError).
             val grantTail = if (intReturn) "const/4 v0, 0x0\nreturn v0" else "return-object v1"
             val nocbTail = if (intReturn) "const/4 v0, 0x0\nreturn v0" else
+                "const-string v2, \"MorpheIAP\"\n" +
+                "const-string v4, \"grant: NO listener (nocb)\"\n" +
+                "invoke-static {v2, v4}, Landroid/util/Log;->d(Ljava/lang/String;Ljava/lang/String;)I\n" +
                 "invoke-static {}, Lcom/android/billingclient/api/BillingResult;->newBuilder()Lcom/android/billingclient/api/BillingResult\$Builder;\n" +
                 "move-result-object v1\n" +
                 "const/4 v4, 0x0\n" +
@@ -366,6 +369,9 @@ val freeInAppPurchasesPatch = bytecodePatch(
             }
             return """
                 move-object/from16 v0, p0
+                const-string v2, "MorpheIAP"
+                const-string v4, "grant: launchBillingFlow reached"
+                invoke-static {v2, v4}, Landroid/util/Log;->d(Ljava/lang/String;Ljava/lang/String;)I
                 $igetTail
                 if-eqz v0, :morphe_iap_nocb
                 $pid
@@ -411,6 +417,9 @@ val freeInAppPurchasesPatch = bytecodePatch(
                 move-result-object v1
                 invoke-virtual {v1}, Lcom/android/billingclient/api/BillingResult${'$'}Builder;->build()Lcom/android/billingclient/api/BillingResult;
                 move-result-object v1
+                const-string v2, "MorpheIAP"
+                const-string v4, "grant: dispatching onPurchasesUpdated"
+                invoke-static {v2, v4}, Landroid/util/Log;->d(Ljava/lang/String;Ljava/lang/String;)I
                 invoke-interface {v0, v1, v3}, Lcom/android/billingclient/api/PurchasesUpdatedListener;->onPurchasesUpdated(Lcom/android/billingclient/api/BillingResult;Ljava/util/List;)V
                 $grantTail
                 :morphe_iap_nocb
