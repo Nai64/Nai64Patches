@@ -24,6 +24,12 @@ val freeInAppPurchasesPatch = bytecodePatch(
         key = "fakeStartupPurchases",
         description = "Deliver a fake owned purchase on every inventory query. Helps games that only grant at boot, but can stall strict Unity titles. Leave off if a game hangs on loading.",
     )
+    val fakeBillingConnection by booleanOption(
+        title = "Fake billing connection",
+        default = false,
+        key = "fakeBillingConnection",
+        description = "Report the billing client as connected before the real connection finishes, then let the real one run. Helps devices with no working Play Store, but the early callback can make purchases vanish silently in Unity titles that route IAP through Unity Gaming Services. Leave off unless purchases do not start at all.",
+    )
     execute {
         val logger = Logger.getLogger(this::class.java.name)
         DiscordPromo.logOnce(logger)
@@ -495,38 +501,48 @@ val freeInAppPurchasesPatch = bytecodePatch(
             it.addInstructions(0, "return-void")
         }
 
-        // startConnection(BillingClientStateListener) -> fire
-        // onBillingSetupFinished(OK) on the listener, then FALL THROUGH to
-        // the real body (no return): the real connection still runs, so the
-        // untouched product catalog below keeps working on devices with
-        // Play, while no-Play devices boot on the early OK instead of
-        // waiting for setup forever. Any other overload (e.g. the native
-        // (J) bridge used by Unity IL2CPP games) is left completely
-        // untouched: voiding it strands native setup with no callback and
-        // freezes the app on its loading screen.
+        // startConnection(BillingClientStateListener) -> optionally fire
+        // onBillingSetupFinished(OK) on the listener, then FALL THROUGH to the
+        // real body (no return) so the real connection still runs and the
+        // untouched product catalog keeps working on devices with Play.
+        // OFF by default (fakeBillingConnection). The early OK is delivered
+        // before the client is really connected, and the real body then
+        // delivers a second setup-finished callback. Unity titles that route
+        // purchases through Unity Gaming Services can react to that duplicate
+        // by not dispatching the purchase at all, leaving the game waiting on
+        // its purchase spinner with no success and no failure callback. Those
+        // titles are better served by leaving the connection alone: the
+        // synthetic catalog and the buy-time grant are what deliver the
+        // reward. Any other overload (e.g. the native (J) bridge used by Unity
+        // IL2CPP games) is left completely untouched: voiding it strands native
+        // setup with no callback and freezes the app on its loading screen.
         // VERIFIER RULE: fall-through injections MUST go through
         // cloneMutable (expandSwap): direct prepending retypes v0/v1 for
         // the original body below and ART rejects the whole class
         // (seen on Nice Dice 3D). If the frame cannot grow, skip rather
         // than inject unsafely.
-        patchAll(Fingerprint(name = "startConnection", custom = { _, c -> c.type.contains("BillingClient")         }), "BillingClient.startConnection", 2) {
-            if (it.parameterTypes == listOf("Lcom/android/billingclient/api/BillingClientStateListener;") && it.returnType == "V") {
-                val block = """
-                    invoke-static {}, Lcom/android/billingclient/api/BillingResult;->newBuilder()Lcom/android/billingclient/api/BillingResult${'$'}Builder;
-                    move-result-object v0
-                    const/4 v1, 0x0
-                    invoke-virtual {v0, v1}, Lcom/android/billingclient/api/BillingResult${'$'}Builder;->setResponseCode(I)Lcom/android/billingclient/api/BillingResult${'$'}Builder;
-                    move-result-object v0
-                    invoke-virtual {v0}, Lcom/android/billingclient/api/BillingResult${'$'}Builder;->build()Lcom/android/billingclient/api/BillingResult;
-                    move-result-object v0
-                    move-object/from16 v1, p1
-                    invoke-interface {v1, v0}, Lcom/android/billingclient/api/BillingClientStateListener;->onBillingSetupFinished(Lcom/android/billingclient/api/BillingResult;)V
-                """.trimIndent()
-                if (!expandSwap(it, block)) {
-                    logger.warning("FreeIAP startConnection left stock (frame too small to clone safely)")
+        if (fakeBillingConnection == true) {
+            patchAll(Fingerprint(name = "startConnection", custom = { _, c -> c.type.contains("BillingClient") }), "BillingClient.startConnection", 2) {
+                if (it.parameterTypes == listOf("Lcom/android/billingclient/api/BillingClientStateListener;") && it.returnType == "V") {
+                    val block = """
+                        invoke-static {}, Lcom/android/billingclient/api/BillingResult;->newBuilder()Lcom/android/billingclient/api/BillingResult${'$'}Builder;
+                        move-result-object v0
+                        const/4 v1, 0x0
+                        invoke-virtual {v0, v1}, Lcom/android/billingclient/api/BillingResult${'$'}Builder;->setResponseCode(I)Lcom/android/billingclient/api/BillingResult${'$'}Builder;
+                        move-result-object v0
+                        invoke-virtual {v0}, Lcom/android/billingclient/api/BillingResult${'$'}Builder;->build()Lcom/android/billingclient/api/BillingResult;
+                        move-result-object v0
+                        move-object/from16 v1, p1
+                        invoke-interface {v1, v0}, Lcom/android/billingclient/api/BillingClientStateListener;->onBillingSetupFinished(Lcom/android/billingclient/api/BillingResult;)V
+                    """.trimIndent()
+                    if (!expandSwap(it, block)) {
+                        logger.warning("FreeIAP startConnection left stock (frame too small to clone safely)")
+                    }
                 }
+                // else: leave the overload alone (see comment above)
             }
-            // else: leave the overload alone (see comment above)
+        } else {
+            logger.info("FreeIAP startConnection left stock (fakeBillingConnection off)")
         }
 
         // onPurchasesUpdated is fired by the buy-time grant in
