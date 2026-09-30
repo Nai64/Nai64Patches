@@ -886,7 +886,7 @@ val freeInAppPurchasesPatch = bytecodePatch(
                                 move-result-object v5
                                 invoke-virtual {v5, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
                                 move-result-object v5
-                                const-string v6, "\"}"
+                                const-string v6, "\",\"price\":\"0.00\",\"priceAmountMicros\":0,\"priceCurrencyCode\":\"USD\",\"countryCode\":\"US\",\"offerToken\":\"morphe_offer\",\"oneTimePurchaseOfferDetails\":{\"price\":\"0.00\",\"formattedPrice\":\"0.00\",\"priceAmountMicros\":0,\"priceCurrencyCode\":\"USD\",\"offerToken\":\"morphe_offer\",\"state\":1},\"subscriptionOfferDetails\":[{\"offerToken\":\"morphe_offer\",\"pricingPhases\":{\"pricingPhaseList\":[{\"formattedPrice\":\"0.00\",\"priceAmountMicros\":0,\"billingPeriod\":\"P1M\",\"billingCycleCount\":0}]},\"eligibilityState\":1}]}"
                                 invoke-virtual {v5, v6}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
                                 move-result-object v5
                                 invoke-virtual {v5}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
