@@ -1216,3 +1216,71 @@ internal object MaxAppOpenAdIsReadyFingerprint : Fingerprint(
     returnType = "Z",
     parameters = emptyList(),
 )
+/*
+ * Reward amount getters.
+ *
+ * `rewardAmountMultiplier` scales the number the SDK reports instead of
+ * repeating the reward callback. One callback that reports N times is
+ * accepted by games that ignore extra reward events, and it costs the same
+ * regardless of N, so the ceiling is not limited by code size.
+ *
+ * Abstract declarations (0x401) are listed only as documentation of where
+ * the value is declared; the concrete implementation is what gets folded,
+ * because an abstract method has no body to rewrite.
+ */
+internal object AdMobRewardItemImplAmountFingerprint : Fingerprint(
+    definingClass = "Lcom/google/android/gms/ads/rewarded/zza;",
+    name = "getAmount",
+    returnType = "I",
+    parameters = emptyList(),
+)
+
+internal object MaxRewardImplAmountFingerprint : Fingerprint(
+    definingClass = "Lcom/applovin/impl/mediation/MaxRewardImpl;",
+    name = "getAmount",
+    returnType = "I",
+    parameters = emptyList(),
+)
+
+internal object PangleRewardItemAmountFingerprint : Fingerprint(
+    definingClass = "Lcom/bytedance/sdk/openadsdk/api/reward/PAGRewardItem;",
+    name = "getRewardAmount",
+    returnType = "I",
+    parameters = emptyList(),
+)
+
+internal object ChartboostRewardEventAmountFingerprint : Fingerprint(
+    definingClass = "Lcom/chartboost/sdk/events/RewardEvent;",
+    name = "getReward",
+    returnType = "I",
+    parameters = emptyList(),
+)
+
+internal object MintegralRewardAmountFingerprint : Fingerprint(
+    definingClass = "Lcom/mbridge/msdk/foundation/entity/RewardPlus;",
+    name = "getAmount",
+    returnType = "I",
+    parameters = emptyList(),
+)
+
+internal object MintegralRewardAmountMaxFingerprint : Fingerprint(
+    definingClass = "Lcom/mbridge/msdk/foundation/entity/RewardPlus;",
+    name = "getAmountMax",
+    returnType = "I",
+    parameters = emptyList(),
+)
+
+internal object LevelPlayRewardAmountFingerprint : Fingerprint(
+    definingClass = "Lcom/unity3d/mediation/rewarded/LevelPlayReward;",
+    name = "getAmount",
+    returnType = "I",
+    parameters = emptyList(),
+)
+
+internal object MetaRewardDataQuantityFingerprint : Fingerprint(
+    definingClass = "Lcom/facebook/ads/RewardData;",
+    name = "getQuantity",
+    returnType = "I",
+    parameters = emptyList(),
+)
+

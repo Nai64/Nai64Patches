@@ -6,9 +6,14 @@ import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.booleanOption
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.patch.stringOption
+import com.android.tools.smali.dexlib2.AccessFlags
+import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
+import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
+import patches.universal.ads.util.cloneMutable
 import patches.universal.ads.util.cloneParameters
 import patches.universal.ads.util.findMutableMethodOf
 import patches.universal.ads.util.fireRewardedAdCallbacks
+import patches.universal.ads.util.registersUsed
 import patches.universal.ads.util.repeatLines
 import java.util.logging.Logger
 import patches.universal.ads.util.DiscordPromo
@@ -58,6 +63,12 @@ val adsFreeRewardsPatch = bytecodePatch(
         title = "Repeat full ad break",
         description = "Deliver each repeat as its own displayed/reward/hidden ad break. Turn this on for games that ignore extra reward events and only pay out once per ad break. Leave off for games that pay per reward event, which would then pay the multiplier squared times.",
     )
+    val rewardAmountMultiplier by stringOption(
+        key = "rewardAmountMultiplier",
+        default = "1",
+        title = "Reward amount multiplier",
+        description = "Multiply the reward amount the ad network reports, so one reward event is already worth this many times the real amount. Unlike the reward multiplier this does not repeat the reward, so it still works on games that only pay out once per ad break, and it covers networks that have no reward strategy. 1 keeps the reported amount unchanged.",
+    )
 
     execute {
         val logger = Logger.getLogger(this::class.java.name)
@@ -81,12 +92,197 @@ val adsFreeRewardsPatch = bytecodePatch(
             else -> parsed
         }
         logger.info("Ads Free Rewards: rewardMultiplier=$multiplier")
+        val amountRequested = (rewardAmountMultiplier ?: "1").trim()
+        val amountParsed = amountRequested.toIntOrNull()
+        val amountMultiplier = when {
+            amountParsed == null -> {
+                logger.warning("Ads Free Rewards: rewardAmountMultiplier '$amountRequested' is not a number - using 1")
+                1
+            }
+            amountParsed < 1 -> {
+                logger.warning("Ads Free Rewards: rewardAmountMultiplier $amountParsed is below 1 - using 1")
+                1
+            }
+            amountParsed > MAX_AMOUNT_MULTIPLIER -> {
+                logger.warning("Ads Free Rewards: rewardAmountMultiplier $amountParsed is above the $MAX_AMOUNT_MULTIPLIER limit - using $MAX_AMOUNT_MULTIPLIER")
+                MAX_AMOUNT_MULTIPLIER
+            }
+            else -> amountParsed
+        }
+        logger.info("Ads Free Rewards: rewardAmountMultiplier=$amountMultiplier")
+        if (amountMultiplier > 1) {
+            val scaled = scaleRewardAmounts(logger, amountMultiplier)
+            logger.info("Ads Free Rewards: scaled reward amount in $scaled reward getter(s)")
+        }
         applyAdsFreeRewardsV1190(logger, rewardStrategy, instantReward, multiplier, repeatAdBreak)
         if (fakeAdAvailability == true) {
             val faked = forceAdAvailability(logger)
             if (faked > 0) logger.info("Ads Free Rewards: faked availability for $faked SDK check(s)")
         }
     }
+}
+
+/**
+ * Multiplies the value every `return vN` in [method] yields, so the SDK
+ * reports the scaled amount instead of the real one.
+ *
+ * Rewriting the return sites in place keeps the method name, signature and
+ * access flags untouched, so `invoke-super` call sites and subclass
+ * overrides keep resolving. A rename-and-wrap scheme would break any
+ * `invoke-super` that targets the renamed signature.
+ *
+ * The product is clamped to [MAX_SCALED_AMOUNT]: a large multiplier on a
+ * large real amount overflows `int` and would otherwise hand the game a
+ * negative reward.
+ */
+private fun MutableMethod.scaleReturnedInt(multiplier: Int, labelPrefix: String): Int {
+    val impl = implementation ?: return 0
+    val sites = mutableListOf<Pair<Int, Int>>()
+    var index = 0
+    for (ins in impl.instructions) {
+        if (ins.opcode.name.equals("return", ignoreCase = true) && ins is OneRegisterInstruction) {
+            sites += index to ins.registerA
+        }
+        index++
+    }
+    if (sites.isEmpty()) return 0
+
+    val needed = 2
+
+    fun constBlockFor(mult: Int): String = "const v$mult, 0x${multiplier.toString(16)}"
+
+    var scaled = 0
+    sites.asReversed().forEachIndexed { reversedIdx, (at, retReg) ->
+        // Only the returned register is live at a return site. Every other
+        // register, parameters included, is dead and safe to reuse, so the
+        // scratch registers are taken from the top of the frame. The returned
+        // register is excluded so the multiply has a destination.
+        if (impl.registerCount < needed + 1) return@forEachIndexed
+        val temps = mutableListOf<Int>()
+        var candidate = impl.registerCount - 1
+        while (temps.size < needed && candidate >= 0) {
+            if (candidate != retReg) temps += candidate
+            candidate--
+        }
+        if (temps.size < needed) return@forEachIndexed
+
+        val mult = temps[0]
+        val clamp = temps.last()
+        val tag = "${labelPrefix}_${sites.size - reversedIdx}"
+
+        addInstructions(
+            at,
+            """
+            ${constBlockFor(mult)}
+            mul-int/2addr v$retReg, v$mult
+            const v$clamp, 0x${MAX_SCALED_AMOUNT.toString(16)}
+            if-le v$retReg, v$clamp, :$tag
+            move v$retReg, v$clamp
+            :$tag
+            """.trimIndent(),
+        )
+        scaled++
+    }
+    return scaled
+}
+
+private const val MAX_SCALED_AMOUNT = 1_000_000_000
+
+/**
+ * Ceiling for the amount multiplier.
+ *
+ * The reward multiplier has to stay low because it unrolls the reward
+ * callback once per step, so every step costs real dex. Scaling the reported
+ * amount instead rewrites a fixed handful of return sites no matter how large
+ * the multiplier is, so this limit is about int range and overflow rather than
+ * output size.
+ */
+private const val MAX_AMOUNT_MULTIPLIER = 1_000_000
+
+
+/**
+ * Runs [scaleReturnedInt], growing the frame until it has registers to work
+ * with.
+ *
+ * Reward getters are typically one-register methods: `iget` into v0 and
+ * `return v0`, with v0 doubling as `this`. There is no free register for the
+ * multiplier, so the frame has to be widened first. [scaleReturnedInt] leaves
+ * the method untouched when it cannot proceed, so retrying after a grow is
+ * safe.
+ */
+private fun BytecodePatchContext.scaleWithFrameGrowth(
+    method: MutableMethod,
+    multiplier: Int,
+): Int {
+    var current = method
+    repeat(4) {
+        val done = current.scaleReturnedInt(multiplier, "morphe_amt")
+        if (done > 0) return done
+        val mutableClass = mutableClassDefBy(current.definingClass)
+        val target = mutableClass.methods.firstOrNull {
+            it.name == current.name &&
+                it.parameterTypes == current.parameterTypes &&
+                it.returnType == current.returnType
+        } ?: return 0
+        val grown = current.cloneMutable(additionalRegisters = 2)
+        mutableClass.methods.remove(target)
+        mutableClass.methods.add(grown)
+        current = grown
+    }
+    return 0
+}
+
+/**
+ * Scales the reward amount each ad SDK reports.
+ *
+ * The reward multiplier in [rewardMultiplier] repeats the reward *callback*,
+ * which only pays out on games that honour every event: a game that settles
+ * one reward per ad break collapses the repeats back to a single payout.
+ * Scaling the reported amount instead produces one callback that is already
+ * worth N times, so it survives that deduplication, and the cost does not
+ * grow with N.
+ *
+ * It is also network-agnostic. The per-network strategies only cover the SDKs
+ * they were written for, while these getters exist in the networks those
+ * strategies never reached, so a single pass covers more games.
+ */
+private fun BytecodePatchContext.scaleRewardAmounts(logger: Logger, amountMultiplier: Int): Int {
+    if (amountMultiplier <= 1) return 0
+    val targets = listOf(
+        "AdMob RewardItem.getAmount" to AdMobRewardItemImplAmountFingerprint,
+        "AppLovin MAX MaxRewardImpl.getAmount" to MaxRewardImplAmountFingerprint,
+        "Pangle PAGRewardItem.getRewardAmount" to PangleRewardItemAmountFingerprint,
+        "Chartboost RewardEvent.getReward" to ChartboostRewardEventAmountFingerprint,
+        "Mintegral RewardPlus.getAmount" to MintegralRewardAmountFingerprint,
+        "Mintegral RewardPlus.getAmountMax" to MintegralRewardAmountMaxFingerprint,
+        "Unity LevelPlay LevelPlayReward.getAmount" to LevelPlayRewardAmountFingerprint,
+        "Meta RewardData.getQuantity" to MetaRewardDataQuantityFingerprint,
+    )
+    var patched = 0
+    for ((label, fingerprint) in targets) {
+        val method = fingerprint.methodOrNull
+        if (method == null) {
+            logger.info("Ads Free Rewards: amount scaling skipped $label - not present")
+            continue
+        }
+        if (AccessFlags.ABSTRACT.isSet(method.accessFlags) || AccessFlags.STATIC.isSet(method.accessFlags)) {
+            logger.info("Ads Free Rewards: amount scaling skipped $label - abstract or static")
+            continue
+        }
+        val scaled = try {
+            scaleWithFrameGrowth(method, amountMultiplier)
+        } catch (e: Exception) {
+            logger.warning("Ads Free Rewards: amount scaling failed $label - ${e.message}")
+            0
+        }
+        if (scaled > 0) {
+            logger.info("Ads Free Rewards: amount scaling $label x$amountMultiplier ($scaled return site(s))")
+            patched++
+        } else {
+            logger.info("Ads Free Rewards: amount scaling skipped $label - no usable return site")
+        }
+    }
+    return patched
 }
 
 /**
