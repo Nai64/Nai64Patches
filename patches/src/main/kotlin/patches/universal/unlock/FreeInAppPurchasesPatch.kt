@@ -6,10 +6,11 @@ import app.morphe.patcher.extensions.InstructionExtensions.removeInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.patch.booleanOption
-import patches.universal.ads.util.cloneMutable
-import java.util.logging.Logger
 import patches.universal.ads.util.DiscordPromo
+import patches.universal.ads.util.cloneMutable
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod.Companion.toMutable
+import java.util.logging.Logger
+
 
 @Suppress("unused")
 val freeInAppPurchasesPatch = bytecodePatch(
@@ -48,6 +49,18 @@ val freeInAppPurchasesPatch = bytecodePatch(
                 for (p in m.parameterTypes) slots += if (p == "J" || p == "D") 2 else 1
                 slots
             } catch (_: Exception) { 0 }
+        }
+        // True when the app ships any class under [packagePrefix]. Used to name
+        // the store layer when no billing surface was found, so the log says
+        // *why* the patch did nothing instead of leaving a silent no-op.
+        fun hasAnyClassWithPrefix(packagePrefix: String): Boolean {
+            return try {
+                var found = false
+                classDefForEach { classDef ->
+                    if (!found && classDef.type.startsWith("L$packagePrefix")) found = true
+                }
+                found
+            } catch (_: Exception) { false }
         }
         // Frame expansion for injections needing more regs than the frame
         // holds: clone with extra registers and swap the clone in. The
@@ -1370,6 +1383,54 @@ val freeInAppPurchasesPatch = bytecodePatch(
             custom = { m, c -> !c.type.contains("revenuecat") && m.parameterTypes.any { it.contains("PurchasesError") } }),
             "RC.onError") {
             it.addInstructions(0, "return-void")
+        }
+
+        // ──────────────────────────────────────────────
+        // NATIVE STORE DIAGNOSIS
+        // ──────────────────────────────────────────────
+        //
+        // A growing number of Unity titles route purchases through their own
+        // store layer instead of Play Billing, so nothing in the Java billing
+        // API is called and every patch above silently no-ops. The game then
+        // dispatches the purchase and waits forever, which reads to the user
+        // like a broken patch rather than an unsupported game. Say so plainly.
+
+        if (patched == 0) {
+            val hasBillingApi = hasAnyClassWithPrefix("com/android/billingclient/")
+            val nativeStore = listOfNotNull(
+                "com/unity3d/udp/" to "Unity Gaming Services UDP store",
+                "com/tiktok/iap/" to "TikTok IAP store bridge",
+                "com/bytedance/applestore/" to "ByteDance app store",
+            ).firstOrNull { (prefix, _) -> hasAnyClassWithPrefix(prefix) }
+
+            when {
+                nativeStore != null -> logger.warning(
+                    "Free In-app Purchases: this app uses the ${nativeStore.second}, which does not " +
+                        "call Play Billing, so the Java billing patches cannot reach it. The grant " +
+                        "did not apply and purchases will stay locked. This game needs native " +
+                        "(IL2CPP) patching instead.",
+                )
+                // Nothing on the Java layer can be patched when the engine's own
+                // billing client is not even shipped in the dex. Unity games
+                // built this way keep the store (and any ad SDK) in
+                // libil2cpp.so, which is why the app looks empty here.
+                !hasBillingApi && hasAnyClassWithPrefix("com/unity3d/") -> logger.warning(
+                    "Free In-app Purchases: this Unity game ships no Play Billing classes in the dex, " +
+                        "so its store runs entirely inside libil2cpp.so. Nothing on the Java layer " +
+                        "can be patched and purchases will stay locked. This game needs native " +
+                        "(IL2CPP) patching instead.",
+                )
+                !hasBillingApi -> logger.warning(
+                    "Free In-app Purchases: this app ships no Play Billing classes at all, so it " +
+                        "cannot buy through Google Play. If its store is implemented natively, the " +
+                        "Java billing patches cannot reach it and this game needs native patching.",
+                )
+                hasAnyClassWithPrefix("com/unity3d/services/") -> logger.warning(
+                    "Free In-app Purchases: no billing or purchase checks found, and this app " +
+                        "embeds Unity Gaming Services. If the store is backed by UGS/UDP rather " +
+                        "than Play Billing, purchases cannot be granted from the Java layer.",
+                )
+            }
         }
 
         // ──────────────────────────────────────────────
