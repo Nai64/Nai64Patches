@@ -1284,3 +1284,30 @@ internal object MetaRewardDataQuantityFingerprint : Fingerprint(
     parameters = emptyList(),
 )
 
+/*
+ * Rewarded-ad countdown.
+ *
+ * Rewarded UIs show a countdown and keep the reward button disabled until it
+ * reaches zero. Folding the "show" side to a no-op removes the visible timer
+ * and the dead time it imposes.
+ */
+internal object PangleCountdownShowFingerprint : Fingerprint(
+    definingClass = "Lcom/bytedance/sdk/openadsdk/component/reward/top/TopLayoutDislike2;",
+    name = "showCountDownText",
+    returnType = "V",
+    parameters = emptyList(),
+)
+
+internal object PangleCountdownShowAltFingerprint : Fingerprint(
+    definingClass = "Lcom/bytedance/sdk/openadsdk/component/reward/top/zmn;",
+    name = "showCountDownText",
+    returnType = "V",
+    parameters = emptyList(),
+)
+
+internal object PangleCountdownShowAlt2Fingerprint : Fingerprint(
+    definingClass = "Lcom/bytedance/sdk/openadsdk/component/reward/top/zn;",
+    name = "showCountDownText",
+    returnType = "V",
+    parameters = emptyList(),
+)

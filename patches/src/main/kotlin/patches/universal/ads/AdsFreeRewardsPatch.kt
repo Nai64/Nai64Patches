@@ -69,6 +69,12 @@ val adsFreeRewardsPatch = bytecodePatch(
         title = "Reward amount multiplier",
         description = "Multiply the reward amount the ad network reports, so one reward event is already worth this many times the real amount. Unlike the reward multiplier this does not repeat the reward, so it still works on games that only pay out once per ad break, and it covers networks that have no reward strategy. 1 keeps the reported amount unchanged.",
     )
+    val skipAdCountdown by booleanOption(
+        key = "skipAdCountdown",
+        default = false,
+        title = "Skip ad countdown",
+        description = "Stop rewarded ads from showing the countdown and holding the reward button until it finishes.",
+    )
 
     execute {
         val logger = Logger.getLogger(this::class.java.name)
@@ -113,6 +119,10 @@ val adsFreeRewardsPatch = bytecodePatch(
         if (amountMultiplier > 1) {
             val scaled = scaleRewardAmounts(logger, amountMultiplier)
             logger.info("Ads Free Rewards: scaled reward amount in $scaled reward getter(s)")
+        }
+        if (skipAdCountdown == true) {
+            val killed = skipAdCountdowns(logger)
+            logger.info("Ads Free Rewards: removed ad countdown in $killed place(s)")
         }
         applyAdsFreeRewardsV1190(logger, rewardStrategy, instantReward, multiplier, repeatAdBreak)
         if (fakeAdAvailability == true) {
@@ -199,6 +209,41 @@ private const val MAX_SCALED_AMOUNT = 1_000_000_000
  */
 private const val MAX_AMOUNT_MULTIPLIER = 1_000_000
 
+/**
+ * Removes the rewarded-ad countdown.
+ *
+ * Rewarded units show a countdown and keep the reward control disabled until
+ * it reaches zero, so the player waits out dead time. Folding the call that
+ * shows the timer to a no-op removes both the countdown and the wait it
+ * gates.
+ */
+private fun BytecodePatchContext.skipAdCountdowns(logger: Logger): Int {
+    val targets = listOf(
+        "Pangle TopLayoutDislike2.showCountDownText" to PangleCountdownShowFingerprint,
+        "Pangle top/zmn.showCountDownText" to PangleCountdownShowAltFingerprint,
+        "Pangle top/zn.showCountDownText" to PangleCountdownShowAlt2Fingerprint,
+    )
+    var patched = 0
+    for ((label, fingerprint) in targets) {
+        val method = fingerprint.methodOrNull
+        if (method == null) {
+            logger.info("Ads Free Rewards: countdown skipped $label - not present")
+            continue
+        }
+        if (method.implementation == null) {
+            logger.info("Ads Free Rewards: countdown skipped $label - no implementation")
+            continue
+        }
+        try {
+            method.addInstructions(0, "return-void")
+            logger.info("Ads Free Rewards: removed countdown $label")
+            patched++
+        } catch (e: Exception) {
+            logger.warning("Ads Free Rewards: countdown failed $label - ${e.message}")
+        }
+    }
+    return patched
+}
 
 /**
  * Runs [scaleReturnedInt], growing the frame until it has registers to work
