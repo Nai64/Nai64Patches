@@ -1,3 +1,14 @@
+## [1.52.0](https://github.com/Nai64/Nai64Patches/compare/1.51.0...1.52.0) (2026-09-30)
+
+### New Features
+
+* add a reward amount multiplier to Ads Free Rewards ([6fc63fc](https://github.com/Nai64/Nai64Patches/commit/6fc63fc34fff27f0ba21791f74837720d92aecbf))
+* add an option to skip the rewarded ad countdown ([f7b902b](https://github.com/Nai64/Nai64Patches/commit/f7b902b62bad81d31d991e5def6d2c481b486763))
+* expand small frames so Free IAP price folds apply ([c7a8686](https://github.com/Nai64/Nai64Patches/commit/c7a86862f2d20021737b25a87494464034621016))
+* explain why no billing check could be patched ([c392671](https://github.com/Nai64/Nai64Patches/commit/c392671f8920108fc4c8a4e17fb44c6cfc003aeb))
+* gate the billing connection fake behind a new option ([2d12224](https://github.com/Nai64/Nai64Patches/commit/2d1222432271e5b2cbf67c1ebb3b36555bfbb228))
+* include pricing and offer details in Free IAP synthetic catalog ([191bbac](https://github.com/Nai64/Nai64Patches/commit/191bbac4e86692e3d17d649ffe7362ea1ba15361))
+
 ## [1.51.0](https://github.com/Nai64/Nai64Patches/compare/1.50.1...1.51.0) (2026-09-26)
 
 ### Bug Fixes

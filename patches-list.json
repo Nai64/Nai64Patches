@@ -1,6 +1,6 @@
 {
   "NOTE": "Do NOT manually edit this file. This file is automatically updated when semantic release (release.yml) runs. Manually editing this file can break your releases and break third party tools that use this file.",
-  "version": "1.51.0",
+  "version": "1.52.0",
   "patches": [
     {
       "name": "Unlock Premium",
@@ -33,6 +33,15 @@
           "key": "fakeStartupPurchases",
           "title": "Fake owned purchases at startup",
           "description": "Deliver a fake owned purchase on every inventory query. Helps games that only grant at boot, but can stall strict Unity titles. Leave off if a game hangs on loading.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "fakeBillingConnection",
+          "title": "Fake billing connection",
+          "description": "Report the billing client as connected before the real connection finishes, then let the real one run. Helps devices with no working Play Store, but the early callback can make purchases vanish silently in Unity titles that route IAP through Unity Gaming Services. Leave off unless purchases do not start at all.",
           "required": false,
           "type": "kotlin.Boolean",
           "default": false,
@@ -172,6 +181,24 @@
           "key": "repeatAdBreak",
           "title": "Repeat full ad break",
           "description": "Deliver each repeat as its own displayed/reward/hidden ad break. Turn this on for games that ignore extra reward events and only pay out once per ad break. Leave off for games that pay per reward event, which would then pay the multiplier squared times.",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        },
+        {
+          "key": "rewardAmountMultiplier",
+          "title": "Reward amount multiplier",
+          "description": "Multiply the reward amount the ad network reports, so one reward event is already worth this many times the real amount. Unlike the reward multiplier this does not repeat the reward, so it still works on games that only pay out once per ad break, and it covers networks that have no reward strategy. 1 keeps the reported amount unchanged.",
+          "required": false,
+          "type": "kotlin.String",
+          "default": "1",
+          "values": null
+        },
+        {
+          "key": "skipAdCountdown",
+          "title": "Skip ad countdown",
+          "description": "Stop rewarded ads from showing the countdown and holding the reward button until it finishes.",
           "required": false,
           "type": "kotlin.Boolean",
           "default": false,
