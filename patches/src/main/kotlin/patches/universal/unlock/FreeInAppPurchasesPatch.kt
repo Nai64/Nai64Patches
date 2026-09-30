@@ -102,7 +102,7 @@ val freeInAppPurchasesPatch = bytecodePatch(
                 true
             } catch (_: Exception) { false }
         }
-        fun patchAll(fp: Fingerprint, label: String, needRegs: Int = 1, injector: (app.morphe.patcher.util.proxy.mutableTypes.MutableMethod) -> Unit) {
+        fun patchAll(fp: Fingerprint, label: String, needRegs: Int = 1, tinyBlock: String? = null, injector: (app.morphe.patcher.util.proxy.mutableTypes.MutableMethod) -> Unit) {
             // try multi-match first via context receiver
             try {
                 val matches: List<app.morphe.patcher.Match> = try {
@@ -116,6 +116,11 @@ val freeInAppPurchasesPatch = bytecodePatch(
                             val method = m.method
                             if (method.implementation == null) continue
                             if (minRegs(method) < needRegs) {
+                                if (tinyBlock != null && expandSwap(method, tinyBlock, wipeBody = true)) {
+                                    patched++
+                                    patchedMethods.add(label)
+                                    continue
+                                }
                                 logger.info("FreeIAP skipped tiny frame: ${method.definingClass}->${method.name} regs=${minRegs(method)} need=$needRegs label=$label")
                                 continue
                             }
@@ -1034,10 +1039,10 @@ val freeInAppPurchasesPatch = bytecodePatch(
             }
         }
         // OneTimePurchaseOfferDetails / SubscriptionOfferDetails micros
-        patchAll(Fingerprint(name = "getPriceAmountMicros", returnType = "J"), "getPriceAmountMicros", 2) {
+        patchAll(Fingerprint(name = "getPriceAmountMicros", returnType = "J"), "getPriceAmountMicros", 2, "const-wide/16 v0, 0x0\nreturn-wide v0") {
             it.addInstructions(0, "const-wide/16 v0, 0x0\nreturn-wide v0")
         }
-        patchAll(Fingerprint(name = "getPriceAmountMicros", custom = { _, c -> c.type.lowercase().contains("offer") }), "Offer.getPriceAmountMicros", 2) {
+        patchAll(Fingerprint(name = "getPriceAmountMicros", custom = { _, c -> c.type.lowercase().contains("offer") }), "Offer.getPriceAmountMicros", 2, "const-wide/16 v0, 0x0\nreturn-wide v0") {
             if (it.returnType == "J") it.addInstructions(0, "const-wide/16 v0, 0x0\nreturn-wide v0")
         }
         // getOriginalJson -> fake json
