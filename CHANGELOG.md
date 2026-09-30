@@ -1,3 +1,17 @@
+## [1.51.0](https://github.com/Nai64/Nai64Patches/compare/1.50.1...1.51.0) (2026-09-26)
+
+### Bug Fixes
+
+* call the product details listener directly instead of by reflection ([bd0859b](https://github.com/Nai64/Nai64Patches/commit/bd0859b06e888e3b6892ae5660aaf0553dcc7042))
+* null-guard the listener holder in the buy-time grant ([f394c4f](https://github.com/Nai64/Nai64Patches/commit/f394c4f66879e39a888af39494c396f20273cb1f))
+* only warn about skipped RevenueCat fakes when RevenueCat is present ([f8226cf](https://github.com/Nai64/Nai64Patches/commit/f8226cf0c62b13d1ea7a0b208716b00d2944075a))
+* stop marking the synthetic catalog helper as a constructor ([c4c10d3](https://github.com/Nai64/Nai64Patches/commit/c4c10d39d57e473dcb84232d75ce5fd34a8da126))
+
+### New Features
+
+* add a repeat full ad break option for the reward multiplier ([131b7f9](https://github.com/Nai64/Nai64Patches/commit/131b7f92c62fb8d22ae6dda2f0586155965b7701))
+* add reward multiplier option to Ads Free Rewards ([63de269](https://github.com/Nai64/Nai64Patches/commit/63de269da228e1b596cd9de9e065c6262492b55b))
+
 ## [1.50.1](https://github.com/Nai64/Nai64Patches/compare/1.50.0...1.50.1) (2026-09-26)
 
 ### Bug Fixes
