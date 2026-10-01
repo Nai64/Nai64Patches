@@ -55,19 +55,17 @@ val adsFreeRewardsPatch = bytecodePatch(
         key = "rewardMultiplier",
         default = "1",
         title = "Reward multiplier",
-        description = "Grant the ad reward this many times per ad button press (1-50). Applies to the instant reward granted without watching an ad. 1 keeps the normal single reward.",
+        description = "Make the ad reward worth this many times more. How it is applied depends on the reward multiplier mode. 1 leaves the reward unchanged.",
     )
-    val repeatAdBreak by booleanOption(
-        key = "repeatAdBreak",
-        default = false,
-        title = "Repeat full ad break",
-        description = "Deliver each repeat as its own displayed/reward/hidden ad break. Turn this on for games that ignore extra reward events and only pay out once per ad break. Leave off for games that pay per reward event, which would then pay the multiplier squared times.",
-    )
-    val rewardAmountMultiplier by stringOption(
-        key = "rewardAmountMultiplier",
-        default = "1",
-        title = "Reward amount multiplier",
-        description = "Multiply the reward amount the ad network reports, so one reward event is already worth this many times the real amount. Unlike the reward multiplier this does not repeat the reward, so it still works on games that only pay out once per ad break, and it covers networks that have no reward strategy. 1 keeps the reported amount unchanged.",
+    val rewardMultiplierMode by stringOption(
+        key = "rewardMultiplierMode",
+        default = "amount",
+        title = "Reward multiplier mode",
+        description = "'Amount' multiplies the reward the ad network reports, which works even on games that only pay out once per ad break, and reaches networks that have no reward strategy. 'Reward' repeats the reward callback instead, which is needed by games that grant their own fixed reward and ignore the reported amount, but is capped much lower because each repeat is written out.",
+        values = mapOf(
+            "Amount (reported value)" to "amount",
+            "Reward (repeat callback)" to "reward",
+        ),
     )
     val skipAdCountdown by booleanOption(
         key = "skipAdCountdown",
@@ -80,6 +78,11 @@ val adsFreeRewardsPatch = bytecodePatch(
         val logger = Logger.getLogger(this::class.java.name)
         DiscordPromo.logOnce(logger)
         logger.info("Ads Free Rewards: strategy=$rewardStrategy instantReward=$instantReward")
+
+        val useAmount = (rewardMultiplierMode ?: "amount").trim().equals("reward", ignoreCase = true).not()
+        val modeLabel = if (useAmount) "amount" else "reward"
+        val limit = if (useAmount) MAX_AMOUNT_MULTIPLIER else MAX_REPEAT_MULTIPLIER
+
         val requested = (rewardMultiplier ?: "1").trim()
         val parsed = requested.toIntOrNull()
         val multiplier = when {
@@ -91,40 +94,30 @@ val adsFreeRewardsPatch = bytecodePatch(
                 logger.warning("Ads Free Rewards: rewardMultiplier $parsed is below 1 - using 1")
                 1
             }
-            parsed > 50 -> {
-                logger.warning("Ads Free Rewards: rewardMultiplier $parsed is above the 50 limit - using 50")
-                50
+            parsed > limit -> {
+                logger.warning("Ads Free Rewards: rewardMultiplier $parsed is above the $limit limit for $modeLabel mode - using $limit")
+                limit
             }
             else -> parsed
         }
-        logger.info("Ads Free Rewards: rewardMultiplier=$multiplier")
-        val amountRequested = (rewardAmountMultiplier ?: "1").trim()
-        val amountParsed = amountRequested.toIntOrNull()
-        val amountMultiplier = when {
-            amountParsed == null -> {
-                logger.warning("Ads Free Rewards: rewardAmountMultiplier '$amountRequested' is not a number - using 1")
-                1
+        logger.info("Ads Free Rewards: rewardMultiplier=$multiplier mode=$modeLabel")
+
+        if (multiplier > 1) {
+            if (useAmount) {
+                val scaled = scaleRewardAmounts(logger, multiplier)
+                logger.info("Ads Free Rewards: scaled reward amount in $scaled reward getter(s)")
+            } else {
+                logger.info("Ads Free Rewards: repeating the reward callback $multiplier time(s)")
             }
-            amountParsed < 1 -> {
-                logger.warning("Ads Free Rewards: rewardAmountMultiplier $amountParsed is below 1 - using 1")
-                1
-            }
-            amountParsed > MAX_AMOUNT_MULTIPLIER -> {
-                logger.warning("Ads Free Rewards: rewardAmountMultiplier $amountParsed is above the $MAX_AMOUNT_MULTIPLIER limit - using $MAX_AMOUNT_MULTIPLIER")
-                MAX_AMOUNT_MULTIPLIER
-            }
-            else -> amountParsed
-        }
-        logger.info("Ads Free Rewards: rewardAmountMultiplier=$amountMultiplier")
-        if (amountMultiplier > 1) {
-            val scaled = scaleRewardAmounts(logger, amountMultiplier)
-            logger.info("Ads Free Rewards: scaled reward amount in $scaled reward getter(s)")
         }
         if (skipAdCountdown == true) {
             val killed = skipAdCountdowns(logger)
             logger.info("Ads Free Rewards: removed ad countdown in $killed place(s)")
         }
-        applyAdsFreeRewardsV1190(logger, rewardStrategy, instantReward, multiplier, repeatAdBreak)
+        // In amount mode the multiplier is already spent on the reported value,
+        // so the callback is granted exactly once.
+        val repeat = multiplier.takeIf { !useAmount } ?: 1
+        applyAdsFreeRewardsV1190(logger, rewardStrategy, instantReward, repeat)
         if (fakeAdAvailability == true) {
             val faked = forceAdAvailability(logger)
             if (faked > 0) logger.info("Ads Free Rewards: faked availability for $faked SDK check(s)")
@@ -208,6 +201,15 @@ private const val MAX_SCALED_AMOUNT = 1_000_000_000
  * output size.
  */
 private const val MAX_AMOUNT_MULTIPLIER = 1_000_000
+
+/**
+ * Ceiling for the reward mode of the multiplier.
+ *
+ * Repeating the callback writes the reward out once per step, so this is
+ * bounded by output size rather than by int range. [repeatLines] caps the
+ * unroll at the same value.
+ */
+private const val MAX_REPEAT_MULTIPLIER = 50
 
 /**
  * Removes the rewarded-ad countdown.
@@ -380,7 +382,7 @@ private fun BytecodePatchContext.forceAdAvailability(logger: Logger): Int {
     return patched
 }
 
-private fun BytecodePatchContext.applyAdsFreeRewardsV1190(logger: Logger, rewardStrategy: String?, instantReward: Boolean?, multiplier: Int, repeatAdBreak: Boolean?) {
+private fun BytecodePatchContext.applyAdsFreeRewardsV1190(logger: Logger, rewardStrategy: String?, instantReward: Boolean?, multiplier: Int) {
     val strategy = rewardStrategy
     val useMax = strategy == "auto" || strategy == "max"
     val useUnityAds = strategy == "auto" || strategy == "unityAds"
@@ -458,7 +460,7 @@ private fun BytecodePatchContext.applyAdsFreeRewardsV1190(logger: Logger, reward
         applyMyTargetStrategy(logger, multiplier)
         applyYandexWrapperStrategy(logger, multiplier)
     }
-    if (applyMaxUnityStrategy(logger, useMax, instantReward, multiplier, repeatAdBreak)) return
+    if (applyMaxUnityStrategy(logger, useMax, instantReward, multiplier)) return
     applyNativeMaxStrategy(logger, useMax, instantReward, multiplier)
     applyInMobiRewardedStrategy(logger, useMax, instantReward, multiplier)
     applyIronSourceAdsStrategy(logger, useIronSource, instantReward, multiplier)
@@ -668,11 +670,11 @@ private fun BytecodePatchContext.applyMadsStrategy(logger: Logger, useIronSource
     }
 }
 
-private fun BytecodePatchContext.applyMaxUnityStrategy(logger: Logger, useMax: Boolean, instantReward: Boolean?, multiplier: Int, repeatAdSession: Boolean?): Boolean {
+private fun BytecodePatchContext.applyMaxUnityStrategy(logger: Logger, useMax: Boolean, instantReward: Boolean?, multiplier: Int): Boolean {
     val unityShow = ShowRewardedAdFingerprint.methodOrNull
     val unityReady = IsRewardedAdReadyFingerprint.methodOrNull
     if (!useMax || unityShow == null || unityReady == null) return false
-    logger.info("Ads Free Rewards: MAX Unity Ad wrapper patch succeeded${if (instantReward == true && multiplier > 1) " (reward x$multiplier${if (repeatAdSession == true) ", repeated ad breaks" else ""})" else ""}")
+    logger.info("Ads Free Rewards: MAX Unity Ad wrapper patch succeeded${if (instantReward == true && multiplier > 1) " (reward x$multiplier)" else ""}")
     unityReady.addInstructions(0, """
         const/4 v0, 0x1
         return v0
@@ -723,17 +725,9 @@ private fun BytecodePatchContext.applyMaxUnityStrategy(logger: Logger, useMax: B
             invoke-static {v1, v2, v3}, Lcom/applovin/impl/sdk/utils/JsonUtils;->putString(Lorg/json/JSONObject;Ljava/lang/String;Ljava/lang/String;)V
             invoke-static {v1}, Lcom/applovin/mediation/unity/MaxUnityAdManager;->forwardUnityEvent(Lorg/json/JSONObject;)V
         """.trimIndent()
-        // Some games only pay out once per ad break and ignore further reward
-        // events until the next one starts. Repeating the whole
-        // displayed/reward/hidden cycle presents each payout as its own ad
-        // break, which those games accept. Others pay per reward event, so
-        // repeating the full cycle there would pay multiplier squared times.
-        val adBreak = "$unityDisplayedEvent\n$unityRewardEvent\n$unityHiddenEvent"
-        val body = if (repeatAdSession == true) {
-            repeatLines(multiplier, "            ", adBreak)
-        } else {
-            "$unityDisplayedEvent\n${repeatLines(multiplier, "            ", unityRewardEvent)}\n$unityHiddenEvent"
-        }
+        // The displayed/hidden events still fire once so the ad flow completes
+        // normally; only the reward event is repeated.
+        val body = "$unityDisplayedEvent\n${repeatLines(multiplier, "            ", unityRewardEvent)}\n$unityHiddenEvent"
         unityShow.cloneParameters().addInstructions(
             0, """
             move-object/from16 v0, p1
