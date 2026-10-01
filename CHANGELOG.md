@@ -1,3 +1,9 @@
+## [1.52.1](https://github.com/Nai64/Nai64Patches/compare/1.52.0...1.52.1) (2026-10-01)
+
+### Bug Fixes
+
+* escape and complete the Free IAP synthetic product details ([972ec13](https://github.com/Nai64/Nai64Patches/commit/972ec13a463c9e19179cb388c940acd702729288))
+
 ## [1.52.0](https://github.com/Nai64/Nai64Patches/compare/1.51.0...1.52.0) (2026-09-30)
 
 ### New Features
