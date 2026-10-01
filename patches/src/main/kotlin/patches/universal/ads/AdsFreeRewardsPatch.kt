@@ -39,18 +39,6 @@ val adsFreeRewardsPatch = bytecodePatch(
             "Huawei Ads Kit / Petal Ads" to "huawei",
         ),
     )
-    val instantReward by booleanOption(
-        key = "instantReward",
-        default = true,
-        title = "Instant reward",
-        description = "Claim the reward immediately without showing an ad (applies to the current patch version)",
-    )
-    val fakeAdAvailability by booleanOption(
-        key = "fakeAdAvailability",
-        default = true,
-        title = "Fake ad availability",
-        description = "Force ad SDKs to report ads as available so the reward flow triggers (needed when no real ad can fill)",
-    )
     val rewardMultiplier by stringOption(
         key = "rewardMultiplier",
         default = "1",
@@ -67,17 +55,17 @@ val adsFreeRewardsPatch = bytecodePatch(
             "Reward (repeat callback)" to "reward",
         ),
     )
-    val skipAdCountdown by booleanOption(
-        key = "skipAdCountdown",
-        default = false,
-        title = "Skip ad countdown",
-        description = "Stop rewarded ads from showing the countdown and holding the reward button until it finishes.",
-    )
-
     execute {
         val logger = Logger.getLogger(this::class.java.name)
         DiscordPromo.logOnce(logger)
-        logger.info("Ads Free Rewards: strategy=$rewardStrategy instantReward=$instantReward")
+        // Claiming the reward without showing the ad, reporting ads as
+        // available, and dropping the countdown are what this patch is for.
+        // They used to be switches that only ever made the patch do nothing,
+        // so they are unconditional now.
+        val instantReward: Boolean? = true
+        val fakeAdAvailability: Boolean? = true
+        val skipAdCountdown: Boolean? = true
+        logger.info("Ads Free Rewards: strategy=$rewardStrategy")
 
         val useAmount = (rewardMultiplierMode ?: "amount").trim().equals("reward", ignoreCase = true).not()
         val modeLabel = if (useAmount) "amount" else "reward"
@@ -110,18 +98,14 @@ val adsFreeRewardsPatch = bytecodePatch(
                 logger.info("Ads Free Rewards: repeating the reward callback $multiplier time(s)")
             }
         }
-        if (skipAdCountdown == true) {
-            val killed = skipAdCountdowns(logger)
-            logger.info("Ads Free Rewards: removed ad countdown in $killed place(s)")
-        }
+        val killed = skipAdCountdowns(logger)
+        logger.info("Ads Free Rewards: removed ad countdown in $killed place(s)")
         // In amount mode the multiplier is already spent on the reported value,
         // so the callback is granted exactly once.
         val repeat = multiplier.takeIf { !useAmount } ?: 1
         applyAdsFreeRewardsV1190(logger, rewardStrategy, instantReward, repeat)
-        if (fakeAdAvailability == true) {
-            val faked = forceAdAvailability(logger)
-            if (faked > 0) logger.info("Ads Free Rewards: faked availability for $faked SDK check(s)")
-        }
+        val faked = forceAdAvailability(logger)
+        if (faked > 0) logger.info("Ads Free Rewards: faked availability for $faked SDK check(s)")
     }
 }
 
