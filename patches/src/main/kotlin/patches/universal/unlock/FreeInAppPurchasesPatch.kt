@@ -866,32 +866,50 @@ val freeInAppPurchasesPatch = bytecodePatch(
                                 if-eqz v2, :morphe_cat_loop
                                 new-instance v5, Ljava/lang/StringBuilder;
                                 invoke-direct {v5}, Ljava/lang/StringBuilder;-><init>()V
-                                const-string v6, "{\"productId\":\""
+                                const-string v6, "{\"productId\":"
                                 invoke-virtual {v5, v6}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
                                 move-result-object v5
-                                invoke-virtual {v5, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
-                                move-result-object v5
-                                const-string v6, "\",\"type\":\""
+                                invoke-static {v2}, Lorg/json/JSONObject;->quote(Ljava/lang/String;)Ljava/lang/String;
+                                move-result-object v6
                                 invoke-virtual {v5, v6}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
                                 move-result-object v5
-                                invoke-virtual {v5, v3}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
-                                move-result-object v5
-                                const-string v6, "\",\"title\":\""
+                                const-string v6, ",\"title\":"
                                 invoke-virtual {v5, v6}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
                                 move-result-object v5
-                                invoke-virtual {v5, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
-                                move-result-object v5
-                                const-string v6, "\",\"name\":\""
+                                invoke-static {v2}, Lorg/json/JSONObject;->quote(Ljava/lang/String;)Ljava/lang/String;
+                                move-result-object v6
                                 invoke-virtual {v5, v6}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
                                 move-result-object v5
-                                invoke-virtual {v5, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
-                                move-result-object v5
-                                const-string v6, "\",\"description\":\""
+                                const-string v6, ",\"name\":"
                                 invoke-virtual {v5, v6}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
                                 move-result-object v5
-                                invoke-virtual {v5, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+                                invoke-static {v2}, Lorg/json/JSONObject;->quote(Ljava/lang/String;)Ljava/lang/String;
+                                move-result-object v6
+                                invoke-virtual {v5, v6}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
                                 move-result-object v5
-                                const-string v6, "\",\"price\":\"0.00\",\"priceAmountMicros\":0,\"priceCurrencyCode\":\"USD\",\"countryCode\":\"US\",\"offerToken\":\"morphe_offer\",\"oneTimePurchaseOfferDetails\":{\"price\":\"0.00\",\"formattedPrice\":\"0.00\",\"priceAmountMicros\":0,\"priceCurrencyCode\":\"USD\",\"offerToken\":\"morphe_offer\",\"state\":1},\"subscriptionOfferDetails\":[{\"offerToken\":\"morphe_offer\",\"pricingPhases\":{\"pricingPhaseList\":[{\"formattedPrice\":\"0.00\",\"priceAmountMicros\":0,\"billingPeriod\":\"P1M\",\"billingCycleCount\":0}]},\"eligibilityState\":1}]}"
+                                const-string v6, ",\"description\":"
+                                invoke-virtual {v5, v6}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+                                move-result-object v5
+                                invoke-static {v2}, Lorg/json/JSONObject;->quote(Ljava/lang/String;)Ljava/lang/String;
+                                move-result-object v6
+                                invoke-virtual {v5, v6}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+                                move-result-object v5
+                                const-string v6, ",\"packageDisplayName\":"
+                                invoke-virtual {v5, v6}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+                                move-result-object v5
+                                invoke-static {v2}, Lorg/json/JSONObject;->quote(Ljava/lang/String;)Ljava/lang/String;
+                                move-result-object v6
+                                invoke-virtual {v5, v6}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+                                move-result-object v5
+                                const-string v6, "subs"
+                                invoke-virtual {v3, v6}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+                                move-result v4
+                                if-nez v4, :morphe_cat_subs
+                                const-string v6, ",\"type\":\"inapp\",\"price\":\"0.00\",\"priceAmountMicros\":0,\"priceCurrencyCode\":\"USD\",\"countryCode\":\"US\",\"offerToken\":\"morphe_offer\",\"oneTimePurchaseOfferDetails\":{\"formattedPrice\":\"0.00\",\"priceAmountMicros\":0,\"priceCurrencyCode\":\"USD\"},\"oneTimePurchaseOfferDetailsList\":[{\"formattedPrice\":\"0.00\",\"priceAmountMicros\":0,\"priceCurrencyCode\":\"USD\"}]}"
+                                goto :morphe_cat_tail
+                                :morphe_cat_subs
+                                const-string v6, ",\"type\":\"subs\",\"price\":\"0.00\",\"priceAmountMicros\":0,\"priceCurrencyCode\":\"USD\",\"countryCode\":\"US\",\"offerToken\":\"morphe_offer\",\"subscriptionOfferDetails\":[{\"basePlanId\":\"base\",\"offerId\":\"\",\"offerIdToken\":\"morphe_offer\",\"pricingPhases\":{\"pricingPhaseList\":[{\"formattedPrice\":\"0.00\",\"priceAmountMicros\":0,\"priceCurrencyCode\":\"USD\",\"billingPeriod\":\"P1M\",\"recurrenceMode\":1,\"billingCycleCount\":0}]},\"offerTags\":[]}]}"
+                                :morphe_cat_tail
                                 invoke-virtual {v5, v6}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
                                 move-result-object v5
                                 invoke-virtual {v5}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
