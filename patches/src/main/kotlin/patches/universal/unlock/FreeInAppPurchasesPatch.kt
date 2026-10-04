@@ -1063,10 +1063,19 @@ val freeInAppPurchasesPatch = bytecodePatch(
         patchAll(Fingerprint(name = "getPriceAmountMicros", custom = { _, c -> c.type.lowercase().contains("offer") }), "Offer.getPriceAmountMicros", 2, "const-wide/16 v0, 0x0\nreturn-wide v0") {
             if (it.returnType == "J") it.addInstructions(0, "const-wide/16 v0, 0x0\nreturn-wide v0")
         }
-        // getOriginalJson -> fake json
-        patchAll(Fingerprint(name = "getOriginalJson", returnType = "Ljava/lang/String;"), "getOriginalJson") {
-            it.addInstructions(0, "const-string v0, \"{\\\"productId\\\":\\\"morphe_fake\\\",\\\"purchaseToken\\\":\\\"fake\\\"}\"\nreturn-object v0")
-        }
+        // getOriginalJson is deliberately left stock.
+        //
+        // It used to be folded to a hardcoded
+        // {"productId":"morphe_fake",...} literal. That destroyed the real
+        // product id the buy-time grant had just resolved out of
+        // BillingFlowParams, so any game that reads the id from the raw
+        // purchase JSON instead of Purchase.getProductId() saw a product it
+        // did not recognise, granted nothing, and retried - reported as prices
+        // rendering at 0.00 and a purchase that never completes.
+        //
+        // The Purchase the grant constructs already carries the correct JSON
+        // built from the real id, so the stock getter returns the right
+        // answer and folding it only ever broke it.
 
         // Purchase state getters -> look owned/valid (scoped to billing/purchase classes only;
         // ProductDetails identity like getProductId is deliberately NOT spoofed so SKU lookup keeps working)
