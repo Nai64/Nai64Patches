@@ -19,3 +19,18 @@ pluginManagement {
 plugins {
     id("app.morphe.patches") version "1.3.4"
 }
+
+dependencyResolutionManagement {
+    repositories {
+        mavenCentral()
+        google()
+    }
+}
+
+settings {
+    patchesProjectPath = ":patches"
+    extensions {
+        projectsPath = ":extensions"
+        proguardFiles("proguard-rules.pro")
+    }
+}
