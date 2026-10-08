@@ -13,10 +13,12 @@ package patches.universal.ads.util
  *
  * The repeat is unrolled at patch time rather than looped, so no branch
  * targets or extra registers are introduced and the injection stays
- * verifier-safe.
+ * verifier-safe. That also bounds the multiplier: each invoke-interface is 3
+ * code units and a dex method body is capped at 65535, so the unroll cannot
+ * exceed roughly 21k repeats.
  */
 fun repeatLines(count: Int, indent: String, block: String): String =
-    (1..count.coerceIn(1, 50)).joinToString("\n") { copy ->
+    (1..count.coerceIn(1, 10_000)).joinToString("\n") { copy ->
         block.lineSequence().joinToString("\n") { "$indent$it" }
     }
 

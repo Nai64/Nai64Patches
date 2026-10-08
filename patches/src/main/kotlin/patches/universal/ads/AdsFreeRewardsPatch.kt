@@ -43,16 +43,16 @@ val adsFreeRewardsPatch = bytecodePatch(
         key = "rewardMultiplier",
         default = "1",
         title = "Reward multiplier",
-        description = "Make the ad reward worth this many times more. How it is applied depends on the reward multiplier mode. 1 leaves the reward unchanged.",
+        description = "Reward value per ad.",
     )
     val rewardMultiplierMode by stringOption(
         key = "rewardMultiplierMode",
-        default = "amount",
+        default = "reward",
         title = "Reward multiplier mode",
-        description = "'Amount' multiplies the reward the ad network reports, which works even on games that only pay out once per ad break, and reaches networks that have no reward strategy. 'Reward' repeats the reward callback instead, which is needed by games that grant their own fixed reward and ignore the reported amount, but is capped much lower because each repeat is written out.",
+        description = "'Reward' repeats the reward callback. 'Amount' scales the value the ad network reports.",
         values = mapOf(
-            "Amount (reported value)" to "amount",
             "Reward (repeat callback)" to "reward",
+            "Amount (reported value)" to "amount",
         ),
     )
     execute {
@@ -190,10 +190,14 @@ private const val MAX_AMOUNT_MULTIPLIER = 1_000_000
  * Ceiling for the reward mode of the multiplier.
  *
  * Repeating the callback writes the reward out once per step, so this is
- * bounded by output size rather than by int range. [repeatLines] caps the
- * unroll at the same value.
+ * bounded by dex output size rather than by int range. Each repeated
+ * invoke-interface is 3 code units and a method body is capped at 65535, which
+ * puts the theoretical ceiling near 21k. [repeatLines] caps the unroll at the
+ * same value. Reaching much beyond this needs the repeat emitted as a counted
+ * loop instead of an unroll, which needs a spare register at every injection
+ * site; three of them do not currently grow their frames.
  */
-private const val MAX_REPEAT_MULTIPLIER = 50
+private const val MAX_REPEAT_MULTIPLIER = 10_000
 
 /**
  * Removes the rewarded-ad countdown.
