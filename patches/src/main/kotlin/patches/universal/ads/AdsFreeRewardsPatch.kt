@@ -215,7 +215,7 @@ private fun BytecodePatchContext.applyAdsFreeRewardsV1190(logger: Logger, reward
         MadsRvHandlerOnRewardedFingerprint.methodOrNull != null
 
     if (multiplier != 1) {
-        logger.info("Ads Free Rewards: reward multiplier $multiplier - repeating the reward callback $multiplier times, shown/hidden lifecycle still fires once")
+        logger.info("Ads Free Rewards: reward multiplier $multiplier - the ad break is repeated $multiplier time(s)")
     }
 
     logger.info("Ads Free Rewards: detected SDKs  -  MAX Unity=$hasMaxUnity native MAX=$hasNativeMax UnityAds=$hasUnityAds UnityAdsV4=$hasUnityAdsV4 LevelPlay=$hasLevelPlay ironSourceBridge=$hasIronSourceUnityBridge MyTarget=$hasMyTarget Yandex=$hasYandexUnityRewarded Huawei=$hasHuawei AdMob=$hasAdMob InMobi=$hasInMobi InMobiRewarded=$hasInMobiRewarded IronSourceAds=$hasIronSourceAds MADS=$hasMads")
@@ -525,9 +525,14 @@ private fun BytecodePatchContext.applyMaxUnityStrategy(logger: Logger, useMax: B
             invoke-static {v1, v2, v3}, Lcom/applovin/impl/sdk/utils/JsonUtils;->putString(Lorg/json/JSONObject;Ljava/lang/String;Ljava/lang/String;)V
             invoke-static {v1}, Lcom/applovin/mediation/unity/MaxUnityAdManager;->forwardUnityEvent(Lorg/json/JSONObject;)V
         """.trimIndent()
-        // The displayed/hidden events still fire once so the ad flow completes
-        // normally; only the reward event is repeated.
-        val body = "$unityDisplayedEvent\n${repeatLines(multiplier, "            ", unityRewardEvent)}\n$unityHiddenEvent"
+        // The whole ad break is repeated, not just the reward callback. Games that
+        // collapse repeated reward callbacks within a single ad break - common
+        // in Unity IL2CPP titles, where one break means one payout no matter how
+        // many reward events arrive - would otherwise pay out exactly once.
+        // Replaying displayed -> reward -> hidden gives every iteration its own
+        // break, so the guard resets in between and each one pays out.
+        val oneBreak = "$unityDisplayedEvent\n$unityRewardEvent\n$unityHiddenEvent"
+        val body = repeatLines(multiplier, "            ", oneBreak)
         unityShow.cloneParameters().addInstructions(
             0, """
             move-object/from16 v0, p1
