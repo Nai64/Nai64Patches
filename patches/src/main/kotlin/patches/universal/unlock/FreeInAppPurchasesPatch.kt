@@ -33,7 +33,17 @@ val freeInAppPurchasesPatch = bytecodePatch(
     )
     execute {
         val logger = Logger.getLogger(this::class.java.name)
+        logger.warning(
+            "Free In-app Purchases is deprecated and no longer maintained. It does not work " +
+                "reliably on any known game. Use the discord for current, game-specific patches.",
+        )
         DiscordPromo.logOnce(logger)
+
+        // Deprecated: no longer maintained and not reliable on any known game.
+        // Kept only so existing option files and stored selections keep
+        // loading, so stop here and let the notices above be the whole output.
+        return@execute
+
         var patched = 0
         val patchedMethods = mutableSetOf<String>()
 
