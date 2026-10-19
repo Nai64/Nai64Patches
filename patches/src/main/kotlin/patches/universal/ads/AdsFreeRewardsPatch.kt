@@ -1,6 +1,7 @@
 ﻿package patches.universal.ads
 
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
+import app.morphe.patcher.extensions.InstructionExtensions.removeInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.removeInstructions
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.booleanOption
@@ -612,33 +613,36 @@ private fun BytecodePatchContext.applyAdMobRewardedStrategy(logger: Logger, useM
                 // Found call site: RewardedAd.show(Activity, OnUserEarnedRewardListener)
                 // Replace it with direct reward: if p2 != null, p2.onUserEarnedReward(null)
                     try {
-                        // Determine registers for Activity and listener (35c or 3rc)
-                        val (activityReg, listenerReg) = when (insn) {
-                            // invoke-virtual {v0, v1, v2}, RewardedAd.show
-                            // v0 = this (RewardedAd), v1 = Activity, v2 = listener
-                            // Need to parse: for 35c, registerCount, registers C/D/E etc.
-                            // For show with 3 regs (this, activity, listener), C=this, D=activity, E=listener
-                            is com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction35c -> {
-                                // invoke-virtual/range {v0..v2}
+                        // Determine registers for receiver, Activity and listener.
+                        // Match on the *interfaces* rather than the Builder* classes: the
+                        // implementation is read from the original immutable ClassDef, so
+                        // these instructions are DexBacked and would fall through to `else`.
+                        val (thisReg, activityReg, listenerReg) = when (insn) {
+                            is com.android.tools.smali.dexlib2.iface.instruction.FiveRegisterInstruction -> {
+                                // invoke-virtual {vC, vD, vE}: C=this, D=Activity, E=listener
                                 if (insn.registerCount < 3) continue
-                                Pair(insn.registerD, insn.registerE)
+                                Triple(insn.registerC, insn.registerD, insn.registerE)
                             }
-                            is com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction3rc -> {
+                            is com.android.tools.smali.dexlib2.iface.instruction.RegisterRangeInstruction -> {
                                 val start = insn.startRegister
-                                Pair(start + 1, start + 2)
+                                Triple(start, start + 1, start + 2)
                             }
                             else -> continue
                         }
                         // The reward callback is repeated `multiplier` times. Each repetition needs
                         // its own label to stay unique inside the enclosing method.
+                        // `thisReg` is dead once the show invoke below is removed, so it doubles as
+                        // the scratch register holding the null RewardItem. Reusing v0 blindly was
+                        // unsafe: v0 is the RewardedAd receiver in the common case.
                         val rewardCalls = (1..multiplier).joinToString("\n") { iteration ->
                             """
                             if-eqz v$listenerReg, :morphe_admob_skip_${index}_$iteration
-                            const/4 v0, 0x0
-                            invoke-interface {v$listenerReg, v0}, Lcom/google/android/gms/ads/OnUserEarnedRewardListener;->onUserEarnedReward(Lcom/google/android/gms/ads/rewarded/RewardItem;)V
+                            const/4 v$thisReg, 0x0
+                            invoke-interface {v$listenerReg, v$thisReg}, Lcom/google/android/gms/ads/OnUserEarnedRewardListener;->onUserEarnedReward(Lcom/google/android/gms/ads/rewarded/RewardItem;)V
                             :morphe_admob_skip_${index}_$iteration
                             """.trimIndent().prependIndent("                        ")
                         }
+                        mutableMethod.removeInstruction(index)
                         mutableMethod.addInstructions(index, rewardCalls)
                     // Keep original invoke as well? Actually we want to skip the ad, so we should nop the original invoke
                     // Instead, we just inserted reward before, and let original show still run  -  it will show ad but also give reward instantly
