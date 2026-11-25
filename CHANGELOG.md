@@ -1,3 +1,20 @@
+## [1.53.0](https://github.com/Nai64/Nai64Patches/compare/1.52.1...1.53.0) (2026-11-25)
+
+### Bug Fixes
+
+* amplify AdMob reward handlers instead of forging callbacks ([6e75cef](https://github.com/Nai64/Nai64Patches/commit/6e75cef509d78790fb3d4b40c14be6b2af21f3cd))
+* repeat the whole ad break so the multiplier survives per-break guards ([373c61a](https://github.com/Nai64/Nai64Patches/commit/373c61ad07b3fd1b72c51111e771bdb8fe8c5e69))
+* retire the iap patch ([0a11786](https://github.com/Nai64/Nai64Patches/commit/0a11786ec400d5ec998aca75bd28c3c4501979ce))
+* stop overwriting the purchase product id in getOriginalJson ([6969248](https://github.com/Nai64/Nai64Patches/commit/69692485edc143490a39ca6a4267a15cfce7cde0))
+
+### New Features
+
+* ad free reward admob support ([ddd5eb7](https://github.com/Nai64/Nai64Patches/commit/ddd5eb76f2365be47890241361c43d08984d3a84))
+* add internal IL2CPP hook library and loader patches ([d5393a2](https://github.com/Nai64/Nai64Patches/commit/d5393a285112707db97628aca09ff56994300598))
+* allow any paired earphones in vivo tws ([8b28d90](https://github.com/Nai64/Nai64Patches/commit/8b28d908672ab02b995779d081f2d9b689de4dcc))
+* drop amount mode from the ads reward multiplier ([b03d784](https://github.com/Nai64/Nai64Patches/commit/b03d784670b35055f6b740ffbe64f5c591218141))
+* raise the reward multiplier cap and default to reward mode ([6c8c6a7](https://github.com/Nai64/Nai64Patches/commit/6c8c6a76272e17c7942f0a1a79486d102cd68153))
+
 ## [1.52.1](https://github.com/Nai64/Nai64Patches/compare/1.52.0...1.52.1) (2026-10-01)
 
 ### Bug Fixes

@@ -1,6 +1,6 @@
 {
   "NOTE": "Do NOT manually edit this file. This file is automatically updated when semantic release (release.yml) runs. Manually editing this file can break your releases and break third party tools that use this file.",
-  "version": "1.52.1",
+  "version": "1.53.0",
   "patches": [
     {
       "name": "Unlock Premium",
@@ -153,23 +153,11 @@
         {
           "key": "rewardMultiplier",
           "title": "Reward multiplier",
-          "description": "Make the ad reward worth this many times more. How it is applied depends on the reward multiplier mode. 1 leaves the reward unchanged.",
+          "description": "How many times the reward callback runs per ad.",
           "required": false,
           "type": "kotlin.String",
           "default": "1",
           "values": null
-        },
-        {
-          "key": "rewardMultiplierMode",
-          "title": "Reward multiplier mode",
-          "description": "'Amount' multiplies the reward the ad network reports, which works even on games that only pay out once per ad break, and reaches networks that have no reward strategy. 'Reward' repeats the reward callback instead, which is needed by games that grant their own fixed reward and ignore the reported amount, but is capped much lower because each repeat is written out.",
-          "required": false,
-          "type": "kotlin.String",
-          "default": "amount",
-          "values": {
-            "Amount (reported value)": "amount",
-            "Reward (repeat callback)": "reward"
-          }
         }
       ]
     },
@@ -217,6 +205,43 @@
           "required": false,
           "type": "kotlin.Boolean",
           "default": true,
+          "values": null
+        }
+      ]
+    },
+    {
+      "name": "Accept any earphones",
+      "description": "Show any paired Bluetooth audio device as a Vivo TWS earphone so it can be selected and connected.",
+      "default": false,
+      "category": "Misc",
+      "dependencies": [],
+      "compatiblePackages": [
+        {
+          "packageName": "com.vivo.vivotws",
+          "name": null,
+          "description": null,
+          "apkFileType": null,
+          "appIconColor": null,
+          "signatures": null,
+          "targets": [
+            {
+              "version": null,
+              "versionCodes": null,
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
+      "options": [
+        {
+          "key": "vivoSpoofedModel",
+          "title": "Spoofed TWS model",
+          "description": "Model reported to the app. 16 = vivo TWS Neo, 1 = vivo TWS 1, 28 = vivo TWS 2.",
+          "required": false,
+          "type": "kotlin.Int",
+          "default": 16,
           "values": null
         }
       ]
