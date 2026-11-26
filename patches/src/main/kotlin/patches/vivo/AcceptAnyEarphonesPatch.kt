@@ -2,6 +2,7 @@ package patches.vivo
 
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
+import app.morphe.patcher.patch.Compatibility
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.patch.intOption
 
@@ -52,7 +53,7 @@ val acceptAnyEarphonesPatch = bytecodePatch(
     description = "Show any paired Bluetooth audio device as a Vivo TWS earphone so it can be selected and connected.",
     default = false,
 ) {
-    compatibleWith("com.vivo.vivotws")
+    compatibleWith(Compatibility(packageName = "com.vivo.vivotws", name = "vEarphones"))
     category("Misc")
 
     val spoofedModel by intOption(
