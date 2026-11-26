@@ -5,7 +5,6 @@ import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.booleanOption
 import app.morphe.patcher.patch.bytecodePatch
-import app.morphe.patcher.patch.stringOption
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
 import patches.universal.ads.util.cloneParameters
 import patches.universal.ads.util.findMutableMethodOf
@@ -183,97 +182,50 @@ private fun BytecodePatchContext.patchWith(fingerprint: Fingerprint, smali: Stri
 @Suppress("unused")
 val noAdsPatch = bytecodePatch(
     name = "No Ads",
-    description = "Blocks ads by type. Pick what to block. For rewarded ads use Ads Free Rewards instead.",
     default = false,
 ) {
     category("Featured")
-    val preset by stringOption(
-        key = "preset",
-        default = "recommended",
-        title = "Preset",
-        description = "Quick setup: Recommended blocks most ads but keeps rewarded ads for Ads Free Rewards compatibility. Aggressive blocks everything including rewarded. Custom lets you pick below.",
-        values = linkedMapOf(
-            "Recommended (keep rewarded)" to "recommended",
-            "Aggressive (block all)" to "aggressive",
-            "Custom" to "custom",
-        ),
-    )
     val blockInterstitials by booleanOption(
         title = "Block Interstitials",
         default = true,
         key = "blockInterstitials",
-        description = "Full-screen ads between levels or menus. Safe to block in most apps.",
     )
     val blockBanners by booleanOption(
         title = "Block Banners",
         default = true,
         key = "blockBanners",
-        description = "Thin banners at top/bottom. Safe to block; rarely breaks layout.",
     )
     val blockAppOpen by booleanOption(
         title = "Block App Open",
         default = true,
         key = "blockAppOpen",
-        description = "Ads on cold start. Block to skip the launch ad.",
     )
     val blockMRec by booleanOption(
         title = "Block MREC",
         default = true,
         key = "blockMRec",
-        description = "Medium rectangles (300x250) inside feeds. Safe to block.",
     )
     val blockRewarded by booleanOption(
         title = "Block Rewarded",
         default = false,
         key = "blockRewarded",
-        description = "Rewarded video  -  disable if you use Ads Free Rewards, otherwise progress gates may break. Enable only to fully remove rewarded ads.",
     )
     val blockNative by booleanOption(
         title = "Block Native",
         default = true,
         key = "blockNative",
-        description = "Native ads blended into feeds/lists. Enable for cleaner feeds (may leave empty placeholders).",
     )
 
     execute {
         val detectionLogger = Logger.getLogger(this::class.java.name)
         DiscordPromo.logOnce(detectionLogger)
 
-        // Apply preset logic
-        val effectiveBlockInterstitials = when (preset) {
-            "aggressive" -> true
-            "recommended" -> true
-            else -> blockInterstitials == true
-        }
-        val effectiveBlockBanners = when (preset) {
-            "aggressive" -> true
-            "recommended" -> true
-            else -> blockBanners == true
-        }
-        val effectiveBlockAppOpen = when (preset) {
-            "aggressive" -> true
-            "recommended" -> true
-            else -> blockAppOpen == true
-        }
-        val effectiveBlockMRec = when (preset) {
-            "aggressive" -> true
-            "recommended" -> true
-            else -> blockMRec == true
-        }
-        val effectiveBlockRewarded = when (preset) {
-            "aggressive" -> true
-            "recommended" -> false
-            else -> blockRewarded == true
-        }
-        val effectiveBlockNative = when (preset) {
-            "aggressive" -> true
-            "recommended" -> true
-            else -> blockNative == true
-        }
-
-        if (effectiveBlockRewarded && preset == "recommended") {
-            detectionLogger.info("No Ads: Block Rewarded is off in Recommended preset  -  use Ads Free Rewards to keep rewarded progress working")
-        }
+        val effectiveBlockInterstitials = blockInterstitials == true
+        val effectiveBlockBanners = blockBanners == true
+        val effectiveBlockAppOpen = blockAppOpen == true
+        val effectiveBlockMRec = blockMRec == true
+        val effectiveBlockRewarded = blockRewarded == true
+        val effectiveBlockNative = blockNative == true
 
         val hasMaxUnity = ShowInterstitialFingerprint.methodOrNull != null ||
             ShowAppOpenAdFingerprint.methodOrNull != null ||
@@ -652,7 +604,7 @@ val noAdsPatch = bytecodePatch(
         if (totalPatched == 0) {
             detectionLogger.warning("No Ads: no patchable ad methods found for selected options. Try enabling more categories or the app uses an unsupported SDK (check log for detected SDKs).")
         } else {
-            detectionLogger.info("No Ads: patched $totalPatched method(s) in total  -  preset: $preset, interstitials=$effectiveBlockInterstitials, banners=$effectiveBlockBanners, appOpen=$effectiveBlockAppOpen, mrec=$effectiveBlockMRec, rewarded=$effectiveBlockRewarded, native=$effectiveBlockNative")
+            detectionLogger.info("No Ads: patched $totalPatched method(s) in total  -  interstitials=$effectiveBlockInterstitials, banners=$effectiveBlockBanners, appOpen=$effectiveBlockAppOpen, mrec=$effectiveBlockMRec, rewarded=$effectiveBlockRewarded, native=$effectiveBlockNative")
         }
     }
 }

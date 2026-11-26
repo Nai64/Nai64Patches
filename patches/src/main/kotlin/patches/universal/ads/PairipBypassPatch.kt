@@ -1,7 +1,6 @@
 package patches.universal.ads
 
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
-import app.morphe.patcher.patch.booleanOption
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.patch.resourcePatch
 import com.android.tools.smali.dexlib2.Opcode
@@ -16,34 +15,10 @@ import patches.universal.manifest.applicationOrNull
 @Suppress("unused")
 val pairipBypassPatch = bytecodePatch(
     name = "Pairip Bypass",
-    description = "Bypass app protection so the patched app can start.",
+    description = "Very crucial patch if the game downloaded from Play Store.",
     default = false,
 ) {
     category("Featured")
-    val localInstallerChecks by booleanOption(
-        key = "localInstallerChecks",
-        default = true,
-        title = "Local installer checks",
-        description = "Spoof checks that verify which installer installed the app.",
-    )
-    val storeSpoofChecks by booleanOption(
-        key = "storeSpoofChecks",
-        default = true,
-        title = "Play Store install spoof",
-        description = "Report Play Store installation (integrated Spoof Play Store Install Source).",
-    )
-    val startupLauncherChecks by booleanOption(
-        key = "startupLauncherChecks",
-        default = true,
-        title = "StartupLauncher checks",
-        description = "Bypass both PairIP StartupLauncher.launch and StartupLauncher.pairip entry points.",
-    )
-    val disableFirebase by booleanOption(
-        key = "disableFirebase",
-        default = true,
-        title = "Disable Firebase",
-        description = "Add Firebase manifest switches that stop Analytics, Messaging, Crashlytics and Performance from auto-initializing, and remove the measurement init provider, receiver and services. For apps that crash at startup in ScionFrontendApi (broken Dynamite loading).",
-    )
 
     // -- Strategy 8: Firebase disable + measurement removal (internal resource patch) --
     // Merged from Disable Firebase Auto-Init: manifest switches first, then
@@ -56,10 +31,6 @@ val pairipBypassPatch = bytecodePatch(
         category("Misc")
         execute {
             val logger = Logger.getLogger(this::class.java.name)
-            if (disableFirebase != true) {
-                logger.info("Firebase cleanup disabled by strategy selection")
-                return@execute
-            }
 
             val switches = mapOf(
                 "firebase_analytics_collection_enabled" to "false",
@@ -142,7 +113,7 @@ val pairipBypassPatch = bytecodePatch(
 
         // -- Strategy 1: Local installer check --
         // Report a successful local installer check.
-        if (localInstallerChecks == true) PerformLocalInstallerCheckFingerprint.methodOrNull?.let {
+        PerformLocalInstallerCheckFingerprint.methodOrNull?.let {
             it.addInstructions(0, listOf(
                 BuilderInstruction11n(Opcode.CONST_4, 0, 1),
                 BuilderInstruction11x(Opcode.RETURN, 0),
@@ -154,63 +125,61 @@ val pairipBypassPatch = bytecodePatch(
         // Integrated from Spoof Play Store Install Source: report Play Store
         // installation. Only the first matching spoof strategy applies.
         var spoofName: String? = null
-        if (storeSpoofChecks == true) {
-            GenericBooleanInstallerCheckFingerprint.methodOrNull?.let {
-                it.addInstructions(0, listOf(
-                    BuilderInstruction11n(Opcode.CONST_4, 0, 1),
-                    BuilderInstruction11x(Opcode.RETURN, 0),
-                ))
-                logger.info("Applied generic boolean Play Store spoof")
-                spoofName = "generic boolean spoof"
-            }
+        GenericBooleanInstallerCheckFingerprint.methodOrNull?.let {
+            it.addInstructions(0, listOf(
+                BuilderInstruction11n(Opcode.CONST_4, 0, 1),
+                BuilderInstruction11x(Opcode.RETURN, 0),
+            ))
+            logger.info("Applied generic boolean Play Store spoof")
+            spoofName = "generic boolean spoof"
+        }
 
-            if (spoofName == null) GenericStringInstallerCheckFingerprint.methodOrNull?.let {
-                it.addInstructions(0, """
-                    const-string v0, "com.android.vending"
-                    return-object v0
-                """.trimIndent())
-                logger.info("Applied Play Store installer source spoof")
-                spoofName = "installer source"
-            }
+        if (spoofName == null) GenericStringInstallerCheckFingerprint.methodOrNull?.let {
+            it.addInstructions(0, """
+                const-string v0, "com.android.vending"
+                return-object v0
+            """.trimIndent())
+            logger.info("Applied Play Store installer source spoof")
+            spoofName = "installer source"
+        }
 
-            if (spoofName == null) FallbackBooleanInstallerCheckFingerprint.methodOrNull?.let {
-                it.addInstructions(0, listOf(
-                    BuilderInstruction11n(Opcode.CONST_4, 0, 1),
-                    BuilderInstruction11x(Opcode.RETURN, 0),
-                ))
-                logger.info("Applied fallback boolean Play Store spoof")
-                spoofName = "fallback boolean spoof"
-            }
+        if (spoofName == null) FallbackBooleanInstallerCheckFingerprint.methodOrNull?.let {
+            it.addInstructions(0, listOf(
+                BuilderInstruction11n(Opcode.CONST_4, 0, 1),
+                BuilderInstruction11x(Opcode.RETURN, 0),
+            ))
+            logger.info("Applied fallback boolean Play Store spoof")
+            spoofName = "fallback boolean spoof"
+        }
 
-            if (spoofName == null) FallbackStringInstallerCheckFingerprint.methodOrNull?.let {
-                it.addInstructions(0, """
-                    const-string v0, "com.android.vending"
-                    return-object v0
-                """.trimIndent())
-                logger.info("Applied fallback String Play Store spoof")
-                spoofName = "fallback installer source"
-            }
+        if (spoofName == null) FallbackStringInstallerCheckFingerprint.methodOrNull?.let {
+            it.addInstructions(0, """
+                const-string v0, "com.android.vending"
+                return-object v0
+            """.trimIndent())
+            logger.info("Applied fallback String Play Store spoof")
+            spoofName = "fallback installer source"
         }
 
         // -- Strategy 6: StartupLauncher.launch --
         // Disable the PairIP startup dispatcher.
-        if (startupLauncherChecks == true) PairipStartupLauncherLaunchFingerprint.methodOrNull?.let {
+        PairipStartupLauncherLaunchFingerprint.methodOrNull?.let {
             it.addInstructions(0, "return-void")
             logger.info("Applied PairIP StartupLauncher.launch bypass")
         }
 
         // -- Strategy 7: StartupLauncher.pairip --
         // Disable the PairIP dispatcher entry point.
-        if (startupLauncherChecks == true) PairipStartupLauncherPairipFingerprint.methodOrNull?.let {
+        PairipStartupLauncherPairipFingerprint.methodOrNull?.let {
             it.addInstructions(0, "return-void")
             logger.info("Applied PairIP StartupLauncher.pairip bypass")
         }
 
         val applied = buildList {
-            if (localInstallerChecks == true && PerformLocalInstallerCheckFingerprint.methodOrNull != null) add("performLocalInstallerCheck")
-            if (spoofName != null) add(spoofName!!)
-            if (startupLauncherChecks == true && PairipStartupLauncherLaunchFingerprint.methodOrNull != null) add("StartupLauncher.launch")
-            if (startupLauncherChecks == true && PairipStartupLauncherPairipFingerprint.methodOrNull != null) add("StartupLauncher.pairip")
+            if (PerformLocalInstallerCheckFingerprint.methodOrNull != null) add("performLocalInstallerCheck")
+            if (spoofName != null) add(spoofName)
+            if (PairipStartupLauncherLaunchFingerprint.methodOrNull != null) add("StartupLauncher.launch")
+            if (PairipStartupLauncherPairipFingerprint.methodOrNull != null) add("StartupLauncher.pairip")
         }
         if (applied.isEmpty()) {
             logger.warning("No Pairip license methods found. No changes applied.")

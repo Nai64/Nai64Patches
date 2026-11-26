@@ -18,24 +18,10 @@ import patches.universal.ads.util.DiscordPromo
 @Suppress("unused")
 val adsFreeRewardsPatch = bytecodePatch(
     name = "Ads Free Rewards",
-    description = "Get rewards without watching ads. Combine with No Ads for other formats, but keep No Ads' rewarded block off.",
+    description = "Get rewards without watching ads.",
     default = false,
 ) {
     category("Featured")
-    val rewardStrategy by stringOption(
-        key = "rewardStrategy",
-        default = "auto",
-        title = "Reward Strategy",
-        description = "Which ad-network integration to patch. 'Auto' covers every supported network",
-        values = mapOf(
-            "Auto (all networks)" to "auto",
-            "AppLovin MAX" to "max",
-            "Unity Ads" to "unityAds",
-            "ironSource / LevelPlay" to "ironSource",
-            "RuStore / VK MyTarget" to "rustore",
-            "Huawei Ads Kit / Petal Ads" to "huawei",
-        ),
-    )
     val rewardMultiplier by stringOption(
         key = "rewardMultiplier",
         default = "1",
@@ -52,8 +38,6 @@ val adsFreeRewardsPatch = bytecodePatch(
         val instantReward: Boolean? = true
         val fakeAdAvailability: Boolean? = true
         val skipAdCountdown: Boolean? = true
-        logger.info("Ads Free Rewards: strategy=$rewardStrategy")
-
         val requested = (rewardMultiplier ?: "1").trim()
         val parsed = requested.toIntOrNull()
         val multiplier = when {
@@ -78,7 +62,7 @@ val adsFreeRewardsPatch = bytecodePatch(
         }
         val killed = skipAdCountdowns(logger)
         logger.info("Ads Free Rewards: removed ad countdown in $killed place(s)")
-        applyAdsFreeRewardsV1190(logger, rewardStrategy, instantReward, multiplier)
+        applyAdsFreeRewardsV1190(logger, instantReward, multiplier)
         val faked = forceAdAvailability(logger)
         if (faked > 0) logger.info("Ads Free Rewards: faked availability for $faked SDK check(s)")
     }
@@ -183,15 +167,14 @@ private fun BytecodePatchContext.forceAdAvailability(logger: Logger): Int {
     return patched
 }
 
-private fun BytecodePatchContext.applyAdsFreeRewardsV1190(logger: Logger, rewardStrategy: String?, instantReward: Boolean?, multiplier: Int) {
-    val strategy = rewardStrategy
-    val useMax = strategy == "auto" || strategy == "max"
-    val useUnityAds = strategy == "auto" || strategy == "unityAds"
-    val useIronSource = strategy == "auto" || strategy == "ironSource"
-    val useRustore = strategy == "auto" || strategy == "rustore"
-    val useHuawei = strategy == "auto" || strategy == "huawei"
+private fun BytecodePatchContext.applyAdsFreeRewardsV1190(logger: Logger, instantReward: Boolean?, multiplier: Int) {
+    val useMax = true
+    val useUnityAds = true
+    val useIronSource = true
+    val useRustore = true
+    val useHuawei = true
 
-    logger.info("Ads Free Rewards: strategy=$strategy instantReward=$instantReward fakeAdAvailability=true rewardMultiplier=$multiplier")
+    logger.info("Ads Free Rewards: instantReward=$instantReward fakeAdAvailability=true rewardMultiplier=$multiplier")
 
     val hasMaxUnity = ShowRewardedAdFingerprint.methodOrNull != null &&
         IsRewardedAdReadyFingerprint.methodOrNull != null
@@ -222,7 +205,7 @@ private fun BytecodePatchContext.applyAdsFreeRewardsV1190(logger: Logger, reward
     logger.info("Ads Free Rewards: detected SDKs  -  MAX Unity=$hasMaxUnity native MAX=$hasNativeMax UnityAds=$hasUnityAds UnityAdsV4=$hasUnityAdsV4 LevelPlay=$hasLevelPlay ironSourceBridge=$hasIronSourceUnityBridge MyTarget=$hasMyTarget Yandex=$hasYandexUnityRewarded Huawei=$hasHuawei AdMob=$hasAdMob InMobi=$hasInMobi InMobiRewarded=$hasInMobiRewarded IronSourceAds=$hasIronSourceAds MADS=$hasMads")
 
     if (!hasMaxUnity && !hasNativeMax && !hasUnityAds && !hasUnityAdsV4 && !hasLevelPlay && !hasIronSourceUnityBridge && !hasMyTarget && !hasYandexUnityRewarded && !hasHuawei && !hasAdMob && !hasInMobiRewarded && !hasIronSourceAds && !hasMads) {
-        logger.warning("Ads Free Rewards: no supported ad SDK found for reward strategy $strategy  -  no changes applied")
+        logger.warning("Ads Free Rewards: no supported ad SDK found, no changes applied")
         return
     }
 
@@ -252,8 +235,7 @@ private fun BytecodePatchContext.applyAdsFreeRewardsV1190(logger: Logger, reward
             logger.warning("Ads Free Rewards: Huawei show class not found  -  skipping")
         }
     } else {
-        if (!useHuawei) logger.info("Ads Free Rewards: Huawei strategy disabled by rewardStrategy=$strategy")
-        else if (!hasHuawei) logger.info("Ads Free Rewards: Huawei SDK not detected  -  skipping")
+        if (!hasHuawei) logger.info("Ads Free Rewards: Huawei SDK not detected  -  skipping")
         else logger.info("Ads Free Rewards: Huawei skipped (instantReward=$instantReward)")
     }
 
