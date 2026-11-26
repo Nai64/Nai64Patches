@@ -1,3 +1,9 @@
+## [1.54.0](https://github.com/Nai64/Nai64Patches/compare/1.53.1...1.54.0) (2026-11-26)
+
+### New Features
+
+* added Spirit Detective patches ([6f5d9d7](https://github.com/Nai64/Nai64Patches/commit/6f5d9d787c484dfda96e6a03e52479e4f6004a66))
+
 ## [1.53.1](https://github.com/Nai64/Nai64Patches/compare/1.53.0...1.53.1) (2026-11-26)
 
 ### Bug Fixes
