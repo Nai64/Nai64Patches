@@ -17,7 +17,7 @@ pluginManagement {
 }
 
 plugins {
-    id("app.morphe.patches") version "1.3.4"
+    id("app.morphe.patches") version "2.1.2"
 }
 
 dependencyResolutionManagement {
@@ -27,10 +27,10 @@ dependencyResolutionManagement {
     }
 }
 
-settings {
+configure<app.morphe.patches.gradle.SettingsExtension> {
     patchesProjectPath = ":patches"
     extensions {
         projectsPath = ":extensions"
-        proguardFiles("proguard-rules.pro")
+        proguardFiles(rootProject.projectDir.resolve("extensions/extension/proguard-rules.pro").toString())
     }
 }

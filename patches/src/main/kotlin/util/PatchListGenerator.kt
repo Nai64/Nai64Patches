@@ -33,7 +33,7 @@ fun main() {
 }
 
 @Suppress("DEPRECATION")
-private fun generatePatchList(version: String, patches: Set<Patch<*>>) {
+private fun generatePatchList(version: String, patches: Set<Patch>) {
     val listJson = File("../patches-list.json")
 
     val patchOrder = listOf(
@@ -67,6 +67,7 @@ private fun generatePatchList(version: String, patches: Set<Patch<*>>) {
                     apkFileType = compat.apkFileType?.name,
                     appIconColor = compat.appIconColor?.let { "#%06X".format(it) },
                     signatures = compat.signatures,
+                    formFactor = compat.formFactor?.name,
                     targets = compat.targets.map { target ->
                         JsonCompatibility.Target(
                             version = target.version,
@@ -140,6 +141,7 @@ private class JsonCompatibility(
     val apkFileType: String?,
     val appIconColor: String?,
     val signatures: Set<String>?,
+    val formFactor: String?,
     val targets: List<Target>,
 ) {
     class Target(
