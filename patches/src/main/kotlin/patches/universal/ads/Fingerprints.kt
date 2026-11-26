@@ -1,6 +1,8 @@
 package patches.universal.ads
 
 import app.morphe.patcher.Fingerprint
+import app.morphe.patcher.StringComparisonType
+import app.morphe.patcher.string
 import com.android.tools.smali.dexlib2.AccessFlags
 
 internal object ShowRewardedAdFingerprint : Fingerprint(
@@ -120,28 +122,28 @@ internal object GenericBooleanInstallerCheckFingerprint : Fingerprint(
     accessFlags = listOf(AccessFlags.PRIVATE),
     returnType = "Z",
     parameters = emptyList(),
-    strings = listOf("com.android.vending"),
+    strings = listOf(string("com.android.vending", StringComparisonType.CONTAINS)),
 )
 
 internal object GenericStringInstallerCheckFingerprint : Fingerprint(
     accessFlags = listOf(AccessFlags.PRIVATE),
     returnType = "Ljava/lang/String;",
     parameters = emptyList(),
-    strings = listOf("com.android.vending"),
+    strings = listOf(string("com.android.vending", StringComparisonType.CONTAINS)),
 )
 
 internal object FallbackBooleanInstallerCheckFingerprint : Fingerprint(
     accessFlags = listOf(AccessFlags.PRIVATE),
     returnType = "Z",
     parameters = emptyList(),
-    strings = listOf("com.android.vending"),
+    strings = listOf(string("com.android.vending", StringComparisonType.CONTAINS)),
 )
 
 internal object FallbackStringInstallerCheckFingerprint : Fingerprint(
     accessFlags = listOf(AccessFlags.PRIVATE),
     returnType = "Ljava/lang/String;",
     parameters = emptyList(),
-    strings = listOf("com.android.vending"),
+    strings = listOf(string("com.android.vending", StringComparisonType.CONTAINS)),
 )
 
 // -- Amazon Appstore availability fingerprints --
@@ -151,25 +153,25 @@ internal object FallbackStringInstallerCheckFingerprint : Fingerprint(
 internal object AmazonVeneziaBooleanAvailabilityFingerprint : Fingerprint(
     returnType = "Z",
     parameters = emptyList(),
-    strings = listOf("com.amazon.venezia"),
+    strings = listOf(string("com.amazon.venezia", StringComparisonType.CONTAINS)),
 )
 
 internal object AmazonVeneziaStringAvailabilityFingerprint : Fingerprint(
     returnType = "Ljava/lang/String;",
     parameters = emptyList(),
-    strings = listOf("com.amazon.venezia"),
+    strings = listOf(string("com.amazon.venezia", StringComparisonType.CONTAINS)),
 )
 
 internal object AmazonMarketplaceBooleanAvailabilityFingerprint : Fingerprint(
     returnType = "Z",
     parameters = emptyList(),
-    strings = listOf("com.amazon.device.marketplace"),
+    strings = listOf(string("com.amazon.device.marketplace", StringComparisonType.CONTAINS)),
 )
 
 internal object AmazonMarketplaceStringAvailabilityFingerprint : Fingerprint(
     returnType = "Ljava/lang/String;",
     parameters = emptyList(),
-    strings = listOf("com.amazon.device.marketplace"),
+    strings = listOf(string("com.amazon.device.marketplace", StringComparisonType.CONTAINS)),
 )
 
 internal object PairipSignatureCheckVerifyIntegrityFingerprint : Fingerprint(
@@ -328,40 +330,65 @@ internal object HuaweiSplashAdLoadFingerprint : Fingerprint(
 )
 
 // -- StartApp / MoPub / Chartboost / InMobi / Mintegral (obfuscated fallback via strings) --
+//
+// These fingerprints detect an SDK by substrings of its literals, so they use CONTAINS filters.
+// Raw strings in `strings` are exact matches since patcher 2.0.0.
 
 internal object StartAppAdShowFingerprint : Fingerprint(
     returnType = "V",
-    strings = listOf("StartAppSDK", "com.startapp"),
+    strings = listOf(
+        string("StartAppSDK", StringComparisonType.CONTAINS),
+        string("com.startapp", StringComparisonType.CONTAINS),
+    ),
 )
 
 internal object MoPubInterstitialShowFingerprint : Fingerprint(
     returnType = "V",
-    strings = listOf("com.mopub", "MoPubInterstitial"),
+    strings = listOf(
+        string("com.mopub", StringComparisonType.CONTAINS),
+        string("MoPubInterstitial", StringComparisonType.CONTAINS),
+    ),
 )
 
 internal object ChartboostShowInterstitialFingerprint : Fingerprint(
     returnType = "V",
-    strings = listOf("com.chartboost", "Chartboost"),
+    strings = listOf(
+        string("com.chartboost", StringComparisonType.CONTAINS),
+        string("Chartboost", StringComparisonType.CONTAINS),
+    ),
 )
 
 internal object InMobiInterstitialShowFingerprint : Fingerprint(
     returnType = "V",
-    strings = listOf("com.inmobi", "IMInterstitial"),
+    strings = listOf(
+        string("com.inmobi", StringComparisonType.CONTAINS),
+        string("IMInterstitial", StringComparisonType.CONTAINS),
+    ),
 )
 
 internal object InMobiRewardedShowFingerprint : Fingerprint(
     returnType = "V",
-    strings = listOf("com.inmobi", "InMobiInterstitial", "Rewarded"),
+    strings = listOf(
+        string("com.inmobi", StringComparisonType.CONTAINS),
+        string("InMobiInterstitial", StringComparisonType.CONTAINS),
+        string("Rewarded", StringComparisonType.CONTAINS),
+    ),
 )
 
 internal object InMobiIsReadyFingerprint : Fingerprint(
     returnType = "Z",
-    strings = listOf("com.inmobi", "isReady"),
+    strings = listOf(
+        string("com.inmobi", StringComparisonType.CONTAINS),
+        string("isReady", StringComparisonType.CONTAINS),
+    ),
 )
 
 internal object MintegralInterstitialShowFingerprint : Fingerprint(
     returnType = "V",
-    strings = listOf("com.mintegral", "MTGInterstitial"),
+    strings = listOf(
+        string("com.mintegral", StringComparisonType.CONTAINS),
+        string("MTGInterstitial", StringComparisonType.CONTAINS),
+    ),
 )
 
 // -- AdMob Native --
@@ -800,7 +827,10 @@ internal object IronSourceLevelPlayFullScreenShowAdFingerprint : Fingerprint(
 
 internal object IronSourceAdsRewardedShowFingerprint : Fingerprint(
     returnType = "V",
-    strings = listOf("com.unity3d.ironsourceads", "IronSourceAds"),
+    strings = listOf(
+        string("com.unity3d.ironsourceads", StringComparisonType.CONTAINS),
+        string("IronSourceAds", StringComparisonType.CONTAINS),
+    ),
 )
 
 // Precise ironSourceAds Unity wrapper (com.unity3d.ironsourceads.rewarded.RewardedAd).
@@ -1136,7 +1166,10 @@ internal object MyTargetInitFingerprint : Fingerprint(
 internal object StartAppInitFingerprint : Fingerprint(
     name = "init",
     returnType = "V",
-    strings = listOf("com.startapp", "StartAppSDK"),
+    strings = listOf(
+        string("com.startapp", StringComparisonType.CONTAINS),
+        string("StartAppSDK", StringComparisonType.CONTAINS),
+    ),
 )
 
 internal object ChartboostInitFingerprint : Fingerprint(
@@ -1154,7 +1187,7 @@ internal object InMobiInitFingerprint : Fingerprint(
 internal object MintegralInitFingerprint : Fingerprint(
     name = "init",
     returnType = "V",
-    strings = listOf("com.mintegral"),
+    strings = listOf(string("com.mintegral", StringComparisonType.CONTAINS)),
 )
 
 // -- Ad "available / ready" gates (Fake Ad Availability patch) --
