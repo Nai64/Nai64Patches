@@ -15,6 +15,40 @@ import patches.universal.ads.util.DiscordPromo
 
 private val logger = Logger.getLogger("patches.universal.ads.NoAdsPatch")
 
+/**
+ * Declared values of a [Fingerprint], read from its private fields.
+ *
+ * Morphe Patcher 2.x made the declared fingerprint values internal, because patches are expected to
+ * work with the matched method. The fallback scans below still need the declared signature when a
+ * fingerprint does not match, so read it reflectively. Missing fields fail soft, which disables the
+ * fallback scan instead of failing the whole patch.
+ */
+private object DeclaredFingerprint {
+    private fun field(name: String) =
+        runCatching { Fingerprint::class.java.getDeclaredField(name).apply { isAccessible = true } }
+            .getOrNull()
+
+    private val nameField = field("name")
+    private val returnTypeField = field("declaredReturnType")
+    private val parametersField = field("declaredParameters")
+    private val definingClassField = field("declaredDefiningClass")
+
+    fun name(fingerprint: Fingerprint): String? =
+        nameField?.let { runCatching { it.get(fingerprint) as? String }.getOrNull() }
+
+    fun returnType(fingerprint: Fingerprint): String? =
+        invoke(fingerprint, returnTypeField)?.toString()
+
+    fun parameters(fingerprint: Fingerprint): List<String> =
+        (invoke(fingerprint, parametersField) as? List<*>)?.mapNotNull { it?.toString() } ?: emptyList()
+
+    fun definingClass(fingerprint: Fingerprint): String? =
+        invoke(fingerprint, definingClassField)?.toString()
+
+    private fun invoke(fingerprint: Fingerprint, field: java.lang.reflect.Field?): Any? =
+        field?.let { runCatching { (it.get(fingerprint) as? Function0<*>)?.invoke() }.getOrNull() }
+}
+
 private fun BytecodePatchContext.injectOrSkip(
     fingerprint: Fingerprint,
     instructions: String,
@@ -22,7 +56,7 @@ private fun BytecodePatchContext.injectOrSkip(
     val method = fingerprint.methodOrNull ?: return
     if (method.implementation == null) {
         logger.warning(
-            "No Ads: skipping ${fingerprint.name}: method has no implementation",
+            "No Ads: skipping ${method.name} in ${method.definingClass}: method has no implementation",
         )
         return
     }
@@ -33,10 +67,10 @@ private fun BytecodePatchContext.returnVoid(fingerprint: Fingerprint) =
     injectOrSkip(fingerprint, "return-void")
 
 private fun BytecodePatchContext.patchVoid(fingerprint: Fingerprint): Int {
-    val name = fingerprint.name ?: return 0
-    val params = fingerprint.parameters ?: emptyList()
-    val ret = fingerprint.returnType ?: return 0
-    val target = fingerprint.definingClass
+    val name = DeclaredFingerprint.name(fingerprint) ?: return 0
+    val params = DeclaredFingerprint.parameters(fingerprint)
+    val ret = DeclaredFingerprint.returnType(fingerprint) ?: return 0
+    val target = DeclaredFingerprint.definingClass(fingerprint)
 
     // Fast path: exact match has implementation
     val exact = fingerprint.methodOrNull
@@ -84,10 +118,10 @@ private fun BytecodePatchContext.patchVoid(fingerprint: Fingerprint): Int {
 }
 
 private fun BytecodePatchContext.patchReturnFalse(fingerprint: Fingerprint): Int {
-    val name = fingerprint.name ?: return 0
-    val params = fingerprint.parameters ?: emptyList()
-    val ret = fingerprint.returnType ?: return 0
-    val target = fingerprint.definingClass
+    val name = DeclaredFingerprint.name(fingerprint) ?: return 0
+    val params = DeclaredFingerprint.parameters(fingerprint)
+    val ret = DeclaredFingerprint.returnType(fingerprint) ?: return 0
+    val target = DeclaredFingerprint.definingClass(fingerprint)
 
     val exact = fingerprint.methodOrNull
     if (exact != null && exact.implementation != null) {
@@ -130,16 +164,16 @@ private fun BytecodePatchContext.patchWith(fingerprint: Fingerprint, smali: Stri
         if ((fingerprint === MaxInterstitialAdShowAdFingerprint || fingerprint === MaxAppOpenAdShowAdFingerprint || fingerprint === MaxRewardedAdShowAdFingerprint) && rc < 7) {
             try {
                 exact.cloneParameters().addInstructions(0, smali)
-                logger.info("No Ads: patched ${fingerprint.name} via clone (low regs $rc) in ${exact.definingClass}")
+                logger.info("No Ads: patched ${exact.name} via clone (low regs $rc) in ${exact.definingClass}")
                 return 1
             } catch (e: Exception) {
-                logger.warning("No Ads: clone failed for ${fingerprint.name}: ${e.message}")
+                logger.warning("No Ads: clone failed for ${exact.name}: ${e.message}")
             }
-            logger.warning("No Ads: skipping ${fingerprint.name} in ${exact.definingClass}: register count $rc < 7")
+            logger.warning("No Ads: skipping ${exact.name} in ${exact.definingClass}: register count $rc < 7")
             return 0
         }
         exact.addInstructions(0, smali)
-        logger.info("No Ads: patched ${fingerprint.name} (exact 1 impl)")
+        logger.info("No Ads: patched ${exact.name} (exact 1 impl)")
         return 1
     }
     // fallback scan for these is risky (they need exact class reflection), skip
