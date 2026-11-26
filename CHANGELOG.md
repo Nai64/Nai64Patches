@@ -1,3 +1,11 @@
+## [1.53.1](https://github.com/Nai64/Nai64Patches/compare/1.53.0...1.53.1) (2026-11-26)
+
+### Bug Fixes
+
+* declare vivo compatibility with Compatibility ([3eda6e7](https://github.com/Nai64/Nai64Patches/commit/3eda6e702ba941725c5a23e41e04f4535a88f63e))
+* match fingerprint strings by substring ([36944a2](https://github.com/Nai64/Nai64Patches/commit/36944a2b0722af7acc69a9df49b6a21b1cf1abc4))
+* read fingerprint declarations reflectively ([a9abd54](https://github.com/Nai64/Nai64Patches/commit/a9abd54a755abd6af45dd50d6a68115a25eeb43b))
+
 ## [1.53.0](https://github.com/Nai64/Nai64Patches/compare/1.52.1...1.53.0) (2026-11-25)
 
 ### Bug Fixes
