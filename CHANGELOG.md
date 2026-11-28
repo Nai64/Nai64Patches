@@ -1,3 +1,9 @@
+## [1.55.1](https://github.com/Nai64/Nai64Patches/compare/1.55.0...1.55.1) (2026-11-28)
+
+### Bug Fixes
+
+* remove patch and option descriptions ([15a95f3](https://github.com/Nai64/Nai64Patches/commit/15a95f32edce3d86fa74eebe4f62e568ee3b5209))
+
 ## [1.55.0](https://github.com/Nai64/Nai64Patches/compare/1.54.0...1.55.0) (2026-11-28)
 
 ### New Features
