@@ -4,7 +4,7 @@
   "patches": [
     {
       "name": "Unlock Premium",
-      "description": "Unlock premium features and remove paywalls.",
+      "description": null,
       "default": false,
       "category": null,
       "dependencies": [],
@@ -32,7 +32,7 @@
         {
           "key": "iapNativeRules",
           "title": "Native byte rules",
-          "description": "One rule per line as FROM => TO using hex bytes. Use ?? in FROM for bytes that vary. Lines starting with # are ignored.",
+          "description": null,
           "required": true,
           "type": "kotlin.String",
           "default": "",
@@ -41,7 +41,7 @@
         {
           "key": "iapNativeLibraries",
           "title": "Native libraries",
-          "description": "Comma separated library paths to patch. Leave empty to scan every .so file under lib/.",
+          "description": null,
           "required": false,
           "type": "kotlin.String",
           "default": "",

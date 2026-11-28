@@ -17,7 +17,6 @@ import patches.universal.ads.util.DiscordPromo
 @Suppress("unused")
 val unlockPremiumPatch = bytecodePatch(
     name = "Unlock Premium",
-    description = "Unlock premium features and remove paywalls.",
     default = false,
 ) {
     val extraKeys by stringOption(

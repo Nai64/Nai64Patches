@@ -75,14 +75,12 @@ val freeInAppPurchasesPatch = rawResourcePatch(
         key = "iapNativeRules",
         title = "Native byte rules",
         default = "",
-        description = "One rule per line as FROM => TO using hex bytes. Use ?? in FROM for bytes that vary. Lines starting with # are ignored.",
         required = true,
     )
     val libraryFilter by stringOption(
         key = "iapNativeLibraries",
         title = "Native libraries",
         default = "",
-        description = "Comma separated library paths to patch. Leave empty to scan every .so file under lib/.",
         required = false,
     )
 
