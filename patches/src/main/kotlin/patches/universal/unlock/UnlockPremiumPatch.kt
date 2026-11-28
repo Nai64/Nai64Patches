@@ -20,7 +20,6 @@ val unlockPremiumPatch = bytecodePatch(
     description = "Unlock premium features and remove paywalls.",
     default = false,
 ) {
-    category("Featured")
     val extraKeys by stringOption(
         title = "Extra keys",
         default = "",

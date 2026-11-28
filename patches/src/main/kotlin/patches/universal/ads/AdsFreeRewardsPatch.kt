@@ -21,7 +21,6 @@ val adsFreeRewardsPatch = bytecodePatch(
     description = "Get rewards without watching ads.",
     default = false,
 ) {
-    category("Featured")
     val rewardMultiplier by stringOption(
         key = "rewardMultiplier",
         default = "1",

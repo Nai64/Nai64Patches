@@ -18,8 +18,6 @@ val pairipBypassPatch = bytecodePatch(
     description = "Very crucial patch if the game downloaded from Play Store.",
     default = false,
 ) {
-    category("Featured")
-
     // -- Strategy 8: Firebase disable + measurement removal (internal resource patch) --
     // Merged from Disable Firebase Auto-Init: manifest switches first, then
     // removal of the init provider (boots FirebaseApp, analytics connector

@@ -184,7 +184,6 @@ val noAdsPatch = bytecodePatch(
     name = "No Ads",
     default = false,
 ) {
-    category("Featured")
     val blockInterstitials by booleanOption(
         title = "Block Interstitials",
         default = true,

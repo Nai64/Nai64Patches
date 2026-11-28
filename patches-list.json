@@ -6,7 +6,7 @@
       "name": "Unlock Premium",
       "description": "Unlock premium features and remove paywalls.",
       "default": false,
-      "category": "Featured",
+      "category": null,
       "dependencies": [],
       "compatiblePackages": null,
       "options": [
@@ -53,7 +53,7 @@
       "name": "No Ads",
       "description": null,
       "default": false,
-      "category": "Featured",
+      "category": null,
       "dependencies": [],
       "compatiblePackages": null,
       "options": [
@@ -117,7 +117,7 @@
       "name": "Ads Free Rewards",
       "description": "Get rewards without watching ads.",
       "default": false,
-      "category": "Featured",
+      "category": null,
       "dependencies": [],
       "compatiblePackages": null,
       "options": [
@@ -136,7 +136,7 @@
       "name": "Pairip Bypass",
       "description": "Very crucial patch if the game downloaded from Play Store.",
       "default": false,
-      "category": "Featured",
+      "category": null,
       "dependencies": [
         "ResourcePatch"
       ],
