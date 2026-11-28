@@ -9,10 +9,10 @@
 
 # Nai's Patches
 
-A curated collection of Morphe patches that tune, unlock and declutter Android apps and games. This source ships the 5 Featured patches: Unlock Premium, Free In-app Purchases, No Ads, Ads Free Rewards and Pairip Bypass.
+A curated collection of Morphe patches for Android apps and games. This source ships 5 Featured patches plus per-title patches for supported games and apps.
 
 > [!NOTE]
-> Looking for the other 430 patches (spoofing, manifest tweaks, telemetry blocks, UI tweaks and more)? Add the companion source **[Nai's Extra Patches](https://github.com/Nai64/Nai64ExtraPatches)** alongside this one.
+> Need spoofing, manifest tweaks, telemetry blocks or UI tweaks? Add the companion source **[Nai's Extra Patches](https://github.com/Nai64/Nai64ExtraPatches)** alongside this one. It ships 432 patches.
 
 </div>
 
@@ -21,7 +21,8 @@ A curated collection of Morphe patches that tune, unlock and declutter Android a
 ![Table of Contents](images/header-table-of-contents.png)
 
 - [Overview](#overview)
-- [Features](#features)
+- [Featured Patches](#features)
+- [Game and App Patches](#games)
 - [How to Use](#how-to-use)
 - [Patch Options](#patch-options)
 - [Tips](#tips)
@@ -34,10 +35,13 @@ A curated collection of Morphe patches that tune, unlock and declutter Android a
 <a name="overview"></a>
 ![Overview](images/header-overview.png)
 
-Nai's Patches is a set of ready made patches built for the [Morphe](https://github.com/MorpheApp) patcher. Each patch targets a common annoyance found in modern Android apps and games: rewarded ad walls, forced splash screens, license popups, root and integrity detection, and locked in app purchases.
+Nai's Patches is a set of ready made patches built for the [Morphe](https://github.com/MorpheApp) patcher. It has two halves:
+
+- **5 Featured patches** that work across most apps: premium unlocks, free purchases, ad blocking, ad-free rewards and Pairip bypass.
+- **Per-title patches** for specific games and apps, split into small independent toggles so you pick exactly what you want.
 
 > [!NOTE]
-> Every patch is optional. Enable only what you need for a given app or game. Most patches work independently, and several can be combined for a cleaner experience.
+> Every patch is optional and off by default. Enable only what you need. Most patches work independently, and several can be combined.
 
 The project is open source and community driven. New patches and fixes land through standard pull requests, and releases are produced automatically.
 
@@ -62,18 +66,59 @@ Add Nai's Patches as a source inside the Morphe patcher.
 <a name="features"></a>
 ![Features](images/header-features.png)
 
-This source ships the 6 Featured patches only.
+## Featured Patches
+
+Five patches that work on most apps and games.
 
 | Patch | What it does |
 | :--- | :--- |
-| Unlock Premium | Unlock premium features and remove paywalls |
-| Free In-app Purchases | Get paid items for free, best for offline games |
-| No Ads | Blocks ads by type, pick what to block |
-| Ads Free Rewards | Get rewards without watching ads |
-| Pairip Bypass | Bypass app protection so the patched app can start |
+| Unlock Premium | Unlocks premium features and removes paywalls |
+| Free In-app Purchases | Grants paid items without charging. Best for offline games |
+| No Ads | Blocks interstitials, banners, app open, MREC and native ads. Rewarded ads stay on by default |
+| Ads Free Rewards | Grants the reward from a rewarded ad without playing it |
+| Pairip Bypass | Defeats Pairip startup protection so a patched app can launch |
 
 > [!TIP]
-> Combine **No Ads** with **Ads Free Rewards** (keep No Ads' rewarded block off) for the quietest session in apps that gate progress behind rewarded ads. For spoofing, manifest tweaks, telemetry blocks and UI tweaks, add **[Nai's Extra Patches](https://github.com/Nai64/Nai64ExtraPatches)**.
+> Combine **No Ads** with **Ads Free Rewards** and leave `Block Rewarded` off. That removes the ad walls while keeping reward gates working. For spoofing, manifest tweaks, telemetry blocks and UI tweaks, add **[Nai's Extra Patches](https://github.com/Nai64/Nai64ExtraPatches)**.
+
+---
+
+<a name="games"></a>
+
+## Game and App Patches
+
+These patches are tied to one package and only show up for that app. All are off by default.
+
+### Spirit Detective
+
+Package `com.ghost.detective.rpg`, tested on 1.01.27.
+
+Eleven independent toggles. Mix and match freely. Each one checks the game's config files by hash before writing, so an unknown game version refuses to patch instead of producing a broken build.
+
+| Patch | What it changes |
+| :--- | :--- |
+| Unlimited Diamonds | Diamond rewards and drops |
+| Unlimited Gold | Gold rewards and drops |
+| Unlimited Armor Shards | Shard rewards and gear sale values, plus 0 shard part upgrades |
+| Unlimited Skill Points | Skill point rewards, plus 0 cost skills |
+| Unlimited Keys | Armory, golden and developer key rewards |
+| Unlimited VIP Points | VIP point rewards |
+| Unlimited Ad-Free Tickets | Ad-free ticket rewards |
+| Unlimited Active Points | Daily activity, active and passive point rewards |
+| Unlimited Materials | Crafting and upgrade material rewards |
+| Free Purchases | Shop and upgrade prices |
+| Free Equipment Upgrades | Equipment, star and collar upgrade materials |
+
+> [!NOTE]
+> The reward patches raise the matching reward to 1,000,000,000. These are client side numbers, not true infinity, and some screens may display them in short form.
+
+### Vivo TWS
+
+Package `com.vivo.vivotws`.
+
+| Patch | What it does |
+| :--- | :--- |
+| Accept any earphones | Shows any paired Bluetooth audio device as a Vivo TWS earphone so it can be selected and connected |
 
 ---
 
@@ -88,23 +133,31 @@ This source ships the 6 Featured patches only.
 > [!IMPORTANT]
 > Always keep a copy of the original APK. If a patched build misbehaves, you can fall back to the unmodified version and try a different combination of patches.
 
-Most patches expose friendly dropdowns or toggles instead of raw text fields, so you rarely need to type anything by hand.
+Most patches expose dropdowns and toggles instead of raw text fields, so you rarely need to type anything by hand.
 
 ---
 
 <a name="patch-options"></a>
 ![Patch Options](images/header-patch-options.png)
 
-Some patches are highly configurable. Expand a section to see its options.
+Some patches are configurable. Expand a section to see its options.
 
 <details>
-<summary><b>Ads Free Rewards</b></summary>
+<summary><b>Unlock Premium</b></summary>
 
 | Option | Type | Default | Notes |
 | :--- | :--- | :--- | :--- |
-| Patch version | Dropdown | 1.19.0 (Current) | Pick a historical implementation, useful when an app only works with an older approach |
-| Reward Strategy | Dropdown | Auto (all networks) | AppLovin MAX, Unity Ads, ironSource or every supported network |
-| Instant reward | Toggle | On | Claim the reward immediately without showing an ad, applies to the current version |
+| Extra keys | Text | Empty | Comma separated SharedPreferences or DataStore keys to treat as premium. Leave empty for the built in list |
+
+</details>
+
+<details>
+<summary><b>Free In-app Purchases</b></summary>
+
+| Option | Type | Default | Notes |
+| :--- | :--- | :--- | :--- |
+| Native byte rules | Text | Empty | One rule per line as `FROM => TO` in hex. Use `??` for bytes that vary. Lines starting with `#` are ignored |
+| Native libraries | Text | Empty | Comma separated `.so` paths. Leave empty to scan every library under `lib/` |
 
 </details>
 
@@ -117,8 +170,24 @@ Some patches are highly configurable. Expand a section to see its options.
 | Block Banners | Toggle | On | Top or bottom banner ads |
 | Block App Open | Toggle | On | Ads shown on app start |
 | Block MREC | Toggle | On | Medium rectangle banner ads |
-| Block Rewarded | Toggle | Off | Rewarded video — disable if you use Ads Free Rewards, otherwise progress gates may break. Enable only to fully remove rewarded ads |
-| Block Native | Toggle | On | Native ads blended into feeds/lists |
+| Block Rewarded | Toggle | Off | Leave off when using Ads Free Rewards, otherwise reward gates can break |
+| Block Native | Toggle | On | Native ads blended into feeds and lists |
+
+</details>
+
+<details>
+<summary><b>Ads Free Rewards</b></summary>
+
+| Option | Type | Default | Notes |
+| :--- | :--- | :--- | :--- |
+| Reward multiplier | Text | 1 | How many times the reward callback runs per ad |
+
+</details>
+
+<details>
+<summary><b>Pairip Bypass</b></summary>
+
+Pairip Bypass has no options. It applies every strategy it can find and reports which ones matched in the patcher log.
 
 </details>
 
@@ -129,7 +198,7 @@ Some patches are highly configurable. Expand a section to see its options.
 
 - Start with a minimal set of patches, then add more only if needed. Smaller changes are easier to debug.
 - If an app crashes after patching, disable the most recent patch you enabled and test again.
-- Use the Patch version option in Ads Free Rewards to roll back to an older implementation when a newer app build stops working.
+- Use `Reward multiplier` in Ads Free Rewards to speed up reward farming.
 - Pairip Bypass helps when a patched app refuses to start on launch.
 - For orientation locks, spoofs and manifest tweaks, add Nai's Extra Patches.
 
@@ -142,7 +211,7 @@ Some patches are highly configurable. Expand a section to see its options.
 ![Warnings](images/header-warnings.png)
 
 > [!WARNING]
-> Patches marked Experimental, such as Pairip Bypass, hook deeper into app internals. They may not work on every app and can cause crashes or visual glitches.
+> Patches that hook app internals, such as Pairip Bypass, may not work on every app and can cause crashes or visual glitches.
 
 > [!CAUTION]
 > Modifying applications can violate the terms of service of the apps you patch. Use these patches only on apps you own, for personal and educational purposes. The authors are not responsible for bans, data loss or other consequences.
@@ -157,15 +226,16 @@ Some patches are highly configurable. Expand a section to see its options.
 ![Compatibility](images/header-compatibility.png)
 
 - Targets Android apps and games packaged as APK or XAPK.
-- Requires the Morphe patcher and a Java runtime.
-- Works best on standard Unity, native and ad SDK based apps.
+- Requires the Morphe patcher. The desktop build also needs a Java runtime.
+- Works best on Unity, native, ad SDK and Cocos2d-js based apps.
 - Patch behavior depends on the exact app build. A patch that works today may need an option tweak after an app update.
+- Per-title patches are locked to the game or app version they were built for. A new version needs an updated patch.
 
 > [!NOTE]
 > Because each app is different, no single configuration fits all titles. Treat the patch list as a toolkit and tune it per app.
 
-- **Compatibility reports (community):** the maintainer does not test every app — search and contribute via [`COMPATIBILITY.md`](COMPATIBILITY.md) and the [Compatibility Report](.github/ISSUE_TEMPLATE/compatibility-report.yml) issue template ([label:compatibility](https://github.com/Nai64/Nai64Patches/issues?q=label%3Acompatibility) issues).
-- **Troubleshooting:** see [`TROUBLESHOOTING.md`](TROUBLESHOOTING.md) — `Got this error? Try enabling x patch.` Common install errors, save-data preservation (`Preserve App Data` / `Keep Data on Uninstall`), Unity/Il2Cpp limits.
+- **Compatibility reports (community):** the maintainer does not test every app. Search and contribute via [`COMPATIBILITY.md`](COMPATIBILITY.md) and the [Compatibility Report](.github/ISSUE_TEMPLATE/compatibility-report.yml) issue template ([label:compatibility](https://github.com/Nai64/Nai64Patches/issues?q=label%3Acompatibility) issues).
+- **Troubleshooting:** see [`TROUBLESHOOTING.md`](TROUBLESHOOTING.md) for common install errors, save data preservation and Unity or Il2Cpp limits.
 
 ---
 
