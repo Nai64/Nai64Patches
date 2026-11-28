@@ -1,6 +1,6 @@
 {
   "NOTE": "Do NOT manually edit this file. This file is automatically updated when semantic release (release.yml) runs. Manually editing this file can break your releases and break third party tools that use this file.",
-  "version": "1.54.0",
+  "version": "1.55.0",
   "patches": [
     {
       "name": "Unlock Premium",
@@ -23,57 +23,44 @@
     },
     {
       "name": "Free In-app Purchases",
-      "description": "Get paid items free: buying grants items without charging. Best for offline games.",
+      "description": null,
       "default": false,
-      "category": "Featured",
+      "category": null,
       "dependencies": [],
       "compatiblePackages": null,
       "options": [
         {
-          "key": "fakeStartupPurchases",
-          "title": "Fake owned purchases at startup",
-          "description": "Deliver a fake owned purchase on every inventory query. Helps games that only grant at boot, but can stall strict Unity titles. Leave off if a game hangs on loading.",
-          "required": false,
-          "type": "kotlin.Boolean",
-          "default": false,
+          "key": "iapNativeRules",
+          "title": "Native byte rules",
+          "description": "One rule per line as FROM => TO using hex bytes. Use ?? in FROM for bytes that vary. Lines starting with # are ignored.",
+          "required": true,
+          "type": "kotlin.String",
+          "default": "",
           "values": null
         },
         {
-          "key": "fakeBillingConnection",
-          "title": "Fake billing connection",
-          "description": "Report the billing client as connected before the real connection finishes, then let the real one run. Helps devices with no working Play Store, but the early callback can make purchases vanish silently in Unity titles that route IAP through Unity Gaming Services. Leave off unless purchases do not start at all.",
+          "key": "iapNativeLibraries",
+          "title": "Native libraries",
+          "description": "Comma separated library paths to patch. Leave empty to scan every .so file under lib/.",
           "required": false,
-          "type": "kotlin.Boolean",
-          "default": false,
+          "type": "kotlin.String",
+          "default": "",
           "values": null
         }
       ]
     },
     {
       "name": "No Ads",
-      "description": "Blocks ads by type. Pick what to block. For rewarded ads use Ads Free Rewards instead.",
+      "description": null,
       "default": false,
       "category": "Featured",
       "dependencies": [],
       "compatiblePackages": null,
       "options": [
         {
-          "key": "preset",
-          "title": "Preset",
-          "description": "Quick setup: Recommended blocks most ads but keeps rewarded ads for Ads Free Rewards compatibility. Aggressive blocks everything including rewarded. Custom lets you pick below.",
-          "required": false,
-          "type": "kotlin.String",
-          "default": "recommended",
-          "values": {
-            "Recommended (keep rewarded)": "recommended",
-            "Aggressive (block all)": "aggressive",
-            "Custom": "custom"
-          }
-        },
-        {
           "key": "blockInterstitials",
           "title": "Block Interstitials",
-          "description": "Full-screen ads between levels or menus. Safe to block in most apps.",
+          "description": null,
           "required": false,
           "type": "kotlin.Boolean",
           "default": true,
@@ -82,7 +69,7 @@
         {
           "key": "blockBanners",
           "title": "Block Banners",
-          "description": "Thin banners at top/bottom. Safe to block; rarely breaks layout.",
+          "description": null,
           "required": false,
           "type": "kotlin.Boolean",
           "default": true,
@@ -91,7 +78,7 @@
         {
           "key": "blockAppOpen",
           "title": "Block App Open",
-          "description": "Ads on cold start. Block to skip the launch ad.",
+          "description": null,
           "required": false,
           "type": "kotlin.Boolean",
           "default": true,
@@ -100,7 +87,7 @@
         {
           "key": "blockMRec",
           "title": "Block MREC",
-          "description": "Medium rectangles (300x250) inside feeds. Safe to block.",
+          "description": null,
           "required": false,
           "type": "kotlin.Boolean",
           "default": true,
@@ -109,7 +96,7 @@
         {
           "key": "blockRewarded",
           "title": "Block Rewarded",
-          "description": "Rewarded video  -  disable if you use Ads Free Rewards, otherwise progress gates may break. Enable only to fully remove rewarded ads.",
+          "description": null,
           "required": false,
           "type": "kotlin.Boolean",
           "default": false,
@@ -118,7 +105,7 @@
         {
           "key": "blockNative",
           "title": "Block Native",
-          "description": "Native ads blended into feeds/lists. Enable for cleaner feeds (may leave empty placeholders).",
+          "description": null,
           "required": false,
           "type": "kotlin.Boolean",
           "default": true,
@@ -128,28 +115,12 @@
     },
     {
       "name": "Ads Free Rewards",
-      "description": "Get rewards without watching ads. Combine with No Ads for other formats, but keep No Ads' rewarded block off.",
+      "description": "Get rewards without watching ads.",
       "default": false,
       "category": "Featured",
       "dependencies": [],
       "compatiblePackages": null,
       "options": [
-        {
-          "key": "rewardStrategy",
-          "title": "Reward Strategy",
-          "description": "Which ad-network integration to patch. 'Auto' covers every supported network",
-          "required": false,
-          "type": "kotlin.String",
-          "default": "auto",
-          "values": {
-            "Auto (all networks)": "auto",
-            "AppLovin MAX": "max",
-            "Unity Ads": "unityAds",
-            "ironSource / LevelPlay": "ironSource",
-            "RuStore / VK MyTarget": "rustore",
-            "Huawei Ads Kit / Petal Ads": "huawei"
-          }
-        },
         {
           "key": "rewardMultiplier",
           "title": "Reward multiplier",
@@ -163,51 +134,14 @@
     },
     {
       "name": "Pairip Bypass",
-      "description": "Bypass app protection so the patched app can start.",
+      "description": "Very crucial patch if the game downloaded from Play Store.",
       "default": false,
       "category": "Featured",
       "dependencies": [
         "ResourcePatch"
       ],
       "compatiblePackages": null,
-      "options": [
-        {
-          "key": "localInstallerChecks",
-          "title": "Local installer checks",
-          "description": "Spoof checks that verify which installer installed the app.",
-          "required": false,
-          "type": "kotlin.Boolean",
-          "default": true,
-          "values": null
-        },
-        {
-          "key": "storeSpoofChecks",
-          "title": "Play Store install spoof",
-          "description": "Report Play Store installation (integrated Spoof Play Store Install Source).",
-          "required": false,
-          "type": "kotlin.Boolean",
-          "default": true,
-          "values": null
-        },
-        {
-          "key": "startupLauncherChecks",
-          "title": "StartupLauncher checks",
-          "description": "Bypass both PairIP StartupLauncher.launch and StartupLauncher.pairip entry points.",
-          "required": false,
-          "type": "kotlin.Boolean",
-          "default": true,
-          "values": null
-        },
-        {
-          "key": "disableFirebase",
-          "title": "Disable Firebase",
-          "description": "Add Firebase manifest switches that stop Analytics, Messaging, Crashlytics and Performance from auto-initializing, and remove the measurement init provider, receiver and services. For apps that crash at startup in ScionFrontendApi (broken Dynamite loading).",
-          "required": false,
-          "type": "kotlin.Boolean",
-          "default": true,
-          "values": null
-        }
-      ]
+      "options": []
     },
     {
       "name": "Accept any earphones",

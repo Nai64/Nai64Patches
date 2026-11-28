@@ -1,3 +1,9 @@
+## [1.55.0](https://github.com/Nai64/Nai64Patches/compare/1.54.0...1.55.0) (2026-11-28)
+
+### New Features
+
+* rewrite free iap as native pattern patcher ([0e9e8a2](https://github.com/Nai64/Nai64Patches/commit/0e9e8a2caa458565b857519c74083b2fa4b5e40d))
+
 ## [1.54.0](https://github.com/Nai64/Nai64Patches/compare/1.53.1...1.54.0) (2026-11-26)
 
 ### New Features

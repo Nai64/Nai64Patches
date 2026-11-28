@@ -1,7 +1,7 @@
 {
-  "created_at": "2026-11-26T18:40:37",
-  "description": "## [1.54.0](https://github.com/Nai64/Nai64Patches/compare/1.53.1...1.54.0) (2026-11-26)\n\n### New Features\n\n* added Spirit Detective patches ([6f5d9d7](https://github.com/Nai64/Nai64Patches/commit/6f5d9d787c484dfda96e6a03e52479e4f6004a66))",
-  "download_url": "https://github.com/Nai64/Nai64Patches/releases/download/1.54.0/patches-1.54.0.mpp",
+  "created_at": "2026-11-28T07:32:15",
+  "description": "## [1.55.0](https://github.com/Nai64/Nai64Patches/compare/1.54.0...1.55.0) (2026-11-28)\n\n### New Features\n\n* rewrite free iap as native pattern patcher ([0e9e8a2](https://github.com/Nai64/Nai64Patches/commit/0e9e8a2caa458565b857519c74083b2fa4b5e40d))",
+  "download_url": "https://github.com/Nai64/Nai64Patches/releases/download/1.55.0/patches-1.55.0.mpp",
   "signature_download_url": "",
-  "version": "1.54.0"
+  "version": "1.55.0"
 }
