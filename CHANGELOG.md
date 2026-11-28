@@ -1,9 +1,3 @@
-## [1.55.2](https://github.com/Nai64/Nai64Patches/compare/1.55.1...1.55.2) (2026-11-28)
-
-### Bug Fixes
-
-* update extra patch count ([8a79564](https://github.com/Nai64/Nai64Patches/commit/8a795644f2360be3f5f1e70ef5ab781c3c580797))
-
 ## [1.55.1](https://github.com/Nai64/Nai64Patches/compare/1.55.0...1.55.1) (2026-11-28)
 
 ### Bug Fixes

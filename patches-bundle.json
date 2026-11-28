@@ -1,7 +1,7 @@
 {
-  "created_at": "2026-11-28T08:49:25",
-  "description": "## [1.55.2](https://github.com/Nai64/Nai64Patches/compare/1.55.1...1.55.2) (2026-11-28)\n\n### Bug Fixes\n\n* update extra patch count ([8a79564](https://github.com/Nai64/Nai64Patches/commit/8a795644f2360be3f5f1e70ef5ab781c3c580797))",
-  "download_url": "https://github.com/Nai64/Nai64Patches/releases/download/1.55.2/patches-1.55.2.mpp",
+  "created_at": "2026-11-28T08:06:39",
+  "description": "## [1.55.1](https://github.com/Nai64/Nai64Patches/compare/1.55.0...1.55.1) (2026-11-28)\n\n### Bug Fixes\n\n* remove patch and option descriptions ([15a95f3](https://github.com/Nai64/Nai64Patches/commit/15a95f32edce3d86fa74eebe4f62e568ee3b5209))",
+  "download_url": "https://github.com/Nai64/Nai64Patches/releases/download/1.55.1/patches-1.55.1.mpp",
   "signature_download_url": "",
-  "version": "1.55.2"
+  "version": "1.55.1"
 }
