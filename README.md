@@ -12,7 +12,7 @@
 A curated collection of Morphe patches for Android apps and games. This source ships 5 Featured patches plus per-title patches for supported games and apps.
 
 > [!NOTE]
-> Need spoofing, manifest tweaks, telemetry blocks or UI tweaks? Add the companion source **[Nai's Extra Patches](https://github.com/Nai64/Nai64ExtraPatches)** alongside this one. It ships 510 patches.
+> Need spoofing, manifest tweaks, telemetry blocks or UI tweaks? Add the companion source **[Nai's Extra Patches](https://github.com/Nai64/Nai64ExtraPatches)** alongside this one. It ships 600 patches.
 
 </div>
 
